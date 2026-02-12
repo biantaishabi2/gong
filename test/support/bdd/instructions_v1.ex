@@ -79,6 +79,24 @@ defmodule Gong.BDD.Instructions.V1 do
       {:when, :tool_read} ->
         tool_read!(ctx, args, meta)
 
+      {:when, :tool_write} ->
+        tool_write!(ctx, args, meta)
+
+      {:when, :tool_edit} ->
+        tool_edit!(ctx, args, meta)
+
+      {:when, :tool_bash} ->
+        tool_bash!(ctx, args, meta)
+
+      {:when, :tool_grep} ->
+        tool_grep!(ctx, args, meta)
+
+      {:when, :tool_find} ->
+        tool_find!(ctx, args, meta)
+
+      {:when, :tool_ls} ->
+        tool_ls!(ctx, args, meta)
+
       # ── Assertions: 结果断言 ──
 
       {:then, :assert_tool_success} ->
@@ -96,6 +114,24 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_read_text} ->
         assert_read_text!(ctx, args, meta)
 
+      {:then, :assert_file_exists} ->
+        assert_file_exists!(ctx, args, meta)
+
+      {:then, :assert_file_content} ->
+        assert_file_content!(ctx, args, meta)
+
+      {:then, :assert_result_field} ->
+        assert_result_field!(ctx, args, meta)
+
+      {:then, :assert_exit_code} ->
+        assert_exit_code!(ctx, args, meta)
+
+      {:then, :assert_output_contains} ->
+        assert_output_contains!(ctx, args, meta)
+
+      {:then, :assert_output_not_contains} ->
+        assert_output_not_contains!(ctx, args, meta)
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -106,7 +142,11 @@ defmodule Gong.BDD.Instructions.V1 do
   defp create_temp_dir!(ctx, _args, _meta) do
     dir = Path.join(System.tmp_dir!(), "gong_test_#{:erlang.unique_integer([:positive])}")
     File.mkdir_p!(dir)
-    ExUnit.Callbacks.on_exit(fn -> File.rm_rf!(dir) end)
+    ExUnit.Callbacks.on_exit(fn ->
+      # 恢复权限后再删除（chmod 测试可能锁住子目录）
+      System.cmd("chmod", ["-R", "755", dir], stderr_to_stdout: true)
+      File.rm_rf!(dir)
+    end)
     Map.put(ctx, :workspace, dir)
   end
 
@@ -192,6 +232,93 @@ defmodule Gong.BDD.Instructions.V1 do
     Map.put(ctx, :last_result, result)
   end
 
+  # ── Tools 实现：write ──
+
+  defp tool_write!(ctx, args, _meta) do
+    path = resolve_tool_path(ctx, Map.get(args, :path, ""))
+    content = unescape(Map.get(args, :content, ""))
+
+    result = Gong.Tools.Write.run(%{file_path: path, content: content}, %{})
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── Tools 实现：edit ──
+
+  defp tool_edit!(ctx, args, _meta) do
+    path = resolve_tool_path(ctx, Map.get(args, :path, ""))
+
+    params = %{
+      file_path: path,
+      old_string: unescape(args.old_string),
+      new_string: unescape(args.new_string)
+    }
+    params = if args[:replace_all], do: Map.put(params, :replace_all, args.replace_all), else: params
+
+    result = Gong.Tools.Edit.run(params, %{})
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── Tools 实现：bash ──
+
+  defp tool_bash!(ctx, args, _meta) do
+    params = %{command: args.command}
+    params = if args[:timeout], do: Map.put(params, :timeout, args.timeout), else: params
+    params = if args[:cwd] do
+      cwd = resolve_tool_path(ctx, args.cwd)
+      Map.put(params, :cwd, cwd)
+    else
+      params
+    end
+
+    result = Gong.Tools.Bash.run(params, %{})
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── Tools 实现：grep ──
+
+  defp tool_grep!(ctx, args, _meta) do
+    params = %{pattern: args.pattern}
+    params = if args[:path], do: Map.put(params, :path, resolve_tool_path(ctx, args.path)), else: Map.put(params, :path, ctx.workspace)
+    params = if args[:glob], do: Map.put(params, :glob, args.glob), else: params
+    params = if args[:context], do: Map.put(params, :context, args.context), else: params
+    params = if args[:ignore_case], do: Map.put(params, :ignore_case, args.ignore_case), else: params
+    params = if args[:fixed_strings], do: Map.put(params, :fixed_strings, args.fixed_strings), else: params
+    params = if args[:output_mode], do: Map.put(params, :output_mode, args.output_mode), else: params
+
+    result = Gong.Tools.Grep.run(params, %{})
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── Tools 实现：find ──
+
+  defp tool_find!(ctx, args, _meta) do
+    params = %{pattern: args.pattern}
+    params = if args[:path], do: Map.put(params, :path, resolve_tool_path(ctx, args.path)), else: Map.put(params, :path, ctx.workspace)
+    params = if args[:exclude], do: Map.put(params, :exclude, args.exclude), else: params
+    params = if args[:limit], do: Map.put(params, :limit, args.limit), else: params
+
+    result = Gong.Tools.Find.run(params, %{})
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── Tools 实现：ls ──
+
+  defp tool_ls!(ctx, args, _meta) do
+    path = resolve_tool_path(ctx, Map.get(args, :path, ""))
+    result = Gong.Tools.Ls.run(%{path: path}, %{})
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── 路径解析辅助 ──
+
+  defp resolve_tool_path(ctx, path) do
+    cond do
+      String.starts_with?(path, "/") -> path
+      String.starts_with?(path, "~/") -> path
+      true -> Path.join(ctx.workspace, path)
+    end
+  end
+
   # ── Assertion 实现 ──
 
   defp assert_tool_success!(ctx, args, _meta) do
@@ -254,6 +381,59 @@ defmodule Gong.BDD.Instructions.V1 do
     result = ctx.last_result
     assert {:ok, data} = result
     assert data[:image] == nil, "期望返回文本，但收到图片数据"
+    ctx
+  end
+
+  # ── 文件断言 ──
+
+  defp assert_file_exists!(ctx, %{path: path}, _meta) do
+    full = Path.join(ctx.workspace, path)
+    assert File.exists?(full), "期望文件存在: #{full}"
+    ctx
+  end
+
+  defp assert_file_content!(ctx, %{path: path, expected: expected}, _meta) do
+    full = Path.join(ctx.workspace, path)
+    actual = File.read!(full)
+    expected_decoded = unescape(expected)
+    assert actual == expected_decoded,
+      "期望文件内容为 #{inspect(expected_decoded)}，实际：#{inspect(actual)}"
+    ctx
+  end
+
+  # ── 结果字段断言 ──
+
+  defp assert_result_field!(ctx, %{field: field, expected: expected}, _meta) do
+    assert {:ok, data} = ctx.last_result
+    field_atom = String.to_existing_atom(field)
+    actual = Map.get(data, field_atom)
+    assert to_string(actual) == expected,
+      "期望 #{field}=#{expected}，实际：#{inspect(actual)}"
+    ctx
+  end
+
+  # ── Bash 特有断言 ──
+
+  defp assert_exit_code!(ctx, %{expected: expected}, _meta) do
+    assert {:ok, data} = ctx.last_result
+    assert data.exit_code == expected,
+      "期望 exit_code=#{expected}，实际：#{data.exit_code}"
+    ctx
+  end
+
+  defp assert_output_contains!(ctx, %{text: text}, _meta) do
+    assert {:ok, data} = ctx.last_result
+    decoded = unescape(text)
+    assert data.content =~ decoded,
+      "期望输出包含 #{inspect(decoded)}，实际：#{String.slice(data.content, 0, 200)}"
+    ctx
+  end
+
+  defp assert_output_not_contains!(ctx, %{text: text}, _meta) do
+    assert {:ok, data} = ctx.last_result
+    decoded = unescape(text)
+    refute data.content =~ decoded,
+      "期望输出不包含 #{inspect(decoded)}，但包含了"
     ctx
   end
 

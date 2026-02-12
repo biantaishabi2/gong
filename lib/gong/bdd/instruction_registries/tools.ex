@@ -22,7 +22,194 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         assert_class: nil
       },
 
+      tool_write: %{
+        name: :tool_write,
+        kind: :when,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil},
+          content: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :external_io,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      tool_edit: %{
+        name: :tool_edit,
+        kind: :when,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil},
+          old_string: %{type: :string, required?: true, allowed: nil},
+          new_string: %{type: :string, required?: true, allowed: nil},
+          replace_all: %{type: :bool, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :external_io,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      tool_bash: %{
+        name: :tool_bash,
+        kind: :when,
+        args: %{
+          command: %{type: :string, required?: true, allowed: nil},
+          timeout: %{type: :int, required?: false, allowed: nil},
+          cwd: %{type: :string, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :external_io,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      tool_grep: %{
+        name: :tool_grep,
+        kind: :when,
+        args: %{
+          pattern: %{type: :string, required?: true, allowed: nil},
+          path: %{type: :string, required?: false, allowed: nil},
+          glob: %{type: :string, required?: false, allowed: nil},
+          context: %{type: :int, required?: false, allowed: nil},
+          ignore_case: %{type: :bool, required?: false, allowed: nil},
+          fixed_strings: %{type: :bool, required?: false, allowed: nil},
+          output_mode: %{type: :string, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :external_io,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      tool_find: %{
+        name: :tool_find,
+        kind: :when,
+        args: %{
+          pattern: %{type: :string, required?: true, allowed: nil},
+          path: %{type: :string, required?: false, allowed: nil},
+          exclude: %{type: :string, required?: false, allowed: nil},
+          limit: %{type: :int, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :external_io,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      tool_ls: %{
+        name: :tool_ls,
+        kind: :when,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :external_io,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
       # ── THEN: 结果断言 ──
+
+      assert_file_exists: %{
+        name: :assert_file_exists,
+        kind: :then,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_file_content: %{
+        name: :assert_file_content,
+        kind: :then,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil},
+          expected: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_result_field: %{
+        name: :assert_result_field,
+        kind: :then,
+        args: %{
+          field: %{type: :string, required?: true, allowed: nil},
+          expected: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_exit_code: %{
+        name: :assert_exit_code,
+        kind: :then,
+        args: %{
+          expected: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_output_contains: %{
+        name: :assert_output_contains,
+        kind: :then,
+        args: %{
+          text: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_output_not_contains: %{
+        name: :assert_output_not_contains,
+        kind: :then,
+        args: %{
+          text: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
 
       assert_tool_success: %{
         name: :assert_tool_success,

@@ -1,9 +1,11 @@
 [global]
 namespace = "Gong"
+project_root = "."
+registry_module = "Gong.BDD.InstructionRegistry"
+runtime_module = "Gong.BDD.Instructions.V1"
 in = "docs/bdd"
 out = "test/bdd_generated"
 docs_root = "docs"
-runtime_module = "Gong.BDD.Instructions.V1"
 test_case = "ExUnit.Case"
 module_prefix = "Gong.BDD.Generated"
 

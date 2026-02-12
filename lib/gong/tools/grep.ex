@@ -62,13 +62,15 @@ defmodule Gong.Tools.Grep do
   end
 
   defp build_args(params, path) do
-    args = [
-      "--json",
-      "--line-number",
-      "--color=never",
-      "--hidden",
-      "--max-count=#{@max_matches}"
-    ]
+    mode = params[:output_mode] || "content"
+
+    # --json 只在 content 模式下使用（与 --files-with-matches/--count 冲突）
+    args =
+      if mode == "content" do
+        ["--json", "--line-number", "--color=never", "--hidden", "--max-count=#{@max_matches}"]
+      else
+        ["--color=never", "--hidden", "--max-count=#{@max_matches}"]
+      end
 
     args = if params[:ignore_case], do: args ++ ["--ignore-case"], else: args
     args = if params[:fixed_strings], do: args ++ ["--fixed-strings"], else: args
@@ -81,7 +83,6 @@ defmodule Gong.Tools.Grep do
         args
       end
 
-    mode = params[:output_mode] || "content"
     args = if mode == "files_with_matches", do: args ++ ["--files-with-matches"], else: args
     args = if mode == "count", do: args ++ ["--count"], else: args
 

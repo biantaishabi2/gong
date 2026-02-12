@@ -64,7 +64,12 @@ defmodule Gong.Tools.Bash do
 
     try do
       port = Port.open({:spawn_executable, bash_path()}, [{:args, ["-c", command]} | port_opts])
-      {:os_pid, os_pid} = Port.info(port, :os_pid)
+
+      os_pid =
+        case Port.info(port, :os_pid) do
+          {:os_pid, pid} -> pid
+          nil -> nil
+        end
 
       collect_output(port, os_pid, timeout_ms)
     rescue
@@ -178,6 +183,8 @@ defmodule Gong.Tools.Bash do
   end
 
   # ── 进程树杀死 ──
+
+  defp kill_process_tree(nil), do: :ok
 
   defp kill_process_tree(os_pid) do
     # 负 PID = 发送信号给整个进程组
