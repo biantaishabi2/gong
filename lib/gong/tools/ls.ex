@@ -2,7 +2,8 @@ defmodule Gong.Tools.Ls do
   @moduledoc """
   目录列表 Action。
 
-  列出指定目录的内容，包括文件大小、修改时间等元信息。
+  列出指定目录的内容，包括文件类型、大小、修改时间。
+  截断策略：head（保留开头）。
   """
 
   use Jido.Action,
@@ -12,9 +13,109 @@ defmodule Gong.Tools.Ls do
       path: [type: :string, required: true, doc: "目录路径"]
     ]
 
+  @max_entries 1000
+
   @impl true
   def run(params, _context) do
-    # TODO: 实现目录列表逻辑
-    {:ok, %{path: params.path, entries: []}}
+    with {:ok, path} <- resolve_path(params.path),
+         :ok <- check_directory(path) do
+      list_entries(path)
+    end
   end
+
+  defp resolve_path(path) when not is_binary(path) do
+    {:error, "参数错误：path 必须是字符串"}
+  end
+
+  defp resolve_path("~/" <> rest) do
+    {:ok, Path.join(System.user_home!(), rest) |> Path.expand()}
+  end
+
+  defp resolve_path(path), do: {:ok, Path.expand(path)}
+
+  defp check_directory(path) do
+    cond do
+      not File.exists?(path) ->
+        {:error, "#{path}: No such file or directory (ENOENT)"}
+
+      not File.dir?(path) ->
+        {:error, "#{path}: Not a directory"}
+
+      true ->
+        case File.stat(path) do
+          {:ok, %{access: access}} when access in [:read, :read_write] -> :ok
+          {:ok, _} -> {:error, "#{path}: Permission denied (EACCES)"}
+          {:error, reason} -> {:error, "#{path}: #{inspect(reason)}"}
+        end
+    end
+  end
+
+  defp list_entries(path) do
+    case File.ls(path) do
+      {:ok, names} ->
+        entries =
+          names
+          |> Enum.sort()
+          |> Enum.map(fn name -> build_entry(path, name) end)
+
+        total = length(entries)
+        truncated = total > @max_entries
+        shown = Enum.take(entries, @max_entries)
+
+        content = format_entries(shown)
+
+        hint =
+          if truncated do
+            "\n[Showing #{@max_entries} of #{total} entries]"
+          else
+            ""
+          end
+
+        {:ok,
+         %{
+           content: content <> hint,
+           entries: shown,
+           total: total,
+           truncated: truncated
+         }}
+
+      {:error, reason} ->
+        {:error, "#{path}: #{inspect(reason)}"}
+    end
+  end
+
+  defp build_entry(parent, name) do
+    full = Path.join(parent, name)
+
+    case File.lstat(full) do
+      {:ok, stat} ->
+        %{
+          name: name,
+          type: stat.type,
+          size: stat.size,
+          mtime: stat.mtime
+        }
+
+      {:error, _} ->
+        %{name: name, type: :unknown, size: 0, mtime: nil}
+    end
+  end
+
+  defp format_entries(entries) do
+    entries
+    |> Enum.map(fn e ->
+      type_indicator = type_suffix(e.type)
+      size_str = format_size(e.size)
+      "#{String.pad_trailing(size_str, 10)} #{e.name}#{type_indicator}"
+    end)
+    |> Enum.join("\n")
+  end
+
+  defp type_suffix(:directory), do: "/"
+  defp type_suffix(:symlink), do: "@"
+  defp type_suffix(_), do: ""
+
+  defp format_size(bytes) when bytes < 1024, do: "#{bytes}B"
+  defp format_size(bytes) when bytes < 1024 * 1024, do: "#{div(bytes, 1024)}K"
+  defp format_size(bytes), do: "#{div(bytes, 1024 * 1024)}M"
 end
