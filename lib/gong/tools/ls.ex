@@ -91,15 +91,22 @@ defmodule Gong.Tools.Ls do
       {:ok, stat} ->
         %{
           name: name,
-          type: stat.type,
+          type: to_string(stat.type),
           size: stat.size,
-          mtime: stat.mtime
+          mtime: format_mtime(stat.mtime)
         }
 
       {:error, _} ->
-        %{name: name, type: :unknown, size: 0, mtime: nil}
+        %{name: name, type: "unknown", size: 0, mtime: nil}
     end
   end
+
+  defp format_mtime({{y, m, d}, {h, mi, s}}) do
+    :io_lib.format("~4..0B-~2..0B-~2..0B ~2..0B:~2..0B:~2..0B", [y, m, d, h, mi, s])
+    |> IO.iodata_to_binary()
+  end
+
+  defp format_mtime(_), do: nil
 
   defp format_entries(entries) do
     entries
@@ -111,8 +118,8 @@ defmodule Gong.Tools.Ls do
     |> Enum.join("\n")
   end
 
-  defp type_suffix(:directory), do: "/"
-  defp type_suffix(:symlink), do: "@"
+  defp type_suffix("directory"), do: "/"
+  defp type_suffix("symlink"), do: "@"
   defp type_suffix(_), do: ""
 
   defp format_size(bytes) when bytes < 1024, do: "#{bytes}B"

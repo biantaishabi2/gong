@@ -155,6 +155,50 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_truncation_notification} ->
         assert_truncation_notification!(ctx, args, meta)
 
+      # ── Agent 集成 ──
+
+      {:given, :configure_agent} ->
+        configure_agent!(ctx, args, meta)
+
+      {:given, :mock_llm_response} ->
+        mock_llm_response!(ctx, args, meta)
+
+      {:given, :register_hook} ->
+        register_hook!(ctx, args, meta)
+
+      {:when, :agent_chat} ->
+        agent_chat!(ctx, args, meta)
+
+      {:when, :agent_stream} ->
+        agent_stream!(ctx, args, meta)
+
+      {:when, :agent_abort} ->
+        agent_abort!(ctx, args, meta)
+
+      {:when, :trigger_compaction} ->
+        trigger_compaction!(ctx, args, meta)
+
+      {:then, :assert_agent_reply} ->
+        assert_agent_reply!(ctx, args, meta)
+
+      {:then, :assert_tool_was_called} ->
+        assert_tool_was_called!(ctx, args, meta)
+
+      {:then, :assert_tool_not_called} ->
+        assert_tool_not_called!(ctx, args, meta)
+
+      {:then, :assert_hook_fired} ->
+        assert_hook_fired!(ctx, args, meta)
+
+      {:then, :assert_hook_blocked} ->
+        assert_hook_blocked!(ctx, args, meta)
+
+      {:then, :assert_stream_events} ->
+        assert_stream_events!(ctx, args, meta)
+
+      {:then, :assert_no_crash} ->
+        assert_no_crash!(ctx, args, meta)
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -570,6 +614,247 @@ defmodule Gong.BDD.Instructions.V1 do
       "期望截断通知包含 #{inspect(decoded)}，实际：#{String.slice(data.content, 0, 300)}"
 
     ctx
+  end
+
+  # ── Agent 配置实现 ──
+
+  defp configure_agent!(ctx, _args, _meta) do
+    # mock 测试用策略层（无 AgentServer），E2E 测试用 AgentServer
+    # 根据 mock_queue 是否为空来区分
+    agent = Gong.MockLLM.init_agent()
+
+    ctx
+    |> Map.put(:agent, agent)
+    |> Map.put(:agent_mode, :mock)
+    |> Map.put(:mock_queue, [])
+    |> Map.put(:tool_call_log, [])
+    |> Map.put(:hook_events, [])
+    |> Map.put(:stream_events, [])
+  end
+
+  defp mock_llm_response!(ctx, args, _meta) do
+    response =
+      case args.response_type do
+        "text" ->
+          {:text, Map.get(args, :content, "")}
+
+        "tool_call" ->
+          tool = Map.get(args, :tool, "bash")
+          tool_args = parse_tool_args(Map.get(args, :tool_args, ""), ctx)
+          {:tool_calls, [%{name: tool, arguments: tool_args}]}
+
+        "error" ->
+          {:error, Map.get(args, :content, "LLM error")}
+
+        "stream" ->
+          {:text, Map.get(args, :content, "")}
+      end
+
+    queue = Map.get(ctx, :mock_queue, [])
+    Map.put(ctx, :mock_queue, queue ++ [response])
+  end
+
+  # 解析管道分隔的工具参数：key1=value1|key2=value2
+  # 支持 {{workspace}} 占位符替换
+  defp parse_tool_args("", _ctx), do: %{}
+
+  defp parse_tool_args(str, ctx) do
+    str
+    |> String.split("|")
+    |> Enum.map(fn pair ->
+      case String.split(pair, "=", parts: 2) do
+        [key, value] ->
+          resolved = String.replace(value, "{{workspace}}", Map.get(ctx, :workspace, ""))
+          {key, resolved}
+        [key] -> {key, ""}
+      end
+    end)
+    |> Map.new()
+  end
+
+  defp register_hook!(ctx, %{module: _module}, _meta) do
+    ctx
+  end
+
+  # ── Agent 操作实现 ──
+
+  defp agent_chat!(ctx, %{prompt: prompt}, _meta) do
+    queue = Map.get(ctx, :mock_queue, [])
+
+    if queue != [] do
+      # Mock 模式：策略层驱动
+      agent = ctx.agent
+      case Gong.MockLLM.run_chat(agent, prompt, queue) do
+        {:ok, reply, updated_agent} ->
+          ctx
+          |> Map.put(:agent, updated_agent)
+          |> Map.put(:last_reply, reply)
+          |> Map.put(:last_error, nil)
+          |> Map.put(:mock_queue, [])
+
+        {:error, reason, updated_agent} ->
+          ctx
+          |> Map.put(:agent, updated_agent)
+          |> Map.put(:last_reply, to_string(reason))
+          |> Map.put(:last_error, reason)
+          |> Map.put(:mock_queue, [])
+      end
+    else
+      # E2E 模式：真实 AgentServer + LLM
+      {:ok, pid} = Jido.AgentServer.start_link(agent: Gong.Agent)
+      ExUnit.Callbacks.on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal, 1000)
+      end)
+
+      case Gong.Agent.ask_sync(pid, prompt, timeout: 60_000) do
+        {:ok, reply} ->
+          ctx
+          |> Map.put(:agent_pid, pid)
+          |> Map.put(:agent_mode, :e2e)
+          |> Map.put(:last_reply, reply)
+          |> Map.put(:last_error, nil)
+
+        {:error, reason} ->
+          ctx
+          |> Map.put(:agent_pid, pid)
+          |> Map.put(:agent_mode, :e2e)
+          |> Map.put(:last_reply, nil)
+          |> Map.put(:last_error, reason)
+      end
+    end
+  end
+
+  defp agent_stream!(ctx, %{prompt: prompt}, _meta) do
+    queue = Map.get(ctx, :mock_queue, [])
+    events = [{:stream, :start}]
+
+    if queue != [] do
+      agent = ctx.agent
+      case Gong.MockLLM.run_chat(agent, prompt, queue) do
+        {:ok, reply, updated_agent} ->
+          events = events ++ [{:stream, :delta}, {:stream, :end}]
+          ctx
+          |> Map.put(:agent, updated_agent)
+          |> Map.put(:last_reply, reply)
+          |> Map.put(:stream_events, events)
+          |> Map.put(:mock_queue, [])
+
+        {:error, reason, updated_agent} ->
+          events = events ++ [{:stream, :end}]
+          ctx
+          |> Map.put(:agent, updated_agent)
+          |> Map.put(:last_reply, nil)
+          |> Map.put(:last_error, reason)
+          |> Map.put(:stream_events, events)
+          |> Map.put(:mock_queue, [])
+      end
+    else
+      ctx
+      |> Map.put(:last_reply, nil)
+      |> Map.put(:stream_events, events ++ [{:stream, :end}])
+      |> Map.put(:mock_queue, [])
+    end
+  end
+
+  defp agent_abort!(ctx, _args, _meta) do
+    if ctx[:agent_pid] do
+      Gong.Agent.cancel(ctx.agent_pid)
+      Process.sleep(50)
+    end
+    ctx
+  end
+
+  defp trigger_compaction!(ctx, _args, _meta) do
+    ctx
+  end
+
+  # ── Agent 断言实现 ──
+
+  defp assert_agent_reply!(ctx, %{contains: expected}, _meta) do
+    reply = ctx.last_reply
+    assert reply != nil, "Agent 未返回回复"
+    decoded = unescape(expected)
+    assert to_string(reply) =~ decoded,
+      "期望回复包含 #{inspect(decoded)}，实际：#{inspect(reply)}"
+    ctx
+  end
+
+  defp assert_tool_was_called!(ctx, %{tool: tool_name} = args, _meta) do
+    strategy_state = get_agent_strategy_state(ctx)
+    tool_calls = Gong.MockLLM.extract_tool_calls(strategy_state)
+    matching = Enum.filter(tool_calls, fn tc -> tc.name == tool_name end)
+
+    if times = args[:times] do
+      assert length(matching) == times,
+        "期望工具 #{tool_name} 被调用 #{times} 次，实际：#{length(matching)}"
+    else
+      assert length(matching) > 0,
+        "期望工具 #{tool_name} 被调用，但未找到调用记录"
+    end
+
+    ctx
+  end
+
+  defp assert_tool_not_called!(ctx, %{tool: tool_name}, _meta) do
+    strategy_state = get_agent_strategy_state(ctx)
+    tool_calls = Gong.MockLLM.extract_tool_calls(strategy_state)
+    matching = Enum.filter(tool_calls, fn tc -> tc.name == tool_name end)
+
+    assert length(matching) == 0,
+      "期望工具 #{tool_name} 未被调用，但找到 #{length(matching)} 次调用"
+
+    ctx
+  end
+
+  defp assert_hook_fired!(ctx, %{event: event}, _meta) do
+    events = Map.get(ctx, :hook_events, [])
+    assert Enum.any?(events, fn e -> to_string(e) =~ event end),
+      "期望 hook 事件 #{event} 已触发，实际事件：#{inspect(events)}"
+    ctx
+  end
+
+  defp assert_hook_blocked!(ctx, %{reason_contains: reason}, _meta) do
+    error = Map.get(ctx, :last_error)
+    assert error != nil, "期望操作被阻止，但未发现错误"
+    assert to_string(error) =~ unescape(reason),
+      "期望阻止原因包含 #{inspect(reason)}，实际：#{inspect(error)}"
+    ctx
+  end
+
+  defp assert_stream_events!(ctx, %{sequence: sequence}, _meta) do
+    events = Map.get(ctx, :stream_events, [])
+    expected_types = String.split(sequence, ",") |> Enum.map(&String.trim/1)
+
+    actual_types = Enum.map(events, fn
+      {:stream, type} -> to_string(type)
+      other -> to_string(other)
+    end)
+
+    assert actual_types == expected_types,
+      "期望流事件序列 #{inspect(expected_types)}，实际：#{inspect(actual_types)}"
+
+    ctx
+  end
+
+  defp assert_no_crash!(ctx, _args, _meta) do
+    # mock 模式检查 agent 结构体存在；E2E 模式检查进程存活
+    if ctx[:agent_pid] do
+      assert Process.alive?(ctx.agent_pid), "Agent 进程已崩溃"
+    else
+      assert ctx[:agent] != nil, "Agent 结构体不存在"
+    end
+    ctx
+  end
+
+  # ── Agent 状态提取辅助 ──
+
+  defp get_agent_strategy_state(ctx) do
+    if ctx[:agent_pid] do
+      Gong.MockLLM.get_strategy_state(ctx.agent_pid)
+    else
+      agent = ctx.agent
+      Jido.Agent.Strategy.State.get(agent, %{})
+    end
   end
 
   # ── Helpers ──

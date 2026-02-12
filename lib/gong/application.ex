@@ -6,6 +6,8 @@ defmodule Gong.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      # Jido AgentServer 依赖的注册表
+      {Registry, keys: :unique, name: Jido.Registry},
       # Agent 会话注册表
       {Registry, keys: :unique, name: Gong.SessionRegistry},
       # Agent 会话动态监督器

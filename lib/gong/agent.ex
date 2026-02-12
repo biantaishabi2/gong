@@ -1,15 +1,15 @@
 defmodule Gong.Agent do
   @moduledoc """
-  Jido Agent 定义。
+  Gong 编码 Agent — 基于 Jido.AI.ReActAgent 的 LLM + 工具循环。
 
-  持有工具集（Actions）、系统提示词和运行状态。
-  通过 `Jido.Agent` 宏定义，运行时由 `Jido.Agent.Server` GenServer 驱动。
+  通过 `ask/2,3`、`await/1,2`、`ask_sync/2,3` 与 Agent 交互。
+  ReAct 策略内置 LLM 调用 + 工具执行的状态机循环。
   """
 
-  use Jido.Agent,
+  use Jido.AI.ReActAgent,
     name: "gong",
-    description: "通用 Agent 引擎",
-    actions: [
+    description: "Gong 通用编码 Agent",
+    tools: [
       Gong.Tools.Read,
       Gong.Tools.Write,
       Gong.Tools.Edit,
@@ -18,8 +18,7 @@ defmodule Gong.Agent do
       Gong.Tools.Find,
       Gong.Tools.Ls
     ],
-    schema: [
-      workspace: [type: :string, required: true, doc: "工作目录路径"],
-      system_prompt: [type: :string, default: "", doc: "系统提示词"]
-    ]
+    model: "anthropic:claude-sonnet-4-5-20250929",
+    max_iterations: 25,
+    system_prompt: "你是 Gong，一个通用编码 Agent。使用提供的工具完成用户任务。优先使用专用工具而非 bash。文件路径使用绝对路径。回复简洁，中文。"
 end

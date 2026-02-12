@@ -1,0 +1,240 @@
+defmodule Gong.MockLLM do
+  @moduledoc """
+  Mock LLM 测试基础设施。
+
+  通过策略层直接驱动 ReAct 循环，绕过真实 LLM/HTTP 调用。
+  每次 LLM 调用点从预定义响应队列中弹出下一个响应。
+  """
+
+  alias Jido.Agent.Strategy.State, as: StratState
+  alias Jido.AI.Strategies.ReAct
+  alias Jido.AI.Directive
+  alias Jido.Instruction
+
+  @doc """
+  初始化 agent（策略层），返回初始化后的 agent 结构体。
+  """
+  @spec init_agent() :: struct()
+  def init_agent do
+    # Gong.Agent.new() 内部已调用 ReAct.init/2 并传入正确的 strategy_opts
+    # 不需要再次调用 ReAct.init
+    Gong.Agent.new()
+  end
+
+  @doc """
+  驱动完整的 ReAct 对话循环（策略层）。
+
+  给定用户 prompt 和 mock 响应队列，自动执行：
+  1. 发送 start 指令 → 获取 LLM call_id
+  2. 注入 mock LLM 响应
+  3. 如果是 tool_calls → 执行真实工具 → 发送 tool_result → 循环
+  4. 如果是 final_answer → 返回结果
+
+  响应队列格式：
+  - `{:text, "内容"}` — final_answer
+  - `{:tool_calls, [%{name: "...", arguments: %{}}]}` — 工具调用
+  - `{:error, "错误信息"}` — LLM 错误
+
+  返回 `{:ok, reply, agent}` 或 `{:error, reason, agent}`
+  """
+  @spec run_chat(struct(), String.t(), [tuple()]) :: {:ok, String.t(), struct()} | {:error, term(), struct()}
+  def run_chat(agent, prompt, response_queue) do
+    # 发送 start 指令
+    start_instruction = %Instruction{
+      action: ReAct.start_action(),
+      params: %{query: prompt}
+    }
+
+    {agent, directives} = ReAct.cmd(agent, [start_instruction], %{})
+
+    # 从 directives 中提取 call_id
+    call_id = extract_call_id(directives)
+
+    # 驱动 ReAct 循环
+    drive_loop(agent, call_id, response_queue)
+  end
+
+  # ── 内部循环驱动 ──
+
+  defp drive_loop(agent, call_id, [response | rest]) do
+    # 构建 LLM 结果
+    llm_params = build_llm_result(call_id, response)
+
+    result_instruction = %Instruction{
+      action: ReAct.llm_result_action(),
+      params: llm_params
+    }
+
+    {agent, directives} = ReAct.cmd(agent, [result_instruction], %{})
+
+    # 检查策略状态
+    state = StratState.get(agent, %{})
+
+    case state[:status] do
+      :completed ->
+        {:ok, state[:result] || "", agent}
+
+      :error ->
+        {:error, state[:result] || "unknown error", agent}
+
+      :awaiting_tool ->
+        # 执行工具调用
+        {agent, new_call_id} = execute_pending_tools(agent, state, directives)
+
+        # 继续循环
+        drive_loop(agent, new_call_id, rest)
+
+      :awaiting_llm ->
+        # 需要下一次 LLM 调用
+        new_call_id = extract_call_id(directives) || call_id
+        drive_loop(agent, new_call_id, rest)
+
+      other ->
+        {:error, "unexpected status: #{other}", agent}
+    end
+  end
+
+  defp drive_loop(agent, _call_id, []) do
+    state = StratState.get(agent, %{})
+
+    case state[:status] do
+      :completed -> {:ok, state[:result] || "", agent}
+      :error -> {:error, state[:result] || "unknown error", agent}
+      _ -> {:error, "response queue exhausted while status=#{state[:status]}", agent}
+    end
+  end
+
+  # ── 工具执行 ──
+
+  defp execute_pending_tools(agent, state, _directives) do
+    pending = state[:pending_tool_calls] || []
+    config = state[:config] || %{}
+    actions_by_name = config[:actions_by_name] || %{}
+
+    # 合并工具上下文
+    base_ctx = config[:base_tool_context] || %{}
+    run_ctx = state[:run_tool_context] || %{}
+    tool_context = Map.merge(base_ctx, run_ctx)
+
+    # 执行每个待处理的工具调用
+    agent =
+      Enum.reduce(pending, agent, fn tc, acc_agent ->
+        tool_name = tc.name
+        arguments = tc.arguments || %{}
+
+        # 查找 action 模块
+        action_module = Map.get(actions_by_name, tool_name)
+
+        result =
+          if action_module do
+            # 将 string keys 转为 atom keys
+            atom_args =
+              arguments
+              |> Enum.map(fn {k, v} -> {to_atom_safe(k), v} end)
+              |> Map.new()
+
+            try do
+              case action_module.run(atom_args, tool_context) do
+                {:ok, data} -> {:ok, data}
+                {:error, reason} -> {:error, to_string(reason)}
+              end
+            rescue
+              e -> {:error, Exception.message(e)}
+            end
+          else
+            {:error, "Unknown tool: #{tool_name}"}
+          end
+
+        # 发送 tool_result
+        tool_result_instruction = %Instruction{
+          action: ReAct.tool_result_action(),
+          params: %{
+            call_id: tc.id,
+            tool_name: tool_name,
+            result: result
+          }
+        }
+
+        {new_agent, _directives} = ReAct.cmd(acc_agent, [tool_result_instruction], %{})
+        new_agent
+      end)
+
+    # 获取新的 call_id（如果有新的 LLM 调用）
+    new_state = StratState.get(agent, %{})
+    new_call_id = new_state[:current_llm_call_id]
+
+    {agent, new_call_id}
+  end
+
+  # ── 辅助函数 ──
+
+  defp extract_call_id(directives) do
+    Enum.find_value(directives, fn
+      %Directive.LLMStream{id: id} -> id
+      _ -> nil
+    end)
+  end
+
+  defp build_llm_result(call_id, {:text, text}) do
+    %{
+      call_id: call_id,
+      result: {:ok, %{type: :final_answer, text: text, tool_calls: []}}
+    }
+  end
+
+  defp build_llm_result(call_id, {:tool_calls, tool_calls}) do
+    formatted =
+      Enum.with_index(tool_calls, fn tc, idx ->
+        %{
+          id: Map.get(tc, :id, "tool_call_#{idx}"),
+          name: tc.name,
+          arguments: tc.arguments
+        }
+      end)
+
+    %{
+      call_id: call_id,
+      result: {:ok, %{type: :tool_calls, text: "", tool_calls: formatted}}
+    }
+  end
+
+  defp build_llm_result(call_id, {:error, error_msg}) do
+    %{
+      call_id: call_id,
+      result: {:error, error_msg}
+    }
+  end
+
+  defp to_atom_safe(key) when is_atom(key), do: key
+  defp to_atom_safe(key) when is_binary(key) do
+    try do
+      String.to_existing_atom(key)
+    rescue
+      _ -> String.to_atom(key)
+    end
+  end
+
+  # ── AgentServer 辅助（用于 E2E 测试）──
+
+  @doc "获取 agent 策略状态（从 AgentServer）"
+  @spec get_strategy_state(pid()) :: map()
+  def get_strategy_state(pid) do
+    {:ok, server_state} = Jido.AgentServer.state(pid)
+    Map.get(server_state.agent.state, :__strategy__, %{})
+  end
+
+  @doc "从策略状态提取工具调用记录"
+  @spec extract_tool_calls(map()) :: [map()]
+  def extract_tool_calls(strategy_state) do
+    conversation = Map.get(strategy_state, :conversation, [])
+
+    conversation
+    |> Enum.flat_map(fn
+      %{role: :assistant, tool_calls: tcs} when is_list(tcs) ->
+        Enum.map(tcs, fn tc ->
+          %{name: tc[:name] || tc["name"], arguments: tc[:arguments] || tc["arguments"] || %{}}
+        end)
+      _ -> []
+    end)
+  end
+end

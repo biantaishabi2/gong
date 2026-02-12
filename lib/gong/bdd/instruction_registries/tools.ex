@@ -16,7 +16,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :external_io,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -32,7 +32,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :external_io,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -49,7 +49,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :external_io,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -65,7 +65,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :external_io,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -85,7 +85,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :external_io,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -102,7 +102,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :external_io,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -116,7 +116,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :external_io,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -133,7 +133,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -148,7 +148,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -163,7 +163,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -177,7 +177,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -191,7 +191,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -205,7 +205,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -221,7 +221,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -235,7 +235,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :error
@@ -250,7 +250,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -264,7 +264,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -276,7 +276,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -295,7 +295,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -311,7 +311,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -326,7 +326,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -349,7 +349,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
@@ -363,7 +363,7 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: :C
