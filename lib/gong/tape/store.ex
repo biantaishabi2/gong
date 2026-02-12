@@ -38,9 +38,9 @@ defmodule Gong.Tape.Store do
 
   @doc "创建新 anchor（阶段切换）"
   @spec handoff(t(), String.t(), map()) :: {:ok, String.t()} | {:error, term()}
-  def handoff(_store, _name, _state \\ %{}) do
+  def handoff(_store, name, _state \\ %{}) do
     # TODO: 创建新目录 + 数据库记录
-    {:ok, "001_#{_name}"}
+    {:ok, "001_#{name}"}
   end
 
   @doc "按 anchor 范围查询条目"
