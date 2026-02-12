@@ -1389,14 +1389,14 @@ end
 
 ---
 
-#### J.2 bash Action（19 个）
+#### J.2 bash Action（21 个）
 
 ```elixir
 @moduledoc """
 Bash Action 测试
 
 基于编码 Agent 架构文档 Section B (bash 设计规格)
-共 19 个测试用例，覆盖执行、错误、输出管理、进程管理、Pi 历史 bug 回归
+共 21 个测试用例，覆盖执行、错误、输出管理、进程管理、Pi 历史 bug 回归、参数校验
 """
 ```
 
@@ -1537,18 +1537,32 @@ test "5.5 截断行数计数精确" do
   # When: bash("seq 1 150")
   # Then: 截断通知显示 "省略 50 行"（而不是 49 或 51）
 end
+
+test "5.6 无效参数类型防护" do
+  # Pi bug #1259 扩展：LLM 可能给任何工具传错误类型参数
+  # Given: command 参数为 nil 或 integer
+  # When: bash(command: nil)
+  # Then: 返回参数校验错误，不崩溃
+end
+
+test "5.7 危险命令告警" do
+  # Pi 安全调研：rm -rf /、git push --force 等破坏性命令无防护
+  # Given: Hook 注册了 before_tool_call 拦截
+  # When: bash("rm -rf /")
+  # Then: Hook 返回 {:block, "危险命令需要确认"}，命令不执行
+end
 ```
 
 ---
 
-#### J.3 read Action（19 个）
+#### J.3 read Action（20 个）
 
 ```elixir
 @moduledoc """
 Read Action 测试
 
 基于编码 Agent 架构文档 Section C (read 设计规格)
-共 19 个测试用例，覆盖基本读取、分页、截断、图片、文件系统边界、Pi 历史 bug 回归
+共 20 个测试用例，覆盖基本读取、分页、截断、图片、文件系统边界、Pi 历史 bug 回归、参数校验
 """
 ```
 
@@ -1690,18 +1704,25 @@ test "6.2 tilde 路径展开" do
   # When: read(path: "~/test.txt")
   # Then: 正确展开 ~ 为 $HOME 并读取
 end
+
+test "6.3 无效参数类型防护" do
+  # Pi bug #1259 扩展：LLM 传非 string 的 file_path
+  # Given: file_path 参数为 nil 或 integer
+  # When: read(path: 42)
+  # Then: 返回参数校验错误，不崩溃
+end
 ```
 
 ---
 
-#### J.4 write Action（8 个）
+#### J.4 write Action（9 个）
 
 ```elixir
 @moduledoc """
 Write Action 测试
 
 基于编码 Agent 架构文档 Section D (write 设计规格)
-共 8 个测试用例
+共 9 个测试用例
 """
 ```
 
@@ -1764,18 +1785,25 @@ test "3.3 tilde 路径展开" do
   # When: write(path: "~/output/result.txt", content: "data")
   # Then: 正确展开 ~ 为 $HOME 并写入
 end
+
+test "3.4 无效参数类型防护" do
+  # Pi bug #1259 扩展：LLM 传非 string 的参数
+  # Given: file_path 为 integer，content 为 nil
+  # When: write(path: 123, content: nil)
+  # Then: 返回参数校验错误，不崩溃
+end
 ```
 
 ---
 
-#### J.5 grep Action（10 个）
+#### J.5 grep Action（11 个）
 
 ```elixir
 @moduledoc """
 Grep Action 测试
 
 基于编码 Agent 架构文档 Section E (grep 设计规格)
-共 10 个测试用例
+共 11 个测试用例
 """
 ```
 
@@ -1851,16 +1879,27 @@ test "3.3 二进制文件跳过" do
 end
 ```
 
+##### describe "4. 参数校验"
+
+```elixir
+test "4.1 无效参数类型防护" do
+  # Pi bug #1259 扩展：LLM 传非 string 的 pattern
+  # Given: pattern 参数为 nil 或 integer
+  # When: grep(pattern: nil, path: dir_path)
+  # Then: 返回参数校验错误，不崩溃
+end
+```
+
 ---
 
-#### J.6 find Action（6 个）
+#### J.6 find Action（7 个）
 
 ```elixir
 @moduledoc """
 Find Action 测试
 
 基于编码 Agent 架构文档 Section F (find 设计规格)
-共 6 个测试用例
+共 7 个测试用例
 """
 ```
 
@@ -1908,16 +1947,27 @@ test "2.3 符号链接处理" do
 end
 ```
 
+##### describe "3. 参数校验"
+
+```elixir
+test "3.1 无效参数类型防护" do
+  # Pi bug #1259 扩展：LLM 传非 string 的 pattern
+  # Given: pattern 参数为 nil 或 list
+  # When: find(pattern: [])
+  # Then: 返回参数校验错误，不崩溃
+end
+```
+
 ---
 
-#### J.7 ls Action（6 个）
+#### J.7 ls Action（7 个）
 
 ```elixir
 @moduledoc """
 Ls Action 测试
 
 基于编码 Agent 架构文档 Section G (ls 设计规格)
-共 6 个测试用例
+共 7 个测试用例
 """
 ```
 
@@ -1962,6 +2012,17 @@ test "2.3 大目录截断" do
   # Given: 目录含 600 个文件
   # When: ls(path)
   # Then: 截断到 500 条目，提示剩余数量
+end
+```
+
+##### describe "3. 参数校验"
+
+```elixir
+test "3.1 无效参数类型防护" do
+  # Pi bug #1259 扩展：LLM 传非 string 的 path
+  # Given: path 参数为 integer
+  # When: ls(path: 42)
+  # Then: 返回参数校验错误，不崩溃
 end
 ```
 
@@ -2080,7 +2141,7 @@ test "4.2 bash 截断通知含原始大小" do
 end
 ```
 
-#### J.9 Agent 集成测试（20 个）
+#### J.9 Agent 集成测试（26 个）
 
 ```elixir
 @moduledoc """
@@ -2088,7 +2149,7 @@ Agent 集成测试
 
 验证我们的 Action 模块在 Jido 管道中的表现。
 Jido/jido_ai/ReqLLM 框架层由各自的测试覆盖，我们不重复。
-共 20 个测试用例，含 7 个 Pi 历史 bug 回归
+共 26 个测试用例，含 7 个 Pi 历史 bug 回归 + 6 个错误恢复与健壮性
 """
 ```
 
@@ -2235,6 +2296,51 @@ test "4.7 retry 在工具执行完成后才 resolve" do
   # Given: LLM 返回 tool_call，API 曾 retry 过
   # When: Agent 执行 tool_call
   # Then: 整个循环（含工具执行）完成后才标记为成功
+end
+```
+
+##### describe "5. 错误恢复与健壮性"
+
+```elixir
+test "5.1 LLM 连接中断恢复" do
+  # Pi 调研：流式响应中途连接断开，Agent 挂起
+  # Given: Agent 正在接收 LLM 流式响应
+  # When: 连接在第 3 个 chunk 后断开（模拟网络错误）
+  # Then: Agent 检测到断连，清理状态，返回错误信息，不挂起
+end
+
+test "5.2 malformed JSON 响应" do
+  # Pi 调研：LLM 返回非法 JSON 导致解析崩溃
+  # Given: LLM API 返回格式异常的响应（截断的 JSON、非 JSON 文本）
+  # When: Agent 解析该响应
+  # Then: 返回友好错误信息，不崩溃，可继续下一轮对话
+end
+
+test "5.3 错误类型不误分类" do
+  # Pi bug #7a896fd: thinking block error 被误判为 token 溢出，错误触发压缩
+  # Given: LLM API 返回 invalid_request_error（thinking block 顺序错误）
+  # When: Agent 处理该错误
+  # Then: 走会话恢复逻辑（重试），不触发上下文压缩
+end
+
+test "5.4 流式超时" do
+  # Pi 调研：流开始后 LLM 卡住不发 chunk，Agent 无限等待
+  # Given: LLM 开始返回流式响应
+  # When: 连续 30 秒无新 chunk
+  # Then: Agent 超时，清理连接，返回超时错误
+end
+
+test "5.5 Action 异常隔离" do
+  # Pi 调研：Action run/2 raise 导致整个 Agent 崩溃
+  # Given: read Action 执行时文件在 stat 和 read 之间被删除（race condition）
+  # When: Action run/2 raise File.Error
+  # Then: Agent 捕获异常，将错误信息作为 tool_result 回传 LLM，继续循环
+end
+
+test "5.6 API key 无效" do
+  # Given: 配置了无效的 API key
+  # When: Agent 首次调用 LLM
+  # Then: 返回认证错误信息，不触发重试或压缩
 end
 ```
 
@@ -2526,6 +2632,81 @@ end
 
 ---
 
+#### J.12 压缩系统测试（8 个）
+
+```elixir
+@moduledoc """
+压缩系统测试
+
+基于架构文档 Compaction 设计 + Pi token-limit-recovery 调研
+共 8 个测试用例，覆盖 token 估算、窗口滑动、触发条件、失败回退、并发防护
+"""
+```
+
+##### describe "1. Token 估算"
+
+```elixir
+test "1.1 中英文混合估算" do
+  # Given: 消息含 "Hello 你好 World 世界"
+  # When: estimate_tokens(messages)
+  # Then: 中文按 1字≈2token、英文按 1word≈1.3token 估算，误差 < 20%
+end
+
+test "1.2 空消息列表" do
+  # Given: messages = []
+  # When: estimate_tokens([])
+  # Then: 返回 0
+end
+```
+
+##### describe "2. 窗口滑动与保留策略"
+
+```elixir
+test "2.1 未超阈值不压缩" do
+  # Given: 10 条消息，总 token < max_tokens
+  # When: compact(messages, max_tokens: 100_000)
+  # Then: 返回原始消息，summary = nil，不调 LLM
+end
+
+test "2.2 超阈值触发压缩" do
+  # Given: 50 条消息，总 token > max_tokens
+  # When: compact(messages, max_tokens: 100_000, window_size: 20)
+  # Then: 保留最近 20 条完整消息，前 30 条被摘要替换
+end
+
+test "2.3 系统消息不参与压缩" do
+  # Given: 第 1 条消息为 role: "system"
+  # When: 压缩触发
+  # Then: 系统消息始终保留在最前面，不被摘要替换
+end
+```
+
+##### describe "3. 失败回退与防护"
+
+```elixir
+test "3.1 压缩 API 失败回退" do
+  # Pi 调研：摘要 API 本身因 token 过多而失败，导致无限循环
+  # Given: LLM 摘要请求返回 HTTP 400（输入过长）
+  # When: compact 调 LLM 生成摘要失败
+  # Then: 回退到工具输出截断策略，不无限重试
+end
+
+test "3.2 压缩锁防并发" do
+  # Pi 调研：两个压缩同时执行导致状态损坏
+  # Given: Agent 正在执行压缩
+  # When: 第二次压缩被触发
+  # Then: 第二次被跳过（锁保护），返回 {:error, :compaction_in_progress}
+end
+
+test "3.3 压缩结果写入 Tape" do
+  # Given: Tape store 已初始化
+  # When: 压缩完成，生成 summary
+  # Then: Tape 中创建新 anchor "compaction"，summary 被记录
+end
+```
+
+---
+
 #### 跳过的测试
 
 | 模块 | Pi 测试数 | 不需要原因 |
@@ -2541,21 +2722,22 @@ end
 | Action / 模块 | 数量 | 其中 Pi bug 回归 | 状态 |
 |---------------|------|-----------------|------|
 | edit Action | 26 | +3 | 必做 |
-| bash Action | 19 | +5 | 必做 |
-| read Action | 19 | +2 | 必做 |
-| write Action | 8 | +1 | 必做 |
-| grep Action | 10 | — | 必做 |
-| find Action | 6 | — | 必做 |
-| ls Action | 6 | — | 必做 |
+| bash Action | 21 | +5 | 必做 |
+| read Action | 20 | +2 | 必做 |
+| write Action | 9 | +1 | 必做 |
+| grep Action | 11 | — | 必做 |
+| find Action | 7 | — | 必做 |
+| ls Action | 7 | — | 必做 |
 | 截断系统 | 14 | +2 | 必做 |
-| Agent 集成 | 20 | +7 | 必做 |
+| Agent 集成 | 26 | +7 | 必做 |
 | Hook 系统 | 18 | — | 必做 |
-| **必做合计** | **146** | **+20** | |
+| 压缩系统 | 8 | — | 必做 |
+| **必做合计** | **167** | **+20** | |
 | 多提供商 E2E（OpenAI/Gemini/DeepSeek） | 12 | — | 留位 |
 | 图片配置 | 4 | — | 留位 |
 | 路径扩展（macOS + NFS + Docker + 超长） | 6 | — | 留位 |
 | **留位合计** | **22** | | |
-| **总计（含留位）** | **168** | | |
+| **总计（含留位）** | **189** | | |
 | 不需要的（Pi TUI/剪贴板） | 20 | | 跳过 |
 | 不重复的（Jido/jido_ai 自身覆盖） | 7 | | 由框架测试 |
 
