@@ -1,0 +1,11 @@
+[global]
+namespace = "Gong"
+in = "docs/bdd"
+out = "test/bdd_generated"
+docs_root = "docs"
+runtime_module = "Gong.BDD.Instructions.V1"
+test_case = "ExUnit.Case"
+module_prefix = "Gong.BDD.Generated"
+
+[runtime.caps.sync]
+out = "docs/bdd/_generated/runtime_caps_v1.exs"

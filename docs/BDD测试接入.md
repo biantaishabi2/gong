@@ -2,7 +2,7 @@
 
 ## 概述
 
-Gong 使用 `bdd_compiler`（bddc）编译器实现"文档即测试"。测试用例以 DSL 格式编写，由编译器验证指令合法性、生成 ExUnit 测试代码，最终通过 CI 门禁自动执行。
+Gong 使用 `bddc` 编译器实现"文档即测试"。测试用例以 DSL 格式编写，由编译器验证指令合法性、生成 ExUnit 测试代码，最终通过 CI 门禁自动执行。
 
 **不直接手写 ExUnit 测试。**
 
@@ -12,13 +12,20 @@ Gong 使用 `bdd_compiler`（bddc）编译器实现"文档即测试"。测试用
 
 ## 项目配置
 
-```
-project_root:     /home/wangbo/document/gong
-registry_module:  Gong.BDD.InstructionRegistry
-runtime_module:   Gong.BDD.Instructions.V1
-docs_root:        docs/bdd
-dsl_in:           docs/bdd
-out:              test/bdd_generated
+所有配置收敛在项目根目录 `.bddc.toml`，bddc 命令自动读取，无需手动传参：
+
+```toml
+[global]
+namespace = "Gong"
+in = "docs/bdd"
+out = "test/bdd_generated"
+docs_root = "docs"
+runtime_module = "Gong.BDD.Instructions.V1"
+test_case = "ExUnit.Case"
+module_prefix = "Gong.BDD.Generated"
+
+[runtime.caps.sync]
+out = "docs/bdd/_generated/runtime_caps_v1.exs"
 ```
 
 ---
@@ -27,34 +34,36 @@ out:              test/bdd_generated
 
 ```
 gong/
+├── .bddc.toml                              # bddc 项目配置
 ├── lib/gong/bdd/
-│   ├── instruction_registry.ex          # 主注册表入口
+│   ├── instruction_registry.ex             # 主注册表入口
 │   └── instruction_registries/
-│       ├── common.ex                    # 通用指令（时间冻结、临时文件等）
-│       ├── tools.ex                     # 工具指令（tool_read/write/edit/...）
-│       ├── truncation.ex               # 截断系统指令
-│       ├── agent.ex                    # Agent 集成指令
-│       ├── hook.ex                     # Hook 系统指令
-│       ├── compaction.ex               # 压缩系统指令
-│       └── generated.ex               # bddc 自动生成（最低优先级）
+│       ├── common.ex                       # 通用指令（时间冻结、临时文件等）
+│       ├── tools.ex                        # 工具指令（tool_read/write/edit/...）
+│       ├── truncation.ex                   # 截断系统指令
+│       ├── agent.ex                        # Agent 集成指令
+│       ├── hook.ex                         # Hook 系统指令
+│       ├── compaction.ex                   # 压缩系统指令
+│       └── generated.ex                    # bddc 自动生成（GENERATED 区域）
 ├── test/support/bdd/
-│   ├── instructions_v1.ex              # 运行时 dispatcher
-│   └── fixtures.ex                     # 文件系统 fixture 工具
+│   ├── instructions_v1.ex                  # 运行时 dispatcher
+│   └── fixtures.ex                         # 文件系统 fixture 工具
 ├── docs/bdd/
-│   ├── read_action.dsl                 # J.3 的 20 个场景
-│   ├── write_action.dsl                # J.4 的 9 个场景
-│   ├── edit_action.dsl                 # J.1 的 26 个场景
-│   ├── bash_action.dsl                 # J.2 的 21 个场景
-│   ├── grep_action.dsl                 # J.5 的 11 个场景
-│   ├── find_action.dsl                 # J.6 的 7 个场景
-│   ├── ls_action.dsl                   # J.7 的 7 个场景
-│   ├── truncation.dsl                  # J.8 的 14 个场景
-│   ├── agent_integration.dsl           # J.9 的 26 个场景
-│   ├── hook_system.dsl                 # J.10 的 18 个场景
-│   └── compaction.dsl                  # J.12 的 8 个场景
-├── test/bdd_generated/                 # 编译输出（不要手动编辑）
+│   ├── read_action.dsl                     # J.3 的 20 个场景
+│   ├── write_action.dsl                    # J.4 的 9 个场景
+│   ├── edit_action.dsl                     # J.1 的 26 个场景
+│   ├── bash_action.dsl                     # J.2 的 21 个场景
+│   ├── grep_action.dsl                     # J.5 的 11 个场景
+│   ├── find_action.dsl                     # J.6 的 7 个场景
+│   ├── ls_action.dsl                       # J.7 的 7 个场景
+│   ├── truncation.dsl                      # J.8 的 14 个场景
+│   ├── agent_integration.dsl              # J.9 的 26 个场景
+│   ├── hook_system.dsl                     # J.10 的 18 个场景
+│   └── compaction.dsl                      # J.12 的 8 个场景
+├── test/bdd_generated/                     # 编译输出（不要手动编辑）
 └── scripts/
-    └── bdd_gate.sh                     # CI 门禁脚本
+    ├── bdd_gate.sh                         # BDD 门禁脚本
+    └── pre_deploy_check.sh                 # 部署前全量门禁
 ```
 
 ---
@@ -163,294 +172,29 @@ GIVEN create_temp_dir
 GIVEN create_temp_file path="empty.txt" content=""
 WHEN tool_read path="empty.txt"
 THEN assert_tool_success truncated=false
-
-[SCENARIO: BDD-READ-004] TITLE: offset 参数分页 TAGS: unit external_io
-GIVEN create_temp_dir
-GIVEN create_large_file path="paged.txt" lines=100 line_length=20
-WHEN tool_read path="paged.txt" offset=51
-THEN assert_tool_success content_contains="51"
-
-[SCENARIO: BDD-READ-005] TITLE: limit 参数分页 TAGS: unit external_io
-GIVEN create_temp_dir
-GIVEN create_large_file path="paged.txt" lines=100 line_length=20
-WHEN tool_read path="paged.txt" limit=10
-THEN assert_tool_success content_contains="offset" truncated=true
-
-[SCENARIO: BDD-READ-006] TITLE: 行数截断 TAGS: unit external_io
-GIVEN create_temp_dir
-GIVEN create_large_file path="big.txt" lines=2500 line_length=20
-WHEN tool_read path="big.txt"
-THEN assert_tool_truncated truncated_by="lines" original_lines=2500
-
-[SCENARIO: BDD-READ-007] TITLE: 符号链接跟随 TAGS: unit external_io
-GIVEN create_temp_dir
-GIVEN create_temp_file path="real.txt" content="target content"
-GIVEN create_symlink link="link.txt" target="real.txt"
-WHEN tool_read path="link.txt"
-THEN assert_tool_success content_contains="target content"
-
-[SCENARIO: BDD-READ-008] TITLE: 权限不足 TAGS: unit external_io
-GIVEN create_temp_dir
-GIVEN create_temp_file path="locked.txt" content="secret"
-GIVEN set_file_permission path="locked.txt" mode="000"
-WHEN tool_read path="locked.txt"
-THEN assert_tool_error error_contains="EACCES"
-
-[SCENARIO: BDD-READ-009] TITLE: 无效参数类型防护 TAGS: unit external_io
-GIVEN create_temp_dir
-WHEN tool_read path=42
-THEN assert_tool_error error_contains="参数"
-
-[SCENARIO: BDD-READ-010] TITLE: tilde 路径展开 TAGS: unit external_io
-GIVEN create_temp_dir
-GIVEN create_temp_file path="~/gong_test_tilde.txt" content="tilde test"
-WHEN tool_read path="~/gong_test_tilde.txt"
-THEN assert_tool_success content_contains="tilde test"
 ```
 
 ---
 
-## 指令注册表
+## CI 门禁
 
-### 入口模块
+### bdd_gate.sh
 
-```elixir
-# lib/gong/bdd/instruction_registry.ex
-
-defmodule Gong.BDD.InstructionRegistry do
-  @moduledoc "Gong BDD 指令注册表入口"
-
-  @spec fetch(atom(), :v1 | :v2) :: {:ok, map()} | :error
-  def fetch(name, version \\ :v1) do
-    Map.fetch(specs(version), name)
-  end
-
-  @spec specs(:v1 | :v2) :: map()
-  def specs(:v1) do
-    %{}
-    |> merge_specs!(Gong.BDD.InstructionRegistries.Common.specs(:v1))
-    |> merge_specs!(Gong.BDD.InstructionRegistries.Tools.specs(:v1))
-    |> merge_specs!(Gong.BDD.InstructionRegistries.Truncation.specs(:v1))
-    |> merge_specs!(Gong.BDD.InstructionRegistries.Agent.specs(:v1))
-    |> merge_specs!(Gong.BDD.InstructionRegistries.Hook.specs(:v1))
-    |> merge_specs!(Gong.BDD.InstructionRegistries.Compaction.specs(:v1))
-    |> merge_specs!(Gong.BDD.InstructionRegistries.Generated.specs(:v1))
-  end
-
-  def specs(:v2), do: specs(:v1)
-
-  defp merge_specs!(base, additions) do
-    Map.merge(base, additions)
-  end
-end
-```
-
-### 领域注册表示例（Tools）
-
-```elixir
-# lib/gong/bdd/instruction_registries/tools.ex
-
-defmodule Gong.BDD.InstructionRegistries.Tools do
-  @moduledoc "工具 Action BDD 指令注册"
-
-  def specs(:v1) do
-    %{
-      tool_read: %{
-        name: :tool_read,
-        kind: :when,
-        args: %{
-          path: %{type: :string, required?: true, allowed: nil},
-          offset: %{type: :int, required?: false, allowed: nil},
-          limit: %{type: :int, required?: false, allowed: nil}
-        },
-        outputs: %{},
-        rules: [],
-        boundary: :external_io,
-        scopes: [:unit, :integration],
-        async?: false,
-        eventually?: false,
-        assert_class: nil
-      },
-
-      assert_tool_success: %{
-        name: :assert_tool_success,
-        kind: :then,
-        args: %{
-          content_contains: %{type: :string, required?: false, allowed: nil},
-          truncated: %{type: :bool, required?: false, allowed: nil}
-        },
-        outputs: %{},
-        rules: [],
-        boundary: :test_runtime,
-        scopes: [:unit, :integration],
-        async?: false,
-        eventually?: false,
-        assert_class: :C
-      },
-
-      assert_tool_error: %{
-        name: :assert_tool_error,
-        kind: :then,
-        args: %{
-          error_contains: %{type: :string, required?: true, allowed: nil}
-        },
-        outputs: %{},
-        rules: [],
-        boundary: :test_runtime,
-        scopes: [:unit, :integration],
-        async?: false,
-        eventually?: false,
-        assert_class: :error
-      }
-
-      # ... 其余工具指令同理
-    }
-  end
-
-  def specs(:v2), do: %{}
-end
-```
-
----
-
-## 运行时 Dispatcher
-
-```elixir
-# test/support/bdd/instructions_v1.ex
-
-defmodule Gong.BDD.Instructions.V1 do
-  @moduledoc "Gong BDD v1 指令运行时实现"
-
-  import ExUnit.Assertions
-
-  @type ctx :: map()
-  @type meta :: map()
-
-  # 编译期提取已实现的指令列表
-  @supported_instructions (
-    __ENV__.file
-    |> File.read!()
-    |> then(fn src ->
-      Regex.scan(~r/\{\:(?:given|when|then),\s+\:([a-zA-Z0-9_]+)\}\s*->/, src,
-        capture: :all_but_first
-      )
-    end)
-    |> List.flatten()
-    |> Enum.map(&String.to_atom/1)
-    |> Enum.uniq()
-    |> Enum.sort()
-  )
-
-  @spec capabilities() :: MapSet.t(atom())
-  def capabilities, do: MapSet.new(@supported_instructions)
-
-  @spec run!(ctx(), :given | :when | :then, atom(), map(), meta()) :: ctx()
-  def run!(ctx, kind, name, args, meta \\ %{})
-
-  # ── Common ──
-
-  def run!(ctx, :given, :create_temp_dir, _args, _meta) do
-    dir = Path.join(System.tmp_dir!(), "gong_test_#{:erlang.unique_integer([:positive])}")
-    File.mkdir_p!(dir)
-    # ExUnit on_exit 自动清理
-    ExUnit.Callbacks.on_exit(fn -> File.rm_rf!(dir) end)
-    Map.put(ctx, :workspace, dir)
-  end
-
-  def run!(ctx, :given, :create_temp_file, %{path: path, content: content}, _meta) do
-    full = Path.join(ctx.workspace, path)
-    File.mkdir_p!(Path.dirname(full))
-    File.write!(full, content)
-    ctx
-  end
-
-  # ── Tools ──
-
-  def run!(ctx, :when, :tool_read, args, _meta) do
-    params = %{
-      file_path: Path.join(ctx.workspace, args.path)
-    }
-    |> maybe_put(:offset, args[:offset])
-    |> maybe_put(:limit, args[:limit])
-
-    result = Jido.Action.run(Gong.Tools.Read, params)
-    Map.put(ctx, :last_result, result)
-  end
-
-  # ── Assertions ──
-
-  def run!(ctx, :then, :assert_tool_success, args, _meta) do
-    assert {:ok, result} = ctx.last_result
-
-    if cc = args[:content_contains] do
-      assert result.content =~ cc,
-        "期望内容包含 #{inspect(cc)}，实际：#{String.slice(result.content, 0, 200)}"
-    end
-
-    if args[:truncated] != nil do
-      assert result.truncated == args.truncated
-    end
-
-    ctx
-  end
-
-  def run!(ctx, :then, :assert_tool_error, %{error_contains: expected}, _meta) do
-    assert {:error, error} = ctx.last_result
-    error_msg = if is_binary(error), do: error, else: inspect(error)
-    assert error_msg =~ expected,
-      "期望错误包含 #{inspect(expected)}，实际：#{error_msg}"
-    ctx
-  end
-
-  # ── Helpers ──
-
-  defp maybe_put(map, _key, nil), do: map
-  defp maybe_put(map, key, val), do: Map.put(map, key, val)
-end
-```
-
----
-
-## CI 门禁脚本
+有了 `.bddc.toml`，门禁脚本无需传参：
 
 ```bash
 #!/usr/bin/env bash
-# scripts/bdd_gate.sh
 set -euo pipefail
+cd "$(dirname "$0")/.."
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-
-# 查找 bdd_compiler
-BIN="${BDD_COMPILER_BIN:-}"
-if [ -z "$BIN" ]; then
-  if [ -f "${ROOT_DIR}/tools/bdd_compiler/bdd_compiler" ]; then
-    BIN="${ROOT_DIR}/tools/bdd_compiler/bdd_compiler"
-  elif command -v bdd_compiler &>/dev/null; then
-    BIN="bdd_compiler"
-  elif command -v bddc &>/dev/null; then
-    BIN="bddc"
-  else
-    echo "[bdd_gate] ERROR: bdd_compiler not found" >&2
-    exit 1
-  fi
-fi
-
-echo "[bdd_gate] using: ${BIN}"
-echo "[bdd_gate] Step 1: compile + lint + runtime coverage"
-
-${BIN} check \
-  --project-root "${ROOT_DIR}" \
-  --registry-module Gong.BDD.InstructionRegistry \
-  --runtime-module Gong.BDD.Instructions.V1 \
-  --docs-root docs \
-  --in docs/bdd \
-  --out test/bdd_generated
-
-echo "[bdd_gate] Step 2: run generated tests"
-cd "${ROOT_DIR}" && mix test test/bdd_generated/ --trace
-
-echo "[bdd_gate] done ✓"
+bddc check                              # 自动读取 .bddc.toml
+mix compile --warnings-as-errors
+mix test test/bdd_generated/ --trace
 ```
+
+### pre_deploy_check.sh
+
+全量门禁（BDD + 编译 + 测试），支持 `--bdd-only` / `--skip-bdd` 等开关。
 
 ---
 
@@ -458,50 +202,38 @@ echo "[bdd_gate] done ✓"
 
 ### 新增工具时
 
-以 read Action 为例：
-
 ```bash
 # 1. 实现业务代码
-#    → lib/gong/tools/read.ex
+#    → lib/gong/tools/xxx.ex
 
 # 2. 写 DSL 场景
-#    → docs/bdd/read_action.dsl
+#    → docs/bdd/xxx_action.dsl
 
 # 3. 补指令注册（如果用了新指令）
+#    可用 bddc registry.scaffold 生成草稿
 #    → lib/gong/bdd/instruction_registries/tools.ex
 
 # 4. 补运行时实现
 #    → test/support/bdd/instructions_v1.ex
 
-# 5. 编译验证
-bdd_compiler check \
-  --project-root /home/wangbo/document/gong \
-  --registry-module Gong.BDD.InstructionRegistry \
-  --runtime-module Gong.BDD.Instructions.V1 \
-  --docs-root docs \
-  --in docs/bdd \
-  --out test/bdd_generated
-
-# 6. 跑测试
+# 5. 一键验证
+bddc check
 mix test test/bdd_generated/
 ```
 
 ### 一键串联（推荐）
 
 ```bash
-bdd_compiler domain.autowire \
-  --project-root /home/wangbo/document/gong \
+bddc domain.autowire \
   --module Gong.Tools.Read \
   --functions run/2 \
   --prefix tool \
   --kind when \
   --version v1 \
-  --registry-module Gong.BDD.InstructionRegistry \
-  --runtime-module Gong.BDD.Instructions.V1 \
-  --in docs/bdd \
-  --out test/bdd_generated \
   --strict true
 ```
+
+配置参数（namespace、in、out、runtime_module 等）由 `.bddc.toml` 自动提供。
 
 ---
 
