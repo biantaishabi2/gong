@@ -39,8 +39,7 @@ gong/
 │   ├── instruction_registry.ex             # 主注册表入口
 │   └── instruction_registries/
 │       ├── common.ex                       # 通用指令（时间冻结、临时文件等）
-│       ├── tools.ex                        # 工具指令（tool_read/write/edit/...）
-│       ├── truncation.ex                   # 截断系统指令
+│       ├── tools.ex                        # 工具指令 + 截断系统指令
 │       ├── agent.ex                        # Agent 集成指令
 │       ├── hook.ex                         # Hook 系统指令
 │       ├── compaction.ex                   # 压缩系统指令
@@ -56,7 +55,7 @@ gong/
 │   ├── grep_action.dsl                     # J.5 的 11 个场景
 │   ├── find_action.dsl                     # J.6 的 7 个场景
 │   ├── ls_action.dsl                       # J.7 的 7 个场景
-│   ├── truncation.dsl                      # J.8 的 14 个场景
+│   ├── truncate_system.dsl                 # J.8 的 14 个场景
 │   ├── agent_integration.dsl              # J.9 的 26 个场景
 │   ├── hook_system.dsl                     # J.10 的 18 个场景
 │   └── compaction.dsl                      # J.12 的 8 个场景
@@ -93,6 +92,9 @@ create_binary_file   # path: string, bytes: int — 创建指定大小的二进�
 create_symlink       # link: string, target: string — 创建符号链接
 set_file_permission  # path: string, mode: string — 设置文件权限（如 "000"）
 create_large_file    # path: string, lines: int, line_length: int — 创建大文件
+create_png_file      # path: string — 创建最小 PNG 文件
+set_var              # name: string, value: string — 设置上下文变量
+generate_content     # name: string, lines: int, line_length?: int — 生成多行内容到变量
 
 # THEN
 assert_file_exists   # path: string
@@ -112,6 +114,11 @@ tool_grep   # pattern: string, path?: string, glob?: string, context?: int
 tool_find   # pattern: string, path?: string, limit?: int
 tool_ls     # path: string
 
+# WHEN — 截断系统（直接调用 Gong.Truncate，结果存 ctx.last_result）
+truncate_head  # content_var: string, max_lines?: int, max_bytes?: int
+truncate_tail  # content_var: string, max_lines?: int, max_bytes?: int
+truncate_line  # content_var: string, max_chars: int
+
 # THEN — 工具结果断言
 assert_tool_success        # content_contains?: string, truncated?: bool
 assert_tool_error          # error_contains: string
@@ -120,6 +127,12 @@ assert_exit_code           # expected: int
 assert_output_contains     # text: string
 assert_output_not_contains # text: string
 assert_result_field        # field: string, expected: string
+
+# THEN — 截断结果断言（对 %Gong.Truncate.Result{} 断言）
+assert_truncation_result       # truncated?: bool, truncated_by?: string,
+                               # output_lines?: int, first_line_exceeds_limit?: bool,
+                               # last_line_partial?: bool
+assert_truncation_notification # contains: string — 对工具截断通知的文本断言
 ```
 
 #### Agent（Agent 集成指令）
@@ -258,7 +271,7 @@ bddc domain.autowire \
 | `grep_action.dsl` | J.5 | 11 |
 | `find_action.dsl` | J.6 | 7 |
 | `ls_action.dsl` | J.7 | 7 |
-| `truncation.dsl` | J.8 | 14 |
+| `truncate_system.dsl` | J.8 | 14 |
 | `agent_integration.dsl` | J.9 | 26 |
 | `hook_system.dsl` | J.10 | 18 |
 | `compaction.dsl` | J.12 | 8 |

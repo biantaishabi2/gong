@@ -280,6 +280,93 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── WHEN: 截断操作 ──
+
+      truncate_head: %{
+        name: :truncate_head,
+        kind: :when,
+        args: %{
+          content_var: %{type: :string, required?: true, allowed: nil},
+          max_lines: %{type: :int, required?: false, allowed: nil},
+          max_bytes: %{type: :int, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      truncate_tail: %{
+        name: :truncate_tail,
+        kind: :when,
+        args: %{
+          content_var: %{type: :string, required?: true, allowed: nil},
+          max_lines: %{type: :int, required?: false, allowed: nil},
+          max_bytes: %{type: :int, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      truncate_line: %{
+        name: :truncate_line,
+        kind: :when,
+        args: %{
+          content_var: %{type: :string, required?: true, allowed: nil},
+          max_chars: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── THEN: 截断结果断言 ──
+
+      assert_truncation_result: %{
+        name: :assert_truncation_result,
+        kind: :then,
+        args: %{
+          truncated: %{type: :bool, required?: false, allowed: nil},
+          truncated_by: %{type: :string, required?: false, allowed: nil},
+          output_lines: %{type: :int, required?: false, allowed: nil},
+          first_line_exceeds_limit: %{type: :bool, required?: false, allowed: nil},
+          last_line_partial: %{type: :bool, required?: false, allowed: nil},
+          content_contains: %{type: :string, required?: false, allowed: nil},
+          valid_utf8: %{type: :bool, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_truncation_notification: %{
+        name: :assert_truncation_notification,
+        kind: :then,
+        args: %{
+          contains: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

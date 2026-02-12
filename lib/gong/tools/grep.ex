@@ -168,7 +168,9 @@ defmodule Gong.Tools.Grep do
   defp maybe_truncate(content) when byte_size(content) <= @max_bytes, do: {content, false}
 
   defp maybe_truncate(content) do
-    {truncated, _} = Gong.Truncate.truncate(content, :head, max_bytes: @max_bytes)
+    %Gong.Truncate.Result{content: truncated} =
+      Gong.Truncate.truncate(content, :head, max_bytes: @max_bytes)
+
     {truncated, true}
   end
 

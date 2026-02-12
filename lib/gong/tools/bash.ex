@@ -163,8 +163,8 @@ defmodule Gong.Tools.Bash do
     raw = String.trim_trailing(raw, "\n")
 
     if total_bytes > @max_output_bytes do
-      {truncated, _} = Gong.Truncate.truncate(raw, :tail, max_bytes: @max_output_bytes)
-      truncated
+      result = Gong.Truncate.truncate(raw, :tail, max_bytes: @max_output_bytes)
+      result.content <> "\n[原始 #{result.total_bytes} 字节]"
     else
       maybe_truncate_lines(raw)
     end

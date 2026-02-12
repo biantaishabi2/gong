@@ -104,6 +104,37 @@ defmodule Gong.BDD.InstructionRegistries.Common do
         async?: false,
         eventually?: false,
         assert_class: nil
+      },
+      set_var: %{
+        name: :set_var,
+        kind: :given,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          value: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      generate_content: %{
+        name: :generate_content,
+        kind: :given,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          lines: %{type: :int, required?: true, allowed: nil},
+          line_length: %{type: :int, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
       }
     }
   end

@@ -176,19 +176,27 @@ defmodule Gong.Tools.Read do
           end)
           |> Enum.join("\n")
 
-        # 检查字节截断
-        {final_content, truncated_by_bytes} = maybe_truncate_bytes(formatted)
+        # 字节截断
+        trunc_result = Gong.Truncate.truncate(formatted, :head, max_bytes: @max_bytes)
+        final_content = trunc_result.content
+        truncated_by_bytes = trunc_result.truncated
 
         truncated = remaining > 0 or truncated_by_bytes
         details = build_truncation_details(total_lines, start_line, output_lines, remaining, truncated_by_bytes, limit)
 
         # 续读提示
         hint =
-          if remaining > 0 do
-            next_offset = start_line + output_lines
-            "\n[#{remaining} more lines. Use offset=#{next_offset} to continue.]"
-          else
-            ""
+          cond do
+            truncated_by_bytes ->
+              next_offset = start_line + trunc_result.output_lines
+              "\n[Use offset=#{next_offset} to continue reading]"
+
+            remaining > 0 ->
+              next_offset = start_line + output_lines
+              "\n[#{remaining} more lines. Use offset=#{next_offset} to continue.]"
+
+            true ->
+              ""
           end
 
         {:ok,
@@ -213,16 +221,6 @@ defmodule Gong.Tools.Read do
     truncated = String.slice(line, 0, @max_line_length)
     remaining = String.length(line) - @max_line_length
     "#{truncated}... [#{remaining} chars truncated]"
-  end
-
-  # 字节级截断
-  defp maybe_truncate_bytes(content) when byte_size(content) <= @max_bytes do
-    {content, false}
-  end
-
-  defp maybe_truncate_bytes(content) do
-    {truncated, _} = Gong.Truncate.truncate(content, :head, max_bytes: @max_bytes)
-    {truncated, true}
   end
 
   defp build_truncation_details(total, start, output, remaining, by_bytes, limit) do

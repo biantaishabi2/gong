@@ -74,6 +74,12 @@ defmodule Gong.BDD.Instructions.V1 do
       {:given, :set_file_permission} ->
         set_file_permission!(ctx, args, meta)
 
+      {:given, :set_var} ->
+        set_var!(ctx, args, meta)
+
+      {:given, :generate_content} ->
+        generate_content!(ctx, args, meta)
+
       # ── Tools: 工具调用 ──
 
       {:when, :tool_read} ->
@@ -96,6 +102,17 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:when, :tool_ls} ->
         tool_ls!(ctx, args, meta)
+
+      # ── 截断操作 ──
+
+      {:when, :truncate_head} ->
+        truncate_head!(ctx, args, meta)
+
+      {:when, :truncate_tail} ->
+        truncate_tail!(ctx, args, meta)
+
+      {:when, :truncate_line} ->
+        truncate_line!(ctx, args, meta)
 
       # ── Assertions: 结果断言 ──
 
@@ -131,6 +148,12 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_output_not_contains} ->
         assert_output_not_contains!(ctx, args, meta)
+
+      {:then, :assert_truncation_result} ->
+        assert_truncation_result!(ctx, args, meta)
+
+      {:then, :assert_truncation_notification} ->
+        assert_truncation_notification!(ctx, args, meta)
 
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
@@ -434,6 +457,118 @@ defmodule Gong.BDD.Instructions.V1 do
     decoded = unescape(text)
     refute data.content =~ decoded,
       "期望输出不包含 #{inspect(decoded)}，但包含了"
+    ctx
+  end
+
+  # ── Common 实现：变量 ──
+
+  defp set_var!(ctx, %{name: name, value: value}, _meta) do
+    decoded = unescape(value)
+    Map.put(ctx, String.to_atom(name), decoded)
+  end
+
+  defp generate_content!(ctx, args, _meta) do
+    name = args.name
+    lines = args.lines
+    line_length = Map.get(args, :line_length, 20)
+
+    content =
+      1..lines
+      |> Enum.map(fn n ->
+        prefix = "line #{n}"
+        padding = String.duplicate("x", max(0, line_length - String.length(prefix)))
+        prefix <> padding
+      end)
+      |> Enum.join("\n")
+
+    Map.put(ctx, String.to_atom(name), content)
+  end
+
+  # ── 截断操作实现 ──
+
+  defp truncate_head!(ctx, args, _meta) do
+    content = Map.fetch!(ctx, String.to_atom(args.content_var))
+    opts = build_truncate_opts(args)
+    result = Gong.Truncate.truncate(content, :head, opts)
+    Map.put(ctx, :last_result, result)
+  end
+
+  defp truncate_tail!(ctx, args, _meta) do
+    content = Map.fetch!(ctx, String.to_atom(args.content_var))
+    opts = build_truncate_opts(args)
+    result = Gong.Truncate.truncate(content, :tail, opts)
+    Map.put(ctx, :last_result, result)
+  end
+
+  defp truncate_line!(ctx, args, _meta) do
+    content = Map.fetch!(ctx, String.to_atom(args.content_var))
+    result = Gong.Truncate.truncate_line(content, args.max_chars)
+    Map.put(ctx, :last_result, result)
+  end
+
+  defp build_truncate_opts(args) do
+    opts = []
+    opts = if args[:max_lines], do: [{:max_lines, args.max_lines} | opts], else: opts
+    opts = if args[:max_bytes], do: [{:max_bytes, args.max_bytes} | opts], else: opts
+    opts
+  end
+
+  # ── 截断断言实现 ──
+
+  defp assert_truncation_result!(ctx, args, _meta) do
+    result = ctx.last_result
+    assert %Gong.Truncate.Result{} = result, "期望 Truncate.Result，实际：#{inspect(result)}"
+
+    if args[:truncated] != nil do
+      assert result.truncated == args.truncated,
+        "期望 truncated=#{args.truncated}，实际：#{result.truncated}"
+    end
+
+    if tb = args[:truncated_by] do
+      expected_by = String.to_existing_atom(tb)
+
+      assert result.truncated_by == expected_by,
+        "期望 truncated_by=#{tb}，实际：#{inspect(result.truncated_by)}"
+    end
+
+    if args[:output_lines] do
+      assert result.output_lines == args.output_lines,
+        "期望 output_lines=#{args.output_lines}，实际：#{result.output_lines}"
+    end
+
+    if args[:first_line_exceeds_limit] != nil do
+      assert result.first_line_exceeds_limit == args.first_line_exceeds_limit,
+        "期望 first_line_exceeds_limit=#{args.first_line_exceeds_limit}，实际：#{result.first_line_exceeds_limit}"
+    end
+
+    if args[:last_line_partial] != nil do
+      assert result.last_line_partial == args.last_line_partial,
+        "期望 last_line_partial=#{args.last_line_partial}，实际：#{result.last_line_partial}"
+    end
+
+    if cc = args[:content_contains] do
+      decoded = unescape(cc)
+
+      assert result.content =~ decoded,
+        "期望 content 包含 #{inspect(decoded)}，实际：#{String.slice(result.content, 0, 200)}"
+    end
+
+    if args[:valid_utf8] == true do
+      assert String.valid?(result.content),
+        "期望 content 是合法 UTF-8，但包含无效字节"
+    end
+
+    ctx
+  end
+
+  defp assert_truncation_notification!(ctx, %{contains: text}, _meta) do
+    # 用于工具集成测试，last_result 是 {:ok, %{content: ...}}
+    assert {:ok, data} = ctx.last_result
+    decoded = unescape(text)
+
+    assert data.content =~ decoded,
+      "期望截断通知包含 #{inspect(decoded)}，实际：#{String.slice(data.content, 0, 300)}"
+
     ctx
   end
 
