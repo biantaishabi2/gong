@@ -962,6 +962,234 @@ tools = Jido.AI.ToolAdapter.from_actions(CodingAgent.Tools.all())
 
 ---
 
+### I. Hook 系统
+
+#### I.1 设计概述
+
+Hook 系统是 Agent 的**事件拦截与数据变换基础设施**。在工具执行、LLM 调用、会话操作等关键节点插入用户自定义逻辑。
+
+Pi 的 Extension 系统有 22 个事件类型，我们提取其中**与 Agent 核心流程相关的**部分，用 Elixir 原生机制实现。
+
+#### I.2 三类钩子
+
+| 类型 | 能力 | 实现机制 | 用途 |
+|------|------|---------|------|
+| **通知型** | 只读，不能改数据 | Telemetry | 日志、监控、指标、审计 |
+| **拦截型** | 可以取消操作 | Behaviour 回调 | 危险命令确认、权限校验 |
+| **变换型** | 可以修改数据流 | Behaviour 管道（Enum.reduce） | 过滤敏感信息、注入上下文、改写提示词 |
+
+#### I.3 事件清单
+
+##### 通知型事件（Telemetry）
+
+```elixir
+# 会话生命周期
+:telemetry.execute([:gong, :session, :start], %{}, %{session_id: id})
+:telemetry.execute([:gong, :session, :shutdown], %{}, %{session_id: id})
+
+# Agent 循环
+:telemetry.execute([:gong, :agent, :start], %{}, %{prompt: prompt})
+:telemetry.execute([:gong, :agent, :end], %{duration_ms: ms}, %{steps: n})
+:telemetry.execute([:gong, :turn, :start], %{}, %{turn_index: i})
+:telemetry.execute([:gong, :turn, :end], %{duration_ms: ms}, %{turn_index: i, tool_calls: calls})
+
+# 模型切换
+:telemetry.execute([:gong, :model, :select], %{}, %{model: model})
+```
+
+这些事件**只用于观察**，hook 不能修改流程。Telemetry 是 Elixir 生态标准，Phoenix/Ecto/LiveView 都用它。
+
+##### 拦截型事件
+
+```elixir
+@callback before_tool_call(tool :: atom(), params :: map()) ::
+  :ok | {:block, String.t()}
+
+@callback before_session_op(op :: atom(), meta :: map()) ::
+  :ok | :cancel
+```
+
+- `before_tool_call` — 工具执行前，返回 `{:block, "原因"}` 阻止执行
+- `before_session_op` — 会话操作（fork/compact/switch）前，返回 `:cancel` 取消
+
+##### 变换型事件
+
+```elixir
+@callback on_tool_result(tool :: atom(), result :: map()) :: map()
+@callback on_context(messages :: [map()]) :: [map()]
+@callback on_input(text :: String.t(), images :: [map()]) ::
+  {:transform, String.t(), [map()]} | :passthrough | :handled
+@callback on_before_agent(prompt :: String.t(), system :: String.t()) ::
+  {String.t(), String.t(), [map()]}
+```
+
+- `on_tool_result` — 修改工具返回值（多个 hook 串联执行）
+- `on_context` — 修改发给 LLM 的消息列表
+- `on_input` — 变换用户输入，或标记为已处理（短路）
+- `on_before_agent` — 修改提示词和系统消息，注入额外消息
+
+#### I.4 Behaviour 定义
+
+```elixir
+defmodule Gong.Hook do
+  @moduledoc """
+  Agent 钩子行为定义。
+
+  实现此 behaviour 的模块可以注册到 Agent，在关键节点拦截或变换数据流。
+  多个 hook 按注册顺序串联执行（Enum.reduce），每个 hook 拿到上一个的输出。
+  """
+
+  # 拦截型
+  @callback before_tool_call(tool :: atom(), params :: map()) ::
+    :ok | {:block, String.t()}
+  @callback before_session_op(op :: atom(), meta :: map()) ::
+    :ok | :cancel
+
+  # 变换型
+  @callback on_tool_result(tool :: atom(), result :: map()) :: map()
+  @callback on_context(messages :: [map()]) :: [map()]
+  @callback on_input(text :: String.t(), images :: [map()]) ::
+    {:transform, String.t(), [map()]} | :passthrough | :handled
+  @callback on_before_agent(prompt :: String.t(), system :: String.t()) ::
+    {String.t(), String.t(), [map()]}
+
+  @optional_callbacks [
+    before_tool_call: 2, before_session_op: 2,
+    on_tool_result: 2, on_context: 1,
+    on_input: 2, on_before_agent: 2
+  ]
+end
+```
+
+#### I.5 执行引擎
+
+```elixir
+defmodule Gong.HookRunner do
+  @moduledoc "Hook 串联执行器"
+
+  @doc "串联执行变换型 hook，返回最终结果"
+  def pipe(callback, initial, extra_args \\ []) do
+    hooks = Application.get_env(:gong, :hooks, [])
+
+    Enum.reduce(hooks, initial, fn hook, acc ->
+      if function_exported?(hook, callback, length(extra_args) + 1) do
+        try do
+          apply(hook, callback, extra_args ++ [acc])
+        rescue
+          e ->
+            # hook 出错不影响后续 hook 执行（Pi 的设计）
+            :telemetry.execute([:gong, :hook, :error], %{}, %{
+              hook: hook, callback: callback, error: e
+            })
+            acc
+        end
+      else
+        acc
+      end
+    end)
+  end
+
+  @doc "串联执行拦截型 hook，任一返回非 :ok 即停止"
+  def gate(callback, args) do
+    hooks = Application.get_env(:gong, :hooks, [])
+
+    Enum.reduce_while(hooks, :ok, fn hook, _acc ->
+      if function_exported?(hook, callback, length(args)) do
+        try do
+          case apply(hook, callback, args) do
+            :ok -> {:cont, :ok}
+            {:block, reason} -> {:halt, {:blocked, reason}}
+            :cancel -> {:halt, :cancelled}
+          end
+        rescue
+          e ->
+            :telemetry.execute([:gong, :hook, :error], %{}, %{
+              hook: hook, callback: callback, error: e
+            })
+            {:cont, :ok}
+        end
+      else
+        {:cont, :ok}
+      end
+    end)
+  end
+end
+```
+
+#### I.6 Agent 循环中的 Hook 调用点
+
+```
+用户输入
+  │
+  ▼ HookRunner.pipe(:on_input, {text, images})      ← 变换用户输入
+  │
+  ▼ HookRunner.pipe(:on_before_agent, {prompt, system})  ← 注入消息、改提示词
+  │
+  ▼ Agent Loop 开始
+  │   │
+  │   ▼ :telemetry [:gong, :turn, :start]            ← 通知
+  │   │
+  │   ▼ HookRunner.pipe(:on_context, messages)        ← 修改 LLM 上下文
+  │   │
+  │   ▼ 调用 LLM → 返回 tool_calls
+  │   │
+  │   ▼ 对每个 tool_call:
+  │   │   ├─ HookRunner.gate(:before_tool_call, [tool, params])  ← 拦截
+  │   │   │   └─ {:blocked, reason} → 跳过该工具
+  │   │   │
+  │   │   ├─ 执行 Action
+  │   │   │
+  │   │   └─ HookRunner.pipe(:on_tool_result, result, [tool])    ← 变换结果
+  │   │
+  │   ▼ :telemetry [:gong, :turn, :end]               ← 通知
+  │   │
+  │   ▼ 继续循环或结束
+  │
+  ▼ :telemetry [:gong, :agent, :end]                   ← 通知
+```
+
+#### I.7 注册方式
+
+```elixir
+# 方式一：配置文件（静态）
+# config/config.exs
+config :gong, hooks: [
+  MyProject.SafetyHook,
+  MyProject.AuditHook
+]
+
+# 方式二：Agent 启动时（动态）
+Gong.AgentLoop.start(workspace: "/tmp/test", hooks: [MyProject.CustomHook])
+```
+
+不需要文件发现机制——Elixir 模块编译后全局可见，直接用模块名引用。
+
+#### I.8 与 Pi Extension 系统的对照
+
+| 维度 | Pi Extension | Gong Hook |
+|------|-------------|-----------|
+| 注册方式 | 文件扫描 + jiti 动态加载 .ts | 配置模块名或启动参数 |
+| 执行模型 | 异步 Promise 链 | 同步 Enum.reduce |
+| 数据安全 | 需要深拷贝防篡改 | 不需要 — 不可变数据 |
+| 死锁风险 | 需拆两种 Context 防死锁 | 无 — GenServer 模型天然安全 |
+| 错误处理 | try/catch + 手动加堆栈 | rescue + 自动完整 stacktrace |
+| 串联修改 | 专门修了 bug 才实现 | Enum.reduce 天然正确 |
+| 事件数量 | 22 个 | 12 个（去掉了 UI/发现/资源相关） |
+| 工具拦截 | tool_call 返回 { block: true } | before_tool_call 返回 {:block, reason} |
+
+#### I.9 Pi Hook 系统的 Bug 总结
+
+| Pi Bug | 原因 | Elixir 状态 |
+|--------|------|------------|
+| tool_result 不串联 (#1280) | emit() 通用方法没有串联 tool_result | **设计规避** — 专用 `pipe()` 函数 |
+| context 消息被篡改 | hook 直接修改了 JS 对象引用 | **结构不可能** — 不可变数据 |
+| hook 内 waitForIdle 死锁 | 事件回调在 agent loop 内等 agent loop 结束 | **结构不可能** — GenServer 模型 |
+| hook 错误无堆栈 | catch 吞异常 | **结构不可能** — Elixir 异常自带 stacktrace |
+| Extension 命令覆盖内置命令 | 无冲突检测 | 不适用 — 我们不做命令系统 |
+| input event 不串联 | 类似 tool_result 的问题 | **设计规避** — 统一用 `pipe()` |
+
+---
+
 ### J. 测试规格（BDD）
 
 Pi 全项目共 152 个测试。我们移植工具测试和 Agent 集成测试，补充安全/边界场景，TUI/剪贴板测试跳过。
@@ -2021,7 +2249,157 @@ end
 
 ---
 
-#### J.10 留位测试（预留接口和测试骨架）
+#### J.10 Hook 系统测试（18 个）
+
+```elixir
+@moduledoc """
+Hook 系统测试
+
+基于架构文档 Section I (Hook 系统设计) + Pi Extension 测试移植
+共 18 个测试用例，覆盖三类钩子（通知/拦截/变换）+ Pi bug 回归
+"""
+```
+
+##### describe "1. 通知型钩子（Telemetry）"
+
+```elixir
+test "1.1 工具执行发送 telemetry 事件" do
+  # Given: 注册了 [:gong, :tool, :stop] 的 telemetry handler
+  # When: 执行 read Action
+  # Then: handler 收到事件，metadata 包含 tool: :read 和 result
+end
+
+test "1.2 Agent 循环生命周期事件" do
+  # Given: 注册了 [:gong, :agent, :start] 和 [:gong, :agent, :end] handler
+  # When: 发送一次完整的 agent 对话
+  # Then: start 和 end 事件按顺序触发，end 包含 duration_ms 和 steps
+end
+
+test "1.3 turn 事件包含 tool_calls 信息" do
+  # Given: 注册了 [:gong, :turn, :end] handler
+  # When: LLM 返回 tool_call 并执行
+  # Then: turn_end 事件的 metadata 包含 tool_calls 列表
+end
+```
+
+##### describe "2. 拦截型钩子（gate）"
+
+```elixir
+test "2.1 before_tool_call 放行" do
+  # Given: hook 的 before_tool_call 返回 :ok
+  # When: 执行 bash Action
+  # Then: Action 正常执行，返回结果
+end
+
+test "2.2 before_tool_call 阻止" do
+  # Given: hook 的 before_tool_call 对 bash 返回 {:block, "需要确认"}
+  # When: 执行 bash Action
+  # Then: Action 不执行，返回 blocked 信息给 LLM
+end
+
+test "2.3 多 hook 拦截链 — 第一个通过第二个阻止" do
+  # Given: hook_a 返回 :ok，hook_b 返回 {:block, "禁止"}
+  # When: 执行 bash Action
+  # Then: Action 不执行（任一 hook 阻止即停止）
+end
+
+test "2.4 before_session_op 取消" do
+  # Given: hook 的 before_session_op(:compact, _) 返回 :cancel
+  # When: 触发自动压缩
+  # Then: 压缩被取消，会话状态不变
+end
+```
+
+##### describe "3. 变换型钩子（pipe）"
+
+```elixir
+test "3.1 on_tool_result 修改返回值" do
+  # Given: hook 的 on_tool_result 将 content 中的 API_KEY 替换为 [REDACTED]
+  # When: read Action 读取含 API_KEY 的文件
+  # Then: 返回给 LLM 的结果中 API_KEY 已被替换
+end
+
+test "3.2 on_tool_result 多 hook 串联" do
+  # Pi bug #1280 回归：多个 hook 修改 tool_result 必须串联
+  # Given: hook_a 在 content 后追加 "[a]"，hook_b 追加 "[b]"
+  # When: 工具执行完毕
+  # Then: 最终 content 以 "[a][b]" 结尾（串联，非覆盖）
+end
+
+test "3.3 on_tool_result 部分修改保留其他字段" do
+  # Given: hook 只修改 result.content，不动 result.exit_code
+  # When: bash Action 返回 {content: "output", exit_code: 0}
+  # Then: content 被修改，exit_code 保持为 0
+end
+
+test "3.4 on_context 修改 LLM 消息" do
+  # Given: hook 的 on_context 在消息列表末尾注入一条系统提示
+  # When: Agent 准备调 LLM
+  # Then: 发给 LLM 的消息列表包含注入的系统提示
+end
+
+test "3.5 on_input 变换用户输入" do
+  # Given: hook 的 on_input 将中文输入翻译为英文
+  # When: 用户发送 "你好"
+  # Then: Agent 收到变换后的文本
+end
+
+test "3.6 on_input 短路处理" do
+  # Given: hook 的 on_input 返回 :handled
+  # When: 用户发送输入
+  # Then: 后续 hook 不再执行，Agent 不处理该输入
+end
+
+test "3.7 on_before_agent 注入消息" do
+  # Given: hook 的 on_before_agent 返回额外注入消息 [%{role: "user", content: "额外上下文"}]
+  # When: Agent 开始处理
+  # Then: 注入的消息出现在 LLM 上下文中
+end
+```
+
+##### describe "4. 错误处理与隔离"
+
+```elixir
+test "4.1 hook 异常不影响后续 hook" do
+  # Pi 设计：hook 出错不能崩掉整个 Agent
+  # Given: hook_a 的 on_tool_result raise RuntimeError，hook_b 正常返回
+  # When: 工具执行完毕
+  # Then: hook_a 的错误被记录（telemetry 事件），hook_b 正常执行
+end
+
+test "4.2 hook 异常有完整堆栈" do
+  # Pi bug 回归：hook 错误必须有堆栈信息
+  # Given: hook raise 一个 RuntimeError
+  # When: HookRunner 捕获错误
+  # Then: telemetry 事件中包含 %{error: %RuntimeError{}, stacktrace: [...]}
+end
+
+test "4.3 hook 超时不阻塞 Agent" do
+  # Given: hook 的 on_tool_result 内部 Process.sleep(10_000)
+  # When: 工具执行完毕
+  # Then: hook 在合理时间内被跳过（Task.yield 超时），Agent 继续
+end
+```
+
+##### describe "5. 注册与发现"
+
+```elixir
+test "5.1 配置文件注册" do
+  # Given: config :gong, hooks: [TestHook]
+  # When: Agent 启动
+  # Then: TestHook 的回调被调用
+end
+
+test "5.2 启动参数注册" do
+  # Given: Gong.AgentLoop.start(hooks: [TestHook])
+  # When: 执行工具
+  # Then: TestHook 的回调被调用
+end
+```
+
+---
+
+#### J.11 留位测试（预留接口和测试骨架）
 
 ##### describe "多提供商 E2E"（12 个留位）
 
@@ -2171,12 +2549,13 @@ end
 | ls Action | 6 | — | 必做 |
 | 截断系统 | 14 | +2 | 必做 |
 | Agent 集成 | 20 | +7 | 必做 |
-| **必做合计** | **128** | **+20** | |
+| Hook 系统 | 18 | — | 必做 |
+| **必做合计** | **146** | **+20** | |
 | 多提供商 E2E（OpenAI/Gemini/DeepSeek） | 12 | — | 留位 |
 | 图片配置 | 4 | — | 留位 |
 | 路径扩展（macOS + NFS + Docker + 超长） | 6 | — | 留位 |
 | **留位合计** | **22** | | |
-| **总计（含留位）** | **150** | | |
+| **总计（含留位）** | **168** | | |
 | 不需要的（Pi TUI/剪贴板） | 20 | | 跳过 |
 | 不重复的（Jido/jido_ai 自身覆盖） | 7 | | 由框架测试 |
 
