@@ -706,7 +706,11 @@ defmodule Gong.BDD.Instructions.V1 do
         if Process.alive?(pid), do: GenServer.stop(pid, :normal, 1000)
       end)
 
-      case Gong.Agent.ask_sync(pid, prompt, timeout: 60_000) do
+      # 在 prompt 前注入 workspace 路径，让 LLM 知道文件位置
+      workspace = Map.get(ctx, :workspace, File.cwd!())
+      full_prompt = "工作目录：#{workspace}\n所有文件操作使用绝对路径。\n\n#{prompt}"
+
+      case Gong.Agent.ask_sync(pid, full_prompt, timeout: 60_000) do
         {:ok, reply} ->
           ctx
           |> Map.put(:agent_pid, pid)

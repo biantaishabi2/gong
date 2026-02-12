@@ -14,6 +14,9 @@ defmodule Gong.Application do
       {DynamicSupervisor, name: Gong.SessionSupervisor, strategy: :one_for_one}
     ]
 
+    # 注册 DeepSeek provider（复用 OpenAI ChatAPI）
+    ReqLLM.Providers.register(Gong.Providers.DeepSeek)
+
     opts = [strategy: :one_for_one, name: Gong.Supervisor]
     Supervisor.start_link(children, opts)
   end
