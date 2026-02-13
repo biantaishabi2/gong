@@ -304,3 +304,53 @@ GIVEN mock_llm_response response_type="text" content="第一次成功"
 WHEN agent_chat prompt="第一次对话"
 THEN assert_agent_reply contains="第一次成功"
 THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 6: 流式输出（2 个场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-AGENT-027] TITLE: 流式输出事件序列 TAGS: integration agent
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="text" content="流式测试"
+WHEN agent_stream prompt="测试流式"
+THEN assert_stream_events sequence="start,delta,end"
+THEN assert_agent_reply contains="流式测试"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-028] TITLE: 流式输出含工具调用 TAGS: integration agent
+GIVEN create_temp_dir
+GIVEN create_temp_file path="stream.txt" content="流式内容"
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/stream.txt"
+GIVEN mock_llm_response response_type="text" content="流式工具完成"
+WHEN agent_stream prompt="流式读文件"
+THEN assert_tool_was_called tool="read_file"
+THEN assert_agent_reply contains="流式工具完成"
+THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 7: Hook 端到端集成（2 个场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-AGENT-029] TITLE: Hook 拦截工具后 Agent 继续对话 TAGS: integration agent hook
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN register_hook module="BlockBash"
+GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo hack"
+GIVEN mock_llm_response response_type="text" content="工具被拦截了"
+WHEN agent_chat prompt="执行命令"
+THEN assert_agent_reply contains="工具被拦截了"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-030] TITLE: Hook 变换结果后 Agent 获取变换后内容 TAGS: integration agent hook
+GIVEN create_temp_dir
+GIVEN create_temp_file path="key.txt" content="api_key=sk_test_AbCdEfGhIjKlMnOpQrStUvWxYz123456"
+GIVEN configure_agent
+GIVEN register_hook module="RedactApiKey"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/key.txt"
+GIVEN mock_llm_response response_type="text" content="密钥已脱敏"
+WHEN agent_chat prompt="读取密钥"
+THEN assert_tool_was_called tool="read_file"
+THEN assert_agent_reply contains="密钥已脱敏"
+THEN assert_no_crash
