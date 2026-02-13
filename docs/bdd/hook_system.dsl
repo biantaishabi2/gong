@@ -220,3 +220,71 @@ WHEN agent_chat prompt="测试注册"
 THEN assert_hook_fired event="gong.tool.start"
 THEN assert_agent_reply contains="回调已触发"
 THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 6: 短路语义 (3 个场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-HOOK-019] TITLE: gate 短路：第一个 block 后第二个不执行 TAGS: hook gate
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN register_hook module="BlockAll"
+GIVEN register_hook module="CrashHook"
+GIVEN attach_telemetry_handler event="gong.hook.error"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/tmp/x.txt"
+GIVEN mock_llm_response response_type="text" content="短路成功"
+WHEN agent_chat prompt="读文件"
+THEN assert_agent_reply contains="短路成功"
+THEN assert_no_hook_error
+THEN assert_no_crash
+
+[SCENARIO: BDD-HOOK-020] TITLE: on_input passthrough 不改变输入 TAGS: hook transform
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN register_hook module="PassthroughInput"
+GIVEN mock_llm_response response_type="text" content="原始输入不变"
+WHEN agent_chat prompt="保持原样"
+THEN assert_agent_reply contains="原始输入不变"
+THEN assert_conversation_contains text="保持原样"
+THEN assert_no_crash
+
+[SCENARIO: BDD-HOOK-021] TITLE: gate 返回非预期值视为放行 TAGS: hook gate
+GIVEN create_temp_dir
+GIVEN create_temp_file path="bad.txt" content="测试内容"
+GIVEN configure_agent
+GIVEN register_hook module="BadReturnGate"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/bad.txt"
+GIVEN mock_llm_response response_type="text" content="放行成功"
+WHEN agent_chat prompt="读取"
+THEN assert_agent_reply contains="放行成功"
+THEN assert_tool_was_called tool="read_file"
+THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 7: Telemetry 事件顺序 (2 个场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-HOOK-022] TITLE: turn.start 事件触发 TAGS: hook telemetry
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.turn.start"
+GIVEN mock_llm_response response_type="text" content="turn开始了"
+WHEN agent_chat prompt="测试turn"
+THEN assert_telemetry_received event="gong.turn.start"
+THEN assert_no_crash
+
+[SCENARIO: BDD-HOOK-023] TITLE: 完整事件序列验证 TAGS: hook telemetry
+GIVEN create_temp_dir
+GIVEN create_temp_file path="seq.txt" content="序列"
+GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.agent.start"
+GIVEN attach_telemetry_handler event="gong.turn.start"
+GIVEN attach_telemetry_handler event="gong.tool.start"
+GIVEN attach_telemetry_handler event="gong.tool.stop"
+GIVEN attach_telemetry_handler event="gong.turn.end"
+GIVEN attach_telemetry_handler event="gong.agent.end"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/seq.txt"
+GIVEN mock_llm_response response_type="text" content="序列完成"
+WHEN agent_chat prompt="读取序列"
+THEN assert_telemetry_sequence sequence="gong.agent.start,gong.turn.start,gong.tool.start,gong.tool.stop,gong.turn.end,gong.agent.end"
+THEN assert_no_crash

@@ -135,6 +135,20 @@ defmodule Gong.TestHooks do
     end
   end
 
+  # ── 特殊返回值测试 ──
+
+  defmodule PassthroughInput do
+    @moduledoc "on_input 返回 :passthrough 不做任何变换"
+    @behaviour Gong.Hook
+    def on_input(_text, _images), do: :passthrough
+  end
+
+  defmodule BadReturnGate do
+    @moduledoc "gate 返回非预期值（测试 catch-all 处理）"
+    @behaviour Gong.Hook
+    def before_tool_call(_tool, _params), do: :unexpected_value
+  end
+
   # ── 错误处理测试 ──
 
   defmodule CrashHook do

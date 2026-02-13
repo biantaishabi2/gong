@@ -63,6 +63,10 @@ defmodule Gong.HookRunner do
           {:error, _} ->
             # hook 异常不阻止执行，继续下一个
             {:cont, :ok}
+
+          _ ->
+            # hook 返回了非预期值，忽略并继续
+            {:cont, :ok}
         end
       else
         {:cont, :ok}

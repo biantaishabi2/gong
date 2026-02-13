@@ -107,6 +107,32 @@ defmodule Gong.BDD.InstructionRegistries.Hook do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+      assert_no_hook_error: %{
+        name: :assert_no_hook_error,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_telemetry_sequence: %{
+        name: :assert_telemetry_sequence,
+        kind: :then,
+        args: %{
+          sequence: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end
