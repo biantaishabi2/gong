@@ -135,6 +135,66 @@ defmodule Gong.BDD.InstructionRegistries.Common do
         async?: false,
         eventually?: false,
         assert_class: nil
+      },
+      create_bom_file: %{
+        name: :create_bom_file,
+        kind: :given,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil},
+          content: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── THEN: 文件编码断言 ──
+
+      assert_file_has_bom: %{
+        name: :assert_file_has_bom,
+        kind: :then,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_file_has_crlf: %{
+        name: :assert_file_has_crlf,
+        kind: :then,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_file_no_crlf: %{
+        name: :assert_file_no_crlf,
+        kind: :then,
+        args: %{
+          path: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

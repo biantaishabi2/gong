@@ -80,6 +80,9 @@ defmodule Gong.BDD.Instructions.V1 do
       {:given, :generate_content} ->
         generate_content!(ctx, args, meta)
 
+      {:given, :create_bom_file} ->
+        create_bom_file!(ctx, args, meta)
+
       # ── Tools: 工具调用 ──
 
       {:when, :tool_read} ->
@@ -136,6 +139,15 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_file_content} ->
         assert_file_content!(ctx, args, meta)
+
+      {:then, :assert_file_has_bom} ->
+        assert_file_has_bom!(ctx, args, meta)
+
+      {:then, :assert_file_has_crlf} ->
+        assert_file_has_crlf!(ctx, args, meta)
+
+      {:then, :assert_file_no_crlf} ->
+        assert_file_no_crlf!(ctx, args, meta)
 
       {:then, :assert_result_field} ->
         assert_result_field!(ctx, args, meta)
@@ -446,6 +458,16 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
+  defp create_bom_file!(ctx, %{path: path, content: content}, _meta) do
+    full = Path.join(ctx.workspace, path)
+    File.mkdir_p!(Path.dirname(full))
+    decoded_content = unescape(content)
+    # UTF-8 BOM 前缀
+    bom = <<0xEF, 0xBB, 0xBF>>
+    File.write!(full, bom <> decoded_content)
+    ctx
+  end
+
   defp create_symlink!(ctx, %{link: link, target: target}, _meta) do
     link_full = Path.join(ctx.workspace, link)
     target_full = Path.join(ctx.workspace, target)
@@ -651,16 +673,81 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
+  defp assert_file_has_bom!(ctx, %{path: path}, _meta) do
+    full = Path.join(ctx.workspace, path)
+    raw = File.read!(full)
+    assert <<0xEF, 0xBB, 0xBF, _rest::binary>> = raw,
+      "期望文件以 UTF-8 BOM 开头: #{full}"
+    ctx
+  end
+
+  defp assert_file_has_crlf!(ctx, %{path: path}, _meta) do
+    full = Path.join(ctx.workspace, path)
+    raw = File.read!(full)
+    assert String.contains?(raw, "\r\n"),
+      "期望文件包含 CRLF 行尾: #{full}"
+    ctx
+  end
+
+  defp assert_file_no_crlf!(ctx, %{path: path}, _meta) do
+    full = Path.join(ctx.workspace, path)
+    raw = File.read!(full)
+    refute String.contains?(raw, "\r\n"),
+      "期望文件不包含 CRLF 行尾: #{full}"
+    ctx
+  end
+
   # ── 结果字段断言 ──
 
   defp assert_result_field!(ctx, %{field: field, expected: expected}, _meta) do
     assert {:ok, data} = ctx.last_result
-    field_atom = String.to_existing_atom(field)
-    actual = Map.get(data, field_atom)
+    actual = get_nested_field(data, field)
     assert to_string(actual) == expected,
       "期望 #{field}=#{expected}，实际：#{inspect(actual)}"
     ctx
   end
+
+  # 支持嵌套字段访问：如 "diff_first_changed_line" → data.diff.first_changed_line
+  defp get_nested_field(data, field) do
+    # 先尝试直接访问
+    field_atom = try_existing_atom(field)
+    case field_atom && Map.get(data, field_atom) do
+      nil ->
+        # 尝试按 _ 分割逐层访问（如 diff_first_changed_line → [:diff, :first_changed_line]）
+        try_nested_access(data, field)
+      value ->
+        value
+    end
+  end
+
+  defp try_existing_atom(str) do
+    String.to_existing_atom(str)
+  rescue
+    ArgumentError -> nil
+  end
+
+  defp try_nested_access(data, field) do
+    parts = String.split(field, "_")
+    # 从左往右尝试拼接找到第一个匹配的 key
+    find_nested_value(data, parts)
+  end
+
+  defp find_nested_value(_data, []), do: nil
+
+  defp find_nested_value(data, parts) when is_map(data) do
+    # 尝试从 1 个 part 到全部 parts 作为 key
+    Enum.find_value(1..length(parts), fn n ->
+      key_str = Enum.take(parts, n) |> Enum.join("_")
+      key_atom = try_existing_atom(key_str)
+      case key_atom && Map.get(data, key_atom) do
+        nil -> nil
+        value when n == length(parts) -> value
+        value -> find_nested_value(value, Enum.drop(parts, n))
+      end
+    end)
+  end
+
+  defp find_nested_value(_, _), do: nil
 
   # ── Bash 特有断言 ──
 

@@ -1,6 +1,5 @@
 # Edit Action BDD 测试
 # 对应 architecture.md J.1 节
-# 当前覆盖核心场景，高级场景（CRLF/BOM、并发、路径遍历）待后续补充
 
 # ── 1. 基础替换 ──
 
@@ -115,3 +114,48 @@ GIVEN create_temp_file path="test.txt" content="你好世界"
 WHEN tool_edit path="test.txt" old_string="世界" new_string="Elixir"
 THEN assert_tool_success
 THEN assert_file_content path="test.txt" expected="你好Elixir"
+
+# ── 6. CRLF / BOM 处理 ──
+
+[SCENARIO: BDD-EDIT-017] TITLE: CRLF 文件跨平台匹配 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="crlf.txt" content="line1\r\nline2\r\nline3\r\n"
+WHEN tool_edit path="crlf.txt" old_string="line2" new_string="replaced"
+THEN assert_tool_success
+THEN assert_file_content path="crlf.txt" expected="line1\r\nreplaced\r\nline3\r\n"
+
+[SCENARIO: BDD-EDIT-018] TITLE: CRLF 行尾保留 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="crlf.txt" content="aaa\r\nbbb\r\nccc\r\n"
+WHEN tool_edit path="crlf.txt" old_string="bbb" new_string="xxx"
+THEN assert_tool_success
+THEN assert_file_has_crlf path="crlf.txt"
+
+[SCENARIO: BDD-EDIT-019] TITLE: LF 行尾保留 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="lf.txt" content="aaa\nbbb\nccc\n"
+WHEN tool_edit path="lf.txt" old_string="bbb" new_string="xxx"
+THEN assert_tool_success
+THEN assert_file_no_crlf path="lf.txt"
+
+[SCENARIO: BDD-EDIT-020] TITLE: 混合行尾 old_string 用 LF 匹配 CRLF 文件 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="crlf.txt" content="hello\r\nworld\r\n"
+WHEN tool_edit path="crlf.txt" old_string="hello\nworld" new_string="goodbye\nplanet"
+THEN assert_tool_success
+THEN assert_file_content path="crlf.txt" expected="goodbye\r\nplanet\r\n"
+
+[SCENARIO: BDD-EDIT-021] TITLE: BOM + CRLF 联合保留 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_bom_file path="bom.txt" content="line1\r\nline2\r\n"
+WHEN tool_edit path="bom.txt" old_string="line1" new_string="first"
+THEN assert_tool_success
+THEN assert_file_has_bom path="bom.txt"
+THEN assert_file_has_crlf path="bom.txt"
+
+[SCENARIO: BDD-EDIT-022] TITLE: diff 输出包含变更行号 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_large_file path="big.txt" lines=100 line_length=20
+WHEN tool_edit path="big.txt" old_string="line 50" new_string="REPLACED 50"
+THEN assert_tool_success
+THEN assert_result_field field="diff_first_changed_line" expected="50"

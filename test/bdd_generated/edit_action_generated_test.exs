@@ -11,16 +11,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-001] 精确匹配替换" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-001"}
-    # line 8: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 8, raw: "GIVEN create_temp_dir"}, 8)
-    # line 9: GIVEN create_temp_file path="test.txt" content="Hello, world!"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "Hello, world!", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 9, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"Hello, world!\""}, 9)
-    # line 10: WHEN tool_edit path="test.txt" old_string="world" new_string="testing"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "testing", old_string: "world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 10, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"world\" new_string=\"testing\""}, 10)
-    # line 11: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 11, raw: "THEN assert_tool_success"}, 11)
-    # line 12: THEN assert_file_content path="test.txt" expected="Hello, testing!"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "Hello, testing!", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 12, raw: "THEN assert_file_content path=\"test.txt\" expected=\"Hello, testing!\""}, 12)
+    # line 7: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 7, raw: "GIVEN create_temp_dir"}, 7)
+    # line 8: GIVEN create_temp_file path="test.txt" content="Hello, world!"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "Hello, world!", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 8, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"Hello, world!\""}, 8)
+    # line 9: WHEN tool_edit path="test.txt" old_string="world" new_string="testing"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "testing", old_string: "world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 9, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"world\" new_string=\"testing\""}, 9)
+    # line 10: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 10, raw: "THEN assert_tool_success"}, 10)
+    # line 11: THEN assert_file_content path="test.txt" expected="Hello, testing!"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "Hello, testing!", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 11, raw: "THEN assert_file_content path=\"test.txt\" expected=\"Hello, testing!\""}, 11)
     _ctx = ctx
     :ok
   end
@@ -31,14 +31,14 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-002] 文本不存在" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-002"}
-    # line 15: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 15, raw: "GIVEN create_temp_dir"}, 15)
-    # line 16: GIVEN create_temp_file path="test.txt" content="Hello, world!"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "Hello, world!", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 16, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"Hello, world!\""}, 16)
-    # line 17: WHEN tool_edit path="test.txt" old_string="nonexistent" new_string="x"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "x", old_string: "nonexistent", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 17, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"nonexistent\" new_string=\"x\""}, 17)
-    # line 18: THEN assert_tool_error error_contains="Could not find"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Could not find"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 18, raw: "THEN assert_tool_error error_contains=\"Could not find\""}, 18)
+    # line 14: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 14, raw: "GIVEN create_temp_dir"}, 14)
+    # line 15: GIVEN create_temp_file path="test.txt" content="Hello, world!"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "Hello, world!", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 15, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"Hello, world!\""}, 15)
+    # line 16: WHEN tool_edit path="test.txt" old_string="nonexistent" new_string="x"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "x", old_string: "nonexistent", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 16, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"nonexistent\" new_string=\"x\""}, 16)
+    # line 17: THEN assert_tool_error error_contains="Could not find"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Could not find"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 17, raw: "THEN assert_tool_error error_contains=\"Could not find\""}, 17)
     _ctx = ctx
     :ok
   end
@@ -49,14 +49,14 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-003] 多次出现拒绝" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-003"}
-    # line 21: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 21, raw: "GIVEN create_temp_dir"}, 21)
-    # line 22: GIVEN create_temp_file path="test.txt" content="foo bar foo baz foo"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "foo bar foo baz foo", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 22, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"foo bar foo baz foo\""}, 22)
-    # line 23: WHEN tool_edit path="test.txt" old_string="foo" new_string="qux"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "qux", old_string: "foo", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 23, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"foo\" new_string=\"qux\""}, 23)
-    # line 24: THEN assert_tool_error error_contains="3 occurrences"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "3 occurrences"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 24, raw: "THEN assert_tool_error error_contains=\"3 occurrences\""}, 24)
+    # line 20: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 20, raw: "GIVEN create_temp_dir"}, 20)
+    # line 21: GIVEN create_temp_file path="test.txt" content="foo bar foo baz foo"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "foo bar foo baz foo", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 21, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"foo bar foo baz foo\""}, 21)
+    # line 22: WHEN tool_edit path="test.txt" old_string="foo" new_string="qux"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "qux", old_string: "foo", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 22, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"foo\" new_string=\"qux\""}, 22)
+    # line 23: THEN assert_tool_error error_contains="3 occurrences"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "3 occurrences"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 23, raw: "THEN assert_tool_error error_contains=\"3 occurrences\""}, 23)
     _ctx = ctx
     :ok
   end
@@ -67,16 +67,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-004] replace_all 模式" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-004"}
-    # line 27: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 27, raw: "GIVEN create_temp_dir"}, 27)
-    # line 28: GIVEN create_temp_file path="test.txt" content="foo bar foo baz foo"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "foo bar foo baz foo", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 28, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"foo bar foo baz foo\""}, 28)
-    # line 29: WHEN tool_edit path="test.txt" old_string="foo" new_string="qux" replace_all=true
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "qux", old_string: "foo", path: "test.txt", replace_all: true}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 29, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"foo\" new_string=\"qux\" replace_all=true"}, 29)
-    # line 30: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 30, raw: "THEN assert_tool_success"}, 30)
-    # line 31: THEN assert_file_content path="test.txt" expected="qux bar qux baz qux"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "qux bar qux baz qux", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 31, raw: "THEN assert_file_content path=\"test.txt\" expected=\"qux bar qux baz qux\""}, 31)
+    # line 26: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 26, raw: "GIVEN create_temp_dir"}, 26)
+    # line 27: GIVEN create_temp_file path="test.txt" content="foo bar foo baz foo"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "foo bar foo baz foo", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 27, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"foo bar foo baz foo\""}, 27)
+    # line 28: WHEN tool_edit path="test.txt" old_string="foo" new_string="qux" replace_all=true
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "qux", old_string: "foo", path: "test.txt", replace_all: true}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 28, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"foo\" new_string=\"qux\" replace_all=true"}, 28)
+    # line 29: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 29, raw: "THEN assert_tool_success"}, 29)
+    # line 30: THEN assert_file_content path="test.txt" expected="qux bar qux baz qux"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "qux bar qux baz qux", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 30, raw: "THEN assert_file_content path=\"test.txt\" expected=\"qux bar qux baz qux\""}, 30)
     _ctx = ctx
     :ok
   end
@@ -87,16 +87,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-005] 尾部空格容错" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-005"}
-    # line 36: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 36, raw: "GIVEN create_temp_dir"}, 36)
-    # line 37: GIVEN create_temp_file path="test.txt" content="line one   \nline two\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "line one   \\nline two\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 37, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"line one   \\nline two\\n\""}, 37)
-    # line 38: WHEN tool_edit path="test.txt" old_string="line one\nline two" new_string="replaced"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "replaced", old_string: "line one\\nline two", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 38, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"line one\\nline two\" new_string=\"replaced\""}, 38)
-    # line 39: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 39, raw: "THEN assert_tool_success"}, 39)
-    # line 40: THEN assert_file_content path="test.txt" expected="replaced\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "replaced\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 40, raw: "THEN assert_file_content path=\"test.txt\" expected=\"replaced\\n\""}, 40)
+    # line 35: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 35, raw: "GIVEN create_temp_dir"}, 35)
+    # line 36: GIVEN create_temp_file path="test.txt" content="line one   \nline two\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "line one   \\nline two\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 36, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"line one   \\nline two\\n\""}, 36)
+    # line 37: WHEN tool_edit path="test.txt" old_string="line one\nline two" new_string="replaced"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "replaced", old_string: "line one\\nline two", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 37, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"line one\\nline two\" new_string=\"replaced\""}, 37)
+    # line 38: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 38, raw: "THEN assert_tool_success"}, 38)
+    # line 39: THEN assert_file_content path="test.txt" expected="replaced\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "replaced\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 39, raw: "THEN assert_file_content path=\"test.txt\" expected=\"replaced\\n\""}, 39)
     _ctx = ctx
     :ok
   end
@@ -107,16 +107,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-006] 精确匹配优先" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-006"}
-    # line 43: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 43, raw: "GIVEN create_temp_dir"}, 43)
-    # line 44: GIVEN create_temp_file path="test.txt" content="hello world"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 44, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello world\""}, 44)
-    # line 45: WHEN tool_edit path="test.txt" old_string="hello world" new_string="goodbye"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "goodbye", old_string: "hello world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 45, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"hello world\" new_string=\"goodbye\""}, 45)
-    # line 46: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 46, raw: "THEN assert_tool_success"}, 46)
-    # line 47: THEN assert_file_content path="test.txt" expected="goodbye"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "goodbye", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 47, raw: "THEN assert_file_content path=\"test.txt\" expected=\"goodbye\""}, 47)
+    # line 42: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 42, raw: "GIVEN create_temp_dir"}, 42)
+    # line 43: GIVEN create_temp_file path="test.txt" content="hello world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 43, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello world\""}, 43)
+    # line 44: WHEN tool_edit path="test.txt" old_string="hello world" new_string="goodbye"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "goodbye", old_string: "hello world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 44, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"hello world\" new_string=\"goodbye\""}, 44)
+    # line 45: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 45, raw: "THEN assert_tool_success"}, 45)
+    # line 46: THEN assert_file_content path="test.txt" expected="goodbye"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "goodbye", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 46, raw: "THEN assert_file_content path=\"test.txt\" expected=\"goodbye\""}, 46)
     _ctx = ctx
     :ok
   end
@@ -127,14 +127,14 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-007] 模糊也找不到" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-007"}
-    # line 50: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 50, raw: "GIVEN create_temp_dir"}, 50)
-    # line 51: GIVEN create_temp_file path="test.txt" content="hello world"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 51, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello world\""}, 51)
-    # line 52: WHEN tool_edit path="test.txt" old_string="completely different" new_string="x"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "x", old_string: "completely different", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 52, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"completely different\" new_string=\"x\""}, 52)
-    # line 53: THEN assert_tool_error error_contains="Could not find"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Could not find"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 53, raw: "THEN assert_tool_error error_contains=\"Could not find\""}, 53)
+    # line 49: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 49, raw: "GIVEN create_temp_dir"}, 49)
+    # line 50: GIVEN create_temp_file path="test.txt" content="hello world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello world", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 50, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello world\""}, 50)
+    # line 51: WHEN tool_edit path="test.txt" old_string="completely different" new_string="x"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "x", old_string: "completely different", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 51, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"completely different\" new_string=\"x\""}, 51)
+    # line 52: THEN assert_tool_error error_contains="Could not find"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Could not find"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 52, raw: "THEN assert_tool_error error_contains=\"Could not find\""}, 52)
     _ctx = ctx
     :ok
   end
@@ -145,14 +145,14 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-008] old_string 为空拒绝" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-008"}
-    # line 58: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
-    # line 59: GIVEN create_temp_file path="test.txt" content="hello"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 59, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello\""}, 59)
-    # line 60: WHEN tool_edit path="test.txt" old_string="" new_string="content"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "content", old_string: "", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 60, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"\" new_string=\"content\""}, 60)
-    # line 61: THEN assert_tool_error error_contains="cannot be empty"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "cannot be empty"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 61, raw: "THEN assert_tool_error error_contains=\"cannot be empty\""}, 61)
+    # line 57: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 57, raw: "GIVEN create_temp_dir"}, 57)
+    # line 58: GIVEN create_temp_file path="test.txt" content="hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 58, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello\""}, 58)
+    # line 59: WHEN tool_edit path="test.txt" old_string="" new_string="content"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "content", old_string: "", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 59, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"\" new_string=\"content\""}, 59)
+    # line 60: THEN assert_tool_error error_contains="cannot be empty"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "cannot be empty"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 60, raw: "THEN assert_tool_error error_contains=\"cannot be empty\""}, 60)
     _ctx = ctx
     :ok
   end
@@ -163,14 +163,14 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-009] no-op 检测" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-009"}
-    # line 64: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
-    # line 65: GIVEN create_temp_file path="test.txt" content="hello"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 65, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello\""}, 65)
-    # line 66: WHEN tool_edit path="test.txt" old_string="hello" new_string="hello"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "hello", old_string: "hello", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 66, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"hello\" new_string=\"hello\""}, 66)
-    # line 67: THEN assert_tool_error error_contains="identical"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "identical"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 67, raw: "THEN assert_tool_error error_contains=\"identical\""}, 67)
+    # line 63: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 63, raw: "GIVEN create_temp_dir"}, 63)
+    # line 64: GIVEN create_temp_file path="test.txt" content="hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 64, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"hello\""}, 64)
+    # line 65: WHEN tool_edit path="test.txt" old_string="hello" new_string="hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "hello", old_string: "hello", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 65, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"hello\" new_string=\"hello\""}, 65)
+    # line 66: THEN assert_tool_error error_contains="identical"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "identical"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 66, raw: "THEN assert_tool_error error_contains=\"identical\""}, 66)
     _ctx = ctx
     :ok
   end
@@ -181,14 +181,14 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-010] 目标是目录" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-010"}
-    # line 70: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 70, raw: "GIVEN create_temp_dir"}, 70)
-    # line 71: GIVEN create_temp_file path="subdir/placeholder.txt" content=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "subdir/placeholder.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 71, raw: "GIVEN create_temp_file path=\"subdir/placeholder.txt\" content=\"\""}, 71)
-    # line 72: WHEN tool_edit path="subdir" old_string="x" new_string="y"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "y", old_string: "x", path: "subdir"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 72, raw: "WHEN tool_edit path=\"subdir\" old_string=\"x\" new_string=\"y\""}, 72)
-    # line 73: THEN assert_tool_error error_contains="directory"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 73, raw: "THEN assert_tool_error error_contains=\"directory\""}, 73)
+    # line 69: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 69, raw: "GIVEN create_temp_dir"}, 69)
+    # line 70: GIVEN create_temp_file path="subdir/placeholder.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "subdir/placeholder.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 70, raw: "GIVEN create_temp_file path=\"subdir/placeholder.txt\" content=\"\""}, 70)
+    # line 71: WHEN tool_edit path="subdir" old_string="x" new_string="y"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "y", old_string: "x", path: "subdir"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 71, raw: "WHEN tool_edit path=\"subdir\" old_string=\"x\" new_string=\"y\""}, 71)
+    # line 72: THEN assert_tool_error error_contains="directory"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 72, raw: "THEN assert_tool_error error_contains=\"directory\""}, 72)
     _ctx = ctx
     :ok
   end
@@ -199,12 +199,12 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-011] 文件不存在" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-011"}
-    # line 76: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 76, raw: "GIVEN create_temp_dir"}, 76)
-    # line 77: WHEN tool_edit path="nonexistent.txt" old_string="x" new_string="y"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "y", old_string: "x", path: "nonexistent.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 77, raw: "WHEN tool_edit path=\"nonexistent.txt\" old_string=\"x\" new_string=\"y\""}, 77)
-    # line 78: THEN assert_tool_error error_contains="not found"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "not found"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 78, raw: "THEN assert_tool_error error_contains=\"not found\""}, 78)
+    # line 75: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 75, raw: "GIVEN create_temp_dir"}, 75)
+    # line 76: WHEN tool_edit path="nonexistent.txt" old_string="x" new_string="y"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "y", old_string: "x", path: "nonexistent.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 76, raw: "WHEN tool_edit path=\"nonexistent.txt\" old_string=\"x\" new_string=\"y\""}, 76)
+    # line 77: THEN assert_tool_error error_contains="not found"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "not found"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 77, raw: "THEN assert_tool_error error_contains=\"not found\""}, 77)
     _ctx = ctx
     :ok
   end
@@ -215,16 +215,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-012] 权限不足" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-012"}
-    # line 81: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 81, raw: "GIVEN create_temp_dir"}, 81)
-    # line 82: GIVEN create_temp_file path="locked.txt" content="secret"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "secret", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 82, raw: "GIVEN create_temp_file path=\"locked.txt\" content=\"secret\""}, 82)
-    # line 83: GIVEN set_file_permission path="locked.txt" mode="444"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "444", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 83, raw: "GIVEN set_file_permission path=\"locked.txt\" mode=\"444\""}, 83)
-    # line 84: WHEN tool_edit path="locked.txt" old_string="secret" new_string="open"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "open", old_string: "secret", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 84, raw: "WHEN tool_edit path=\"locked.txt\" old_string=\"secret\" new_string=\"open\""}, 84)
-    # line 85: THEN assert_tool_error error_contains="Read-only"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Read-only"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 85, raw: "THEN assert_tool_error error_contains=\"Read-only\""}, 85)
+    # line 80: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 80, raw: "GIVEN create_temp_dir"}, 80)
+    # line 81: GIVEN create_temp_file path="locked.txt" content="secret"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "secret", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 81, raw: "GIVEN create_temp_file path=\"locked.txt\" content=\"secret\""}, 81)
+    # line 82: GIVEN set_file_permission path="locked.txt" mode="444"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "444", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 82, raw: "GIVEN set_file_permission path=\"locked.txt\" mode=\"444\""}, 82)
+    # line 83: WHEN tool_edit path="locked.txt" old_string="secret" new_string="open"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "open", old_string: "secret", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 83, raw: "WHEN tool_edit path=\"locked.txt\" old_string=\"secret\" new_string=\"open\""}, 83)
+    # line 84: THEN assert_tool_error error_contains="Read-only"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Read-only"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 84, raw: "THEN assert_tool_error error_contains=\"Read-only\""}, 84)
     _ctx = ctx
     :ok
   end
@@ -235,16 +235,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-013] 多行文本替换" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-013"}
-    # line 90: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 90, raw: "GIVEN create_temp_dir"}, 90)
-    # line 91: GIVEN create_temp_file path="test.txt" content="line1\nline2\nline3\nline4\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "line1\\nline2\\nline3\\nline4\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 91, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"line1\\nline2\\nline3\\nline4\\n\""}, 91)
-    # line 92: WHEN tool_edit path="test.txt" old_string="line2\nline3" new_string="replaced2\nreplaced3"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "replaced2\\nreplaced3", old_string: "line2\\nline3", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 92, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"line2\\nline3\" new_string=\"replaced2\\nreplaced3\""}, 92)
-    # line 93: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 93, raw: "THEN assert_tool_success"}, 93)
-    # line 94: THEN assert_file_content path="test.txt" expected="line1\nreplaced2\nreplaced3\nline4\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "line1\\nreplaced2\\nreplaced3\\nline4\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 94, raw: "THEN assert_file_content path=\"test.txt\" expected=\"line1\\nreplaced2\\nreplaced3\\nline4\\n\""}, 94)
+    # line 89: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 89, raw: "GIVEN create_temp_dir"}, 89)
+    # line 90: GIVEN create_temp_file path="test.txt" content="line1\nline2\nline3\nline4\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "line1\\nline2\\nline3\\nline4\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 90, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"line1\\nline2\\nline3\\nline4\\n\""}, 90)
+    # line 91: WHEN tool_edit path="test.txt" old_string="line2\nline3" new_string="replaced2\nreplaced3"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "replaced2\\nreplaced3", old_string: "line2\\nline3", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 91, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"line2\\nline3\" new_string=\"replaced2\\nreplaced3\""}, 91)
+    # line 92: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 92, raw: "THEN assert_tool_success"}, 92)
+    # line 93: THEN assert_file_content path="test.txt" expected="line1\nreplaced2\nreplaced3\nline4\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "line1\\nreplaced2\\nreplaced3\\nline4\\n", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 93, raw: "THEN assert_file_content path=\"test.txt\" expected=\"line1\\nreplaced2\\nreplaced3\\nline4\\n\""}, 93)
     _ctx = ctx
     :ok
   end
@@ -255,16 +255,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-014] 返回替换次数" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-014"}
-    # line 97: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 97, raw: "GIVEN create_temp_dir"}, 97)
-    # line 98: GIVEN create_temp_file path="test.txt" content="aaa bbb ccc"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aaa bbb ccc", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 98, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"aaa bbb ccc\""}, 98)
-    # line 99: WHEN tool_edit path="test.txt" old_string="bbb" new_string="xxx"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "xxx", old_string: "bbb", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 99, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"bbb\" new_string=\"xxx\""}, 99)
-    # line 100: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 100, raw: "THEN assert_tool_success"}, 100)
-    # line 101: THEN assert_result_field field="replacements" expected="1"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "1", field: "replacements"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 101, raw: "THEN assert_result_field field=\"replacements\" expected=\"1\""}, 101)
+    # line 96: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 96, raw: "GIVEN create_temp_dir"}, 96)
+    # line 97: GIVEN create_temp_file path="test.txt" content="aaa bbb ccc"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aaa bbb ccc", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 97, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"aaa bbb ccc\""}, 97)
+    # line 98: WHEN tool_edit path="test.txt" old_string="bbb" new_string="xxx"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "xxx", old_string: "bbb", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 98, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"bbb\" new_string=\"xxx\""}, 98)
+    # line 99: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 99, raw: "THEN assert_tool_success"}, 99)
+    # line 100: THEN assert_result_field field="replacements" expected="1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "1", field: "replacements"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 100, raw: "THEN assert_result_field field=\"replacements\" expected=\"1\""}, 100)
     _ctx = ctx
     :ok
   end
@@ -275,16 +275,16 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-015] replace_all 返回替换次数" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-015"}
-    # line 104: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 104, raw: "GIVEN create_temp_dir"}, 104)
-    # line 105: GIVEN create_temp_file path="test.txt" content="aa bb aa cc aa"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aa bb aa cc aa", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 105, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"aa bb aa cc aa\""}, 105)
-    # line 106: WHEN tool_edit path="test.txt" old_string="aa" new_string="zz" replace_all=true
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "zz", old_string: "aa", path: "test.txt", replace_all: true}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 106, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"aa\" new_string=\"zz\" replace_all=true"}, 106)
-    # line 107: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 107, raw: "THEN assert_tool_success"}, 107)
-    # line 108: THEN assert_result_field field="replacements" expected="3"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "3", field: "replacements"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 108, raw: "THEN assert_result_field field=\"replacements\" expected=\"3\""}, 108)
+    # line 103: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 103, raw: "GIVEN create_temp_dir"}, 103)
+    # line 104: GIVEN create_temp_file path="test.txt" content="aa bb aa cc aa"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aa bb aa cc aa", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 104, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"aa bb aa cc aa\""}, 104)
+    # line 105: WHEN tool_edit path="test.txt" old_string="aa" new_string="zz" replace_all=true
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "zz", old_string: "aa", path: "test.txt", replace_all: true}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 105, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"aa\" new_string=\"zz\" replace_all=true"}, 105)
+    # line 106: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 106, raw: "THEN assert_tool_success"}, 106)
+    # line 107: THEN assert_result_field field="replacements" expected="3"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "3", field: "replacements"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 107, raw: "THEN assert_result_field field=\"replacements\" expected=\"3\""}, 107)
     _ctx = ctx
     :ok
   end
@@ -295,16 +295,138 @@ defmodule Gong.BDD.Generated.EditActionTest do
   test "[BDD-EDIT-016] 中文内容替换" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-016"}
-    # line 113: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 113, raw: "GIVEN create_temp_dir"}, 113)
-    # line 114: GIVEN create_temp_file path="test.txt" content="你好世界"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "你好世界", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 114, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"你好世界\""}, 114)
-    # line 115: WHEN tool_edit path="test.txt" old_string="世界" new_string="Elixir"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "Elixir", old_string: "世界", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 115, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"世界\" new_string=\"Elixir\""}, 115)
-    # line 116: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 116, raw: "THEN assert_tool_success"}, 116)
-    # line 117: THEN assert_file_content path="test.txt" expected="你好Elixir"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "你好Elixir", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 117, raw: "THEN assert_file_content path=\"test.txt\" expected=\"你好Elixir\""}, 117)
+    # line 112: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 112, raw: "GIVEN create_temp_dir"}, 112)
+    # line 113: GIVEN create_temp_file path="test.txt" content="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "你好世界", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 113, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"你好世界\""}, 113)
+    # line 114: WHEN tool_edit path="test.txt" old_string="世界" new_string="Elixir"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "Elixir", old_string: "世界", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 114, raw: "WHEN tool_edit path=\"test.txt\" old_string=\"世界\" new_string=\"Elixir\""}, 114)
+    # line 115: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 115, raw: "THEN assert_tool_success"}, 115)
+    # line 116: THEN assert_file_content path="test.txt" expected="你好Elixir"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "你好Elixir", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 116, raw: "THEN assert_file_content path=\"test.txt\" expected=\"你好Elixir\""}, 116)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-017
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-017] CRLF 文件跨平台匹配" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-017"}
+    # line 121: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 121, raw: "GIVEN create_temp_dir"}, 121)
+    # line 122: GIVEN create_temp_file path="crlf.txt" content="line1\r\nline2\r\nline3\r\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "line1\\r\\nline2\\r\\nline3\\r\\n", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 122, raw: "GIVEN create_temp_file path=\"crlf.txt\" content=\"line1\\r\\nline2\\r\\nline3\\r\\n\""}, 122)
+    # line 123: WHEN tool_edit path="crlf.txt" old_string="line2" new_string="replaced"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "replaced", old_string: "line2", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 123, raw: "WHEN tool_edit path=\"crlf.txt\" old_string=\"line2\" new_string=\"replaced\""}, 123)
+    # line 124: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 124, raw: "THEN assert_tool_success"}, 124)
+    # line 125: THEN assert_file_content path="crlf.txt" expected="line1\r\nreplaced\r\nline3\r\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "line1\\r\\nreplaced\\r\\nline3\\r\\n", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 125, raw: "THEN assert_file_content path=\"crlf.txt\" expected=\"line1\\r\\nreplaced\\r\\nline3\\r\\n\""}, 125)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-018
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-018] CRLF 行尾保留" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-018"}
+    # line 128: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 128, raw: "GIVEN create_temp_dir"}, 128)
+    # line 129: GIVEN create_temp_file path="crlf.txt" content="aaa\r\nbbb\r\nccc\r\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aaa\\r\\nbbb\\r\\nccc\\r\\n", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 129, raw: "GIVEN create_temp_file path=\"crlf.txt\" content=\"aaa\\r\\nbbb\\r\\nccc\\r\\n\""}, 129)
+    # line 130: WHEN tool_edit path="crlf.txt" old_string="bbb" new_string="xxx"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "xxx", old_string: "bbb", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 130, raw: "WHEN tool_edit path=\"crlf.txt\" old_string=\"bbb\" new_string=\"xxx\""}, 130)
+    # line 131: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 131, raw: "THEN assert_tool_success"}, 131)
+    # line 132: THEN assert_file_has_crlf path="crlf.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_has_crlf, %{path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 132, raw: "THEN assert_file_has_crlf path=\"crlf.txt\""}, 132)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-019
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-019] LF 行尾保留" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-019"}
+    # line 135: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 135, raw: "GIVEN create_temp_dir"}, 135)
+    # line 136: GIVEN create_temp_file path="lf.txt" content="aaa\nbbb\nccc\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aaa\\nbbb\\nccc\\n", path: "lf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 136, raw: "GIVEN create_temp_file path=\"lf.txt\" content=\"aaa\\nbbb\\nccc\\n\""}, 136)
+    # line 137: WHEN tool_edit path="lf.txt" old_string="bbb" new_string="xxx"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "xxx", old_string: "bbb", path: "lf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 137, raw: "WHEN tool_edit path=\"lf.txt\" old_string=\"bbb\" new_string=\"xxx\""}, 137)
+    # line 138: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 138, raw: "THEN assert_tool_success"}, 138)
+    # line 139: THEN assert_file_no_crlf path="lf.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_no_crlf, %{path: "lf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 139, raw: "THEN assert_file_no_crlf path=\"lf.txt\""}, 139)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-020
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-020] 混合行尾 old_string 用 LF 匹配 CRLF 文件" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-020"}
+    # line 142: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 142, raw: "GIVEN create_temp_dir"}, 142)
+    # line 143: GIVEN create_temp_file path="crlf.txt" content="hello\r\nworld\r\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello\\r\\nworld\\r\\n", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 143, raw: "GIVEN create_temp_file path=\"crlf.txt\" content=\"hello\\r\\nworld\\r\\n\""}, 143)
+    # line 144: WHEN tool_edit path="crlf.txt" old_string="hello\nworld" new_string="goodbye\nplanet"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "goodbye\\nplanet", old_string: "hello\\nworld", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 144, raw: "WHEN tool_edit path=\"crlf.txt\" old_string=\"hello\\nworld\" new_string=\"goodbye\\nplanet\""}, 144)
+    # line 145: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 145, raw: "THEN assert_tool_success"}, 145)
+    # line 146: THEN assert_file_content path="crlf.txt" expected="goodbye\r\nplanet\r\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "goodbye\\r\\nplanet\\r\\n", path: "crlf.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 146, raw: "THEN assert_file_content path=\"crlf.txt\" expected=\"goodbye\\r\\nplanet\\r\\n\""}, 146)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-021
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-021] BOM + CRLF 联合保留" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-021"}
+    # line 149: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 149, raw: "GIVEN create_temp_dir"}, 149)
+    # line 150: GIVEN create_bom_file path="bom.txt" content="line1\r\nline2\r\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_bom_file, %{content: "line1\\r\\nline2\\r\\n", path: "bom.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 150, raw: "GIVEN create_bom_file path=\"bom.txt\" content=\"line1\\r\\nline2\\r\\n\""}, 150)
+    # line 151: WHEN tool_edit path="bom.txt" old_string="line1" new_string="first"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "first", old_string: "line1", path: "bom.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 151, raw: "WHEN tool_edit path=\"bom.txt\" old_string=\"line1\" new_string=\"first\""}, 151)
+    # line 152: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 152, raw: "THEN assert_tool_success"}, 152)
+    # line 153: THEN assert_file_has_bom path="bom.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_has_bom, %{path: "bom.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 153, raw: "THEN assert_file_has_bom path=\"bom.txt\""}, 153)
+    # line 154: THEN assert_file_has_crlf path="bom.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_has_crlf, %{path: "bom.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 154, raw: "THEN assert_file_has_crlf path=\"bom.txt\""}, 154)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-022
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-022] diff 输出包含变更行号" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-022"}
+    # line 157: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 157, raw: "GIVEN create_temp_dir"}, 157)
+    # line 158: GIVEN create_large_file path="big.txt" lines=100 line_length=20
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 20, lines: 100, path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 158, raw: "GIVEN create_large_file path=\"big.txt\" lines=100 line_length=20"}, 158)
+    # line 159: WHEN tool_edit path="big.txt" old_string="line 50" new_string="REPLACED 50"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "REPLACED 50", old_string: "line 50", path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 159, raw: "WHEN tool_edit path=\"big.txt\" old_string=\"line 50\" new_string=\"REPLACED 50\""}, 159)
+    # line 160: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 160, raw: "THEN assert_tool_success"}, 160)
+    # line 161: THEN assert_result_field field="diff_first_changed_line" expected="50"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "50", field: "diff_first_changed_line"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 161, raw: "THEN assert_result_field field=\"diff_first_changed_line\" expected=\"50\""}, 161)
     _ctx = ctx
     :ok
   end
