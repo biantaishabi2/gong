@@ -42,6 +42,7 @@ gong/
 │       ├── tools.ex                        # 工具指令 + 截断系统指令
 │       ├── agent.ex                        # Agent 集成指令
 │       ├── hook.ex                         # Hook 系统指令
+│       ├── tape.ex                         # Tape 存储指令
 │       ├── compaction.ex                   # 压缩系统指令
 │       └── generated.ex                    # bddc 自动生成（GENERATED 区域）
 ├── test/support/bdd/
@@ -56,9 +57,10 @@ gong/
 │   ├── find_action.dsl                     # J.6 的 7 个场景
 │   ├── ls_action.dsl                       # J.7 的 7 个场景
 │   ├── truncate_system.dsl                 # J.8 的 14 个场景
-│   ├── agent_integration.dsl              # J.9 的 26 个场景
-│   ├── hook_system.dsl                     # J.10 的 18 个场景
-│   └── compaction.dsl                      # J.12 的 8 个场景
+│   ├── agent_integration.dsl              # J.9 的 30 个场景
+│   ├── hook_system.dsl                     # J.10 的 23 个场景
+│   ├── tape_storage.dsl                    # J.11 的 34 个场景
+│   └── compaction.dsl                      # J.12 的 14 个场景
 ├── test/bdd_generated/                     # 编译输出（不要手动编辑）
 └── scripts/
     ├── bdd_gate.sh                         # BDD 门禁脚本
@@ -272,7 +274,21 @@ bddc domain.autowire \
 | `find_action.dsl` | J.6 | 7 |
 | `ls_action.dsl` | J.7 | 7 |
 | `truncate_system.dsl` | J.8 | 14 |
-| `agent_integration.dsl` | J.9 | 26 |
-| `hook_system.dsl` | J.10 | 18 |
-| `compaction.dsl` | J.12 | 8 |
-| **合计** | | **167** |
+| `agent_integration.dsl` | J.9 | 30 |
+| `hook_system.dsl` | J.10 | 23 |
+| `tape_storage.dsl` | J.11 | 34 |
+| `compaction.dsl` | J.12 | 14 |
+| **合计** | | **216** |
+
+---
+
+## 有意不测的场景（决策记录）
+
+以下场景在 BDD 验收审计中识别，经评估决定不测，记录理由如下：
+
+| 场景 | 不测理由 |
+|------|----------|
+| Tape 并发 append/query | 单 Agent 单进程模型不会并发写入；SQLite WAL 模式保证并发读；等于测 SQLite 本身 |
+| Tape 文件写成功但 DB 写失败 | BDD-TAPE-019 已测"DB 丢失 → rebuild_index 从文件重建"，双写设计以文件为主、DB 可重建 |
+| Compaction 锁持有者崩溃后孤锁 | ETS named_table 随创建进程销毁；Agent 场景下锁生命周期与进程绑定，不存在孤锁 |
+| AppendTag test helper 未使用 | 动态模块生成工具函数，为多 tag 串联场景预留，保留无害 |
