@@ -38,14 +38,26 @@ defmodule Gong.Compaction do
     else
       {old, recent} = split_with_system_preserved(messages, window_size)
 
-      case summarize_fn.(old) do
+      # 窗口足够大，无需压缩
+      if old == [] do
+        {messages, nil}
+      else
+        result =
+          try do
+          summarize_fn.(old)
+        rescue
+          _ -> {:error, :summarize_fn_crashed}
+        end
+
+      case result do
         {:ok, summary} ->
           summary_msg = %{role: "system", content: "[会话摘要] #{summary}"}
           {[summary_msg | recent], summary}
 
         {:error, _reason} ->
-          # 回退：截断工具输出
-          {truncate_tool_outputs(messages, max_tokens), nil}
+          # 回退：丢弃旧消息，保留窗口内 + 截断工具输出
+          {truncate_tool_outputs(recent, max_tokens), nil}
+      end
       end
     end
   end

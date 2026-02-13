@@ -43,12 +43,12 @@ THEN assert_summary_exists
 # Group 3: 失败防护（3 个）
 # ══════════════════════════════════════════════
 
-[SCENARIO: BDD-COMPACT-006] TITLE: LLM 摘要失败回退到截断策略 TAGS: unit compaction
+[SCENARIO: BDD-COMPACT-006] TITLE: LLM 摘要失败回退到窗口裁剪 TAGS: unit compaction
 GIVEN compaction_messages count=10 token_size=500
 GIVEN compaction_summarize_fn_fail
 WHEN when_compact max_tokens=50 window_size=3
 THEN assert_summary_nil
-THEN assert_compacted message_count=10
+THEN assert_compacted message_count=3
 
 [SCENARIO: BDD-COMPACT-007] TITLE: 并发压缩被锁拒绝 TAGS: unit compaction
 GIVEN compaction_lock_acquired session_id="test-session-1"
@@ -63,3 +63,47 @@ GIVEN compaction_summarize_fn_ok
 WHEN when_compact_and_handoff max_tokens=50 window_size=3
 THEN assert_tape_has_compaction_anchor
 THEN assert_summary_exists
+
+# ══════════════════════════════════════════════
+# Group 4: 边界场景（6 个）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-COMPACT-009] TITLE: window_size 大于消息数不压缩 TAGS: unit compaction
+GIVEN compaction_messages count=3 token_size=500
+GIVEN compaction_summarize_fn_ok
+WHEN when_compact max_tokens=50 window_size=10
+THEN assert_summary_nil
+THEN assert_not_compacted
+
+[SCENARIO: BDD-COMPACT-010] TITLE: summarize_fn 抛异常回退到窗口裁剪 TAGS: unit compaction
+GIVEN compaction_messages count=10 token_size=500
+GIVEN compaction_summarize_fn_raise
+WHEN when_compact max_tokens=50 window_size=3
+THEN assert_summary_nil
+THEN assert_compacted message_count=3
+
+[SCENARIO: BDD-COMPACT-011] TITLE: 锁释放后可重新获取 TAGS: unit compaction
+GIVEN compaction_lock_acquired session_id="reuse-session"
+WHEN when_release_lock session_id="reuse-session"
+WHEN when_acquire_lock session_id="reuse-session"
+THEN assert_no_compaction_error
+
+[SCENARIO: BDD-COMPACT-012] TITLE: 不同 session 锁互不干扰 TAGS: unit compaction
+GIVEN compaction_lock_acquired session_id="session-a"
+WHEN when_acquire_lock session_id="session-b"
+THEN assert_no_compaction_error
+
+[SCENARIO: BDD-COMPACT-013] TITLE: window_size=0 只保留系统消息和摘要 TAGS: unit compaction
+GIVEN compaction_messages_with_system count=10
+GIVEN compaction_summarize_fn_ok
+WHEN when_compact max_tokens=50 window_size=0
+THEN assert_summary_exists
+THEN assert_system_preserved
+
+[SCENARIO: BDD-COMPACT-014] TITLE: 回退后含系统消息的窗口裁剪 TAGS: unit compaction
+GIVEN compaction_messages_with_system count=10
+GIVEN compaction_summarize_fn_fail
+WHEN when_compact max_tokens=50 window_size=3
+THEN assert_summary_nil
+THEN assert_system_preserved
+THEN assert_compacted message_count=4

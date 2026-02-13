@@ -73,6 +73,19 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         assert_class: nil
       },
 
+      compaction_summarize_fn_raise: %{
+        name: :compaction_summarize_fn_raise,
+        kind: :given,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
       # ── WHEN 指令 ──
 
       when_estimate_tokens: %{
@@ -119,6 +132,21 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
       },
       when_acquire_lock: %{
         name: :when_acquire_lock,
+        kind: :when,
+        args: %{
+          session_id: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      when_release_lock: %{
+        name: :when_release_lock,
         kind: :when,
         args: %{
           session_id: %{type: :string, required?: true, allowed: nil}
@@ -224,6 +252,18 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         async?: false,
         eventually?: false,
         assert_class: :error
+      },
+      assert_no_compaction_error: %{
+        name: :assert_no_compaction_error,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       },
       assert_tape_has_compaction_anchor: %{
         name: :assert_tape_has_compaction_anchor,
