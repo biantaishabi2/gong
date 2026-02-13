@@ -306,6 +306,12 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_fork_cleaned} ->
         assert_fork_cleaned!(ctx, args, meta)
 
+      {:then, :assert_entry_has_metadata} ->
+        assert_entry_has_metadata!(ctx, args, meta)
+
+      {:then, :assert_search_result_count} ->
+        assert_search_result_count!(ctx, args, meta)
+
       # ── Compaction 压缩 ──
 
       {:given, :compaction_messages} ->
@@ -323,6 +329,9 @@ defmodule Gong.BDD.Instructions.V1 do
       {:given, :compaction_summarize_fn_fail} ->
         compaction_summarize_fn_fail!(ctx, args, meta)
 
+      {:given, :compaction_summarize_fn_raise} ->
+        compaction_summarize_fn_raise!(ctx, args, meta)
+
       {:when, :when_estimate_tokens} ->
         when_estimate_tokens!(ctx, args, meta)
 
@@ -334,6 +343,9 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:when, :when_acquire_lock} ->
         when_acquire_lock!(ctx, args, meta)
+
+      {:when, :when_release_lock} ->
+        when_release_lock!(ctx, args, meta)
 
       {:then, :assert_token_estimate} ->
         assert_token_estimate!(ctx, args, meta)
@@ -358,6 +370,17 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_tape_has_compaction_anchor} ->
         assert_tape_has_compaction_anchor!(ctx, args, meta)
+
+      {:then, :assert_no_compaction_error} ->
+        assert_no_compaction_error!(ctx, args, meta)
+
+      # ── Hook 扩展断言 ──
+
+      {:then, :assert_no_hook_error} ->
+        assert_no_hook_error!(ctx, args, meta)
+
+      {:then, :assert_telemetry_sequence} ->
+        assert_telemetry_sequence!(ctx, args, meta)
 
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
@@ -1244,7 +1267,26 @@ defmodule Gong.BDD.Instructions.V1 do
     kind = args.kind
     content = unescape(args.content)
 
-    case Gong.Tape.Store.append(store, anchor, %{kind: kind, content: content}) do
+    metadata =
+      cond do
+        Map.has_key?(args, :metadata_kv) ->
+          # 解析 key:value,key:value 格式
+          args.metadata_kv
+          |> String.split(",")
+          |> Enum.map(fn pair ->
+            [k, v] = String.split(pair, ":", parts: 2)
+            {String.trim(k), parse_metadata_value(String.trim(v))}
+          end)
+          |> Map.new()
+
+        Map.has_key?(args, :metadata_json) ->
+          Jason.decode!(args.metadata_json)
+
+        true ->
+          %{}
+      end
+
+    case Gong.Tape.Store.append(store, anchor, %{kind: kind, content: content, metadata: metadata}) do
       {:ok, updated_store} ->
         Map.put(ctx, :tape_store, updated_store)
 
@@ -1797,6 +1839,104 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
+  # ── Tape metadata 断言 ──
+
+  defp assert_entry_has_metadata!(ctx, %{key: key, value: value}, _meta) do
+    results = Map.get(ctx, :tape_search_results, [])
+
+    if key == "" and value == "" do
+      # 验证 metadata 为空对象
+      entry = List.first(results)
+      assert entry != nil, "期望至少有一个搜索结果"
+      metadata = Map.get(entry, :metadata, %{})
+      assert metadata == %{} or metadata == nil, "期望 metadata 为空，实际：#{inspect(metadata)}"
+    else
+      entry = List.first(results)
+      assert entry != nil, "期望至少有一个搜索结果"
+      metadata = Map.get(entry, :metadata, %{})
+      assert metadata != nil, "期望 metadata 不为 nil"
+      actual = Map.get(metadata, key)
+      assert to_string(actual) == value, "期望 metadata[#{key}]=#{value}，实际：#{inspect(actual)}"
+    end
+
+    ctx
+  end
+
+  defp assert_search_result_count!(ctx, %{expected: expected}, _meta) do
+    results = Map.get(ctx, :tape_search_results, [])
+    actual = length(results)
+    assert actual == expected, "期望搜索结果数=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  # ── Compaction 扩展实现 ──
+
+  defp compaction_summarize_fn_raise!(ctx, _args, _meta) do
+    summarize_fn = fn _messages ->
+      raise "LLM 摘要服务异常"
+    end
+
+    Map.put(ctx, :compaction_summarize_fn, summarize_fn)
+  end
+
+  defp when_release_lock!(ctx, %{session_id: session_id}, _meta) do
+    Gong.Compaction.Lock.release(session_id)
+    ctx |> Map.put(:compaction_last_error, nil)
+  end
+
+  defp assert_no_compaction_error!(ctx, _args, _meta) do
+    error = Map.get(ctx, :compaction_last_error)
+    assert error == nil, "期望无错误，但 compaction_last_error=#{inspect(error)}"
+    ctx
+  end
+
+  # ── Hook 扩展断言实现 ──
+
+  defp assert_no_hook_error!(ctx, _args, _meta) do
+    events = Map.get(ctx, :telemetry_events, [])
+
+    hook_errors =
+      Enum.filter(events, fn {name, _, _} ->
+        name == [:gong, :hook, :error]
+      end)
+
+    assert hook_errors == [],
+      "期望无 hook 错误事件，但收到 #{length(hook_errors)} 个"
+
+    ctx
+  end
+
+  defp assert_telemetry_sequence!(ctx, %{sequence: sequence_str}, _meta) do
+    expected =
+      sequence_str
+      |> String.split(",")
+      |> Enum.map(fn name ->
+        name |> String.trim() |> String.split(".") |> Enum.map(&String.to_atom/1)
+      end)
+
+    events = Map.get(ctx, :telemetry_events, [])
+    actual_names = Enum.map(events, fn {name, _, _} -> name end)
+
+    # 检查 expected 是 actual_names 的子序列（保序）
+    assert_subsequence(expected, actual_names)
+    ctx
+  end
+
+  defp assert_subsequence([], _actual), do: :ok
+
+  defp assert_subsequence([exp | rest_exp], [act | rest_act]) do
+    if exp == act do
+      assert_subsequence(rest_exp, rest_act)
+    else
+      assert_subsequence([exp | rest_exp], rest_act)
+    end
+  end
+
+  defp assert_subsequence(remaining, []) do
+    remaining_str = Enum.map(remaining, &Enum.join(&1, ".")) |> Enum.join(", ")
+    flunk("Telemetry 事件序列不完整，缺失：#{remaining_str}")
+  end
+
   defp assert_tape_has_compaction_anchor!(ctx, _args, _meta) do
     store = Map.fetch!(ctx, :tape_store)
     # 检查 anchor 数量增加（至少 2：session-start + compaction）
@@ -1809,6 +1949,13 @@ defmodule Gong.BDD.Instructions.V1 do
   end
 
   # ── Helpers ──
+
+  defp parse_metadata_value(v) do
+    case Integer.parse(v) do
+      {int, ""} -> int
+      _ -> v
+    end
+  end
 
   defp unescape(str) when is_binary(str) do
     str
