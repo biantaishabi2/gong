@@ -17,6 +17,9 @@ defmodule Gong.BDD.InstructionRegistry do
     |> merge_specs!(Gong.BDD.InstructionRegistries.Common.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.Tools.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.Agent.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Hook.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Tape.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Compaction.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.Generated.specs(:v1))
   end
 

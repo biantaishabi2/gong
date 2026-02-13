@@ -205,6 +205,20 @@ defmodule Gong.BDD.InstructionRegistries.Agent do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+      assert_last_error: %{
+        name: :assert_last_error,
+        kind: :then,
+        args: %{
+          error_contains: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

@@ -39,18 +39,22 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "Hello World", path: "hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 19, raw: "GIVEN create_temp_file path=\"hello.txt\" content=\"Hello World\""}, 19)
     # line 20: GIVEN configure_agent
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 20, raw: "GIVEN configure_agent"}, 20)
-    # line 21: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/hello.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 21, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/hello.txt\""}, 21)
-    # line 22: GIVEN mock_llm_response response_type="text" content="文件内容是 Hello World"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件内容是 Hello World", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 22, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件内容是 Hello World\""}, 22)
-    # line 23: WHEN agent_chat prompt="读一下 hello.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读一下 hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 23, raw: "WHEN agent_chat prompt=\"读一下 hello.txt\""}, 23)
-    # line 24: THEN assert_agent_reply contains="Hello World"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "Hello World"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 24, raw: "THEN assert_agent_reply contains=\"Hello World\""}, 24)
+    # line 21: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 21, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 21)
+    # line 22: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/hello.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 22, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/hello.txt\""}, 22)
+    # line 23: GIVEN mock_llm_response response_type="text" content="文件内容是 Hello World"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件内容是 Hello World", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 23, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件内容是 Hello World\""}, 23)
+    # line 24: WHEN agent_chat prompt="读一下 hello.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读一下 hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 24, raw: "WHEN agent_chat prompt=\"读一下 hello.txt\""}, 24)
     # line 25: THEN assert_tool_was_called tool="read_file"
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 25, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 25)
-    # line 26: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 26, raw: "THEN assert_no_crash"}, 26)
+    # line 26: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 26, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"read_file\""}, 26)
+    # line 27: THEN assert_agent_reply contains="Hello World"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "Hello World"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 27, raw: "THEN assert_agent_reply contains=\"Hello World\""}, 27)
+    # line 28: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 28, raw: "THEN assert_no_crash"}, 28)
     _ctx = ctx
     :ok
   end
@@ -61,22 +65,28 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-003] 多工具链式调用" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-003"}
-    # line 29: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 29, raw: "GIVEN create_temp_dir"}, 29)
-    # line 30: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 30, raw: "GIVEN configure_agent"}, 30)
-    # line 31: GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo hello"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "bash", tool_args: "command=echo hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 31, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"bash\" tool_args=\"command=echo hello\""}, 31)
-    # line 32: GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo world"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "bash", tool_args: "command=echo world"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 32, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"bash\" tool_args=\"command=echo world\""}, 32)
-    # line 33: GIVEN mock_llm_response response_type="text" content="执行完毕"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "执行完毕", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 33, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"执行完毕\""}, 33)
-    # line 34: WHEN agent_chat prompt="先输出 hello 再输出 world"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "先输出 hello 再输出 world"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 34, raw: "WHEN agent_chat prompt=\"先输出 hello 再输出 world\""}, 34)
-    # line 35: THEN assert_tool_was_called tool="bash" times=2
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{times: 2, tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 35, raw: "THEN assert_tool_was_called tool=\"bash\" times=2"}, 35)
-    # line 36: THEN assert_agent_reply contains="执行完毕"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "执行完毕"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 36, raw: "THEN assert_agent_reply contains=\"执行完毕\""}, 36)
+    # line 31: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 31, raw: "GIVEN create_temp_dir"}, 31)
+    # line 32: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 32, raw: "GIVEN configure_agent"}, 32)
+    # line 33: GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/out1.txt|content=hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "write_file", tool_args: "file_path={{workspace}}/out1.txt|content=hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 33, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"write_file\" tool_args=\"file_path={{workspace}}/out1.txt|content=hello\""}, 33)
+    # line 34: GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/out2.txt|content=world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "write_file", tool_args: "file_path={{workspace}}/out2.txt|content=world"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 34, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"write_file\" tool_args=\"file_path={{workspace}}/out2.txt|content=world\""}, 34)
+    # line 35: GIVEN mock_llm_response response_type="text" content="执行完毕"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "执行完毕", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 35, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"执行完毕\""}, 35)
+    # line 36: WHEN agent_chat prompt="创建两个文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "创建两个文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 36, raw: "WHEN agent_chat prompt=\"创建两个文件\""}, 36)
+    # line 37: THEN assert_tool_was_called tool="write_file" times=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{times: 2, tool: "write_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 37, raw: "THEN assert_tool_was_called tool=\"write_file\" times=2"}, 37)
+    # line 38: THEN assert_file_exists path="out1.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "out1.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 38, raw: "THEN assert_file_exists path=\"out1.txt\""}, 38)
+    # line 39: THEN assert_file_content path="out1.txt" expected="hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "hello", path: "out1.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 39, raw: "THEN assert_file_content path=\"out1.txt\" expected=\"hello\""}, 39)
+    # line 40: THEN assert_file_exists path="out2.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "out2.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 40, raw: "THEN assert_file_exists path=\"out2.txt\""}, 40)
+    # line 41: THEN assert_file_content path="out2.txt" expected="world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "world", path: "out2.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 41, raw: "THEN assert_file_content path=\"out2.txt\" expected=\"world\""}, 41)
     _ctx = ctx
     :ok
   end
@@ -87,22 +97,22 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-004] 工具写入文件验证" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-004"}
-    # line 39: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 39, raw: "GIVEN create_temp_dir"}, 39)
-    # line 40: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 40, raw: "GIVEN configure_agent"}, 40)
-    # line 41: GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/output.txt|content=written by gong"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "write_file", tool_args: "file_path={{workspace}}/output.txt|content=written by gong"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 41, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"write_file\" tool_args=\"file_path={{workspace}}/output.txt|content=written by gong\""}, 41)
-    # line 42: GIVEN mock_llm_response response_type="text" content="文件已写入"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件已写入", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 42, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件已写入\""}, 42)
-    # line 43: WHEN agent_chat prompt="写一个文件"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "写一个文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 43, raw: "WHEN agent_chat prompt=\"写一个文件\""}, 43)
-    # line 44: THEN assert_agent_reply contains="文件已写入"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "文件已写入"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 44, raw: "THEN assert_agent_reply contains=\"文件已写入\""}, 44)
-    # line 45: THEN assert_file_exists path="output.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "output.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 45, raw: "THEN assert_file_exists path=\"output.txt\""}, 45)
-    # line 46: THEN assert_file_content path="output.txt" expected="written by gong"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "written by gong", path: "output.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 46, raw: "THEN assert_file_content path=\"output.txt\" expected=\"written by gong\""}, 46)
+    # line 44: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 44, raw: "GIVEN create_temp_dir"}, 44)
+    # line 45: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 45, raw: "GIVEN configure_agent"}, 45)
+    # line 46: GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/output.txt|content=written by gong"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "write_file", tool_args: "file_path={{workspace}}/output.txt|content=written by gong"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 46, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"write_file\" tool_args=\"file_path={{workspace}}/output.txt|content=written by gong\""}, 46)
+    # line 47: GIVEN mock_llm_response response_type="text" content="文件已写入"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件已写入", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 47, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件已写入\""}, 47)
+    # line 48: WHEN agent_chat prompt="写一个文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "写一个文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 48, raw: "WHEN agent_chat prompt=\"写一个文件\""}, 48)
+    # line 49: THEN assert_agent_reply contains="文件已写入"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "文件已写入"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 49, raw: "THEN assert_agent_reply contains=\"文件已写入\""}, 49)
+    # line 50: THEN assert_file_exists path="output.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "output.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 50, raw: "THEN assert_file_exists path=\"output.txt\""}, 50)
+    # line 51: THEN assert_file_content path="output.txt" expected="written by gong"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "written by gong", path: "output.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 51, raw: "THEN assert_file_content path=\"output.txt\" expected=\"written by gong\""}, 51)
     _ctx = ctx
     :ok
   end
@@ -113,22 +123,22 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-005] 工具编辑文件" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-005"}
-    # line 49: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 49, raw: "GIVEN create_temp_dir"}, 49)
-    # line 50: GIVEN create_temp_file path="code.py" content="print('hello')"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "print('hello')", path: "code.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 50, raw: "GIVEN create_temp_file path=\"code.py\" content=\"print('hello')\""}, 50)
-    # line 51: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 51, raw: "GIVEN configure_agent"}, 51)
-    # line 52: GIVEN mock_llm_response response_type="tool_call" tool="edit_file" tool_args="file_path={{workspace}}/code.py|old_string=hello|new_string=world"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "edit_file", tool_args: "file_path={{workspace}}/code.py|old_string=hello|new_string=world"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 52, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"edit_file\" tool_args=\"file_path={{workspace}}/code.py|old_string=hello|new_string=world\""}, 52)
-    # line 53: GIVEN mock_llm_response response_type="text" content="已修改"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "已修改", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 53, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"已修改\""}, 53)
-    # line 54: WHEN agent_chat prompt="把 hello 改成 world"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "把 hello 改成 world"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 54, raw: "WHEN agent_chat prompt=\"把 hello 改成 world\""}, 54)
-    # line 55: THEN assert_agent_reply contains="已修改"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "已修改"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 55, raw: "THEN assert_agent_reply contains=\"已修改\""}, 55)
-    # line 56: THEN assert_file_content path="code.py" expected="print('world')"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "print('world')", path: "code.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 56, raw: "THEN assert_file_content path=\"code.py\" expected=\"print('world')\""}, 56)
+    # line 54: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 54, raw: "GIVEN create_temp_dir"}, 54)
+    # line 55: GIVEN create_temp_file path="code.py" content="print('hello')"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "print('hello')", path: "code.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 55, raw: "GIVEN create_temp_file path=\"code.py\" content=\"print('hello')\""}, 55)
+    # line 56: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 56, raw: "GIVEN configure_agent"}, 56)
+    # line 57: GIVEN mock_llm_response response_type="tool_call" tool="edit_file" tool_args="file_path={{workspace}}/code.py|old_string=hello|new_string=world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "edit_file", tool_args: "file_path={{workspace}}/code.py|old_string=hello|new_string=world"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 57, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"edit_file\" tool_args=\"file_path={{workspace}}/code.py|old_string=hello|new_string=world\""}, 57)
+    # line 58: GIVEN mock_llm_response response_type="text" content="已修改"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "已修改", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 58, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"已修改\""}, 58)
+    # line 59: WHEN agent_chat prompt="把 hello 改成 world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "把 hello 改成 world"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 59, raw: "WHEN agent_chat prompt=\"把 hello 改成 world\""}, 59)
+    # line 60: THEN assert_agent_reply contains="已修改"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "已修改"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 60, raw: "THEN assert_agent_reply contains=\"已修改\""}, 60)
+    # line 61: THEN assert_file_content path="code.py" expected="print('world')"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "print('world')", path: "code.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 61, raw: "THEN assert_file_content path=\"code.py\" expected=\"print('world')\""}, 61)
     _ctx = ctx
     :ok
   end
@@ -139,22 +149,26 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-006] grep 搜索工具" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-006"}
-    # line 59: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 59, raw: "GIVEN create_temp_dir"}, 59)
-    # line 60: GIVEN create_temp_file path="src/main.py" content="def main():\n    print('hello')"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "def main():\\n    print('hello')", path: "src/main.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 60, raw: "GIVEN create_temp_file path=\"src/main.py\" content=\"def main():\\n    print('hello')\""}, 60)
-    # line 61: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 61, raw: "GIVEN configure_agent"}, 61)
-    # line 62: GIVEN mock_llm_response response_type="tool_call" tool="grep" tool_args="pattern=main|path={{workspace}}"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "grep", tool_args: "pattern=main|path={{workspace}}"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 62, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"grep\" tool_args=\"pattern=main|path={{workspace}}\""}, 62)
-    # line 63: GIVEN mock_llm_response response_type="text" content="找到 main 函数定义"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "找到 main 函数定义", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 63, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"找到 main 函数定义\""}, 63)
-    # line 64: WHEN agent_chat prompt="搜索 main"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "搜索 main"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 64, raw: "WHEN agent_chat prompt=\"搜索 main\""}, 64)
-    # line 65: THEN assert_tool_was_called tool="grep"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "grep"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 65, raw: "THEN assert_tool_was_called tool=\"grep\""}, 65)
-    # line 66: THEN assert_agent_reply contains="main"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "main"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 66, raw: "THEN assert_agent_reply contains=\"main\""}, 66)
+    # line 64: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
+    # line 65: GIVEN create_temp_file path="src/main.py" content="def main():\n    print('hello')"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "def main():\\n    print('hello')", path: "src/main.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 65, raw: "GIVEN create_temp_file path=\"src/main.py\" content=\"def main():\\n    print('hello')\""}, 65)
+    # line 66: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 66, raw: "GIVEN configure_agent"}, 66)
+    # line 67: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 67, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 67)
+    # line 68: GIVEN mock_llm_response response_type="tool_call" tool="grep" tool_args="pattern=main|path={{workspace}}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "grep", tool_args: "pattern=main|path={{workspace}}"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 68, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"grep\" tool_args=\"pattern=main|path={{workspace}}\""}, 68)
+    # line 69: GIVEN mock_llm_response response_type="text" content="找到 main 函数定义"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "找到 main 函数定义", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 69, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"找到 main 函数定义\""}, 69)
+    # line 70: WHEN agent_chat prompt="搜索 main"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "搜索 main"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 70, raw: "WHEN agent_chat prompt=\"搜索 main\""}, 70)
+    # line 71: THEN assert_tool_was_called tool="grep"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "grep"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 71, raw: "THEN assert_tool_was_called tool=\"grep\""}, 71)
+    # line 72: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="grep"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "grep"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 72, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"grep\""}, 72)
+    # line 73: THEN assert_agent_reply contains="main"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "main"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 73, raw: "THEN assert_agent_reply contains=\"main\""}, 73)
     _ctx = ctx
     :ok
   end
@@ -165,24 +179,28 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-007] find 文件发现" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-007"}
-    # line 69: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 69, raw: "GIVEN create_temp_dir"}, 69)
-    # line 70: GIVEN create_temp_file path="a.py" content="# a"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "# a", path: "a.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 70, raw: "GIVEN create_temp_file path=\"a.py\" content=\"# a\""}, 70)
-    # line 71: GIVEN create_temp_file path="b.py" content="# b"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "# b", path: "b.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 71, raw: "GIVEN create_temp_file path=\"b.py\" content=\"# b\""}, 71)
-    # line 72: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 72, raw: "GIVEN configure_agent"}, 72)
-    # line 73: GIVEN mock_llm_response response_type="tool_call" tool="find_files" tool_args="pattern=*.py|path={{workspace}}"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "find_files", tool_args: "pattern=*.py|path={{workspace}}"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 73, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"find_files\" tool_args=\"pattern=*.py|path={{workspace}}\""}, 73)
-    # line 74: GIVEN mock_llm_response response_type="text" content="找到 2 个 Python 文件"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "找到 2 个 Python 文件", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 74, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"找到 2 个 Python 文件\""}, 74)
-    # line 75: WHEN agent_chat prompt="找所有 py 文件"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "找所有 py 文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 75, raw: "WHEN agent_chat prompt=\"找所有 py 文件\""}, 75)
-    # line 76: THEN assert_tool_was_called tool="find_files"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "find_files"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 76, raw: "THEN assert_tool_was_called tool=\"find_files\""}, 76)
-    # line 77: THEN assert_agent_reply contains="Python"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "Python"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 77, raw: "THEN assert_agent_reply contains=\"Python\""}, 77)
+    # line 76: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 76, raw: "GIVEN create_temp_dir"}, 76)
+    # line 77: GIVEN create_temp_file path="a.py" content="# a"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "# a", path: "a.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 77, raw: "GIVEN create_temp_file path=\"a.py\" content=\"# a\""}, 77)
+    # line 78: GIVEN create_temp_file path="b.py" content="# b"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "# b", path: "b.py"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 78, raw: "GIVEN create_temp_file path=\"b.py\" content=\"# b\""}, 78)
+    # line 79: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 79, raw: "GIVEN configure_agent"}, 79)
+    # line 80: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 80, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 80)
+    # line 81: GIVEN mock_llm_response response_type="tool_call" tool="find_files" tool_args="pattern=*.py|path={{workspace}}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "find_files", tool_args: "pattern=*.py|path={{workspace}}"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 81, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"find_files\" tool_args=\"pattern=*.py|path={{workspace}}\""}, 81)
+    # line 82: GIVEN mock_llm_response response_type="text" content="找到 2 个 Python 文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "找到 2 个 Python 文件", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 82, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"找到 2 个 Python 文件\""}, 82)
+    # line 83: WHEN agent_chat prompt="找所有 py 文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "找所有 py 文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 83, raw: "WHEN agent_chat prompt=\"找所有 py 文件\""}, 83)
+    # line 84: THEN assert_tool_was_called tool="find_files"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "find_files"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 84, raw: "THEN assert_tool_was_called tool=\"find_files\""}, 84)
+    # line 85: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="find_files"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "find_files"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 85, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"find_files\""}, 85)
+    # line 86: THEN assert_agent_reply contains="Python"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "Python"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 86, raw: "THEN assert_agent_reply contains=\"Python\""}, 86)
     _ctx = ctx
     :ok
   end
@@ -193,24 +211,28 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-008] ls 目录列表" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-008"}
-    # line 80: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 80, raw: "GIVEN create_temp_dir"}, 80)
-    # line 81: GIVEN create_temp_file path="file1.txt" content="f1"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "f1", path: "file1.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 81, raw: "GIVEN create_temp_file path=\"file1.txt\" content=\"f1\""}, 81)
-    # line 82: GIVEN create_temp_file path="file2.txt" content="f2"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "f2", path: "file2.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 82, raw: "GIVEN create_temp_file path=\"file2.txt\" content=\"f2\""}, 82)
-    # line 83: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 83, raw: "GIVEN configure_agent"}, 83)
-    # line 84: GIVEN mock_llm_response response_type="tool_call" tool="list_directory" tool_args="path={{workspace}}"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "list_directory", tool_args: "path={{workspace}}"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 84, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"list_directory\" tool_args=\"path={{workspace}}\""}, 84)
-    # line 85: GIVEN mock_llm_response response_type="text" content="目录包含 2 个文件"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "目录包含 2 个文件", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 85, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"目录包含 2 个文件\""}, 85)
-    # line 86: WHEN agent_chat prompt="列出当前目录"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "列出当前目录"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 86, raw: "WHEN agent_chat prompt=\"列出当前目录\""}, 86)
-    # line 87: THEN assert_tool_was_called tool="list_directory"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "list_directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 87, raw: "THEN assert_tool_was_called tool=\"list_directory\""}, 87)
-    # line 88: THEN assert_agent_reply contains="2"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "2"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 88, raw: "THEN assert_agent_reply contains=\"2\""}, 88)
+    # line 89: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 89, raw: "GIVEN create_temp_dir"}, 89)
+    # line 90: GIVEN create_temp_file path="file1.txt" content="f1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "f1", path: "file1.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 90, raw: "GIVEN create_temp_file path=\"file1.txt\" content=\"f1\""}, 90)
+    # line 91: GIVEN create_temp_file path="file2.txt" content="f2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "f2", path: "file2.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 91, raw: "GIVEN create_temp_file path=\"file2.txt\" content=\"f2\""}, 91)
+    # line 92: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 92, raw: "GIVEN configure_agent"}, 92)
+    # line 93: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 93, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 93)
+    # line 94: GIVEN mock_llm_response response_type="tool_call" tool="list_directory" tool_args="path={{workspace}}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "list_directory", tool_args: "path={{workspace}}"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 94, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"list_directory\" tool_args=\"path={{workspace}}\""}, 94)
+    # line 95: GIVEN mock_llm_response response_type="text" content="目录包含 2 个文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "目录包含 2 个文件", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 95, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"目录包含 2 个文件\""}, 95)
+    # line 96: WHEN agent_chat prompt="列出当前目录"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "列出当前目录"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 96, raw: "WHEN agent_chat prompt=\"列出当前目录\""}, 96)
+    # line 97: THEN assert_tool_was_called tool="list_directory"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "list_directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 97, raw: "THEN assert_tool_was_called tool=\"list_directory\""}, 97)
+    # line 98: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="list_directory"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "list_directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 98, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"list_directory\""}, 98)
+    # line 99: THEN assert_agent_reply contains="2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "2"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 99, raw: "THEN assert_agent_reply contains=\"2\""}, 99)
     _ctx = ctx
     :ok
   end
@@ -222,16 +244,16 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-009] E2E 简单问答" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-009"}
-    # line 96: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 96, raw: "GIVEN create_temp_dir"}, 96)
-    # line 97: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 97, raw: "GIVEN configure_agent"}, 97)
-    # line 98: WHEN agent_chat prompt="1+1等于几？请只回答数字"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "1+1等于几？请只回答数字"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 98, raw: "WHEN agent_chat prompt=\"1+1等于几？请只回答数字\""}, 98)
-    # line 99: THEN assert_agent_reply contains="2"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "2"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 99, raw: "THEN assert_agent_reply contains=\"2\""}, 99)
-    # line 100: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 100, raw: "THEN assert_no_crash"}, 100)
+    # line 107: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 107, raw: "GIVEN create_temp_dir"}, 107)
+    # line 108: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 108, raw: "GIVEN configure_agent"}, 108)
+    # line 109: WHEN agent_chat prompt="1+1等于几？请只回答数字"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "1+1等于几？请只回答数字"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 109, raw: "WHEN agent_chat prompt=\"1+1等于几？请只回答数字\""}, 109)
+    # line 110: THEN assert_agent_reply contains="2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "2"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 110, raw: "THEN assert_agent_reply contains=\"2\""}, 110)
+    # line 111: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 111, raw: "THEN assert_no_crash"}, 111)
     _ctx = ctx
     :ok
   end
@@ -243,18 +265,18 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-010] E2E 文件读取" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-010"}
-    # line 103: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 103, raw: "GIVEN create_temp_dir"}, 103)
-    # line 104: GIVEN create_temp_file path="test.txt" content="E2E test content"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "E2E test content", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 104, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"E2E test content\""}, 104)
-    # line 105: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 105, raw: "GIVEN configure_agent"}, 105)
-    # line 106: WHEN agent_chat prompt="读一下 test.txt 的内容"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读一下 test.txt 的内容"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 106, raw: "WHEN agent_chat prompt=\"读一下 test.txt 的内容\""}, 106)
-    # line 107: THEN assert_agent_reply contains="E2E test content"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "E2E test content"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 107, raw: "THEN assert_agent_reply contains=\"E2E test content\""}, 107)
-    # line 108: THEN assert_tool_was_called tool="read_file"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 108, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 108)
+    # line 114: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 114, raw: "GIVEN create_temp_dir"}, 114)
+    # line 115: GIVEN create_temp_file path="test.txt" content="E2E test content"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "E2E test content", path: "test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 115, raw: "GIVEN create_temp_file path=\"test.txt\" content=\"E2E test content\""}, 115)
+    # line 116: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 116, raw: "GIVEN configure_agent"}, 116)
+    # line 117: WHEN agent_chat prompt="读一下 test.txt 的内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读一下 test.txt 的内容"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 117, raw: "WHEN agent_chat prompt=\"读一下 test.txt 的内容\""}, 117)
+    # line 118: THEN assert_agent_reply contains="E2E test content"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "E2E test content"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 118, raw: "THEN assert_agent_reply contains=\"E2E test content\""}, 118)
+    # line 119: THEN assert_tool_was_called tool="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 119, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 119)
     _ctx = ctx
     :ok
   end
@@ -266,16 +288,18 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-011] E2E 文件写入" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-011"}
-    # line 111: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 111, raw: "GIVEN create_temp_dir"}, 111)
-    # line 112: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 112, raw: "GIVEN configure_agent"}, 112)
-    # line 113: WHEN agent_chat prompt="在当前目录创建 hello.txt，内容写 hello from gong"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "在当前目录创建 hello.txt，内容写 hello from gong"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 113, raw: "WHEN agent_chat prompt=\"在当前目录创建 hello.txt，内容写 hello from gong\""}, 113)
-    # line 114: THEN assert_file_exists path="hello.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 114, raw: "THEN assert_file_exists path=\"hello.txt\""}, 114)
-    # line 115: THEN assert_tool_was_called tool="write_file"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "write_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 115, raw: "THEN assert_tool_was_called tool=\"write_file\""}, 115)
+    # line 122: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 122, raw: "GIVEN create_temp_dir"}, 122)
+    # line 123: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 123, raw: "GIVEN configure_agent"}, 123)
+    # line 124: WHEN agent_chat prompt="在当前目录创建 hello.txt，内容写 hello from gong"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "在当前目录创建 hello.txt，内容写 hello from gong"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 124, raw: "WHEN agent_chat prompt=\"在当前目录创建 hello.txt，内容写 hello from gong\""}, 124)
+    # line 125: THEN assert_file_exists path="hello.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 125, raw: "THEN assert_file_exists path=\"hello.txt\""}, 125)
+    # line 126: THEN assert_file_content path="hello.txt" expected="hello from gong"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "hello from gong", path: "hello.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 126, raw: "THEN assert_file_content path=\"hello.txt\" expected=\"hello from gong\""}, 126)
+    # line 127: THEN assert_tool_was_called tool="write_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "write_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 127, raw: "THEN assert_tool_was_called tool=\"write_file\""}, 127)
     _ctx = ctx
     :ok
   end
@@ -287,20 +311,20 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-012] E2E 多轮工具调用" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-012"}
-    # line 118: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 118, raw: "GIVEN create_temp_dir"}, 118)
-    # line 119: GIVEN create_temp_file path="data.txt" content="original data"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "original data", path: "data.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 119, raw: "GIVEN create_temp_file path=\"data.txt\" content=\"original data\""}, 119)
-    # line 120: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 120, raw: "GIVEN configure_agent"}, 120)
-    # line 121: WHEN agent_chat prompt="先读 data.txt，然后把 original 改成 modified"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "先读 data.txt，然后把 original 改成 modified"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 121, raw: "WHEN agent_chat prompt=\"先读 data.txt，然后把 original 改成 modified\""}, 121)
-    # line 122: THEN assert_tool_was_called tool="read_file"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 122, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 122)
-    # line 123: THEN assert_tool_was_called tool="edit_file"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "edit_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 123, raw: "THEN assert_tool_was_called tool=\"edit_file\""}, 123)
-    # line 124: THEN assert_file_content path="data.txt" expected="modified data"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "modified data", path: "data.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 124, raw: "THEN assert_file_content path=\"data.txt\" expected=\"modified data\""}, 124)
+    # line 130: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 130, raw: "GIVEN create_temp_dir"}, 130)
+    # line 131: GIVEN create_temp_file path="data.txt" content="original data"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "original data", path: "data.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 131, raw: "GIVEN create_temp_file path=\"data.txt\" content=\"original data\""}, 131)
+    # line 132: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 132, raw: "GIVEN configure_agent"}, 132)
+    # line 133: WHEN agent_chat prompt="先读 data.txt，然后把 original 改成 modified"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "先读 data.txt，然后把 original 改成 modified"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 133, raw: "WHEN agent_chat prompt=\"先读 data.txt，然后把 original 改成 modified\""}, 133)
+    # line 134: THEN assert_tool_was_called tool="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 134, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 134)
+    # line 135: THEN assert_tool_was_called tool="edit_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "edit_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 135, raw: "THEN assert_tool_was_called tool=\"edit_file\""}, 135)
+    # line 136: THEN assert_file_content path="data.txt" expected="modified data"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "modified data", path: "data.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 136, raw: "THEN assert_file_content path=\"data.txt\" expected=\"modified data\""}, 136)
     _ctx = ctx
     :ok
   end
@@ -311,18 +335,26 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-013] 信号路由到正确策略" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-013"}
-    # line 131: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 131, raw: "GIVEN create_temp_dir"}, 131)
-    # line 132: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 132, raw: "GIVEN configure_agent"}, 132)
-    # line 133: GIVEN mock_llm_response response_type="text" content="路由成功"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "路由成功", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 133, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"路由成功\""}, 133)
-    # line 134: WHEN agent_chat prompt="测试路由"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "测试路由"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 134, raw: "WHEN agent_chat prompt=\"测试路由\""}, 134)
-    # line 135: THEN assert_agent_reply contains="路由成功"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "路由成功"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 135, raw: "THEN assert_agent_reply contains=\"路由成功\""}, 135)
-    # line 136: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 136, raw: "THEN assert_no_crash"}, 136)
+    # line 143: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 143, raw: "GIVEN create_temp_dir"}, 143)
+    # line 144: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 144, raw: "GIVEN configure_agent"}, 144)
+    # line 145: GIVEN attach_telemetry_handler event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 145, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.start\""}, 145)
+    # line 146: GIVEN attach_telemetry_handler event="gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 146, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.end\""}, 146)
+    # line 147: GIVEN mock_llm_response response_type="text" content="路由成功"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "路由成功", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 147, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"路由成功\""}, 147)
+    # line 148: WHEN agent_chat prompt="测试路由"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "测试路由"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 148, raw: "WHEN agent_chat prompt=\"测试路由\""}, 148)
+    # line 149: THEN assert_agent_reply contains="路由成功"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "路由成功"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 149, raw: "THEN assert_agent_reply contains=\"路由成功\""}, 149)
+    # line 150: THEN assert_telemetry_received event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 150, raw: "THEN assert_telemetry_received event=\"gong.agent.start\""}, 150)
+    # line 151: THEN assert_telemetry_received event="gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 151, raw: "THEN assert_telemetry_received event=\"gong.agent.end\""}, 151)
+    # line 152: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 152, raw: "THEN assert_no_crash"}, 152)
     _ctx = ctx
     :ok
   end
@@ -333,16 +365,24 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-014] 空回复处理" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-014"}
-    # line 144: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 144, raw: "GIVEN create_temp_dir"}, 144)
-    # line 145: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 145, raw: "GIVEN configure_agent"}, 145)
-    # line 146: GIVEN mock_llm_response response_type="text" content=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 146, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"\""}, 146)
-    # line 147: WHEN agent_chat prompt="说点什么"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "说点什么"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 147, raw: "WHEN agent_chat prompt=\"说点什么\""}, 147)
-    # line 148: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 148, raw: "THEN assert_no_crash"}, 148)
+    # line 160: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 160, raw: "GIVEN create_temp_dir"}, 160)
+    # line 161: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 161, raw: "GIVEN configure_agent"}, 161)
+    # line 162: GIVEN attach_telemetry_handler event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 162, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.start\""}, 162)
+    # line 163: GIVEN attach_telemetry_handler event="gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 163, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.end\""}, 163)
+    # line 164: GIVEN mock_llm_response response_type="text" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 164, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"\""}, 164)
+    # line 165: WHEN agent_chat prompt="说点什么"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "说点什么"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 165, raw: "WHEN agent_chat prompt=\"说点什么\""}, 165)
+    # line 166: THEN assert_telemetry_received event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 166, raw: "THEN assert_telemetry_received event=\"gong.agent.start\""}, 166)
+    # line 167: THEN assert_telemetry_received event="gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 167, raw: "THEN assert_telemetry_received event=\"gong.agent.end\""}, 167)
+    # line 168: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 168, raw: "THEN assert_no_crash"}, 168)
     _ctx = ctx
     :ok
   end
@@ -353,18 +393,18 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-015] 中文回复" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-015"}
-    # line 151: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 151, raw: "GIVEN create_temp_dir"}, 151)
-    # line 152: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 152, raw: "GIVEN configure_agent"}, 152)
-    # line 153: GIVEN mock_llm_response response_type="text" content="这是一段中文回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段中文回复", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 153, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段中文回复\""}, 153)
-    # line 154: WHEN agent_chat prompt="用中文回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "用中文回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 154, raw: "WHEN agent_chat prompt=\"用中文回复\""}, 154)
-    # line 155: THEN assert_agent_reply contains="中文回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "中文回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 155, raw: "THEN assert_agent_reply contains=\"中文回复\""}, 155)
-    # line 156: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 156, raw: "THEN assert_no_crash"}, 156)
+    # line 171: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 171, raw: "GIVEN create_temp_dir"}, 171)
+    # line 172: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 172, raw: "GIVEN configure_agent"}, 172)
+    # line 173: GIVEN mock_llm_response response_type="text" content="这是一段中文回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段中文回复", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 173, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段中文回复\""}, 173)
+    # line 174: WHEN agent_chat prompt="用中文回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "用中文回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 174, raw: "WHEN agent_chat prompt=\"用中文回复\""}, 174)
+    # line 175: THEN assert_agent_reply contains="中文回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "中文回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 175, raw: "THEN assert_agent_reply contains=\"中文回复\""}, 175)
+    # line 176: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 176, raw: "THEN assert_no_crash"}, 176)
     _ctx = ctx
     :ok
   end
@@ -375,18 +415,18 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-016] 长文本回复" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-016"}
-    # line 159: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 159, raw: "GIVEN create_temp_dir"}, 159)
-    # line 160: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 160, raw: "GIVEN configure_agent"}, 160)
-    # line 161: GIVEN mock_llm_response response_type="text" content="这是一段很长的回复内容包含了很多字符用来模拟长文本返回"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段很长的回复内容包含了很多字符用来模拟长文本返回", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 161, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段很长的回复内容包含了很多字符用来模拟长文本返回\""}, 161)
-    # line 162: WHEN agent_chat prompt="给一个长回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "给一个长回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 162, raw: "WHEN agent_chat prompt=\"给一个长回复\""}, 162)
-    # line 163: THEN assert_agent_reply contains="长文本返回"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "长文本返回"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 163, raw: "THEN assert_agent_reply contains=\"长文本返回\""}, 163)
-    # line 164: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 164, raw: "THEN assert_no_crash"}, 164)
+    # line 179: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 179, raw: "GIVEN create_temp_dir"}, 179)
+    # line 180: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 180, raw: "GIVEN configure_agent"}, 180)
+    # line 181: GIVEN mock_llm_response response_type="text" content="这是一段很长的回复内容包含了很多字符用来模拟长文本返回"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段很长的回复内容包含了很多字符用来模拟长文本返回", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 181, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段很长的回复内容包含了很多字符用来模拟长文本返回\""}, 181)
+    # line 182: WHEN agent_chat prompt="给一个长回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "给一个长回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 182, raw: "WHEN agent_chat prompt=\"给一个长回复\""}, 182)
+    # line 183: THEN assert_agent_reply contains="长文本返回"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "长文本返回"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 183, raw: "THEN assert_agent_reply contains=\"长文本返回\""}, 183)
+    # line 184: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 184, raw: "THEN assert_no_crash"}, 184)
     _ctx = ctx
     :ok
   end
@@ -394,21 +434,37 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   # Source: BDD-AGENT-017
   @tag :agent
   @tag :integration
-  test "[BDD-AGENT-017] 连续多轮对话" do
+  test "[BDD-AGENT-017] 单轮对话生命周期" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-017"}
-    # line 167: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 167, raw: "GIVEN create_temp_dir"}, 167)
-    # line 168: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 168, raw: "GIVEN configure_agent"}, 168)
-    # line 169: GIVEN mock_llm_response response_type="text" content="第一轮回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "第一轮回复", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 169, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"第一轮回复\""}, 169)
-    # line 170: WHEN agent_chat prompt="第一轮"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "第一轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 170, raw: "WHEN agent_chat prompt=\"第一轮\""}, 170)
-    # line 171: THEN assert_agent_reply contains="第一轮回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "第一轮回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 171, raw: "THEN assert_agent_reply contains=\"第一轮回复\""}, 171)
-    # line 172: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 172, raw: "THEN assert_no_crash"}, 172)
+    # line 187: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 187, raw: "GIVEN create_temp_dir"}, 187)
+    # line 188: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 188, raw: "GIVEN configure_agent"}, 188)
+    # line 189: GIVEN attach_telemetry_handler event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 189, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.start\""}, 189)
+    # line 190: GIVEN attach_telemetry_handler event="gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 190, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.end\""}, 190)
+    # line 191: GIVEN attach_telemetry_handler event="gong.turn.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.turn.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 191, raw: "GIVEN attach_telemetry_handler event=\"gong.turn.start\""}, 191)
+    # line 192: GIVEN attach_telemetry_handler event="gong.turn.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.turn.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 192, raw: "GIVEN attach_telemetry_handler event=\"gong.turn.end\""}, 192)
+    # line 193: GIVEN mock_llm_response response_type="text" content="第一轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "第一轮回复", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 193, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"第一轮回复\""}, 193)
+    # line 194: WHEN agent_chat prompt="第一轮"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "第一轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 194, raw: "WHEN agent_chat prompt=\"第一轮\""}, 194)
+    # line 195: THEN assert_agent_reply contains="第一轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "第一轮回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 195, raw: "THEN assert_agent_reply contains=\"第一轮回复\""}, 195)
+    # line 196: THEN assert_telemetry_received event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 196, raw: "THEN assert_telemetry_received event=\"gong.agent.start\""}, 196)
+    # line 197: THEN assert_telemetry_received event="gong.turn.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.turn.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 197, raw: "THEN assert_telemetry_received event=\"gong.turn.start\""}, 197)
+    # line 198: THEN assert_telemetry_received event="gong.turn.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.turn.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 198, raw: "THEN assert_telemetry_received event=\"gong.turn.end\""}, 198)
+    # line 199: THEN assert_telemetry_received event="gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 199, raw: "THEN assert_telemetry_received event=\"gong.agent.end\""}, 199)
+    # line 200: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 200, raw: "THEN assert_no_crash"}, 200)
     _ctx = ctx
     :ok
   end
@@ -419,22 +475,26 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-018] 工具调用后中文路径" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-018"}
-    # line 175: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 175, raw: "GIVEN create_temp_dir"}, 175)
-    # line 176: GIVEN create_temp_file path="data/test.txt" content="中文路径测试内容"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "中文路径测试内容", path: "data/test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 176, raw: "GIVEN create_temp_file path=\"data/test.txt\" content=\"中文路径测试内容\""}, 176)
-    # line 177: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 177, raw: "GIVEN configure_agent"}, 177)
-    # line 178: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/data/test.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/data/test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 178, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/data/test.txt\""}, 178)
-    # line 179: GIVEN mock_llm_response response_type="text" content="读到了中文路径文件内容"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "读到了中文路径文件内容", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 179, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"读到了中文路径文件内容\""}, 179)
-    # line 180: WHEN agent_chat prompt="读 data/test.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读 data/test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 180, raw: "WHEN agent_chat prompt=\"读 data/test.txt\""}, 180)
-    # line 181: THEN assert_agent_reply contains="中文路径"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "中文路径"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 181, raw: "THEN assert_agent_reply contains=\"中文路径\""}, 181)
-    # line 182: THEN assert_tool_was_called tool="read_file"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 182, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 182)
+    # line 203: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 203, raw: "GIVEN create_temp_dir"}, 203)
+    # line 204: GIVEN create_temp_file path="data/test.txt" content="中文路径测试内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "中文路径测试内容", path: "data/test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 204, raw: "GIVEN create_temp_file path=\"data/test.txt\" content=\"中文路径测试内容\""}, 204)
+    # line 205: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 205, raw: "GIVEN configure_agent"}, 205)
+    # line 206: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 206, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 206)
+    # line 207: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/data/test.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/data/test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 207, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/data/test.txt\""}, 207)
+    # line 208: GIVEN mock_llm_response response_type="text" content="读到了中文路径文件内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "读到了中文路径文件内容", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 208, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"读到了中文路径文件内容\""}, 208)
+    # line 209: WHEN agent_chat prompt="读 data/test.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读 data/test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 209, raw: "WHEN agent_chat prompt=\"读 data/test.txt\""}, 209)
+    # line 210: THEN assert_tool_was_called tool="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 210, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 210)
+    # line 211: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 211, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"read_file\""}, 211)
+    # line 212: THEN assert_agent_reply contains="中文路径"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "中文路径"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 212, raw: "THEN assert_agent_reply contains=\"中文路径\""}, 212)
     _ctx = ctx
     :ok
   end
@@ -445,20 +505,26 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-019] 不存在工具的处理" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-019"}
-    # line 185: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 185, raw: "GIVEN create_temp_dir"}, 185)
-    # line 186: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 186, raw: "GIVEN configure_agent"}, 186)
-    # line 187: GIVEN mock_llm_response response_type="tool_call" tool="nonexistent_tool" tool_args=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "nonexistent_tool", tool_args: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 187, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"nonexistent_tool\" tool_args=\"\""}, 187)
-    # line 188: GIVEN mock_llm_response response_type="text" content="工具不存在换个方式"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "工具不存在换个方式", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 188, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"工具不存在换个方式\""}, 188)
-    # line 189: WHEN agent_chat prompt="做些什么"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "做些什么"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 189, raw: "WHEN agent_chat prompt=\"做些什么\""}, 189)
-    # line 190: THEN assert_agent_reply contains="换个方式"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "换个方式"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 190, raw: "THEN assert_agent_reply contains=\"换个方式\""}, 190)
-    # line 191: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 191, raw: "THEN assert_no_crash"}, 191)
+    # line 215: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 215, raw: "GIVEN create_temp_dir"}, 215)
+    # line 216: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 216, raw: "GIVEN configure_agent"}, 216)
+    # line 217: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 217, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 217)
+    # line 218: GIVEN mock_llm_response response_type="tool_call" tool="nonexistent_tool" tool_args=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "nonexistent_tool", tool_args: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 218, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"nonexistent_tool\" tool_args=\"\""}, 218)
+    # line 219: GIVEN mock_llm_response response_type="text" content="工具不存在换个方式"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "工具不存在换个方式", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 219, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"工具不存在换个方式\""}, 219)
+    # line 220: WHEN agent_chat prompt="做些什么"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "做些什么"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 220, raw: "WHEN agent_chat prompt=\"做些什么\""}, 220)
+    # line 221: THEN assert_tool_was_called tool="nonexistent_tool"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "nonexistent_tool"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 221, raw: "THEN assert_tool_was_called tool=\"nonexistent_tool\""}, 221)
+    # line 222: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="nonexistent_tool"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "nonexistent_tool"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 222, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"nonexistent_tool\""}, 222)
+    # line 223: THEN assert_agent_reply contains="换个方式"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "换个方式"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 223, raw: "THEN assert_agent_reply contains=\"换个方式\""}, 223)
+    # line 224: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 224, raw: "THEN assert_no_crash"}, 224)
     _ctx = ctx
     :ok
   end
@@ -469,22 +535,22 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-020] bash 工具调用" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-020"}
-    # line 194: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 194, raw: "GIVEN create_temp_dir"}, 194)
-    # line 195: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 195, raw: "GIVEN configure_agent"}, 195)
-    # line 196: GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo ok"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "bash", tool_args: "command=echo ok"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 196, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"bash\" tool_args=\"command=echo ok\""}, 196)
-    # line 197: GIVEN mock_llm_response response_type="text" content="命令执行成功"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "命令执行成功", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 197, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"命令执行成功\""}, 197)
-    # line 198: WHEN agent_chat prompt="执行 echo ok"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "执行 echo ok"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 198, raw: "WHEN agent_chat prompt=\"执行 echo ok\""}, 198)
-    # line 199: THEN assert_tool_was_called tool="bash"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 199, raw: "THEN assert_tool_was_called tool=\"bash\""}, 199)
-    # line 200: THEN assert_agent_reply contains="执行成功"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "执行成功"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 200, raw: "THEN assert_agent_reply contains=\"执行成功\""}, 200)
-    # line 201: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 201, raw: "THEN assert_no_crash"}, 201)
+    # line 227: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 227, raw: "GIVEN create_temp_dir"}, 227)
+    # line 228: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 228, raw: "GIVEN configure_agent"}, 228)
+    # line 229: GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo ok > {{workspace}}/bash_out.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "bash", tool_args: "command=echo ok > {{workspace}}/bash_out.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 229, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"bash\" tool_args=\"command=echo ok > {{workspace}}/bash_out.txt\""}, 229)
+    # line 230: GIVEN mock_llm_response response_type="text" content="命令执行成功"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "命令执行成功", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 230, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"命令执行成功\""}, 230)
+    # line 231: WHEN agent_chat prompt="执行命令"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "执行命令"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 231, raw: "WHEN agent_chat prompt=\"执行命令\""}, 231)
+    # line 232: THEN assert_tool_was_called tool="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 232, raw: "THEN assert_tool_was_called tool=\"bash\""}, 232)
+    # line 233: THEN assert_file_exists path="bash_out.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "bash_out.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 233, raw: "THEN assert_file_exists path=\"bash_out.txt\""}, 233)
+    # line 234: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 234, raw: "THEN assert_no_crash"}, 234)
     _ctx = ctx
     :ok
   end
@@ -492,19 +558,26 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   # Source: BDD-AGENT-021
   @tag :agent
   @tag :integration
+  @tag :negative
   test "[BDD-AGENT-021] LLM 返回错误后恢复" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-021"}
-    # line 208: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 208, raw: "GIVEN create_temp_dir"}, 208)
-    # line 209: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 209, raw: "GIVEN configure_agent"}, 209)
-    # line 210: GIVEN mock_llm_response response_type="error" content="API rate limit exceeded"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "API rate limit exceeded", response_type: "error"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 210, raw: "GIVEN mock_llm_response response_type=\"error\" content=\"API rate limit exceeded\""}, 210)
-    # line 211: WHEN agent_chat prompt="你好"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 211, raw: "WHEN agent_chat prompt=\"你好\""}, 211)
-    # line 212: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 212, raw: "THEN assert_no_crash"}, 212)
+    # line 241: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 241, raw: "GIVEN create_temp_dir"}, 241)
+    # line 242: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 242, raw: "GIVEN configure_agent"}, 242)
+    # line 243: GIVEN attach_telemetry_handler event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 243, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.start\""}, 243)
+    # line 244: GIVEN mock_llm_response response_type="error" content="API rate limit exceeded"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "API rate limit exceeded", response_type: "error"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 244, raw: "GIVEN mock_llm_response response_type=\"error\" content=\"API rate limit exceeded\""}, 244)
+    # line 245: WHEN agent_chat prompt="你好"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 245, raw: "WHEN agent_chat prompt=\"你好\""}, 245)
+    # line 246: THEN assert_last_error error_contains="rate limit"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_last_error, %{error_contains: "rate limit"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 246, raw: "THEN assert_last_error error_contains=\"rate limit\""}, 246)
+    # line 247: THEN assert_telemetry_received event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 247, raw: "THEN assert_telemetry_received event=\"gong.agent.start\""}, 247)
+    # line 248: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 248, raw: "THEN assert_no_crash"}, 248)
     _ctx = ctx
     :ok
   end
@@ -512,23 +585,30 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   # Source: BDD-AGENT-022
   @tag :agent
   @tag :integration
+  @tag :negative
   test "[BDD-AGENT-022] 工具执行失败后继续" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-022"}
-    # line 215: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 215, raw: "GIVEN create_temp_dir"}, 215)
-    # line 216: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 216, raw: "GIVEN configure_agent"}, 216)
-    # line 217: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/nonexistent/file.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path=/nonexistent/file.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 217, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path=/nonexistent/file.txt\""}, 217)
-    # line 218: GIVEN mock_llm_response response_type="text" content="文件不存在让我换个方式"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件不存在让我换个方式", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 218, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件不存在让我换个方式\""}, 218)
-    # line 219: WHEN agent_chat prompt="读一个不存在的文件"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读一个不存在的文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 219, raw: "WHEN agent_chat prompt=\"读一个不存在的文件\""}, 219)
-    # line 220: THEN assert_agent_reply contains="不存在"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "不存在"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 220, raw: "THEN assert_agent_reply contains=\"不存在\""}, 220)
-    # line 221: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 221, raw: "THEN assert_no_crash"}, 221)
+    # line 251: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 251, raw: "GIVEN create_temp_dir"}, 251)
+    # line 252: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 252, raw: "GIVEN configure_agent"}, 252)
+    # line 253: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 253, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 253)
+    # line 254: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/nonexistent/file.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path=/nonexistent/file.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 254, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path=/nonexistent/file.txt\""}, 254)
+    # line 255: GIVEN mock_llm_response response_type="text" content="文件不存在让我换个方式"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件不存在让我换个方式", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 255, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件不存在让我换个方式\""}, 255)
+    # line 256: WHEN agent_chat prompt="读一个不存在的文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读一个不存在的文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 256, raw: "WHEN agent_chat prompt=\"读一个不存在的文件\""}, 256)
+    # line 257: THEN assert_tool_was_called tool="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 257, raw: "THEN assert_tool_was_called tool=\"read_file\""}, 257)
+    # line 258: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 258, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"read_file\""}, 258)
+    # line 259: THEN assert_agent_reply contains="不存在"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "不存在"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 259, raw: "THEN assert_agent_reply contains=\"不存在\""}, 259)
+    # line 260: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 260, raw: "THEN assert_no_crash"}, 260)
     _ctx = ctx
     :ok
   end
@@ -536,23 +616,34 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   # Source: BDD-AGENT-023
   @tag :agent
   @tag :integration
+  @tag :negative
   test "[BDD-AGENT-023] bash 命令超时后继续" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-023"}
-    # line 224: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 224, raw: "GIVEN create_temp_dir"}, 224)
-    # line 225: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 225, raw: "GIVEN configure_agent"}, 225)
-    # line 226: GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=sleep 100|timeout=1"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "bash", tool_args: "command=sleep 100|timeout=1"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 226, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"bash\" tool_args=\"command=sleep 100|timeout=1\""}, 226)
-    # line 227: GIVEN mock_llm_response response_type="text" content="命令超时了"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "命令超时了", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 227, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"命令超时了\""}, 227)
-    # line 228: WHEN agent_chat prompt="执行一个会超时的命令"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "执行一个会超时的命令"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 228, raw: "WHEN agent_chat prompt=\"执行一个会超时的命令\""}, 228)
-    # line 229: THEN assert_agent_reply contains="超时"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "超时"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 229, raw: "THEN assert_agent_reply contains=\"超时\""}, 229)
-    # line 230: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 230, raw: "THEN assert_no_crash"}, 230)
+    # line 263: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 263, raw: "GIVEN create_temp_dir"}, 263)
+    # line 264: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 264, raw: "GIVEN configure_agent"}, 264)
+    # line 265: GIVEN attach_telemetry_handler event="gong.tool.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 265, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.start\""}, 265)
+    # line 266: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 266, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 266)
+    # line 267: GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=tail -f /dev/null|timeout=1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "bash", tool_args: "command=tail -f /dev/null|timeout=1"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 267, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"bash\" tool_args=\"command=tail -f /dev/null|timeout=1\""}, 267)
+    # line 268: GIVEN mock_llm_response response_type="text" content="命令超时了"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "命令超时了", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 268, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"命令超时了\""}, 268)
+    # line 269: WHEN agent_chat prompt="执行一个会超时的命令"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "执行一个会超时的命令"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 269, raw: "WHEN agent_chat prompt=\"执行一个会超时的命令\""}, 269)
+    # line 270: THEN assert_tool_was_called tool="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 270, raw: "THEN assert_tool_was_called tool=\"bash\""}, 270)
+    # line 271: THEN assert_telemetry_received event="gong.tool.start" metadata_contains="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.start", metadata_contains: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 271, raw: "THEN assert_telemetry_received event=\"gong.tool.start\" metadata_contains=\"bash\""}, 271)
+    # line 272: THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_received, %{event: "gong.tool.stop", metadata_contains: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 272, raw: "THEN assert_telemetry_received event=\"gong.tool.stop\" metadata_contains=\"bash\""}, 272)
+    # line 273: THEN assert_agent_reply contains="超时"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "超时"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 273, raw: "THEN assert_agent_reply contains=\"超时\""}, 273)
+    # line 274: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 274, raw: "THEN assert_no_crash"}, 274)
     _ctx = ctx
     :ok
   end
@@ -560,27 +651,32 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   # Source: BDD-AGENT-024
   @tag :agent
   @tag :integration
+  @tag :negative
   test "[BDD-AGENT-024] 权限拒绝后继续" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-024"}
-    # line 233: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 233, raw: "GIVEN create_temp_dir"}, 233)
-    # line 234: GIVEN create_temp_file path="readonly.txt" content="protected"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "protected", path: "readonly.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 234, raw: "GIVEN create_temp_file path=\"readonly.txt\" content=\"protected\""}, 234)
-    # line 235: GIVEN set_file_permission path="readonly.txt" mode="444"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "444", path: "readonly.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 235, raw: "GIVEN set_file_permission path=\"readonly.txt\" mode=\"444\""}, 235)
-    # line 236: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 236, raw: "GIVEN configure_agent"}, 236)
-    # line 237: GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/readonly.txt|content=overwrite"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "write_file", tool_args: "file_path={{workspace}}/readonly.txt|content=overwrite"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 237, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"write_file\" tool_args=\"file_path={{workspace}}/readonly.txt|content=overwrite\""}, 237)
-    # line 238: GIVEN mock_llm_response response_type="text" content="写入被拒绝了"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "写入被拒绝了", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 238, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"写入被拒绝了\""}, 238)
-    # line 239: WHEN agent_chat prompt="覆写只读文件"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "覆写只读文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 239, raw: "WHEN agent_chat prompt=\"覆写只读文件\""}, 239)
-    # line 240: THEN assert_agent_reply contains="拒绝"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "拒绝"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 240, raw: "THEN assert_agent_reply contains=\"拒绝\""}, 240)
-    # line 241: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 241, raw: "THEN assert_no_crash"}, 241)
+    # line 277: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 277, raw: "GIVEN create_temp_dir"}, 277)
+    # line 278: GIVEN create_temp_file path="readonly.txt" content="protected"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "protected", path: "readonly.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 278, raw: "GIVEN create_temp_file path=\"readonly.txt\" content=\"protected\""}, 278)
+    # line 279: GIVEN set_file_permission path="readonly.txt" mode="444"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "444", path: "readonly.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 279, raw: "GIVEN set_file_permission path=\"readonly.txt\" mode=\"444\""}, 279)
+    # line 280: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 280, raw: "GIVEN configure_agent"}, 280)
+    # line 281: GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/readonly.txt|content=overwrite"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "write_file", tool_args: "file_path={{workspace}}/readonly.txt|content=overwrite"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 281, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"write_file\" tool_args=\"file_path={{workspace}}/readonly.txt|content=overwrite\""}, 281)
+    # line 282: GIVEN mock_llm_response response_type="text" content="写入被拒绝了"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "写入被拒绝了", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 282, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"写入被拒绝了\""}, 282)
+    # line 283: WHEN agent_chat prompt="覆写只读文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "覆写只读文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 283, raw: "WHEN agent_chat prompt=\"覆写只读文件\""}, 283)
+    # line 284: THEN assert_tool_was_called tool="write_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{tool: "write_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 284, raw: "THEN assert_tool_was_called tool=\"write_file\""}, 284)
+    # line 285: THEN assert_file_content path="readonly.txt" expected="protected"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "protected", path: "readonly.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 285, raw: "THEN assert_file_content path=\"readonly.txt\" expected=\"protected\""}, 285)
+    # line 286: THEN assert_agent_reply contains="拒绝"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "拒绝"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 286, raw: "THEN assert_agent_reply contains=\"拒绝\""}, 286)
+    # line 287: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 287, raw: "THEN assert_no_crash"}, 287)
     _ctx = ctx
     :ok
   end
@@ -588,25 +684,28 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   # Source: BDD-AGENT-025
   @tag :agent
   @tag :integration
+  @tag :negative
   test "[BDD-AGENT-025] 连续错误不崩溃" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-025"}
-    # line 244: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 244, raw: "GIVEN create_temp_dir"}, 244)
-    # line 245: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 245, raw: "GIVEN configure_agent"}, 245)
-    # line 246: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/no/such/file1"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path=/no/such/file1"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 246, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path=/no/such/file1\""}, 246)
-    # line 247: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/no/such/file2"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path=/no/such/file2"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 247, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path=/no/such/file2\""}, 247)
-    # line 248: GIVEN mock_llm_response response_type="text" content="两次都失败了"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "两次都失败了", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 248, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"两次都失败了\""}, 248)
-    # line 249: WHEN agent_chat prompt="读两个不存在的文件"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读两个不存在的文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 249, raw: "WHEN agent_chat prompt=\"读两个不存在的文件\""}, 249)
-    # line 250: THEN assert_agent_reply contains="失败"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "失败"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 250, raw: "THEN assert_agent_reply contains=\"失败\""}, 250)
-    # line 251: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 251, raw: "THEN assert_no_crash"}, 251)
+    # line 290: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 290, raw: "GIVEN create_temp_dir"}, 290)
+    # line 291: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 291, raw: "GIVEN configure_agent"}, 291)
+    # line 292: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/no/such/file1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path=/no/such/file1"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 292, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path=/no/such/file1\""}, 292)
+    # line 293: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/no/such/file2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path=/no/such/file2"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 293, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path=/no/such/file2\""}, 293)
+    # line 294: GIVEN mock_llm_response response_type="text" content="两次都失败了"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "两次都失败了", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 294, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"两次都失败了\""}, 294)
+    # line 295: WHEN agent_chat prompt="读两个不存在的文件"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读两个不存在的文件"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 295, raw: "WHEN agent_chat prompt=\"读两个不存在的文件\""}, 295)
+    # line 296: THEN assert_tool_was_called tool="read_file" times=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_was_called, %{times: 2, tool: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 296, raw: "THEN assert_tool_was_called tool=\"read_file\" times=2"}, 296)
+    # line 297: THEN assert_agent_reply contains="失败"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "失败"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 297, raw: "THEN assert_agent_reply contains=\"失败\""}, 297)
+    # line 298: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 298, raw: "THEN assert_no_crash"}, 298)
     _ctx = ctx
     :ok
   end
@@ -617,18 +716,18 @@ defmodule Gong.BDD.Generated.AgentIntegrationTest do
   test "[BDD-AGENT-026] Agent 进程存活性" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-AGENT-026"}
-    # line 254: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 254, raw: "GIVEN create_temp_dir"}, 254)
-    # line 255: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 255, raw: "GIVEN configure_agent"}, 255)
-    # line 256: GIVEN mock_llm_response response_type="text" content="第一次成功"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "第一次成功", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 256, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"第一次成功\""}, 256)
-    # line 257: WHEN agent_chat prompt="第一次对话"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "第一次对话"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 257, raw: "WHEN agent_chat prompt=\"第一次对话\""}, 257)
-    # line 258: THEN assert_agent_reply contains="第一次成功"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "第一次成功"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 258, raw: "THEN assert_agent_reply contains=\"第一次成功\""}, 258)
-    # line 259: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 259, raw: "THEN assert_no_crash"}, 259)
+    # line 301: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 301, raw: "GIVEN create_temp_dir"}, 301)
+    # line 302: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 302, raw: "GIVEN configure_agent"}, 302)
+    # line 303: GIVEN mock_llm_response response_type="text" content="第一次成功"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "第一次成功", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 303, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"第一次成功\""}, 303)
+    # line 304: WHEN agent_chat prompt="第一次对话"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "第一次对话"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 304, raw: "WHEN agent_chat prompt=\"第一次对话\""}, 304)
+    # line 305: THEN assert_agent_reply contains="第一次成功"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "第一次成功"}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 305, raw: "THEN assert_agent_reply contains=\"第一次成功\""}, 305)
+    # line 306: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/agent_integration.dsl", line: 306, raw: "THEN assert_no_crash"}, 306)
     _ctx = ctx
     :ok
   end

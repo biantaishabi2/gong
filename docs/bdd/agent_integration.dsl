@@ -18,22 +18,27 @@ THEN assert_no_crash
 GIVEN create_temp_dir
 GIVEN create_temp_file path="hello.txt" content="Hello World"
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.tool.stop"
 GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/hello.txt"
 GIVEN mock_llm_response response_type="text" content="文件内容是 Hello World"
 WHEN agent_chat prompt="读一下 hello.txt"
-THEN assert_agent_reply contains="Hello World"
 THEN assert_tool_was_called tool="read_file"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="read_file"
+THEN assert_agent_reply contains="Hello World"
 THEN assert_no_crash
 
 [SCENARIO: BDD-AGENT-003] TITLE: 多工具链式调用 TAGS: integration agent
 GIVEN create_temp_dir
 GIVEN configure_agent
-GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo hello"
-GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo world"
+GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/out1.txt|content=hello"
+GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/out2.txt|content=world"
 GIVEN mock_llm_response response_type="text" content="执行完毕"
-WHEN agent_chat prompt="先输出 hello 再输出 world"
-THEN assert_tool_was_called tool="bash" times=2
-THEN assert_agent_reply contains="执行完毕"
+WHEN agent_chat prompt="创建两个文件"
+THEN assert_tool_was_called tool="write_file" times=2
+THEN assert_file_exists path="out1.txt"
+THEN assert_file_content path="out1.txt" expected="hello"
+THEN assert_file_exists path="out2.txt"
+THEN assert_file_content path="out2.txt" expected="world"
 
 [SCENARIO: BDD-AGENT-004] TITLE: 工具写入文件验证 TAGS: integration agent
 GIVEN create_temp_dir
@@ -59,10 +64,12 @@ THEN assert_file_content path="code.py" expected="print('world')"
 GIVEN create_temp_dir
 GIVEN create_temp_file path="src/main.py" content="def main():\n    print('hello')"
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.tool.stop"
 GIVEN mock_llm_response response_type="tool_call" tool="grep" tool_args="pattern=main|path={{workspace}}"
 GIVEN mock_llm_response response_type="text" content="找到 main 函数定义"
 WHEN agent_chat prompt="搜索 main"
 THEN assert_tool_was_called tool="grep"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="grep"
 THEN assert_agent_reply contains="main"
 
 [SCENARIO: BDD-AGENT-007] TITLE: find 文件发现 TAGS: integration agent
@@ -70,10 +77,12 @@ GIVEN create_temp_dir
 GIVEN create_temp_file path="a.py" content="# a"
 GIVEN create_temp_file path="b.py" content="# b"
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.tool.stop"
 GIVEN mock_llm_response response_type="tool_call" tool="find_files" tool_args="pattern=*.py|path={{workspace}}"
 GIVEN mock_llm_response response_type="text" content="找到 2 个 Python 文件"
 WHEN agent_chat prompt="找所有 py 文件"
 THEN assert_tool_was_called tool="find_files"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="find_files"
 THEN assert_agent_reply contains="Python"
 
 [SCENARIO: BDD-AGENT-008] TITLE: ls 目录列表 TAGS: integration agent
@@ -81,10 +90,12 @@ GIVEN create_temp_dir
 GIVEN create_temp_file path="file1.txt" content="f1"
 GIVEN create_temp_file path="file2.txt" content="f2"
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.tool.stop"
 GIVEN mock_llm_response response_type="tool_call" tool="list_directory" tool_args="path={{workspace}}"
 GIVEN mock_llm_response response_type="text" content="目录包含 2 个文件"
 WHEN agent_chat prompt="列出当前目录"
 THEN assert_tool_was_called tool="list_directory"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="list_directory"
 THEN assert_agent_reply contains="2"
 
 # ══════════════════════════════════════════════
@@ -112,6 +123,7 @@ GIVEN create_temp_dir
 GIVEN configure_agent
 WHEN agent_chat prompt="在当前目录创建 hello.txt，内容写 hello from gong"
 THEN assert_file_exists path="hello.txt"
+THEN assert_file_content path="hello.txt" expected="hello from gong"
 THEN assert_tool_was_called tool="write_file"
 
 [SCENARIO: BDD-AGENT-012] TITLE: E2E 多轮工具调用 TAGS: integration e2e agent
@@ -130,9 +142,13 @@ THEN assert_file_content path="data.txt" expected="modified data"
 [SCENARIO: BDD-AGENT-013] TITLE: 信号路由到正确策略 TAGS: integration agent
 GIVEN create_temp_dir
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.agent.start"
+GIVEN attach_telemetry_handler event="gong.agent.end"
 GIVEN mock_llm_response response_type="text" content="路由成功"
 WHEN agent_chat prompt="测试路由"
 THEN assert_agent_reply contains="路由成功"
+THEN assert_telemetry_received event="gong.agent.start"
+THEN assert_telemetry_received event="gong.agent.end"
 THEN assert_no_crash
 
 # ══════════════════════════════════════════════
@@ -143,8 +159,12 @@ THEN assert_no_crash
 [SCENARIO: BDD-AGENT-014] TITLE: 空回复处理 TAGS: integration agent
 GIVEN create_temp_dir
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.agent.start"
+GIVEN attach_telemetry_handler event="gong.agent.end"
 GIVEN mock_llm_response response_type="text" content=""
 WHEN agent_chat prompt="说点什么"
+THEN assert_telemetry_received event="gong.agent.start"
+THEN assert_telemetry_received event="gong.agent.end"
 THEN assert_no_crash
 
 [SCENARIO: BDD-AGENT-015] TITLE: 中文回复 TAGS: integration agent
@@ -163,73 +183,97 @@ WHEN agent_chat prompt="给一个长回复"
 THEN assert_agent_reply contains="长文本返回"
 THEN assert_no_crash
 
-[SCENARIO: BDD-AGENT-017] TITLE: 连续多轮对话 TAGS: integration agent
+[SCENARIO: BDD-AGENT-017] TITLE: 单轮对话生命周期 TAGS: integration agent
 GIVEN create_temp_dir
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.agent.start"
+GIVEN attach_telemetry_handler event="gong.agent.end"
+GIVEN attach_telemetry_handler event="gong.turn.start"
+GIVEN attach_telemetry_handler event="gong.turn.end"
 GIVEN mock_llm_response response_type="text" content="第一轮回复"
 WHEN agent_chat prompt="第一轮"
 THEN assert_agent_reply contains="第一轮回复"
+THEN assert_telemetry_received event="gong.agent.start"
+THEN assert_telemetry_received event="gong.turn.start"
+THEN assert_telemetry_received event="gong.turn.end"
+THEN assert_telemetry_received event="gong.agent.end"
 THEN assert_no_crash
 
 [SCENARIO: BDD-AGENT-018] TITLE: 工具调用后中文路径 TAGS: integration agent
 GIVEN create_temp_dir
 GIVEN create_temp_file path="data/test.txt" content="中文路径测试内容"
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.tool.stop"
 GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/data/test.txt"
 GIVEN mock_llm_response response_type="text" content="读到了中文路径文件内容"
 WHEN agent_chat prompt="读 data/test.txt"
-THEN assert_agent_reply contains="中文路径"
 THEN assert_tool_was_called tool="read_file"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="read_file"
+THEN assert_agent_reply contains="中文路径"
 
 [SCENARIO: BDD-AGENT-019] TITLE: 不存在工具的处理 TAGS: integration agent
 GIVEN create_temp_dir
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.tool.stop"
 GIVEN mock_llm_response response_type="tool_call" tool="nonexistent_tool" tool_args=""
 GIVEN mock_llm_response response_type="text" content="工具不存在换个方式"
 WHEN agent_chat prompt="做些什么"
+THEN assert_tool_was_called tool="nonexistent_tool"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="nonexistent_tool"
 THEN assert_agent_reply contains="换个方式"
 THEN assert_no_crash
 
 [SCENARIO: BDD-AGENT-020] TITLE: bash 工具调用 TAGS: integration agent
 GIVEN create_temp_dir
 GIVEN configure_agent
-GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo ok"
+GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=echo ok > {{workspace}}/bash_out.txt"
 GIVEN mock_llm_response response_type="text" content="命令执行成功"
-WHEN agent_chat prompt="执行 echo ok"
+WHEN agent_chat prompt="执行命令"
 THEN assert_tool_was_called tool="bash"
-THEN assert_agent_reply contains="执行成功"
+THEN assert_file_exists path="bash_out.txt"
 THEN assert_no_crash
 
 # ══════════════════════════════════════════════
 # Group 5: 错误恢复 (6 个场景)
 # ══════════════════════════════════════════════
 
-[SCENARIO: BDD-AGENT-021] TITLE: LLM 返回错误后恢复 TAGS: integration agent
+[SCENARIO: BDD-AGENT-021] TITLE: LLM 返回错误后恢复 TAGS: integration agent negative
 GIVEN create_temp_dir
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.agent.start"
 GIVEN mock_llm_response response_type="error" content="API rate limit exceeded"
 WHEN agent_chat prompt="你好"
+THEN assert_last_error error_contains="rate limit"
+THEN assert_telemetry_received event="gong.agent.start"
 THEN assert_no_crash
 
-[SCENARIO: BDD-AGENT-022] TITLE: 工具执行失败后继续 TAGS: integration agent
+[SCENARIO: BDD-AGENT-022] TITLE: 工具执行失败后继续 TAGS: integration agent negative
 GIVEN create_temp_dir
 GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.tool.stop"
 GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/nonexistent/file.txt"
 GIVEN mock_llm_response response_type="text" content="文件不存在让我换个方式"
 WHEN agent_chat prompt="读一个不存在的文件"
+THEN assert_tool_was_called tool="read_file"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="read_file"
 THEN assert_agent_reply contains="不存在"
 THEN assert_no_crash
 
-[SCENARIO: BDD-AGENT-023] TITLE: bash 命令超时后继续 TAGS: integration agent
+[SCENARIO: BDD-AGENT-023] TITLE: bash 命令超时后继续 TAGS: integration agent negative
 GIVEN create_temp_dir
 GIVEN configure_agent
-GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=sleep 100|timeout=1"
+GIVEN attach_telemetry_handler event="gong.tool.start"
+GIVEN attach_telemetry_handler event="gong.tool.stop"
+GIVEN mock_llm_response response_type="tool_call" tool="bash" tool_args="command=tail -f /dev/null|timeout=1"
 GIVEN mock_llm_response response_type="text" content="命令超时了"
 WHEN agent_chat prompt="执行一个会超时的命令"
+THEN assert_tool_was_called tool="bash"
+THEN assert_telemetry_received event="gong.tool.start" metadata_contains="bash"
+THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="bash"
 THEN assert_agent_reply contains="超时"
 THEN assert_no_crash
 
-[SCENARIO: BDD-AGENT-024] TITLE: 权限拒绝后继续 TAGS: integration agent
+[SCENARIO: BDD-AGENT-024] TITLE: 权限拒绝后继续 TAGS: integration agent negative
 GIVEN create_temp_dir
 GIVEN create_temp_file path="readonly.txt" content="protected"
 GIVEN set_file_permission path="readonly.txt" mode="444"
@@ -237,16 +281,19 @@ GIVEN configure_agent
 GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/readonly.txt|content=overwrite"
 GIVEN mock_llm_response response_type="text" content="写入被拒绝了"
 WHEN agent_chat prompt="覆写只读文件"
+THEN assert_tool_was_called tool="write_file"
+THEN assert_file_content path="readonly.txt" expected="protected"
 THEN assert_agent_reply contains="拒绝"
 THEN assert_no_crash
 
-[SCENARIO: BDD-AGENT-025] TITLE: 连续错误不崩溃 TAGS: integration agent
+[SCENARIO: BDD-AGENT-025] TITLE: 连续错误不崩溃 TAGS: integration agent negative
 GIVEN create_temp_dir
 GIVEN configure_agent
 GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/no/such/file1"
 GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/no/such/file2"
 GIVEN mock_llm_response response_type="text" content="两次都失败了"
 WHEN agent_chat prompt="读两个不存在的文件"
+THEN assert_tool_was_called tool="read_file" times=2
 THEN assert_agent_reply contains="失败"
 THEN assert_no_crash
 
