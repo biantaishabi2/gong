@@ -124,3 +124,19 @@ GIVEN compaction_messages count=3 token_size=10
 WHEN when_compact context_window=200000 reserve_tokens=16384 window_size=5
 THEN assert_not_compacted
 THEN assert_summary_nil
+
+# ══════════════════════════════════════════════
+# Group 6: tool_call/result 配对保护（2 个）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-COMPACT-017] TITLE: 压缩保留 tool_call/result 配对完整 TAGS: unit compaction agent_loop
+GIVEN compaction_messages_with_tools count=10 tool_pair_at=6 token_size=500
+GIVEN compaction_summarize_fn_ok
+WHEN when_compact max_tokens=50 window_size=3
+THEN assert_tool_pairs_intact
+
+[SCENARIO: BDD-COMPACT-018] TITLE: 回退裁剪也保留 tool_call/result 配对 TAGS: unit compaction agent_loop
+GIVEN compaction_messages_with_tools count=10 tool_pair_at=6 token_size=500
+GIVEN compaction_summarize_fn_fail
+WHEN when_compact max_tokens=50 window_size=3
+THEN assert_tool_pairs_intact

@@ -394,6 +394,60 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_telemetry_sequence} ->
         assert_telemetry_sequence!(ctx, args, meta)
 
+      # ── Agent Loop: Steering ──
+
+      {:given, :steering_queue_empty} ->
+        steering_queue_empty!(ctx, args, meta)
+
+      {:when, :steering_push} ->
+        steering_push!(ctx, args, meta)
+
+      {:when, :steering_check} ->
+        steering_check!(ctx, args, meta)
+
+      {:when, :steering_skip_result} ->
+        steering_skip_result!(ctx, args, meta)
+
+      {:then, :assert_steering_pending} ->
+        assert_steering_pending!(ctx, args, meta)
+
+      {:then, :assert_steering_empty} ->
+        assert_steering_empty!(ctx, args, meta)
+
+      {:then, :assert_steering_message} ->
+        assert_steering_message!(ctx, args, meta)
+
+      {:then, :assert_steering_skip_contains} ->
+        assert_steering_skip_contains!(ctx, args, meta)
+
+      # ── Agent Loop: Retry ──
+
+      {:when, :classify_error} ->
+        classify_error!(ctx, args, meta)
+
+      {:when, :retry_delay} ->
+        retry_delay!(ctx, args, meta)
+
+      {:when, :retry_should_retry} ->
+        retry_should_retry!(ctx, args, meta)
+
+      {:then, :assert_error_class} ->
+        assert_error_class!(ctx, args, meta)
+
+      {:then, :assert_delay_ms} ->
+        assert_delay_ms!(ctx, args, meta)
+
+      {:then, :assert_should_retry} ->
+        assert_should_retry!(ctx, args, meta)
+
+      # ── Agent Loop: Compaction 配对保护 ──
+
+      {:given, :compaction_messages_with_tools} ->
+        compaction_messages_with_tools!(ctx, args, meta)
+
+      {:then, :assert_tool_pairs_intact} ->
+        assert_tool_pairs_intact!(ctx, args, meta)
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -2036,6 +2090,154 @@ defmodule Gong.BDD.Instructions.V1 do
 
     ctx
   end
+
+  # ── Steering 实现 ──
+
+  defp steering_queue_empty!(ctx, _args, _meta) do
+    Map.put(ctx, :steering_queue, Gong.Steering.new())
+  end
+
+  defp steering_push!(ctx, %{message: message}, _meta) do
+    queue = Map.get(ctx, :steering_queue, Gong.Steering.new())
+    Map.put(ctx, :steering_queue, Gong.Steering.push(queue, message))
+  end
+
+  defp steering_check!(ctx, _args, _meta) do
+    queue = Map.get(ctx, :steering_queue, Gong.Steering.new())
+    {msg, new_queue} = Gong.Steering.check(queue)
+
+    ctx
+    |> Map.put(:steering_queue, new_queue)
+    |> Map.put(:steering_last_message, msg)
+  end
+
+  defp steering_skip_result!(ctx, %{tool: tool}, _meta) do
+    result = Gong.Steering.skip_result(tool)
+    Map.put(ctx, :steering_skip_result, result)
+  end
+
+  defp assert_steering_pending!(ctx, _args, _meta) do
+    queue = Map.get(ctx, :steering_queue, [])
+    assert Gong.Steering.pending?(queue), "期望 steering 队列有待处理消息"
+    ctx
+  end
+
+  defp assert_steering_empty!(ctx, _args, _meta) do
+    queue = Map.get(ctx, :steering_queue, [])
+    refute Gong.Steering.pending?(queue), "期望 steering 队列为空"
+    ctx
+  end
+
+  defp assert_steering_message!(ctx, %{contains: text}, _meta) do
+    msg = Map.get(ctx, :steering_last_message)
+    assert msg != nil, "期望 steering 消息不为 nil"
+    assert msg =~ text, "期望 steering 消息包含 #{inspect(text)}，实际：#{inspect(msg)}"
+    ctx
+  end
+
+  defp assert_steering_skip_contains!(ctx, %{text: text}, _meta) do
+    result = Map.get(ctx, :steering_skip_result)
+    assert result != nil, "期望 skip_result 不为 nil"
+    result_str = inspect(result)
+    assert result_str =~ text, "期望 skip_result 包含 #{inspect(text)}，实际：#{inspect(result)}"
+    ctx
+  end
+
+  # ── Retry 实现 ──
+
+  defp classify_error!(ctx, %{error: error}, _meta) do
+    class = Gong.Retry.classify_error(error)
+    Map.put(ctx, :retry_error_class, class)
+  end
+
+  defp retry_delay!(ctx, %{attempt: attempt}, _meta) do
+    delay = Gong.Retry.delay_ms(attempt)
+    Map.put(ctx, :retry_delay_ms, delay)
+  end
+
+  defp retry_should_retry!(ctx, %{error_class: error_class, attempt: attempt}, _meta) do
+    class = String.to_existing_atom(error_class)
+    result = Gong.Retry.should_retry?(class, attempt)
+    Map.put(ctx, :retry_should_retry, result)
+  end
+
+  defp assert_error_class!(ctx, %{expected: expected}, _meta) do
+    actual = Map.fetch!(ctx, :retry_error_class)
+    assert to_string(actual) == expected,
+      "期望错误分类=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  defp assert_delay_ms!(ctx, %{expected: expected}, _meta) do
+    actual = Map.fetch!(ctx, :retry_delay_ms)
+    assert actual == expected,
+      "期望延迟=#{expected}ms，实际：#{actual}ms"
+    ctx
+  end
+
+  defp assert_should_retry!(ctx, %{expected: expected}, _meta) do
+    actual = Map.fetch!(ctx, :retry_should_retry)
+    assert actual == expected,
+      "期望 should_retry=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  # ── Compaction 配对保护实现 ──
+
+  defp compaction_messages_with_tools!(ctx, %{count: count, tool_pair_at: tool_pair_at} = args, _meta) do
+    token_size = Map.get(args, :token_size, 100)
+    char_count = max(div(token_size, 2), 10)
+
+    messages =
+      Enum.map(0..(count - 1), fn i ->
+        cond do
+          i == tool_pair_at ->
+            # assistant 消息携带 tool_calls
+            %{
+              role: "assistant",
+              content: "调用工具",
+              tool_calls: [%{id: "tc_#{i}", name: "bash", arguments: %{"command" => "echo hi"}}]
+            }
+
+          i == tool_pair_at + 1 ->
+            # tool 结果消息
+            %{role: "tool", content: "hi\n", tool_call_id: "tc_#{i - 1}"}
+
+          true ->
+            content = "测试消息第#{i}条" <> String.duplicate("内容", max(div(char_count - 6, 2), 1))
+            role = if rem(i, 2) == 0, do: "user", else: "assistant"
+            %{role: role, content: content}
+        end
+      end)
+
+    Map.put(ctx, :compaction_messages, messages)
+  end
+
+  defp assert_tool_pairs_intact!(ctx, _args, _meta) do
+    compacted = Map.fetch!(ctx, :compacted_messages)
+
+    # 验证所有 tool_calls 消息后都跟着 tool 消息
+    compacted
+    |> Enum.with_index()
+    |> Enum.each(fn {msg, idx} ->
+      if has_tool_calls_field?(msg) do
+        assert idx + 1 < length(compacted),
+          "tool_calls 消息在末尾，缺少 tool 结果"
+
+        next = Enum.at(compacted, idx + 1)
+        next_role = Map.get(next, :role) || Map.get(next, "role")
+
+        assert to_string(next_role) == "tool",
+          "tool_calls 消息后应跟 tool 消息，实际：#{inspect(next_role)}"
+      end
+    end)
+
+    ctx
+  end
+
+  defp has_tool_calls_field?(%{tool_calls: tcs}) when is_list(tcs) and tcs != [], do: true
+  defp has_tool_calls_field?(%{"tool_calls" => tcs}) when is_list(tcs) and tcs != [], do: true
+  defp has_tool_calls_field?(_), do: false
 
   # ── Helpers ──
 

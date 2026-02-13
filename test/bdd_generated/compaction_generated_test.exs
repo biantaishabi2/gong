@@ -309,4 +309,42 @@ defmodule Gong.BDD.Generated.CompactionTest do
     :ok
   end
 
+  # Source: BDD-COMPACT-017
+  @tag :agent_loop
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-017] 压缩保留 tool_call/result 配对完整" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-017"}
+    # line 133: GIVEN compaction_messages_with_tools count=10 tool_pair_at=6 token_size=500
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages_with_tools, %{count: 10, token_size: 500, tool_pair_at: 6}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 133, raw: "GIVEN compaction_messages_with_tools count=10 tool_pair_at=6 token_size=500"}, 133)
+    # line 134: GIVEN compaction_summarize_fn_ok
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_summarize_fn_ok, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 134, raw: "GIVEN compaction_summarize_fn_ok"}, 134)
+    # line 135: WHEN when_compact max_tokens=50 window_size=3
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_compact, %{max_tokens: 50, window_size: 3}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 135, raw: "WHEN when_compact max_tokens=50 window_size=3"}, 135)
+    # line 136: THEN assert_tool_pairs_intact
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_pairs_intact, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 136, raw: "THEN assert_tool_pairs_intact"}, 136)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-018
+  @tag :agent_loop
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-018] 回退裁剪也保留 tool_call/result 配对" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-018"}
+    # line 139: GIVEN compaction_messages_with_tools count=10 tool_pair_at=6 token_size=500
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages_with_tools, %{count: 10, token_size: 500, tool_pair_at: 6}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 139, raw: "GIVEN compaction_messages_with_tools count=10 tool_pair_at=6 token_size=500"}, 139)
+    # line 140: GIVEN compaction_summarize_fn_fail
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_summarize_fn_fail, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 140, raw: "GIVEN compaction_summarize_fn_fail"}, 140)
+    # line 141: WHEN when_compact max_tokens=50 window_size=3
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_compact, %{max_tokens: 50, window_size: 3}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 141, raw: "WHEN when_compact max_tokens=50 window_size=3"}, 141)
+    # line 142: THEN assert_tool_pairs_intact
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_pairs_intact, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 142, raw: "THEN assert_tool_pairs_intact"}, 142)
+    _ctx = ctx
+    :ok
+  end
+
 end
