@@ -38,6 +38,7 @@ defmodule Gong.MixProject do
 
       # 数据库（Tape 存储索引）
       {:ecto_sqlite3, "~> 0.17"},
+      {:exqlite, "~> 0.23"},
 
       # JSON
       {:jason, "~> 1.4"},
