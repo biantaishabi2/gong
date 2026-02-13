@@ -389,6 +389,75 @@ defmodule Gong.BDD.InstructionRegistries.AgentLoop do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── GIVEN: E2E LLM 测试 ──
+
+      check_e2e_provider: %{
+        name: :check_e2e_provider,
+        kind: :given,
+        args: %{
+          provider: %{type: :string, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── WHEN: E2E LiveLLM（真实 LLM + Hook 集成）──
+
+      agent_chat_live: %{
+        name: :agent_chat_live,
+        kind: :when,
+        args: %{
+          prompt: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── WHEN: E2E 多轮对话 ──
+
+      agent_chat_continue: %{
+        name: :agent_chat_continue,
+        kind: :when,
+        args: %{
+          prompt: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── THEN: E2E Compaction 可触发性 ──
+
+      assert_context_compactable: %{
+        name: :assert_context_compactable,
+        kind: :then,
+        args: %{
+          context_window: %{type: :int, required?: false, allowed: nil},
+          reserve_tokens: %{type: :int, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

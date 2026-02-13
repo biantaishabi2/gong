@@ -482,6 +482,20 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_auto_no_action} ->
         assert_auto_no_action!(ctx, args, meta)
 
+      # ── E2E LLM 测试 ──
+
+      {:given, :check_e2e_provider} ->
+        check_e2e_provider!(ctx, args, meta)
+
+      {:when, :agent_chat_live} ->
+        agent_chat_live!(ctx, args, meta)
+
+      {:when, :agent_chat_continue} ->
+        agent_chat_continue!(ctx, args, meta)
+
+      {:then, :assert_context_compactable} ->
+        assert_context_compactable!(ctx, args, meta)
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -1117,10 +1131,16 @@ defmodule Gong.BDD.Instructions.V1 do
       end
     else
       # E2E 模式：真实 AgentServer + LLM
-      {:ok, pid} = Jido.AgentServer.start_link(agent: Gong.Agent)
-      ExUnit.Callbacks.on_exit(fn ->
-        if Process.alive?(pid), do: GenServer.stop(pid, :normal, 1000)
-      end)
+      # 复用已有 AgentServer（多轮对话支持）
+      pid = if ctx[:agent_pid] && Process.alive?(ctx[:agent_pid]) do
+        ctx[:agent_pid]
+      else
+        {:ok, new_pid} = Jido.AgentServer.start_link(agent: Gong.Agent)
+        ExUnit.Callbacks.on_exit(fn ->
+          if Process.alive?(new_pid), do: GenServer.stop(new_pid, :normal, 1000)
+        end)
+        new_pid
+      end
 
       # 在 prompt 前注入 workspace 路径，让 LLM 知道文件位置
       workspace = Map.get(ctx, :workspace, File.cwd!())
@@ -2385,6 +2405,124 @@ defmodule Gong.BDD.Instructions.V1 do
     assert result == :no_action,
       "期望未触发压缩，实际：#{result}"
     ctx
+  end
+
+  # ── E2E LiveLLM 测试实现 ──
+
+  defp agent_chat_live!(ctx, %{prompt: prompt}, _meta) do
+    agent = ctx.agent
+    hooks = Map.get(ctx, :hooks, [])
+    workspace = Map.get(ctx, :workspace, File.cwd!())
+    full_prompt = "工作目录：#{workspace}\n所有文件操作使用绝对路径。\n\n#{prompt}"
+
+    case Gong.LiveLLM.run_chat(agent, full_prompt, hooks) do
+      {:ok, reply, updated_agent} ->
+        ctx = collect_telemetry_events(ctx)
+
+        ctx
+        |> Map.put(:agent, updated_agent)
+        |> Map.put(:last_reply, reply)
+        |> Map.put(:last_error, nil)
+
+      {:error, reason, updated_agent} ->
+        ctx = collect_telemetry_events(ctx)
+
+        ctx
+        |> Map.put(:agent, updated_agent)
+        |> Map.put(:last_reply, to_string(reason))
+        |> Map.put(:last_error, reason)
+    end
+  end
+
+  # ── E2E LLM 测试实现 ──
+
+  defp check_e2e_provider!(ctx, args, _meta) do
+    provider = Map.get(args, :provider, "deepseek")
+
+    env_key =
+      case provider do
+        "deepseek" -> "DEEPSEEK_API_KEY"
+        "openai" -> "OPENAI_API_KEY"
+        "anthropic" -> "ANTHROPIC_API_KEY"
+        _ -> "DEEPSEEK_API_KEY"
+      end
+
+    unless System.get_env(env_key) do
+      flunk("跳过 E2E 测试：环境变量 #{env_key} 未设置。请设置后重试。")
+    end
+
+    Map.put(ctx, :e2e_provider, provider)
+  end
+
+  defp agent_chat_continue!(ctx, %{prompt: prompt}, _meta) do
+    # 必须已有存活的 agent_pid（多轮 E2E 对话）
+    pid = ctx[:agent_pid]
+
+    unless pid && Process.alive?(pid) do
+      flunk("agent_chat_continue 需要已有存活的 agent_pid，当前无可用 AgentServer")
+    end
+
+    workspace = Map.get(ctx, :workspace, File.cwd!())
+    full_prompt = "工作目录：#{workspace}\n所有文件操作使用绝对路径。\n\n#{prompt}"
+
+    case Gong.Agent.ask_sync(pid, full_prompt, timeout: 60_000) do
+      {:ok, reply} ->
+        ctx
+        |> Map.put(:last_reply, reply)
+        |> Map.put(:last_error, nil)
+
+      {:error, reason} ->
+        ctx
+        |> Map.put(:last_reply, nil)
+        |> Map.put(:last_error, reason)
+    end
+  end
+
+  defp assert_context_compactable!(ctx, args, _meta) do
+    # 从 AgentServer 获取对话历史，验证 should_compact? 判断
+    pid = ctx[:agent_pid]
+
+    unless pid && Process.alive?(pid) do
+      flunk("assert_context_compactable 需要已有存活的 agent_pid")
+    end
+
+    # 获取 agent 状态中的对话消息
+    state = :sys.get_state(pid)
+    messages = extract_messages_from_state(state)
+
+    opts = []
+    opts = if args[:context_window], do: [{:context_window, args.context_window} | opts], else: opts
+    opts = if args[:reserve_tokens], do: [{:reserve_tokens, args.reserve_tokens} | opts], else: opts
+
+    # 验证 token 计数和 should_compact? 逻辑一致
+    token_count = Gong.Compaction.TokenEstimator.estimate_messages(messages)
+    result = Gong.AutoCompaction.should_compact?(messages, opts)
+
+    # 存储到 ctx 供后续断言使用
+    ctx
+    |> Map.put(:e2e_token_count, token_count)
+    |> Map.put(:e2e_compactable, result)
+  end
+
+  # 从 AgentServer 状态中提取对话消息
+  defp extract_messages_from_state(state) do
+    cond do
+      is_map(state) && Map.has_key?(state, :messages) ->
+        state.messages
+
+      is_map(state) && Map.has_key?(state, :agent) ->
+        agent = state.agent
+        cond do
+          is_map(agent) && Map.has_key?(agent, :messages) -> agent.messages
+          is_map(agent) && Map.has_key?(agent, :state) ->
+            inner = agent.state
+            if is_map(inner) && Map.has_key?(inner, :messages), do: inner.messages, else: []
+          true -> []
+        end
+
+      true ->
+        []
+    end
   end
 
   # ── Helpers ──
