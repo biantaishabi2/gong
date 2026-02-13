@@ -6,22 +6,146 @@ defmodule Gong.Compaction do
   - 滑动窗口保留最近 N 条消息完整内容
   - 窗口外的消息由 LLM 生成摘要替代
   - 系统消息和 anchor 消息始终保留
+  - LLM 摘要失败时回退到截断策略
   """
+
+  alias Gong.Compaction.TokenEstimator
 
   @default_window_size 20
   @default_max_tokens 100_000
+  @truncate_tool_max_chars 200
 
-  @doc "压缩消息列表，返回压缩后的消息和摘要"
+  @doc """
+  压缩消息列表，返回 {压缩后消息, 摘要 | nil}。
+
+  ## 选项
+
+  - `:window_size` - 滑动窗口大小，保留最近 N 条非系统消息（默认 20）
+  - `:max_tokens` - 最大 token 数阈值（默认 100_000）
+  - `:summarize_fn` - 摘要函数 `(messages -> {:ok, summary} | {:error, reason})`
+  """
   @spec compact([map()], keyword()) :: {[map()], String.t() | nil}
   def compact(messages, opts \\ []) do
-    window = Keyword.get(opts, :window_size, @default_window_size)
-    _max_tokens = Keyword.get(opts, :max_tokens, @default_max_tokens)
+    window_size = Keyword.get(opts, :window_size, @default_window_size)
+    max_tokens = Keyword.get(opts, :max_tokens, @default_max_tokens)
+    summarize_fn = Keyword.get(opts, :summarize_fn, &default_summarize/1)
 
-    if length(messages) <= window do
+    total = TokenEstimator.estimate_messages(messages)
+
+    if total <= max_tokens do
+      # 未超阈值，不需要压缩
       {messages, nil}
     else
-      # TODO: 实现压缩逻辑
-      {messages, nil}
+      {old, recent} = split_with_system_preserved(messages, window_size)
+
+      case summarize_fn.(old) do
+        {:ok, summary} ->
+          summary_msg = %{role: "system", content: "[会话摘要] #{summary}"}
+          {[summary_msg | recent], summary}
+
+        {:error, _reason} ->
+          # 回退：截断工具输出
+          {truncate_tool_outputs(messages, max_tokens), nil}
+      end
     end
   end
+
+  @doc """
+  压缩并在 Tape 中创建 handoff anchor 记录摘要。
+
+  返回 {压缩后消息, 摘要 | nil, 更新后的 tape_store}。
+  """
+  @spec compact_and_handoff(Gong.Tape.Store.t(), [map()], keyword()) ::
+          {[map()], String.t() | nil, Gong.Tape.Store.t()}
+  def compact_and_handoff(tape_store, messages, opts \\ []) do
+    {compacted, summary} = compact(messages, opts)
+
+    updated_store =
+      if summary do
+        case Gong.Tape.Store.handoff(tape_store, "compaction") do
+          {:ok, _dir, store} ->
+            case Gong.Tape.Store.append(store, "compaction", %{
+                   kind: "compaction_summary",
+                   content: summary
+                 }) do
+              {:ok, store2} -> store2
+              {:error, _} -> store
+            end
+
+          {:error, _} ->
+            tape_store
+        end
+      else
+        tape_store
+      end
+
+    {compacted, summary, updated_store}
+  end
+
+  @doc """
+  分割消息：系统消息始终保留在 recent 中，其余按窗口分割。
+
+  返回 {old_messages, recent_messages}，其中 recent 包含所有系统消息 + 最近 window_size 条非系统消息。
+  """
+  @spec split_with_system_preserved([map()], non_neg_integer()) :: {[map()], [map()]}
+  def split_with_system_preserved(messages, window_size) do
+    {system_msgs, non_system} =
+      Enum.split_with(messages, fn msg ->
+        get_role(msg) == "system"
+      end)
+
+    if length(non_system) <= window_size do
+      {[], system_msgs ++ non_system}
+    else
+      split_at = length(non_system) - window_size
+      {old, recent_non_system} = Enum.split(non_system, split_at)
+      {old, system_msgs ++ recent_non_system}
+    end
+  end
+
+  @doc """
+  回退策略：截断长工具输出以减少 token 数。
+  """
+  @spec truncate_tool_outputs([map()], non_neg_integer()) :: [map()]
+  def truncate_tool_outputs(messages, _max_tokens) do
+    Enum.map(messages, fn msg ->
+      role = get_role(msg)
+
+      if role == "tool" do
+        content = get_content(msg)
+
+        if is_binary(content) and String.length(content) > @truncate_tool_max_chars do
+          truncated =
+            String.slice(content, 0, @truncate_tool_max_chars) <>
+              "\n...[输出已截断]"
+
+          put_content(msg, truncated)
+        else
+          msg
+        end
+      else
+        msg
+      end
+    end)
+  end
+
+  # 默认摘要函数（占位，生产环境应注入 ReqLLM 调用）
+  defp default_summarize(_messages) do
+    {:error, :no_summarize_fn_configured}
+  end
+
+  defp get_role(%{role: role}), do: to_string(role)
+  defp get_role(%{"role" => role}), do: to_string(role)
+  defp get_role(_), do: nil
+
+  defp get_content(%{content: content}), do: content
+  defp get_content(%{"content" => content}), do: content
+  defp get_content(_), do: nil
+
+  defp put_content(%{content: _} = msg, new_content), do: %{msg | content: new_content}
+
+  defp put_content(%{"content" => _} = msg, new_content),
+    do: Map.put(msg, "content", new_content)
+
+  defp put_content(msg, _), do: msg
 end
