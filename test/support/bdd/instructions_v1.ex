@@ -643,7 +643,8 @@ defmodule Gong.BDD.Instructions.V1 do
     }
     params = if args[:replace_all], do: Map.put(params, :replace_all, args.replace_all), else: params
 
-    result = Gong.Tools.Edit.run(params, %{})
+    tool_ctx = %{workspace: ctx[:workspace]}
+    result = Gong.Tools.Edit.run(params, tool_ctx)
     Map.put(ctx, :last_result, result)
   end
 

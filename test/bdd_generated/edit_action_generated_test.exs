@@ -431,4 +431,76 @@ defmodule Gong.BDD.Generated.EditActionTest do
     :ok
   end
 
+  # Source: BDD-EDIT-023
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-023] 超大文件性能" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-023"}
+    # line 166: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 166, raw: "GIVEN create_temp_dir"}, 166)
+    # line 167: GIVEN create_large_file path="big.txt" lines=50000 line_length=80
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 80, lines: 50000, path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 167, raw: "GIVEN create_large_file path=\"big.txt\" lines=50000 line_length=80"}, 167)
+    # line 168: WHEN tool_edit path="big.txt" old_string="line 25000" new_string="REPLACED 25000"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "REPLACED 25000", old_string: "line 25000", path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 168, raw: "WHEN tool_edit path=\"big.txt\" old_string=\"line 25000\" new_string=\"REPLACED 25000\""}, 168)
+    # line 169: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 169, raw: "THEN assert_tool_success"}, 169)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-024
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-024] 并发编辑不损坏" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-024"}
+    # line 172: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 172, raw: "GIVEN create_temp_dir"}, 172)
+    # line 173: GIVEN create_temp_file path="concurrent.txt" content="aaa\nbbb\nccc\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aaa\\nbbb\\nccc\\n", path: "concurrent.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 173, raw: "GIVEN create_temp_file path=\"concurrent.txt\" content=\"aaa\\nbbb\\nccc\\n\""}, 173)
+    # line 174: WHEN tool_edit path="concurrent.txt" old_string="bbb" new_string="xxx"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "xxx", old_string: "bbb", path: "concurrent.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 174, raw: "WHEN tool_edit path=\"concurrent.txt\" old_string=\"bbb\" new_string=\"xxx\""}, 174)
+    # line 175: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 175, raw: "THEN assert_tool_success"}, 175)
+    # line 176: THEN assert_file_content path="concurrent.txt" expected="aaa\nxxx\nccc\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "aaa\\nxxx\\nccc\\n", path: "concurrent.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 176, raw: "THEN assert_file_content path=\"concurrent.txt\" expected=\"aaa\\nxxx\\nccc\\n\""}, 176)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-025
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-025] 二进制文件保护" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-025"}
+    # line 179: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 179, raw: "GIVEN create_temp_dir"}, 179)
+    # line 180: GIVEN create_png_file path="image.png"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_png_file, %{path: "image.png"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 180, raw: "GIVEN create_png_file path=\"image.png\""}, 180)
+    # line 181: WHEN tool_edit path="image.png" old_string="PNG" new_string="JPG"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "JPG", old_string: "PNG", path: "image.png"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 181, raw: "WHEN tool_edit path=\"image.png\" old_string=\"PNG\" new_string=\"JPG\""}, 181)
+    # line 182: THEN assert_tool_error error_contains="Binary file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Binary file"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 182, raw: "THEN assert_tool_error error_contains=\"Binary file\""}, 182)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-EDIT-026
+  @tag :external_io
+  @tag :unit
+  test "[BDD-EDIT-026] 路径遍历攻击" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-EDIT-026"}
+    # line 185: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 185, raw: "GIVEN create_temp_dir"}, 185)
+    # line 186: WHEN tool_edit path="../../etc/passwd" old_string="root" new_string="hacked"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{new_string: "hacked", old_string: "root", path: "../../etc/passwd"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 186, raw: "WHEN tool_edit path=\"../../etc/passwd\" old_string=\"root\" new_string=\"hacked\""}, 186)
+    # line 187: THEN assert_tool_error error_contains="traversal"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "traversal"}, %{file: "/home/wangbo/document/gong/docs/bdd/edit_action.dsl", line: 187, raw: "THEN assert_tool_error error_contains=\"traversal\""}, 187)
+    _ctx = ctx
+    :ok
+  end
+
 end

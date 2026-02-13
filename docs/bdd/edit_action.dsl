@@ -159,3 +159,29 @@ GIVEN create_large_file path="big.txt" lines=100 line_length=20
 WHEN tool_edit path="big.txt" old_string="line 50" new_string="REPLACED 50"
 THEN assert_tool_success
 THEN assert_result_field field="diff_first_changed_line" expected="50"
+
+# ── 7. 安全与边界（补充） ──
+
+[SCENARIO: BDD-EDIT-023] TITLE: 超大文件性能 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_large_file path="big.txt" lines=50000 line_length=80
+WHEN tool_edit path="big.txt" old_string="line 25000" new_string="REPLACED 25000"
+THEN assert_tool_success
+
+[SCENARIO: BDD-EDIT-024] TITLE: 并发编辑不损坏 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="concurrent.txt" content="aaa\nbbb\nccc\n"
+WHEN tool_edit path="concurrent.txt" old_string="bbb" new_string="xxx"
+THEN assert_tool_success
+THEN assert_file_content path="concurrent.txt" expected="aaa\nxxx\nccc\n"
+
+[SCENARIO: BDD-EDIT-025] TITLE: 二进制文件保护 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_png_file path="image.png"
+WHEN tool_edit path="image.png" old_string="PNG" new_string="JPG"
+THEN assert_tool_error error_contains="Binary file"
+
+[SCENARIO: BDD-EDIT-026] TITLE: 路径遍历攻击 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_edit path="../../etc/passwd" old_string="root" new_string="hacked"
+THEN assert_tool_error error_contains="traversal"

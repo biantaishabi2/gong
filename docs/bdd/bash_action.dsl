@@ -105,3 +105,35 @@ WHEN tool_bash command="seq 1 50000"
 THEN assert_tool_success
 THEN assert_result_field field="truncated" expected="true"
 THEN assert_output_contains text="50000"
+
+# ── 7. Pi 历史 bug 回归 ──
+
+[SCENARIO: BDD-BASH-017] TITLE: UTF-8 多字节跨 chunk 边界 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="python3 -c \"print('你好世界' * 2000)\""
+THEN assert_tool_success content_contains="你好世界"
+
+[SCENARIO: BDD-BASH-018] TITLE: 交互式命令超时不挂死 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="cat" timeout=2
+THEN assert_output_contains text="timed out"
+THEN assert_result_field field="timed_out" expected="true"
+
+[SCENARIO: BDD-BASH-019] TITLE: 进程组杀死无残留 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="sleep 1000 & sleep 1000 & wait" timeout=2
+THEN assert_output_contains text="timed out"
+THEN assert_result_field field="timed_out" expected="true"
+
+[SCENARIO: BDD-BASH-020] TITLE: 管道 SIGPIPE 不报错 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="yes | head -5"
+THEN assert_tool_success content_contains="y"
+THEN assert_exit_code expected=0
+
+[SCENARIO: BDD-BASH-021] TITLE: 截断行数计数精确 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="seq 1 2500"
+THEN assert_tool_success
+THEN assert_output_contains text="500 lines omitted"
+THEN assert_output_contains text="2500"

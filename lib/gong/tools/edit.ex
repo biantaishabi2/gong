@@ -16,10 +16,18 @@ defmodule Gong.Tools.Edit do
       replace_all: [type: :boolean, default: false, doc: "是否替换所有匹配"]
     ]
 
+  # 超大文件阈值：10MB
+  @max_edit_file_bytes 10_485_760
+
   @impl true
-  def run(params, _context) do
+  def run(params, context) do
+    workspace = Map.get(context, :workspace)
+
     with {:ok, path} <- resolve_path(params.file_path),
+         :ok <- check_path_safe(path, workspace),
          :ok <- check_readable(path),
+         :ok <- check_file_size(path),
+         :ok <- check_not_binary(path),
          :ok <- validate_edit_params(params),
          {:ok, raw} <- File.read(path) do
       # BOM / CRLF 检测
@@ -109,6 +117,58 @@ defmodule Gong.Tools.Edit do
       content: Enum.join(diff_lines, "\n"),
       first_changed_line: first_changed + 1
     }
+  end
+
+  # ── 安全检查 ──
+
+  defp check_path_safe(_path, nil), do: :ok
+
+  defp check_path_safe(path, workspace) do
+    expanded = Path.expand(path)
+    ws_expanded = Path.expand(workspace)
+
+    if String.starts_with?(expanded, ws_expanded <> "/") or expanded == ws_expanded do
+      :ok
+    else
+      {:error, "Path traversal blocked: #{path} is outside workspace"}
+    end
+  end
+
+  defp check_file_size(path) do
+    case File.stat(path) do
+      {:ok, %{size: size}} when size > @max_edit_file_bytes ->
+        mb = Float.round(size / 1_048_576, 1)
+        {:error, "File too large (#{mb} MB). Maximum is #{div(@max_edit_file_bytes, 1_048_576)} MB."}
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp check_not_binary(path) do
+    case File.open(path, [:read, :binary]) do
+      {:ok, device} ->
+        chunk = IO.binread(device, 8192)
+        File.close(device)
+
+        case chunk do
+          :eof ->
+            :ok
+
+          data when is_binary(data) ->
+            if :binary.match(data, <<0>>) != :nomatch do
+              {:error, "Binary file detected: #{path}. Edit only supports text files."}
+            else
+              :ok
+            end
+
+          _ ->
+            :ok
+        end
+
+      _ ->
+        :ok
+    end
   end
 
   defp resolve_path(path) when not is_binary(path) do

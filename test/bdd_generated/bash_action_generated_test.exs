@@ -285,4 +285,94 @@ defmodule Gong.BDD.Generated.BashActionTest do
     :ok
   end
 
+  # Source: BDD-BASH-017
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-017]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-017"}
+    # line 112: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 112, raw: "GIVEN create_temp_dir"}, 112)
+    # line 113: WHEN tool_bash command="python3 -c \"print('你好世界' * 2000)\""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "python3 -c \\\"print('你好世界' * 2000)\\\""}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 113, raw: "WHEN tool_bash command=\"python3 -c \\\"print('你好世界' * 2000)\\\"\""}, 113)
+    # line 114: THEN assert_tool_success content_contains="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "你好世界"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 114, raw: "THEN assert_tool_success content_contains=\"你好世界\""}, 114)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-BASH-018
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-018] 交互式命令超时不挂死" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-018"}
+    # line 117: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 117, raw: "GIVEN create_temp_dir"}, 117)
+    # line 118: WHEN tool_bash command="cat" timeout=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "cat", timeout: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 118, raw: "WHEN tool_bash command=\"cat\" timeout=2"}, 118)
+    # line 119: THEN assert_output_contains text="timed out"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "timed out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 119, raw: "THEN assert_output_contains text=\"timed out\""}, 119)
+    # line 120: THEN assert_result_field field="timed_out" expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "true", field: "timed_out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 120, raw: "THEN assert_result_field field=\"timed_out\" expected=\"true\""}, 120)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-BASH-019
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-019] 进程组杀死无残留" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-019"}
+    # line 123: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 123, raw: "GIVEN create_temp_dir"}, 123)
+    # line 124: WHEN tool_bash command="sleep 1000 & sleep 1000 & wait" timeout=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "sleep 1000 & sleep 1000 & wait", timeout: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 124, raw: "WHEN tool_bash command=\"sleep 1000 & sleep 1000 & wait\" timeout=2"}, 124)
+    # line 125: THEN assert_output_contains text="timed out"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "timed out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 125, raw: "THEN assert_output_contains text=\"timed out\""}, 125)
+    # line 126: THEN assert_result_field field="timed_out" expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "true", field: "timed_out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 126, raw: "THEN assert_result_field field=\"timed_out\" expected=\"true\""}, 126)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-BASH-020
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-020] 管道 SIGPIPE 不报错" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-020"}
+    # line 129: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 129, raw: "GIVEN create_temp_dir"}, 129)
+    # line 130: WHEN tool_bash command="yes | head -5"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "yes | head -5"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 130, raw: "WHEN tool_bash command=\"yes | head -5\""}, 130)
+    # line 131: THEN assert_tool_success content_contains="y"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "y"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 131, raw: "THEN assert_tool_success content_contains=\"y\""}, 131)
+    # line 132: THEN assert_exit_code expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_exit_code, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 132, raw: "THEN assert_exit_code expected=0"}, 132)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-BASH-021
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-021] 截断行数计数精确" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-021"}
+    # line 135: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 135, raw: "GIVEN create_temp_dir"}, 135)
+    # line 136: WHEN tool_bash command="seq 1 2500"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "seq 1 2500"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 136, raw: "WHEN tool_bash command=\"seq 1 2500\""}, 136)
+    # line 137: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 137, raw: "THEN assert_tool_success"}, 137)
+    # line 138: THEN assert_output_contains text="500 lines omitted"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "500 lines omitted"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 138, raw: "THEN assert_output_contains text=\"500 lines omitted\""}, 138)
+    # line 139: THEN assert_output_contains text="2500"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "2500"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 139, raw: "THEN assert_output_contains text=\"2500\""}, 139)
+    _ctx = ctx
+    :ok
+  end
+
 end
