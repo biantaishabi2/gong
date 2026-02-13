@@ -11,15 +11,21 @@ defmodule Gong.Tools.Edit do
     description: "替换文件中的指定文本",
     schema: [
       file_path: [type: :string, required: true, doc: "文件绝对路径"],
-      old_string: [type: :string, required: true, doc: "要替换的文本"],
-      new_string: [type: :string, required: true, doc: "替换后的文本"],
-      replace_all: [type: :boolean, default: false, doc: "是否替换所有匹配"]
+      old_string: [type: :string, required: false, doc: "要替换的文本"],
+      new_string: [type: :string, required: false, doc: "替换后的文本"],
+      replace_all: [type: :boolean, default: false, doc: "是否替换所有匹配"],
+      mode: [type: :string, default: "replace", doc: "编辑模式: replace | diff"],
+      diff: [type: :string, required: false, doc: "unified diff 内容（mode=diff 时使用）"]
     ]
 
   # 超大文件阈值：10MB
   @max_edit_file_bytes 10_485_760
 
   @impl true
+  def run(%{mode: "diff"} = params, context) do
+    run_diff_mode(params, context)
+  end
+
   def run(params, context) do
     workspace = Map.get(context, :workspace)
 
@@ -59,6 +65,113 @@ defmodule Gong.Tools.Edit do
             {:error, "#{path}: Write failed (#{reason})"}
         end
       end
+    end
+  end
+
+  # ── Diff 模式 ──
+
+  defp run_diff_mode(params, context) do
+    workspace = Map.get(context, :workspace)
+
+    with {:ok, path} <- resolve_path(params.file_path),
+         :ok <- check_path_safe(path, workspace),
+         :ok <- check_readable(path),
+         {:ok, raw} <- File.read(path) do
+      case apply_unified_diff(raw, params.diff) do
+        {:ok, new_content, changes} ->
+          case File.write(path, new_content) do
+            :ok ->
+              {:ok, %{file_path: path, replacements: changes, mode: "diff"}}
+
+            {:error, reason} ->
+              {:error, "#{path}: Write failed (#{reason})"}
+          end
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    end
+  end
+
+  defp apply_unified_diff(content, diff_text) do
+    lines = String.split(content, "\n")
+    diff_lines = String.split(diff_text, "\n")
+
+    # 解析 diff hunks
+    {result_lines, changes} = apply_diff_hunks(lines, diff_lines, 0, 0)
+
+    if changes > 0 do
+      {:ok, Enum.join(result_lines, "\n"), changes}
+    else
+      {:error, "No changes applied from diff"}
+    end
+  end
+
+  defp apply_diff_hunks(original_lines, diff_lines, _offset, changes) do
+    # 解析 unified diff 行
+    {additions, deletions} = parse_diff_operations(diff_lines)
+
+    # 按行号逆序应用（避免偏移变化）
+    result = apply_operations(original_lines, deletions, additions)
+    total_changes = length(additions) + length(deletions)
+
+    {result, changes + total_changes}
+  end
+
+  defp parse_diff_operations(diff_lines) do
+    # 跟踪当前行号
+    {adds, dels, _line} =
+      Enum.reduce(diff_lines, {[], [], 0}, fn line, {adds, dels, line_num} ->
+        cond do
+          String.starts_with?(line, "@@") ->
+            # 解析 hunk header: @@ -start,count +start,count @@
+            case Regex.run(~r/@@ -(\d+)/, line) do
+              [_, start] -> {adds, dels, String.to_integer(start) - 1}
+              _ -> {adds, dels, line_num}
+            end
+
+          String.starts_with?(line, "-") ->
+            {adds, dels ++ [{line_num, String.slice(line, 1..-1//1)}], line_num + 1}
+
+          String.starts_with?(line, "+") ->
+            {adds ++ [{line_num, String.slice(line, 1..-1//1)}], dels, line_num}
+
+          String.starts_with?(line, " ") ->
+            {adds, dels, line_num + 1}
+
+          true ->
+            {adds, dels, line_num + 1}
+        end
+      end)
+
+    {adds, dels}
+  end
+
+  defp apply_operations(lines, deletions, additions) do
+    # 简化实现：根据 diff 重建内容
+    # 先删除标记行，再插入新行
+    indexed = Enum.with_index(lines)
+
+    del_indices = MapSet.new(Enum.map(deletions, fn {idx, _} -> idx end))
+
+    # 过滤掉被删除的行
+    kept =
+      indexed
+      |> Enum.reject(fn {_line, idx} -> MapSet.member?(del_indices, idx) end)
+      |> Enum.map(fn {line, _idx} -> line end)
+
+    # 插入新行（在删除位置之后）
+    if Enum.empty?(additions) do
+      kept
+    else
+      # 找到第一个删除位置作为插入点
+      insert_at = case deletions do
+        [{idx, _} | _] -> idx
+        [] -> length(kept)
+      end
+
+      add_lines = Enum.map(additions, fn {_, content} -> content end)
+      List.insert_at(kept, insert_at, add_lines) |> List.flatten()
     end
   end
 

@@ -409,6 +409,115 @@ defmodule Gong.BDD.InstructionRegistries.Tape do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── Session 分支 WHEN ──
+
+      tape_branch_from: %{
+        name: :tape_branch_from,
+        kind: :when,
+        args: %{
+          anchor: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      tape_navigate: %{
+        name: :tape_navigate,
+        kind: :when,
+        args: %{
+          anchor: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      tape_build_context: %{
+        name: :tape_build_context,
+        kind: :when,
+        args: %{
+          anchor: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── Session 分支 THEN ──
+
+      assert_tape_branches: %{
+        name: :assert_tape_branches,
+        kind: :then,
+        args: %{
+          anchor: %{type: :string, required?: true, allowed: nil},
+          expected: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_tape_context_path: %{
+        name: :assert_tape_context_path,
+        kind: :then,
+        args: %{
+          count: %{type: :int, required?: true, allowed: nil},
+          contains: %{type: :string, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+
+      # ── Branch Summary ──
+
+      generate_branch_summary: %{
+        name: :generate_branch_summary,
+        kind: :when,
+        args: %{
+          anchor: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      assert_branch_summary: %{
+        name: :assert_branch_summary,
+        kind: :then,
+        args: %{
+          contains: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

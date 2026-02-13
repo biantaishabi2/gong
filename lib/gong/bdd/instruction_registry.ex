@@ -22,6 +22,14 @@ defmodule Gong.BDD.InstructionRegistry do
     |> merge_specs!(Gong.BDD.InstructionRegistries.Compaction.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.AgentLoop.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.Generated.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Model.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Stream.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Abort.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Extension.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.FollowUp.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Settings.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Resource.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.ToolExtra.specs(:v1))
   end
 
   def specs(:v2), do: specs(:v1)

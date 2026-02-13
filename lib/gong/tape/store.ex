@@ -247,6 +247,100 @@ defmodule Gong.Tape.Store do
     Index.close(conn)
   end
 
+  # ── 分支操作 ──
+
+  @doc "从指定 anchor 创建分支，返回新 anchor 名"
+  @spec branch_from(t(), String.t()) :: {:ok, String.t(), t()} | {:error, term()}
+  def branch_from(%__MODULE__{} = store, anchor_name) do
+    parent_seq = Index.anchor_seq(store.db_conn, anchor_name)
+
+    if parent_seq == nil do
+      {:error, "anchor not found: #{anchor_name}"}
+    else
+      branch_name = "#{anchor_name}_branch_#{System.unique_integer([:positive])}"
+      seq = Index.next_anchor_seq(store.db_conn)
+      dir_name = "#{String.pad_leading(Integer.to_string(seq), 3, "0")}_#{branch_name}"
+      dir_path = Path.join([store.workspace_path, "anchors", dir_name])
+
+      File.mkdir_p!(dir_path)
+      Index.insert_anchor(store.db_conn, seq, branch_name, parent_seq)
+
+      {:ok, branch_name, store}
+    end
+  end
+
+  @doc "切换到指定分支的叶节点"
+  @spec navigate(t(), String.t()) :: {:ok, t()} | {:error, term()}
+  def navigate(%__MODULE__{} = store, anchor_name) do
+    seq = Index.anchor_seq(store.db_conn, anchor_name)
+
+    if seq == nil do
+      {:error, "anchor not found: #{anchor_name}"}
+    else
+      {:ok, store}
+    end
+  end
+
+  @doc "列出指定 anchor 的直接子分支"
+  @spec branches(t(), String.t()) :: [String.t()]
+  def branches(%__MODULE__{} = store, anchor_name) do
+    seq = Index.anchor_seq(store.db_conn, anchor_name)
+
+    if seq == nil do
+      []
+    else
+      Index.child_anchors(store.db_conn, seq)
+      |> Enum.map(& &1.name)
+    end
+  end
+
+  @doc "从 anchor 回溯到 root 构建上下文路径"
+  @spec build_context_path(t(), String.t()) :: {:ok, [map()]} | {:error, term()}
+  def build_context_path(%__MODULE__{} = store, anchor_name) do
+    seq = Index.anchor_seq(store.db_conn, anchor_name)
+
+    if seq == nil do
+      {:error, "anchor not found: #{anchor_name}"}
+    else
+      # 获取祖先路径上的所有 anchor
+      path = Index.ancestor_path(store.db_conn, seq)
+      anchor_names = Enum.map(path, & &1.name)
+
+      # 收集每个 anchor 的条目
+      entries =
+        Enum.flat_map(anchor_names, fn name ->
+          case find_anchor_dir(store, name) do
+            {:ok, dir_path} ->
+              FileStore.read_all(dir_path)
+              |> Enum.map(&Map.from_struct/1)
+            :error ->
+              []
+          end
+        end)
+        |> Enum.sort_by(& &1.timestamp)
+
+      {:ok, entries}
+    end
+  end
+
+  @doc "生成分支摘要"
+  @spec generate_branch_summary(t(), String.t()) :: {:ok, String.t()} | {:error, term()}
+  def generate_branch_summary(%__MODULE__{} = store, anchor_name) do
+    case build_context_path(store, anchor_name) do
+      {:ok, entries} ->
+        # 简单摘要：提取关键操作描述
+        summary =
+          entries
+          |> Enum.map(fn e -> "[#{e.kind}] #{String.slice(to_string(e.content), 0, 50)}" end)
+          |> Enum.join(" → ")
+
+        {:ok, summary}
+
+      error ->
+        error
+    end
+  end
+
   # ── 私有辅助 ──
 
   defp find_anchor_dir(%__MODULE__{workspace_path: ws}, anchor_name) do

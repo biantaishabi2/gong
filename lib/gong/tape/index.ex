@@ -19,9 +19,47 @@ defmodule Gong.Tape.Index do
     :ok
   end
 
-  @spec insert_anchor(Exqlite.Sqlite3.db(), integer(), String.t()) :: :ok | {:error, term()}
-  def insert_anchor(conn, seq, name) do
-    exec(conn, "INSERT OR IGNORE INTO anchors (seq, name) VALUES (?1, ?2)", [seq, name])
+  @spec insert_anchor(Exqlite.Sqlite3.db(), integer(), String.t(), integer() | nil) :: :ok | {:error, term()}
+  def insert_anchor(conn, seq, name, parent_seq \\ nil) do
+    if parent_seq do
+      exec(conn, "INSERT OR IGNORE INTO anchors (seq, name, parent_seq) VALUES (?1, ?2, ?3)", [seq, name, parent_seq])
+    else
+      exec(conn, "INSERT OR IGNORE INTO anchors (seq, name) VALUES (?1, ?2)", [seq, name])
+    end
+  end
+
+  @doc "获取 anchor 的 seq"
+  @spec anchor_seq(Exqlite.Sqlite3.db(), String.t()) :: integer() | nil
+  def anchor_seq(conn, name) do
+    case query(conn, "SELECT seq FROM anchors WHERE name = ?1", [name]) do
+      [[seq]] -> seq
+      [] -> nil
+    end
+  end
+
+  @doc "获取指定 anchor 的直接子分支"
+  @spec child_anchors(Exqlite.Sqlite3.db(), integer()) :: [%{seq: integer(), name: String.t()}]
+  def child_anchors(conn, parent_seq) do
+    rows = query(conn, "SELECT seq, name FROM anchors WHERE parent_seq = ?1 ORDER BY seq", [parent_seq])
+    Enum.map(rows, fn [seq, name] -> %{seq: seq, name: name} end)
+  end
+
+  @doc "从 anchor 回溯到 root 的路径（parent_seq 链）"
+  @spec ancestor_path(Exqlite.Sqlite3.db(), integer()) :: [%{seq: integer(), name: String.t()}]
+  def ancestor_path(conn, anchor_seq) do
+    do_ancestor_path(conn, anchor_seq, [])
+  end
+
+  defp do_ancestor_path(_conn, nil, acc), do: acc
+
+  defp do_ancestor_path(conn, current_seq, acc) do
+    case query(conn, "SELECT seq, name, parent_seq FROM anchors WHERE seq = ?1", [current_seq]) do
+      [[seq, name, parent_seq]] ->
+        do_ancestor_path(conn, parent_seq, [%{seq: seq, name: name} | acc])
+
+      [] ->
+        acc
+    end
   end
 
   @spec anchor_count(Exqlite.Sqlite3.db()) :: integer()
@@ -134,7 +172,21 @@ defmodule Gong.Tape.Index do
     """, [])
 
     exec(conn, "CREATE INDEX IF NOT EXISTS idx_entries_anchor ON entries(anchor)", [])
+
+    # v2: 添加 parent_seq 支持树形分支（幂等迁移）
+    migrate_v2_branching(conn)
+
     :ok
+  end
+
+  defp migrate_v2_branching(conn) do
+    cols = query(conn, "PRAGMA table_info(anchors)", [])
+    has_parent = Enum.any?(cols, fn row -> Enum.at(row, 1) == "parent_seq" end)
+
+    unless has_parent do
+      exec(conn, "ALTER TABLE anchors ADD COLUMN parent_seq INTEGER REFERENCES anchors(seq)", [])
+      exec(conn, "CREATE INDEX IF NOT EXISTS idx_anchors_parent ON anchors(parent_seq)", [])
+    end
   end
 
   defp exec(conn, sql, params) do

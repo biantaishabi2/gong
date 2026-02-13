@@ -511,6 +511,180 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_context_compactable} ->
         assert_context_compactable!(ctx, args, meta)
 
+      # ── ModelRegistry ──
+
+      {:given, :init_model_registry} ->
+        init_model_registry!(ctx, args, meta)
+
+      {:given, :register_model} ->
+        register_model!(ctx, args, meta)
+
+      {:when, :switch_model} ->
+        switch_model!(ctx, args, meta)
+
+      {:when, :validate_model} ->
+        validate_model!(ctx, args, meta)
+
+      {:then, :assert_current_model} ->
+        assert_current_model!(ctx, args, meta)
+
+      {:then, :assert_model_error} ->
+        assert_model_error!(ctx, args, meta)
+
+      {:then, :assert_model_count} ->
+        assert_model_count!(ctx, args, meta)
+
+      # ── Stream ──
+
+      {:given, :mock_stream_response} ->
+        mock_stream_response!(ctx, args, meta)
+
+      {:then, :assert_stream_content} ->
+        assert_stream_content!(ctx, args, meta)
+
+      # ── Abort ──
+
+      {:given, :setup_abort_scenario} ->
+        setup_abort_scenario!(ctx, args, meta)
+
+      {:when, :send_abort_signal} ->
+        send_abort_signal!(ctx, args, meta)
+
+      {:then, :assert_aborted} ->
+        assert_aborted!(ctx, args, meta)
+
+      {:then, :assert_abort_reset} ->
+        assert_abort_reset!(ctx, args, meta)
+
+      {:then, :assert_partial_content} ->
+        assert_partial_content!(ctx, args, meta)
+
+      # ── Session 树形分支 ──
+
+      {:when, :tape_branch_from} ->
+        tape_branch_from!(ctx, args, meta)
+
+      {:when, :tape_navigate} ->
+        tape_navigate!(ctx, args, meta)
+
+      {:when, :tape_build_context} ->
+        tape_build_context!(ctx, args, meta)
+
+      {:then, :assert_tape_branches} ->
+        assert_tape_branches!(ctx, args, meta)
+
+      {:then, :assert_tape_context_path} ->
+        assert_tape_context_path!(ctx, args, meta)
+
+      # ── Extension ──
+
+      {:given, :create_extension_dir} ->
+        create_extension_dir!(ctx, args, meta)
+
+      {:given, :create_extension_file} ->
+        create_extension_file!(ctx, args, meta)
+
+      {:when, :discover_extensions} ->
+        discover_extensions!(ctx, args, meta)
+
+      {:when, :load_extension} ->
+        load_extension!(ctx, args, meta)
+
+      {:when, :load_all_extensions} ->
+        load_all_extensions!(ctx, args, meta)
+
+      {:then, :assert_extension_loaded} ->
+        assert_extension_loaded!(ctx, args, meta)
+
+      {:then, :assert_extension_tools} ->
+        assert_extension_tools!(ctx, args, meta)
+
+      {:then, :assert_extension_error} ->
+        assert_extension_error!(ctx, args, meta)
+
+      {:then, :assert_extension_count} ->
+        assert_extension_count!(ctx, args, meta)
+
+      # ── Follow-up ──
+
+      {:given, :inject_follow_up} ->
+        inject_follow_up!(ctx, args, meta)
+
+      {:given, :push_steering_message} ->
+        push_steering_message!(ctx, args, meta)
+
+      {:when, :steering_check_follow_up} ->
+        steering_check_follow_up!(ctx, args, meta)
+
+      {:then, :assert_follow_up_message} ->
+        assert_follow_up_message!(ctx, args, meta)
+
+      {:then, :assert_follow_up_empty} ->
+        assert_follow_up_empty!(ctx, args, meta)
+
+      # ── Settings ──
+
+      {:given, :init_settings} ->
+        init_settings!(ctx, args, meta)
+
+      {:given, :create_settings_file} ->
+        create_settings_file!(ctx, args, meta)
+
+      {:when, :get_setting} ->
+        get_setting!(ctx, args, meta)
+
+      {:when, :set_setting} ->
+        set_setting!(ctx, args, meta)
+
+      {:then, :assert_setting_value} ->
+        assert_setting_value!(ctx, args, meta)
+
+      # ── Resource ──
+
+      {:given, :create_resource_dir} ->
+        create_resource_dir!(ctx, args, meta)
+
+      {:given, :create_resource_file} ->
+        create_resource_file!(ctx, args, meta)
+
+      {:when, :load_resources} ->
+        load_resources!(ctx, args, meta)
+
+      {:when, :reload_resources} ->
+        reload_resources!(ctx, args, meta)
+
+      {:then, :assert_resource_content} ->
+        assert_resource_content!(ctx, args, meta)
+
+      {:then, :assert_resource_count} ->
+        assert_resource_count!(ctx, args, meta)
+
+      # ── Branch Summary ──
+
+      {:when, :generate_branch_summary} ->
+        generate_branch_summary!(ctx, args, meta)
+
+      {:then, :assert_branch_summary} ->
+        assert_branch_summary!(ctx, args, meta)
+
+      # ── Tool: truncate_tool ──
+
+      {:when, :tool_truncate} ->
+        tool_truncate!(ctx, args, meta)
+
+      # ── Tool: edit-diff ──
+
+      {:when, :tool_edit_diff} ->
+        tool_edit_diff!(ctx, args, meta)
+
+      # ── Path Utils ──
+
+      {:when, :normalize_path} ->
+        normalize_path!(ctx, args, meta)
+
+      {:then, :assert_normalized_path} ->
+        assert_normalized_path!(ctx, args, meta)
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -1225,33 +1399,53 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp agent_stream!(ctx, %{prompt: prompt}, _meta) do
     queue = Map.get(ctx, :mock_queue, [])
+    stream_queue = Map.get(ctx, :stream_queue, [])
     events = [{:stream, :start}]
 
-    if queue != [] do
-      agent = ctx.agent
-      case Gong.MockLLM.run_chat(agent, prompt, queue) do
-        {:ok, reply, updated_agent} ->
-          events = events ++ [{:stream, :delta}, {:stream, :end}]
-          ctx
-          |> Map.put(:agent, updated_agent)
-          |> Map.put(:last_reply, reply)
-          |> Map.put(:stream_events, events)
-          |> Map.put(:mock_queue, [])
+    cond do
+      # 有 stream_queue → 使用 MockStream 处理 chunk 队列
+      stream_queue != [] ->
+        chunks = List.first(stream_queue)
+        {_stream_events, text} = Gong.MockStream.run(chunks)
+        events = events ++ [{:stream, :delta}, {:stream, :end}]
 
-        {:error, reason, updated_agent} ->
-          events = events ++ [{:stream, :end}]
-          ctx
-          |> Map.put(:agent, updated_agent)
-          |> Map.put(:last_reply, nil)
-          |> Map.put(:last_error, reason)
-          |> Map.put(:stream_events, events)
-          |> Map.put(:mock_queue, [])
-      end
-    else
-      ctx
-      |> Map.put(:last_reply, nil)
-      |> Map.put(:stream_events, events ++ [{:stream, :end}])
-      |> Map.put(:mock_queue, [])
+        ctx
+        |> Map.put(:last_reply, text)
+        |> Map.put(:last_error, nil)
+        |> Map.put(:stream_events, events)
+        |> Map.put(:stream_queue, Enum.drop(stream_queue, 1))
+        |> Map.put(:mock_queue, [])
+
+      # 有 mock_queue → 使用 MockLLM 正常处理
+      queue != [] ->
+        agent = ctx.agent
+        hooks = Map.get(ctx, :hooks, [])
+        case Gong.MockLLM.run_chat(agent, prompt, queue, hooks) do
+          {:ok, reply, updated_agent} ->
+            events = events ++ [{:stream, :delta}, {:stream, :end}]
+            ctx
+            |> Map.put(:agent, updated_agent)
+            |> Map.put(:last_reply, reply)
+            |> Map.put(:last_error, nil)
+            |> Map.put(:stream_events, events)
+            |> Map.put(:mock_queue, [])
+
+          {:error, reason, updated_agent} ->
+            events = events ++ [{:stream, :end}]
+            ctx
+            |> Map.put(:agent, updated_agent)
+            |> Map.put(:last_reply, nil)
+            |> Map.put(:last_error, reason)
+            |> Map.put(:stream_events, events)
+            |> Map.put(:mock_queue, [])
+        end
+
+      # 无队列 → E2E 模式
+      true ->
+        # E2E 流式：复用 agent_chat 逻辑
+        ctx = agent_chat!(ctx, %{prompt: prompt}, %{})
+        events = events ++ [{:stream, :delta}, {:stream, :end}]
+        Map.put(ctx, :stream_events, events)
     end
   end
 
@@ -2668,9 +2862,563 @@ defmodule Gong.BDD.Instructions.V1 do
     |> String.replace("\\n", "\n")
     |> String.replace("\\t", "\t")
     |> String.replace("\\r", "\r")
+    |> String.replace("\\\"", "\"")
   end
 
   defp unescape(other), do: other
+
+  # ══════════════════════════════════════════════════════
+  # 第二~四批次实现（Steps ⑤-⑭）
+  # ══════════════════════════════════════════════════════
+
+  # ── ModelRegistry 实现 ──
+
+  defp init_model_registry!(ctx, _args, _meta) do
+    Gong.ModelRegistry.init()
+
+    ExUnit.Callbacks.on_exit(fn ->
+      Gong.ModelRegistry.cleanup()
+    end)
+
+    ctx
+  end
+
+  defp register_model!(ctx, args, _meta) do
+    name = String.to_atom(args.name)
+    config = %{
+      provider: args.provider,
+      model_id: args.model_id,
+      api_key_env: Map.get(args, :api_key_env, "DEEPSEEK_API_KEY")
+    }
+
+    Gong.ModelRegistry.register(name, config)
+    ctx
+  end
+
+  defp switch_model!(ctx, %{name: name}, _meta) do
+    name_atom = String.to_atom(name)
+
+    case Gong.ModelRegistry.switch(name_atom) do
+      :ok ->
+        Map.put(ctx, :model_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :model_last_error, to_string(reason))
+    end
+  end
+
+  defp validate_model!(ctx, %{name: name}, _meta) do
+    name_atom = String.to_atom(name)
+
+    case Gong.ModelRegistry.validate(name_atom) do
+      :ok ->
+        Map.put(ctx, :model_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :model_last_error, reason)
+    end
+  end
+
+  defp assert_current_model!(ctx, %{name: expected}, _meta) do
+    {name, _config} = Gong.ModelRegistry.current_model()
+    assert to_string(name) == expected,
+      "期望当前模型=#{expected}，实际：#{name}"
+    ctx
+  end
+
+  defp assert_model_error!(ctx, %{error_contains: expected}, _meta) do
+    error = Map.get(ctx, :model_last_error)
+    assert error != nil, "期望模型错误，但 model_last_error 为 nil"
+    decoded = unescape(expected)
+
+    assert to_string(error) =~ decoded,
+      "期望模型错误包含 #{inspect(decoded)}，实际：#{inspect(error)}"
+
+    ctx
+  end
+
+  defp assert_model_count!(ctx, %{expected: expected}, _meta) do
+    models = Gong.ModelRegistry.list()
+    actual = length(models)
+
+    assert actual == expected,
+      "期望模型数=#{expected}，实际：#{actual}"
+
+    ctx
+  end
+
+  # ── Stream 扩展实现 ──
+
+  defp mock_stream_response!(ctx, args, _meta) do
+    chunks = parse_stream_chunks(Map.get(args, :chunks, ""))
+    stream_queue = Map.get(ctx, :stream_queue, [])
+    Map.put(ctx, :stream_queue, stream_queue ++ [chunks])
+  end
+
+  defp parse_stream_chunks(""), do: []
+  defp parse_stream_chunks(str) do
+    str
+    |> String.split("|")
+    |> Enum.map(fn chunk ->
+      case String.split(chunk, ":", parts: 2) do
+        ["chunk", text] -> {:chunk, text}
+        ["abort", reason] -> {:abort, reason}
+        ["delay", ms] -> {:delay, String.to_integer(ms)}
+        ["done"] -> :done
+        [text] -> {:chunk, text}
+      end
+    end)
+  end
+
+  defp assert_stream_content!(ctx, %{expected: expected}, _meta) do
+    reply = Map.get(ctx, :last_reply, "")
+    decoded = unescape(expected)
+
+    assert to_string(reply) =~ decoded,
+      "期望流式内容包含 #{inspect(decoded)}，实际：#{inspect(reply)}"
+
+    ctx
+  end
+
+  # ── Abort 实现 ──
+
+  defp setup_abort_scenario!(ctx, args, _meta) do
+    abort_after = Map.get(args, :after_tool, 1)
+    Map.put(ctx, :abort_config, %{after_tool: abort_after})
+  end
+
+  defp send_abort_signal!(ctx, _args, _meta) do
+    Gong.Abort.signal!()
+    ctx
+  end
+
+  defp assert_aborted!(ctx, _args, _meta) do
+    # 检查 last_error 包含 aborted 或 ctx 标记
+    error = Map.get(ctx, :last_error)
+    assert error != nil, "期望操作被中止，但未发现错误"
+    assert to_string(error) =~ "abort",
+      "期望错误包含 abort，实际：#{inspect(error)}"
+    ctx
+  end
+
+  defp assert_abort_reset!(ctx, _args, _meta) do
+    # 重置 abort 信号（测试隔离）
+    Gong.Abort.reset!()
+    refute Gong.Abort.aborted?(), "期望 abort 已重置"
+    ctx
+  end
+
+  defp assert_partial_content!(ctx, %{contains: expected}, _meta) do
+    reply = Map.get(ctx, :last_reply, "")
+    decoded = unescape(expected)
+
+    assert to_string(reply) =~ decoded,
+      "期望部分内容包含 #{inspect(decoded)}，实际：#{inspect(reply)}"
+
+    ctx
+  end
+
+  # ── Session 树形分支实现 ──
+
+  defp tape_branch_from!(ctx, %{anchor: anchor_name}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.branch_from(store, anchor_name) do
+      {:ok, branch_name, updated_store} ->
+        ctx
+        |> Map.put(:tape_store, updated_store)
+        |> Map.put(:tape_last_branch, branch_name)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_navigate!(ctx, %{anchor: anchor_name}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.navigate(store, anchor_name) do
+      {:ok, updated_store} ->
+        ctx
+        |> Map.put(:tape_store, updated_store)
+        |> Map.put(:tape_last_anchor, anchor_name)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_build_context!(ctx, %{anchor: anchor_name}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.build_context_path(store, anchor_name) do
+      {:ok, entries} ->
+        ctx
+        |> Map.put(:tape_context_path, entries)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp assert_tape_branches!(ctx, %{anchor: anchor_name, expected: expected}, _meta) do
+    store = ctx.tape_store
+    branches = Gong.Tape.Store.branches(store, anchor_name)
+    actual = length(branches)
+
+    assert actual == expected,
+      "期望分支数=#{expected}，实际：#{actual}，分支：#{inspect(branches)}"
+
+    ctx
+  end
+
+  defp assert_tape_context_path!(ctx, %{count: expected_count} = args, _meta) do
+    entries = Map.get(ctx, :tape_context_path, [])
+    actual = length(entries)
+
+    assert actual == expected_count,
+      "期望上下文路径条目数=#{expected_count}，实际：#{actual}"
+
+    if text = args[:contains] do
+      decoded = unescape(text)
+      found = Enum.any?(entries, fn entry ->
+        to_string(Map.get(entry, :content, "")) =~ decoded
+      end)
+      assert found, "期望上下文路径包含 #{inspect(decoded)}"
+    end
+
+    ctx
+  end
+
+  # ── Extension 实现 ──
+
+  defp create_extension_dir!(ctx, _args, _meta) do
+    ext_dir = Path.join(ctx.workspace, "extensions")
+    File.mkdir_p!(ext_dir)
+    Map.put(ctx, :extension_dir, ext_dir)
+  end
+
+  defp create_extension_file!(ctx, %{name: name, content: content}, _meta) do
+    ext_dir = Map.get(ctx, :extension_dir, Path.join(ctx.workspace, "extensions"))
+    File.mkdir_p!(ext_dir)
+    file_path = Path.join(ext_dir, name)
+    File.write!(file_path, unescape(content))
+    ctx
+  end
+
+  defp discover_extensions!(ctx, _args, _meta) do
+    ext_dir = Map.get(ctx, :extension_dir, Path.join(ctx.workspace, "extensions"))
+
+    case Gong.Extension.Loader.discover([ext_dir]) do
+      {:ok, files} ->
+        ctx
+        |> Map.put(:extension_files, files)
+        |> Map.put(:extension_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :extension_last_error, reason)
+    end
+  end
+
+  defp load_extension!(ctx, %{path: path}, _meta) do
+    full = Path.join(Map.get(ctx, :extension_dir, ctx.workspace), path)
+
+    case Gong.Extension.Loader.load(full) do
+      {:ok, ext_module} ->
+        loaded = Map.get(ctx, :loaded_extensions, [])
+        ctx
+        |> Map.put(:loaded_extensions, loaded ++ [ext_module])
+        |> Map.put(:extension_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :extension_last_error, reason)
+    end
+  end
+
+  defp load_all_extensions!(ctx, _args, _meta) do
+    ext_dir = Map.get(ctx, :extension_dir, Path.join(ctx.workspace, "extensions"))
+
+    case Gong.Extension.Loader.load_all([ext_dir]) do
+      {:ok, modules, errors} ->
+        ctx
+        |> Map.put(:loaded_extensions, modules)
+        |> Map.put(:extension_load_errors, errors)
+        |> Map.put(:extension_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :extension_last_error, reason)
+    end
+  end
+
+  defp assert_extension_loaded!(ctx, %{name: expected}, _meta) do
+    loaded = Map.get(ctx, :loaded_extensions, [])
+    found = Enum.any?(loaded, fn mod ->
+      mod_name = if is_atom(mod), do: to_string(mod), else: to_string(mod)
+      mod_name =~ expected
+    end)
+
+    assert found,
+      "期望 Extension #{expected} 已加载，实际：#{inspect(loaded)}"
+
+    ctx
+  end
+
+  defp assert_extension_tools!(ctx, %{expected: expected}, _meta) do
+    loaded = Map.get(ctx, :loaded_extensions, [])
+    tools = Enum.flat_map(loaded, fn mod ->
+      if function_exported?(mod, :tools, 0), do: mod.tools(), else: []
+    end)
+
+    assert length(tools) == expected,
+      "期望工具数=#{expected}，实际：#{length(tools)}"
+
+    ctx
+  end
+
+  defp assert_extension_error!(ctx, %{error_contains: expected}, _meta) do
+    error = Map.get(ctx, :extension_last_error)
+    errors = Map.get(ctx, :extension_load_errors, [])
+
+    has_error = (error != nil && to_string(error) =~ unescape(expected)) ||
+      Enum.any?(errors, fn {_path, err} -> to_string(err) =~ unescape(expected) end)
+
+    assert has_error,
+      "期望扩展错误包含 #{inspect(expected)}，实际 error：#{inspect(error)}，errors：#{inspect(errors)}"
+
+    ctx
+  end
+
+  defp assert_extension_count!(ctx, %{expected: expected}, _meta) do
+    loaded = Map.get(ctx, :loaded_extensions, [])
+    actual = length(loaded)
+
+    assert actual == expected,
+      "期望已加载扩展数=#{expected}，实际：#{actual}"
+
+    ctx
+  end
+
+  # ── Follow-up 实现 ──
+
+  defp inject_follow_up!(ctx, %{message: message}, _meta) do
+    queue = Map.get(ctx, :steering_queue, Gong.Steering.new())
+    Map.put(ctx, :steering_queue, Gong.Steering.push(queue, {:follow_up, message}))
+  end
+
+  defp push_steering_message!(ctx, %{message: message}, _meta) do
+    queue = Map.get(ctx, :steering_queue, Gong.Steering.new())
+    Map.put(ctx, :steering_queue, Gong.Steering.push(queue, message))
+  end
+
+  defp steering_check_follow_up!(ctx, _args, _meta) do
+    queue = Map.get(ctx, :steering_queue, Gong.Steering.new())
+    {msg, new_queue} = Gong.Steering.check_follow_up(queue)
+
+    ctx
+    |> Map.put(:steering_queue, new_queue)
+    |> Map.put(:follow_up_last_message, msg)
+  end
+
+  defp assert_follow_up_message!(ctx, %{contains: text}, _meta) do
+    msg = Map.get(ctx, :follow_up_last_message)
+    assert msg != nil, "期望 follow_up 消息不为 nil"
+    assert to_string(msg) =~ text,
+      "期望 follow_up 消息包含 #{inspect(text)}，实际：#{inspect(msg)}"
+    ctx
+  end
+
+  defp assert_follow_up_empty!(ctx, _args, _meta) do
+    msg = Map.get(ctx, :follow_up_last_message)
+    assert msg == nil, "期望 follow_up 为空，实际：#{inspect(msg)}"
+    ctx
+  end
+
+  # ── Settings 实现 ──
+
+  defp init_settings!(ctx, _args, _meta) do
+    Gong.Settings.init(ctx.workspace)
+
+    ExUnit.Callbacks.on_exit(fn ->
+      Gong.Settings.cleanup()
+    end)
+
+    ctx
+  end
+
+  defp create_settings_file!(ctx, %{scope: scope, content: content}, _meta) do
+    dir = case scope do
+      "global" -> Path.join(ctx.workspace, ".gong")
+      "project" -> Path.join(ctx.workspace, ".gong")
+      _ -> Path.join(ctx.workspace, ".gong")
+    end
+    File.mkdir_p!(dir)
+    File.write!(Path.join(dir, "settings.json"), unescape(content))
+    ctx
+  end
+
+  defp get_setting!(ctx, %{key: key}, _meta) do
+    value = Gong.Settings.get(key)
+    Map.put(ctx, :setting_last_value, value)
+  end
+
+  defp set_setting!(ctx, %{key: key, value: value}, _meta) do
+    Gong.Settings.set(key, unescape(value))
+    ctx
+  end
+
+  defp assert_setting_value!(ctx, %{expected: expected}, _meta) do
+    actual = Map.get(ctx, :setting_last_value)
+    decoded = unescape(expected)
+
+    assert to_string(actual) == decoded,
+      "期望设置值=#{inspect(decoded)}，实际：#{inspect(actual)}"
+
+    ctx
+  end
+
+  # ── Resource 实现 ──
+
+  defp create_resource_dir!(ctx, %{scope: scope}, _meta) do
+    dir = case scope do
+      "global" -> Path.join(ctx.workspace, ".gong/context")
+      "project" -> Path.join(ctx.workspace, ".gong/context")
+      _ -> Path.join(ctx.workspace, ".gong/context")
+    end
+    File.mkdir_p!(dir)
+    Map.put(ctx, :resource_dir, dir)
+  end
+
+  defp create_resource_file!(ctx, %{name: name, content: content}, _meta) do
+    dir = Map.get(ctx, :resource_dir, Path.join(ctx.workspace, ".gong/context"))
+    File.mkdir_p!(dir)
+    File.write!(Path.join(dir, name), unescape(content))
+    ctx
+  end
+
+  defp load_resources!(ctx, _args, _meta) do
+    gong_dir = Path.join(ctx.workspace, ".gong")
+
+    case Gong.ResourceLoader.load([gong_dir]) do
+      {:ok, resources} ->
+        ctx
+        |> Map.put(:loaded_resources, resources)
+        |> Map.put(:resource_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :resource_last_error, reason)
+    end
+  end
+
+  defp reload_resources!(ctx, _args, _meta) do
+    gong_dir = Path.join(ctx.workspace, ".gong")
+
+    case Gong.ResourceLoader.load([gong_dir]) do
+      {:ok, resources} ->
+        ctx
+        |> Map.put(:loaded_resources, resources)
+        |> Map.put(:resource_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :resource_last_error, reason)
+    end
+  end
+
+  defp assert_resource_content!(ctx, %{contains: text}, _meta) do
+    resources = Map.get(ctx, :loaded_resources, [])
+    decoded = unescape(text)
+
+    found = Enum.any?(resources, fn res ->
+      to_string(Map.get(res, :content, "")) =~ decoded
+    end)
+
+    assert found,
+      "期望资源内容包含 #{inspect(decoded)}，实际资源数：#{length(resources)}"
+
+    ctx
+  end
+
+  defp assert_resource_count!(ctx, %{expected: expected}, _meta) do
+    resources = Map.get(ctx, :loaded_resources, [])
+    actual = length(resources)
+
+    assert actual == expected,
+      "期望资源数=#{expected}，实际：#{actual}"
+
+    ctx
+  end
+
+  # ── Branch Summary 实现 ──
+
+  defp generate_branch_summary!(ctx, %{anchor: anchor_name}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.generate_branch_summary(store, anchor_name) do
+      {:ok, summary} ->
+        ctx
+        |> Map.put(:branch_summary, summary)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp assert_branch_summary!(ctx, %{contains: text}, _meta) do
+    summary = Map.get(ctx, :branch_summary)
+    assert summary != nil, "期望分支摘要不为 nil"
+    decoded = unescape(text)
+
+    assert to_string(summary) =~ decoded,
+      "期望摘要包含 #{inspect(decoded)}，实际：#{inspect(summary)}"
+
+    ctx
+  end
+
+  # ── Tool: truncate_tool 实现 ──
+
+  defp tool_truncate!(ctx, args, _meta) do
+    path = resolve_tool_path(ctx, Map.get(args, :path, ""))
+    params = %{file_path: path}
+    params = if args[:max_lines], do: Map.put(params, :max_lines, args.max_lines), else: params
+
+    result = Gong.Tools.Truncate.run(params, %{})
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── Tool: edit-diff 实现 ──
+
+  defp tool_edit_diff!(ctx, args, _meta) do
+    path = resolve_tool_path(ctx, Map.get(args, :path, ""))
+    params = %{
+      file_path: path,
+      mode: "diff",
+      diff: unescape(args.diff)
+    }
+
+    tool_ctx = %{workspace: ctx[:workspace]}
+    result = Gong.Tools.Edit.run(params, tool_ctx)
+    Map.put(ctx, :last_result, result)
+  end
+
+  # ── Path Utils 实现 ──
+
+  defp normalize_path!(ctx, %{path: path}, _meta) do
+    normalized = Gong.PathUtils.normalize(unescape(path))
+    Map.put(ctx, :normalized_path, normalized)
+  end
+
+  defp assert_normalized_path!(ctx, %{expected: expected}, _meta) do
+    actual = Map.get(ctx, :normalized_path)
+    decoded = unescape(expected)
+
+    assert actual == decoded,
+      "期望路径=#{inspect(decoded)}，实际：#{inspect(actual)}"
+
+    ctx
+  end
 
   # ── 错误诊断 ──
 
