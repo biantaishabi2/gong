@@ -775,4 +775,48 @@ defmodule Gong.BDD.Generated.TapeStorageTest do
     :ok
   end
 
+  # Source: BDD-TAPE-033
+  @tag :tape
+  @tag :unit
+  test "[BDD-TAPE-033] metadata 存取往返" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-TAPE-033"}
+    # line 338: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 338, raw: "GIVEN create_temp_dir"}, 338)
+    # line 339: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 339, raw: "GIVEN tape_init"}, 339)
+    # line 340: GIVEN tape_append kind="message" content="带元数据" metadata_kv="source:test,priority:1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "带元数据", kind: "message", metadata_kv: "source:test,priority:1"}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 340, raw: "GIVEN tape_append kind=\"message\" content=\"带元数据\" metadata_kv=\"source:test,priority:1\""}, 340)
+    # line 341: WHEN when_tape_search query="带元数据"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_tape_search, %{query: "带元数据"}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 341, raw: "WHEN when_tape_search query=\"带元数据\""}, 341)
+    # line 342: THEN assert_search_result_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_search_result_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 342, raw: "THEN assert_search_result_count expected=1"}, 342)
+    # line 343: THEN assert_entry_has_metadata key="source" value="test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_entry_has_metadata, %{key: "source", value: "test"}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 343, raw: "THEN assert_entry_has_metadata key=\"source\" value=\"test\""}, 343)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-TAPE-034
+  @tag :tape
+  @tag :unit
+  test "[BDD-TAPE-034] metadata 默认空对象" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-TAPE-034"}
+    # line 346: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 346, raw: "GIVEN create_temp_dir"}, 346)
+    # line 347: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 347, raw: "GIVEN tape_init"}, 347)
+    # line 348: GIVEN tape_append kind="message" content="无元数据"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "无元数据", kind: "message"}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 348, raw: "GIVEN tape_append kind=\"message\" content=\"无元数据\""}, 348)
+    # line 349: WHEN when_tape_search query="无元数据"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_tape_search, %{query: "无元数据"}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 349, raw: "WHEN when_tape_search query=\"无元数据\""}, 349)
+    # line 350: THEN assert_search_result_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_search_result_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 350, raw: "THEN assert_search_result_count expected=1"}, 350)
+    # line 351: THEN assert_entry_has_metadata key="" value=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_entry_has_metadata, %{key: "", value: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_storage.dsl", line: 351, raw: "THEN assert_entry_has_metadata key=\"\" value=\"\""}, 351)
+    _ctx = ctx
+    :ok
+  end
+
 end

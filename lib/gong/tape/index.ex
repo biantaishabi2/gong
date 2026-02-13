@@ -39,11 +39,13 @@ defmodule Gong.Tape.Index do
   end
 
   @spec insert_entry(Exqlite.Sqlite3.db(), map()) :: :ok | {:error, term()}
-  def insert_entry(conn, %{id: id, anchor: anchor, kind: kind, content: content, timestamp: ts}) do
+  def insert_entry(conn, %{id: id, anchor: anchor, kind: kind, content: content, timestamp: ts} = entry) do
+    metadata_json = entry |> Map.get(:metadata, %{}) |> Jason.encode!()
+
     exec(
       conn,
-      "INSERT INTO entries (id, anchor, kind, content, timestamp) VALUES (?1, ?2, ?3, ?4, ?5)",
-      [id, anchor, kind, content, ts]
+      "INSERT INTO entries (id, anchor, kind, content, timestamp, metadata) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+      [id, anchor, kind, content, ts, metadata_json]
     )
   end
 
@@ -66,7 +68,7 @@ defmodule Gong.Tape.Index do
       query(
         conn,
         """
-        SELECT e.id, e.anchor, e.kind, e.content, e.timestamp
+        SELECT e.id, e.anchor, e.kind, e.content, e.timestamp, e.metadata
         FROM entries e
         JOIN anchors a ON e.anchor = a.name
         WHERE a.seq >= (SELECT seq FROM anchors WHERE name = ?1)
@@ -84,7 +86,7 @@ defmodule Gong.Tape.Index do
     rows =
       query(
         conn,
-        "SELECT id, anchor, kind, content, timestamp FROM entries WHERE content LIKE ?1",
+        "SELECT id, anchor, kind, content, timestamp, metadata FROM entries WHERE content LIKE ?1",
         ["%#{query_text}%"]
       )
 
@@ -93,7 +95,7 @@ defmodule Gong.Tape.Index do
 
   @spec all_entries(Exqlite.Sqlite3.db()) :: [map()]
   def all_entries(conn) do
-    rows = query(conn, "SELECT id, anchor, kind, content, timestamp FROM entries ORDER BY timestamp ASC", [])
+    rows = query(conn, "SELECT id, anchor, kind, content, timestamp, metadata FROM entries ORDER BY timestamp ASC", [])
     Enum.map(rows, &row_to_entry/1)
   end
 
@@ -126,7 +128,8 @@ defmodule Gong.Tape.Index do
       anchor TEXT NOT NULL,
       kind TEXT NOT NULL,
       content TEXT NOT NULL,
-      timestamp INTEGER NOT NULL
+      timestamp INTEGER NOT NULL,
+      metadata TEXT DEFAULT '{}'
     )
     """, [])
 
@@ -187,6 +190,16 @@ defmodule Gong.Tape.Index do
   end
 
   defp row_to_entry([id, anchor, kind, content, timestamp]) do
-    %{id: id, anchor: anchor, kind: kind, content: content, timestamp: timestamp}
+    %{id: id, anchor: anchor, kind: kind, content: content, timestamp: timestamp, metadata: %{}}
+  end
+
+  defp row_to_entry([id, anchor, kind, content, timestamp, metadata_json]) do
+    metadata =
+      case Jason.decode(metadata_json || "{}") do
+        {:ok, map} when is_map(map) -> map
+        _ -> %{}
+      end
+
+    %{id: id, anchor: anchor, kind: kind, content: content, timestamp: timestamp, metadata: metadata}
   end
 end

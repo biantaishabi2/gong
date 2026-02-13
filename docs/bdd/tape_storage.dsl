@@ -329,3 +329,23 @@ GIVEN tape_restore_parent
 WHEN when_tape_merge
 THEN assert_entry_count expected=2
 THEN assert_fork_cleaned
+
+# ══════════════════════════════════════════════
+# Group 11: Metadata 存储（2 个）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-TAPE-033] TITLE: metadata 存取往返 TAGS: unit tape
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="message" content="带元数据" metadata_kv="source:test,priority:1"
+WHEN when_tape_search query="带元数据"
+THEN assert_search_result_count expected=1
+THEN assert_entry_has_metadata key="source" value="test"
+
+[SCENARIO: BDD-TAPE-034] TITLE: metadata 默认空对象 TAGS: unit tape
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="message" content="无元数据"
+WHEN when_tape_search query="无元数据"
+THEN assert_search_result_count expected=1
+THEN assert_entry_has_metadata key="" value=""

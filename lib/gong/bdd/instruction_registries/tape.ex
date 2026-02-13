@@ -23,7 +23,9 @@ defmodule Gong.BDD.InstructionRegistries.Tape do
         args: %{
           anchor: %{type: :string, required?: false, allowed: nil},
           kind: %{type: :string, required?: true, allowed: nil},
-          content: %{type: :string, required?: true, allowed: nil}
+          content: %{type: :string, required?: true, allowed: nil},
+          metadata_json: %{type: :string, required?: false, allowed: nil},
+          metadata_kv: %{type: :string, required?: false, allowed: nil}
         },
         outputs: %{},
         rules: [],
@@ -371,6 +373,35 @@ defmodule Gong.BDD.InstructionRegistries.Tape do
         name: :assert_fork_cleaned,
         kind: :then,
         args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_search_result_count: %{
+        name: :assert_search_result_count,
+        kind: :then,
+        args: %{
+          expected: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit, :integration],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_entry_has_metadata: %{
+        name: :assert_entry_has_metadata,
+        kind: :then,
+        args: %{
+          key: %{type: :string, required?: true, allowed: nil},
+          value: %{type: :string, required?: true, allowed: nil}
+        },
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
