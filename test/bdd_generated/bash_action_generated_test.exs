@@ -85,10 +85,12 @@ defmodule Gong.BDD.Generated.BashActionTest do
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-005"}
     # line 34: GIVEN create_temp_dir
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 34, raw: "GIVEN create_temp_dir"}, 34)
-    # line 35: WHEN tool_bash command="sleep 10" timeout=1
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "sleep 10", timeout: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 35, raw: "WHEN tool_bash command=\"sleep 10\" timeout=1"}, 35)
+    # line 35: WHEN tool_bash command="tail -f /dev/null" timeout=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "tail -f /dev/null", timeout: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 35, raw: "WHEN tool_bash command=\"tail -f /dev/null\" timeout=1"}, 35)
     # line 36: THEN assert_output_contains text="timed out after 1 seconds"
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "timed out after 1 seconds"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 36, raw: "THEN assert_output_contains text=\"timed out after 1 seconds\""}, 36)
+    # line 37: THEN assert_result_field field="timed_out" expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "true", field: "timed_out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 37, raw: "THEN assert_result_field field=\"timed_out\" expected=\"true\""}, 37)
     _ctx = ctx
     :ok
   end
@@ -99,12 +101,12 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-006] 不存在的工作目录" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-006"}
-    # line 39: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 39, raw: "GIVEN create_temp_dir"}, 39)
-    # line 40: WHEN tool_bash command="echo test" cwd="/this/directory/does/not/exist"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo test", cwd: "/this/directory/does/not/exist"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 40, raw: "WHEN tool_bash command=\"echo test\" cwd=\"/this/directory/does/not/exist\""}, 40)
-    # line 41: THEN assert_tool_error error_contains="ENOENT"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "ENOENT"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 41, raw: "THEN assert_tool_error error_contains=\"ENOENT\""}, 41)
+    # line 40: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 40, raw: "GIVEN create_temp_dir"}, 40)
+    # line 41: WHEN tool_bash command="echo test" cwd="/this/directory/does/not/exist"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo test", cwd: "/this/directory/does/not/exist"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 41, raw: "WHEN tool_bash command=\"echo test\" cwd=\"/this/directory/does/not/exist\""}, 41)
+    # line 42: THEN assert_tool_error error_contains="ENOENT"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "ENOENT"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 42, raw: "THEN assert_tool_error error_contains=\"ENOENT\""}, 42)
     _ctx = ctx
     :ok
   end
@@ -115,12 +117,12 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-007] 空命令" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-007"}
-    # line 44: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 44, raw: "GIVEN create_temp_dir"}, 44)
-    # line 45: WHEN tool_bash command=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 45, raw: "WHEN tool_bash command=\"\""}, 45)
-    # line 46: THEN assert_tool_error error_contains="cannot be empty"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "cannot be empty"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 46, raw: "THEN assert_tool_error error_contains=\"cannot be empty\""}, 46)
+    # line 45: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 45, raw: "GIVEN create_temp_dir"}, 45)
+    # line 46: WHEN tool_bash command=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 46, raw: "WHEN tool_bash command=\"\""}, 46)
+    # line 47: THEN assert_tool_error error_contains="cannot be empty"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "cannot be empty"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 47, raw: "THEN assert_tool_error error_contains=\"cannot be empty\""}, 47)
     _ctx = ctx
     :ok
   end
@@ -131,14 +133,14 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-008] stderr 和 stdout 合并" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-008"}
-    # line 51: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 51, raw: "GIVEN create_temp_dir"}, 51)
-    # line 52: WHEN tool_bash command="echo out; echo err >&2"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo out; echo err >&2"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 52, raw: "WHEN tool_bash command=\"echo out; echo err >&2\""}, 52)
-    # line 53: THEN assert_tool_success content_contains="out"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 53, raw: "THEN assert_tool_success content_contains=\"out\""}, 53)
-    # line 54: THEN assert_output_contains text="err"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "err"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 54, raw: "THEN assert_output_contains text=\"err\""}, 54)
+    # line 52: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 52, raw: "GIVEN create_temp_dir"}, 52)
+    # line 53: WHEN tool_bash command="echo out; echo err >&2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo out; echo err >&2"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 53, raw: "WHEN tool_bash command=\"echo out; echo err >&2\""}, 53)
+    # line 54: THEN assert_tool_success content_contains="out"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 54, raw: "THEN assert_tool_success content_contains=\"out\""}, 54)
+    # line 55: THEN assert_output_contains text="err"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "err"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 55, raw: "THEN assert_output_contains text=\"err\""}, 55)
     _ctx = ctx
     :ok
   end
@@ -149,14 +151,14 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-009] 工作目录设置" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-009"}
-    # line 57: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 57, raw: "GIVEN create_temp_dir"}, 57)
-    # line 58: GIVEN create_temp_file path="subdir/marker.txt" content="found"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "found", path: "subdir/marker.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 58, raw: "GIVEN create_temp_file path=\"subdir/marker.txt\" content=\"found\""}, 58)
-    # line 59: WHEN tool_bash command="cat marker.txt" cwd="subdir"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "cat marker.txt", cwd: "subdir"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 59, raw: "WHEN tool_bash command=\"cat marker.txt\" cwd=\"subdir\""}, 59)
-    # line 60: THEN assert_tool_success content_contains="found"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "found"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 60, raw: "THEN assert_tool_success content_contains=\"found\""}, 60)
+    # line 58: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
+    # line 59: GIVEN create_temp_file path="subdir/marker.txt" content="found"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "found", path: "subdir/marker.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 59, raw: "GIVEN create_temp_file path=\"subdir/marker.txt\" content=\"found\""}, 59)
+    # line 60: WHEN tool_bash command="cat marker.txt" cwd="subdir"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "cat marker.txt", cwd: "subdir"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 60, raw: "WHEN tool_bash command=\"cat marker.txt\" cwd=\"subdir\""}, 60)
+    # line 61: THEN assert_tool_success content_contains="found"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "found"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 61, raw: "THEN assert_tool_success content_contains=\"found\""}, 61)
     _ctx = ctx
     :ok
   end
@@ -167,12 +169,12 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-010] bash 特有语法" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-010"}
-    # line 65: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 65, raw: "GIVEN create_temp_dir"}, 65)
-    # line 66: WHEN tool_bash command="if [[ -f /etc/hosts ]]; then echo yes; fi"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "if [[ -f /etc/hosts ]]; then echo yes; fi"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 66, raw: "WHEN tool_bash command=\"if [[ -f /etc/hosts ]]; then echo yes; fi\""}, 66)
-    # line 67: THEN assert_tool_success content_contains="yes"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "yes"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 67, raw: "THEN assert_tool_success content_contains=\"yes\""}, 67)
+    # line 66: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 66, raw: "GIVEN create_temp_dir"}, 66)
+    # line 67: WHEN tool_bash command="if [[ -f /etc/hosts ]]; then echo yes; fi"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "if [[ -f /etc/hosts ]]; then echo yes; fi"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 67, raw: "WHEN tool_bash command=\"if [[ -f /etc/hosts ]]; then echo yes; fi\""}, 67)
+    # line 68: THEN assert_tool_success content_contains="yes"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "yes"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 68, raw: "THEN assert_tool_success content_contains=\"yes\""}, 68)
     _ctx = ctx
     :ok
   end
@@ -183,12 +185,12 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-011] 管道命令" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-011"}
-    # line 70: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 70, raw: "GIVEN create_temp_dir"}, 70)
-    # line 71: WHEN tool_bash command="echo hello | tr 'h' 'H'"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo hello | tr 'h' 'H'"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 71, raw: "WHEN tool_bash command=\"echo hello | tr 'h' 'H'\""}, 71)
-    # line 72: THEN assert_tool_success content_contains="Hello"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "Hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 72, raw: "THEN assert_tool_success content_contains=\"Hello\""}, 72)
+    # line 71: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 71, raw: "GIVEN create_temp_dir"}, 71)
+    # line 72: WHEN tool_bash command="echo hello | tr 'h' 'H'"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo hello | tr 'h' 'H'"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 72, raw: "WHEN tool_bash command=\"echo hello | tr 'h' 'H'\""}, 72)
+    # line 73: THEN assert_tool_success content_contains="Hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "Hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 73, raw: "THEN assert_tool_success content_contains=\"Hello\""}, 73)
     _ctx = ctx
     :ok
   end
@@ -199,12 +201,12 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-012] 环境变量继承" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-012"}
-    # line 77: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 77, raw: "GIVEN create_temp_dir"}, 77)
-    # line 78: WHEN tool_bash command="echo $HOME"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo $HOME"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 78, raw: "WHEN tool_bash command=\"echo $HOME\""}, 78)
-    # line 79: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 79, raw: "THEN assert_tool_success"}, 79)
+    # line 78: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 78, raw: "GIVEN create_temp_dir"}, 78)
+    # line 79: WHEN tool_bash command="echo $HOME"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo $HOME"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 79, raw: "WHEN tool_bash command=\"echo $HOME\""}, 79)
+    # line 80: THEN assert_tool_success content_contains="/home"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "/home"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 80, raw: "THEN assert_tool_success content_contains=\"/home\""}, 80)
     _ctx = ctx
     :ok
   end
@@ -215,12 +217,12 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-013] 命令不存在" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-013"}
-    # line 82: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 82, raw: "GIVEN create_temp_dir"}, 82)
-    # line 83: WHEN tool_bash command="nonexistent_command_xyz_123"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "nonexistent_command_xyz_123"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 83, raw: "WHEN tool_bash command=\"nonexistent_command_xyz_123\""}, 83)
-    # line 84: THEN assert_exit_code expected=127
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_exit_code, %{expected: 127}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 84, raw: "THEN assert_exit_code expected=127"}, 84)
+    # line 83: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 83, raw: "GIVEN create_temp_dir"}, 83)
+    # line 84: WHEN tool_bash command="nonexistent_command_xyz_123"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "nonexistent_command_xyz_123"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 84, raw: "WHEN tool_bash command=\"nonexistent_command_xyz_123\""}, 84)
+    # line 85: THEN assert_exit_code expected=127
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_exit_code, %{expected: 127}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 85, raw: "THEN assert_exit_code expected=127"}, 85)
     _ctx = ctx
     :ok
   end
@@ -231,14 +233,14 @@ defmodule Gong.BDD.Generated.BashActionTest do
   test "[BDD-BASH-014] 返回值含 timed_out 标记" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-BASH-014"}
-    # line 87: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 87, raw: "GIVEN create_temp_dir"}, 87)
-    # line 88: WHEN tool_bash command="echo quick"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo quick"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 88, raw: "WHEN tool_bash command=\"echo quick\""}, 88)
-    # line 89: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 89, raw: "THEN assert_tool_success"}, 89)
-    # line 90: THEN assert_result_field field="timed_out" expected="false"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "false", field: "timed_out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 90, raw: "THEN assert_result_field field=\"timed_out\" expected=\"false\""}, 90)
+    # line 88: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 88, raw: "GIVEN create_temp_dir"}, 88)
+    # line 89: WHEN tool_bash command="echo quick"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo quick"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 89, raw: "WHEN tool_bash command=\"echo quick\""}, 89)
+    # line 90: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 90, raw: "THEN assert_tool_success"}, 90)
+    # line 91: THEN assert_result_field field="timed_out" expected="false"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "false", field: "timed_out"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 91, raw: "THEN assert_result_field field=\"timed_out\" expected=\"false\""}, 91)
     _ctx = ctx
     :ok
   end

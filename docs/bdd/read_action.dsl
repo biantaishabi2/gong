@@ -39,6 +39,7 @@ GIVEN create_temp_dir
 GIVEN create_large_file path="paged.txt" lines=100 line_length=20
 WHEN tool_read path="paged.txt" offset=41 limit=20
 THEN assert_tool_success content_contains="line 41"
+THEN assert_output_not_contains text="line 61"
 
 [SCENARIO: BDD-READ-007] TITLE: offset=1 边界 TAGS: unit external_io
 GIVEN create_temp_dir
@@ -128,7 +129,8 @@ GIVEN create_temp_file path="tilde_test.txt" content="tilde works"
 WHEN tool_read path="tilde_test.txt"
 THEN assert_tool_success content_contains="tilde works"
 
-[SCENARIO: BDD-READ-020] TITLE: 无效参数类型防护 TAGS: unit external_io
+[SCENARIO: BDD-READ-020] TITLE: 目录路径拒绝 TAGS: unit external_io
 GIVEN create_temp_dir
-WHEN tool_read path="valid.txt"
-THEN assert_tool_error error_contains="ENOENT"
+GIVEN create_temp_file path="subdir/placeholder.txt" content=""
+WHEN tool_read path="subdir"
+THEN assert_tool_error error_contains="Is a directory"

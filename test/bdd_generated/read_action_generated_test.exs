@@ -107,6 +107,8 @@ defmodule Gong.BDD.Generated.ReadActionTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{limit: 20, offset: 41, path: "paged.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 40, raw: "WHEN tool_read path=\"paged.txt\" offset=41 limit=20"}, 40)
     # line 41: THEN assert_tool_success content_contains="line 41"
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "line 41"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 41, raw: "THEN assert_tool_success content_contains=\"line 41\""}, 41)
+    # line 42: THEN assert_output_not_contains text="line 61"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "line 61"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 42, raw: "THEN assert_output_not_contains text=\"line 61\""}, 42)
     _ctx = ctx
     :ok
   end
@@ -117,14 +119,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-007] offset=1 边界" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-007"}
-    # line 44: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 44, raw: "GIVEN create_temp_dir"}, 44)
-    # line 45: GIVEN create_temp_file path="three.txt" content="aaa\nbbb\nccc\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aaa\\nbbb\\nccc\\n", path: "three.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 45, raw: "GIVEN create_temp_file path=\"three.txt\" content=\"aaa\\nbbb\\nccc\\n\""}, 45)
-    # line 46: WHEN tool_read path="three.txt" offset=1
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{offset: 1, path: "three.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 46, raw: "WHEN tool_read path=\"three.txt\" offset=1"}, 46)
-    # line 47: THEN assert_tool_success content_contains="aaa"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "aaa"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 47, raw: "THEN assert_tool_success content_contains=\"aaa\""}, 47)
+    # line 45: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 45, raw: "GIVEN create_temp_dir"}, 45)
+    # line 46: GIVEN create_temp_file path="three.txt" content="aaa\nbbb\nccc\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "aaa\\nbbb\\nccc\\n", path: "three.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 46, raw: "GIVEN create_temp_file path=\"three.txt\" content=\"aaa\\nbbb\\nccc\\n\""}, 46)
+    # line 47: WHEN tool_read path="three.txt" offset=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{offset: 1, path: "three.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 47, raw: "WHEN tool_read path=\"three.txt\" offset=1"}, 47)
+    # line 48: THEN assert_tool_success content_contains="aaa"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "aaa"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 48, raw: "THEN assert_tool_success content_contains=\"aaa\""}, 48)
     _ctx = ctx
     :ok
   end
@@ -135,14 +137,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-008] offset 越界" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-008"}
-    # line 50: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 50, raw: "GIVEN create_temp_dir"}, 50)
-    # line 51: GIVEN create_temp_file path="short.txt" content="a\nb\nc\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "a\\nb\\nc\\n", path: "short.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 51, raw: "GIVEN create_temp_file path=\"short.txt\" content=\"a\\nb\\nc\\n\""}, 51)
-    # line 52: WHEN tool_read path="short.txt" offset=100
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{offset: 100, path: "short.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 52, raw: "WHEN tool_read path=\"short.txt\" offset=100"}, 52)
-    # line 53: THEN assert_tool_error error_contains="beyond end of file"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "beyond end of file"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 53, raw: "THEN assert_tool_error error_contains=\"beyond end of file\""}, 53)
+    # line 51: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 51, raw: "GIVEN create_temp_dir"}, 51)
+    # line 52: GIVEN create_temp_file path="short.txt" content="a\nb\nc\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "a\\nb\\nc\\n", path: "short.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 52, raw: "GIVEN create_temp_file path=\"short.txt\" content=\"a\\nb\\nc\\n\""}, 52)
+    # line 53: WHEN tool_read path="short.txt" offset=100
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{offset: 100, path: "short.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 53, raw: "WHEN tool_read path=\"short.txt\" offset=100"}, 53)
+    # line 54: THEN assert_tool_error error_contains="beyond end of file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "beyond end of file"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 54, raw: "THEN assert_tool_error error_contains=\"beyond end of file\""}, 54)
     _ctx = ctx
     :ok
   end
@@ -153,14 +155,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-009] 行数截断" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-009"}
-    # line 58: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
-    # line 59: GIVEN create_large_file path="big.txt" lines=2500 line_length=10
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 10, lines: 2500, path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 59, raw: "GIVEN create_large_file path=\"big.txt\" lines=2500 line_length=10"}, 59)
-    # line 60: WHEN tool_read path="big.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 60, raw: "WHEN tool_read path=\"big.txt\""}, 60)
-    # line 61: THEN assert_tool_truncated truncated_by="lines" original_lines=2500
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_truncated, %{original_lines: 2500, truncated_by: "lines"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 61, raw: "THEN assert_tool_truncated truncated_by=\"lines\" original_lines=2500"}, 61)
+    # line 59: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 59, raw: "GIVEN create_temp_dir"}, 59)
+    # line 60: GIVEN create_large_file path="big.txt" lines=2500 line_length=10
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 10, lines: 2500, path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 60, raw: "GIVEN create_large_file path=\"big.txt\" lines=2500 line_length=10"}, 60)
+    # line 61: WHEN tool_read path="big.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "big.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 61, raw: "WHEN tool_read path=\"big.txt\""}, 61)
+    # line 62: THEN assert_tool_truncated truncated_by="lines" original_lines=2500
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_truncated, %{original_lines: 2500, truncated_by: "lines"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 62, raw: "THEN assert_tool_truncated truncated_by=\"lines\" original_lines=2500"}, 62)
     _ctx = ctx
     :ok
   end
@@ -171,14 +173,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-010] 字节截断" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-010"}
-    # line 64: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
-    # line 65: GIVEN create_large_file path="wide.txt" lines=500 line_length=200
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 200, lines: 500, path: "wide.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 65, raw: "GIVEN create_large_file path=\"wide.txt\" lines=500 line_length=200"}, 65)
-    # line 66: WHEN tool_read path="wide.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "wide.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 66, raw: "WHEN tool_read path=\"wide.txt\""}, 66)
-    # line 67: THEN assert_tool_truncated truncated_by="bytes"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_truncated, %{truncated_by: "bytes"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 67, raw: "THEN assert_tool_truncated truncated_by=\"bytes\""}, 67)
+    # line 65: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 65, raw: "GIVEN create_temp_dir"}, 65)
+    # line 66: GIVEN create_large_file path="wide.txt" lines=500 line_length=200
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 200, lines: 500, path: "wide.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 66, raw: "GIVEN create_large_file path=\"wide.txt\" lines=500 line_length=200"}, 66)
+    # line 67: WHEN tool_read path="wide.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "wide.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 67, raw: "WHEN tool_read path=\"wide.txt\""}, 67)
+    # line 68: THEN assert_tool_truncated truncated_by="bytes"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_truncated, %{truncated_by: "bytes"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 68, raw: "THEN assert_tool_truncated truncated_by=\"bytes\""}, 68)
     _ctx = ctx
     :ok
   end
@@ -189,14 +191,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-011] 首行超大" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-011"}
-    # line 70: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 70, raw: "GIVEN create_temp_dir"}, 70)
-    # line 71: GIVEN create_large_file path="oneline.txt" lines=1 line_length=60000
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 60000, lines: 1, path: "oneline.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 71, raw: "GIVEN create_large_file path=\"oneline.txt\" lines=1 line_length=60000"}, 71)
-    # line 72: WHEN tool_read path="oneline.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "oneline.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 72, raw: "WHEN tool_read path=\"oneline.txt\""}, 72)
-    # line 73: THEN assert_tool_success content_contains="chars truncated"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "chars truncated"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 73, raw: "THEN assert_tool_success content_contains=\"chars truncated\""}, 73)
+    # line 71: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 71, raw: "GIVEN create_temp_dir"}, 71)
+    # line 72: GIVEN create_large_file path="oneline.txt" lines=1 line_length=60000
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 60000, lines: 1, path: "oneline.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 72, raw: "GIVEN create_large_file path=\"oneline.txt\" lines=1 line_length=60000"}, 72)
+    # line 73: WHEN tool_read path="oneline.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "oneline.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 73, raw: "WHEN tool_read path=\"oneline.txt\""}, 73)
+    # line 74: THEN assert_tool_success content_contains="chars truncated"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "chars truncated"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 74, raw: "THEN assert_tool_success content_contains=\"chars truncated\""}, 74)
     _ctx = ctx
     :ok
   end
@@ -207,14 +209,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-012] PNG MIME 类型检测" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-012"}
-    # line 78: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 78, raw: "GIVEN create_temp_dir"}, 78)
-    # line 79: GIVEN create_png_file path="image.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_png_file, %{path: "image.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 79, raw: "GIVEN create_png_file path=\"image.txt\""}, 79)
-    # line 80: WHEN tool_read path="image.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "image.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 80, raw: "WHEN tool_read path=\"image.txt\""}, 80)
-    # line 81: THEN assert_read_image mime_type="image/png"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_read_image, %{mime_type: "image/png"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 81, raw: "THEN assert_read_image mime_type=\"image/png\""}, 81)
+    # line 79: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 79, raw: "GIVEN create_temp_dir"}, 79)
+    # line 80: GIVEN create_png_file path="image.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_png_file, %{path: "image.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 80, raw: "GIVEN create_png_file path=\"image.txt\""}, 80)
+    # line 81: WHEN tool_read path="image.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "image.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 81, raw: "WHEN tool_read path=\"image.txt\""}, 81)
+    # line 82: THEN assert_read_image mime_type="image/png"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_read_image, %{mime_type: "image/png"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 82, raw: "THEN assert_read_image mime_type=\"image/png\""}, 82)
     _ctx = ctx
     :ok
   end
@@ -225,14 +227,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-013] 非图片但图片扩展名" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-013"}
-    # line 84: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 84, raw: "GIVEN create_temp_dir"}, 84)
-    # line 85: GIVEN create_temp_file path="fake.png" content="this is plain text"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "this is plain text", path: "fake.png"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 85, raw: "GIVEN create_temp_file path=\"fake.png\" content=\"this is plain text\""}, 85)
-    # line 86: WHEN tool_read path="fake.png"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "fake.png"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 86, raw: "WHEN tool_read path=\"fake.png\""}, 86)
-    # line 87: THEN assert_read_text
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_read_text, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 87, raw: "THEN assert_read_text"}, 87)
+    # line 85: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 85, raw: "GIVEN create_temp_dir"}, 85)
+    # line 86: GIVEN create_temp_file path="fake.png" content="this is plain text"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "this is plain text", path: "fake.png"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 86, raw: "GIVEN create_temp_file path=\"fake.png\" content=\"this is plain text\""}, 86)
+    # line 87: WHEN tool_read path="fake.png"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "fake.png"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 87, raw: "WHEN tool_read path=\"fake.png\""}, 87)
+    # line 88: THEN assert_read_text
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_read_text, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 88, raw: "THEN assert_read_text"}, 88)
     _ctx = ctx
     :ok
   end
@@ -243,14 +245,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-014] 截断详情元数据" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-014"}
-    # line 92: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 92, raw: "GIVEN create_temp_dir"}, 92)
-    # line 93: GIVEN create_large_file path="meta.txt" lines=2500 line_length=10
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 10, lines: 2500, path: "meta.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 93, raw: "GIVEN create_large_file path=\"meta.txt\" lines=2500 line_length=10"}, 93)
-    # line 94: WHEN tool_read path="meta.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "meta.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 94, raw: "WHEN tool_read path=\"meta.txt\""}, 94)
-    # line 95: THEN assert_tool_truncated truncated_by="lines" original_lines=2500
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_truncated, %{original_lines: 2500, truncated_by: "lines"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 95, raw: "THEN assert_tool_truncated truncated_by=\"lines\" original_lines=2500"}, 95)
+    # line 93: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 93, raw: "GIVEN create_temp_dir"}, 93)
+    # line 94: GIVEN create_large_file path="meta.txt" lines=2500 line_length=10
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 10, lines: 2500, path: "meta.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 94, raw: "GIVEN create_large_file path=\"meta.txt\" lines=2500 line_length=10"}, 94)
+    # line 95: WHEN tool_read path="meta.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "meta.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 95, raw: "WHEN tool_read path=\"meta.txt\""}, 95)
+    # line 96: THEN assert_tool_truncated truncated_by="lines" original_lines=2500
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_truncated, %{original_lines: 2500, truncated_by: "lines"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 96, raw: "THEN assert_tool_truncated truncated_by=\"lines\" original_lines=2500"}, 96)
     _ctx = ctx
     :ok
   end
@@ -261,14 +263,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-015] offset=最后一行" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-015"}
-    # line 98: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 98, raw: "GIVEN create_temp_dir"}, 98)
-    # line 99: GIVEN create_large_file path="hundred.txt" lines=100 line_length=10
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 10, lines: 100, path: "hundred.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 99, raw: "GIVEN create_large_file path=\"hundred.txt\" lines=100 line_length=10"}, 99)
-    # line 100: WHEN tool_read path="hundred.txt" offset=100
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{offset: 100, path: "hundred.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 100, raw: "WHEN tool_read path=\"hundred.txt\" offset=100"}, 100)
-    # line 101: THEN assert_tool_success content_contains="line 100"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "line 100"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 101, raw: "THEN assert_tool_success content_contains=\"line 100\""}, 101)
+    # line 99: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 99, raw: "GIVEN create_temp_dir"}, 99)
+    # line 100: GIVEN create_large_file path="hundred.txt" lines=100 line_length=10
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_large_file, %{line_length: 10, lines: 100, path: "hundred.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 100, raw: "GIVEN create_large_file path=\"hundred.txt\" lines=100 line_length=10"}, 100)
+    # line 101: WHEN tool_read path="hundred.txt" offset=100
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{offset: 100, path: "hundred.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 101, raw: "WHEN tool_read path=\"hundred.txt\" offset=100"}, 101)
+    # line 102: THEN assert_tool_success content_contains="line 100"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "line 100"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 102, raw: "THEN assert_tool_success content_contains=\"line 100\""}, 102)
     _ctx = ctx
     :ok
   end
@@ -279,16 +281,16 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-016] 符号链接" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-016"}
-    # line 104: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 104, raw: "GIVEN create_temp_dir"}, 104)
-    # line 105: GIVEN create_temp_file path="real.txt" content="target content here"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "target content here", path: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 105, raw: "GIVEN create_temp_file path=\"real.txt\" content=\"target content here\""}, 105)
-    # line 106: GIVEN create_symlink link="link.txt" target="real.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_symlink, %{link: "link.txt", target: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 106, raw: "GIVEN create_symlink link=\"link.txt\" target=\"real.txt\""}, 106)
-    # line 107: WHEN tool_read path="link.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "link.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 107, raw: "WHEN tool_read path=\"link.txt\""}, 107)
-    # line 108: THEN assert_tool_success content_contains="target content"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "target content"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 108, raw: "THEN assert_tool_success content_contains=\"target content\""}, 108)
+    # line 105: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 105, raw: "GIVEN create_temp_dir"}, 105)
+    # line 106: GIVEN create_temp_file path="real.txt" content="target content here"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "target content here", path: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 106, raw: "GIVEN create_temp_file path=\"real.txt\" content=\"target content here\""}, 106)
+    # line 107: GIVEN create_symlink link="link.txt" target="real.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_symlink, %{link: "link.txt", target: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 107, raw: "GIVEN create_symlink link=\"link.txt\" target=\"real.txt\""}, 107)
+    # line 108: WHEN tool_read path="link.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "link.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 108, raw: "WHEN tool_read path=\"link.txt\""}, 108)
+    # line 109: THEN assert_tool_success content_contains="target content"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "target content"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 109, raw: "THEN assert_tool_success content_contains=\"target content\""}, 109)
     _ctx = ctx
     :ok
   end
@@ -299,16 +301,16 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-017] 权限不足" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-017"}
-    # line 111: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 111, raw: "GIVEN create_temp_dir"}, 111)
-    # line 112: GIVEN create_temp_file path="locked.txt" content="secret"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "secret", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 112, raw: "GIVEN create_temp_file path=\"locked.txt\" content=\"secret\""}, 112)
-    # line 113: GIVEN set_file_permission path="locked.txt" mode="000"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "000", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 113, raw: "GIVEN set_file_permission path=\"locked.txt\" mode=\"000\""}, 113)
-    # line 114: WHEN tool_read path="locked.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 114, raw: "WHEN tool_read path=\"locked.txt\""}, 114)
-    # line 115: THEN assert_tool_error error_contains="EACCES"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "EACCES"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 115, raw: "THEN assert_tool_error error_contains=\"EACCES\""}, 115)
+    # line 112: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 112, raw: "GIVEN create_temp_dir"}, 112)
+    # line 113: GIVEN create_temp_file path="locked.txt" content="secret"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "secret", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 113, raw: "GIVEN create_temp_file path=\"locked.txt\" content=\"secret\""}, 113)
+    # line 114: GIVEN set_file_permission path="locked.txt" mode="000"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "000", path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 114, raw: "GIVEN set_file_permission path=\"locked.txt\" mode=\"000\""}, 114)
+    # line 115: WHEN tool_read path="locked.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "locked.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 115, raw: "WHEN tool_read path=\"locked.txt\""}, 115)
+    # line 116: THEN assert_tool_error error_contains="EACCES"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "EACCES"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 116, raw: "THEN assert_tool_error error_contains=\"EACCES\""}, 116)
     _ctx = ctx
     :ok
   end
@@ -319,14 +321,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-018] 特殊字符文件名" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-018"}
-    # line 120: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 120, raw: "GIVEN create_temp_dir"}, 120)
-    # line 121: GIVEN create_temp_file path="截图 2026-02-11.txt" content="chinese filename"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "chinese filename", path: "截图 2026-02-11.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 121, raw: "GIVEN create_temp_file path=\"截图 2026-02-11.txt\" content=\"chinese filename\""}, 121)
-    # line 122: WHEN tool_read path="截图 2026-02-11.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "截图 2026-02-11.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 122, raw: "WHEN tool_read path=\"截图 2026-02-11.txt\""}, 122)
-    # line 123: THEN assert_tool_success content_contains="chinese filename"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "chinese filename"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 123, raw: "THEN assert_tool_success content_contains=\"chinese filename\""}, 123)
+    # line 121: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 121, raw: "GIVEN create_temp_dir"}, 121)
+    # line 122: GIVEN create_temp_file path="截图 2026-02-11.txt" content="chinese filename"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "chinese filename", path: "截图 2026-02-11.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 122, raw: "GIVEN create_temp_file path=\"截图 2026-02-11.txt\" content=\"chinese filename\""}, 122)
+    # line 123: WHEN tool_read path="截图 2026-02-11.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "截图 2026-02-11.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 123, raw: "WHEN tool_read path=\"截图 2026-02-11.txt\""}, 123)
+    # line 124: THEN assert_tool_success content_contains="chinese filename"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "chinese filename"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 124, raw: "THEN assert_tool_success content_contains=\"chinese filename\""}, 124)
     _ctx = ctx
     :ok
   end
@@ -337,14 +339,14 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   test "[BDD-READ-019] tilde 路径展开" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-019"}
-    # line 126: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 126, raw: "GIVEN create_temp_dir"}, 126)
-    # line 127: GIVEN create_temp_file path="tilde_test.txt" content="tilde works"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "tilde works", path: "tilde_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 127, raw: "GIVEN create_temp_file path=\"tilde_test.txt\" content=\"tilde works\""}, 127)
-    # line 128: WHEN tool_read path="tilde_test.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "tilde_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 128, raw: "WHEN tool_read path=\"tilde_test.txt\""}, 128)
-    # line 129: THEN assert_tool_success content_contains="tilde works"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "tilde works"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 129, raw: "THEN assert_tool_success content_contains=\"tilde works\""}, 129)
+    # line 127: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 127, raw: "GIVEN create_temp_dir"}, 127)
+    # line 128: GIVEN create_temp_file path="tilde_test.txt" content="tilde works"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "tilde works", path: "tilde_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 128, raw: "GIVEN create_temp_file path=\"tilde_test.txt\" content=\"tilde works\""}, 128)
+    # line 129: WHEN tool_read path="tilde_test.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "tilde_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 129, raw: "WHEN tool_read path=\"tilde_test.txt\""}, 129)
+    # line 130: THEN assert_tool_success content_contains="tilde works"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "tilde works"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 130, raw: "THEN assert_tool_success content_contains=\"tilde works\""}, 130)
     _ctx = ctx
     :ok
   end
@@ -352,15 +354,17 @@ defmodule Gong.BDD.Generated.ReadActionTest do
   # Source: BDD-READ-020
   @tag :external_io
   @tag :unit
-  test "[BDD-READ-020] 无效参数类型防护" do
+  test "[BDD-READ-020] 目录路径拒绝" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-READ-020"}
-    # line 132: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 132, raw: "GIVEN create_temp_dir"}, 132)
-    # line 133: WHEN tool_read path="valid.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "valid.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 133, raw: "WHEN tool_read path=\"valid.txt\""}, 133)
-    # line 134: THEN assert_tool_error error_contains="ENOENT"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "ENOENT"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 134, raw: "THEN assert_tool_error error_contains=\"ENOENT\""}, 134)
+    # line 133: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 133, raw: "GIVEN create_temp_dir"}, 133)
+    # line 134: GIVEN create_temp_file path="subdir/placeholder.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "subdir/placeholder.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 134, raw: "GIVEN create_temp_file path=\"subdir/placeholder.txt\" content=\"\""}, 134)
+    # line 135: WHEN tool_read path="subdir"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "subdir"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 135, raw: "WHEN tool_read path=\"subdir\""}, 135)
+    # line 136: THEN assert_tool_error error_contains="Is a directory"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Is a directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 136, raw: "THEN assert_tool_error error_contains=\"Is a directory\""}, 136)
     _ctx = ctx
     :ok
   end

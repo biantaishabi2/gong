@@ -15,6 +15,7 @@ THEN assert_output_contains text="subdir/"
 GIVEN create_temp_dir
 WHEN tool_ls path=""
 THEN assert_tool_success
+THEN assert_output_not_contains text=".txt"
 
 [SCENARIO: BDD-LS-003] TITLE: 排序验证 TAGS: unit external_io
 GIVEN create_temp_dir
@@ -23,6 +24,8 @@ GIVEN create_temp_file path="apple.txt" content=""
 GIVEN create_temp_file path="banana.txt" content=""
 WHEN tool_ls path=""
 THEN assert_tool_success content_contains="apple.txt"
+THEN assert_output_contains text="banana.txt"
+THEN assert_output_contains text="zebra.txt"
 
 # ── 2. 错误与边界 ──
 

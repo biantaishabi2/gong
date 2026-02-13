@@ -51,6 +51,7 @@ GIVEN create_temp_dir
 GIVEN create_temp_file path="test.txt" content="line1\nline2\ntarget\nline4\nline5\n"
 WHEN tool_grep pattern="target" context=1
 THEN assert_tool_success content_contains="target"
+THEN assert_output_not_contains text="line1"
 
 # ── 3. 输出模式与过滤 ──
 
@@ -76,6 +77,7 @@ GIVEN create_temp_file path="text.txt" content="search target\n"
 GIVEN create_binary_file path="binary.bin" bytes=100
 WHEN tool_grep pattern="search"
 THEN assert_tool_success content_contains="text.txt"
+THEN assert_output_not_contains text="binary.bin"
 
 # ── 4. 参数校验 ──
 

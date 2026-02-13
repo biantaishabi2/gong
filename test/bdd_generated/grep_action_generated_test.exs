@@ -137,6 +137,8 @@ defmodule Gong.BDD.Generated.GrepActionTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{context: 1, pattern: "target"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 52, raw: "WHEN tool_grep pattern=\"target\" context=1"}, 52)
     # line 53: THEN assert_tool_success content_contains="target"
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "target"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 53, raw: "THEN assert_tool_success content_contains=\"target\""}, 53)
+    # line 54: THEN assert_output_not_contains text="line1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "line1"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 54, raw: "THEN assert_output_not_contains text=\"line1\""}, 54)
     _ctx = ctx
     :ok
   end
@@ -147,18 +149,18 @@ defmodule Gong.BDD.Generated.GrepActionTest do
   test "[BDD-GREP-008] files_with_matches 模式" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-GREP-008"}
-    # line 58: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
-    # line 59: GIVEN create_temp_file path="match.txt" content="found it\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "found it\\n", path: "match.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 59, raw: "GIVEN create_temp_file path=\"match.txt\" content=\"found it\\n\""}, 59)
-    # line 60: GIVEN create_temp_file path="no.txt" content="nothing\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "nothing\\n", path: "no.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 60, raw: "GIVEN create_temp_file path=\"no.txt\" content=\"nothing\\n\""}, 60)
-    # line 61: WHEN tool_grep pattern="found" output_mode="files_with_matches"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{output_mode: "files_with_matches", pattern: "found"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 61, raw: "WHEN tool_grep pattern=\"found\" output_mode=\"files_with_matches\""}, 61)
-    # line 62: THEN assert_tool_success content_contains="match.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "match.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 62, raw: "THEN assert_tool_success content_contains=\"match.txt\""}, 62)
-    # line 63: THEN assert_output_not_contains text="no.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "no.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 63, raw: "THEN assert_output_not_contains text=\"no.txt\""}, 63)
+    # line 59: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 59, raw: "GIVEN create_temp_dir"}, 59)
+    # line 60: GIVEN create_temp_file path="match.txt" content="found it\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "found it\\n", path: "match.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 60, raw: "GIVEN create_temp_file path=\"match.txt\" content=\"found it\\n\""}, 60)
+    # line 61: GIVEN create_temp_file path="no.txt" content="nothing\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "nothing\\n", path: "no.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 61, raw: "GIVEN create_temp_file path=\"no.txt\" content=\"nothing\\n\""}, 61)
+    # line 62: WHEN tool_grep pattern="found" output_mode="files_with_matches"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{output_mode: "files_with_matches", pattern: "found"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 62, raw: "WHEN tool_grep pattern=\"found\" output_mode=\"files_with_matches\""}, 62)
+    # line 63: THEN assert_tool_success content_contains="match.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "match.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 63, raw: "THEN assert_tool_success content_contains=\"match.txt\""}, 63)
+    # line 64: THEN assert_output_not_contains text="no.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "no.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 64, raw: "THEN assert_output_not_contains text=\"no.txt\""}, 64)
     _ctx = ctx
     :ok
   end
@@ -169,18 +171,18 @@ defmodule Gong.BDD.Generated.GrepActionTest do
   test "[BDD-GREP-009] glob 文件过滤" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-GREP-009"}
-    # line 66: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 66, raw: "GIVEN create_temp_dir"}, 66)
-    # line 67: GIVEN create_temp_file path="code.ex" content="test content\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "test content\\n", path: "code.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 67, raw: "GIVEN create_temp_file path=\"code.ex\" content=\"test content\\n\""}, 67)
-    # line 68: GIVEN create_temp_file path="code.js" content="test content\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "test content\\n", path: "code.js"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 68, raw: "GIVEN create_temp_file path=\"code.js\" content=\"test content\\n\""}, 68)
-    # line 69: WHEN tool_grep pattern="test" glob="*.ex"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{glob: "*.ex", pattern: "test"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 69, raw: "WHEN tool_grep pattern=\"test\" glob=\"*.ex\""}, 69)
-    # line 70: THEN assert_tool_success content_contains="code.ex"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "code.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 70, raw: "THEN assert_tool_success content_contains=\"code.ex\""}, 70)
-    # line 71: THEN assert_output_not_contains text="code.js"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "code.js"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 71, raw: "THEN assert_output_not_contains text=\"code.js\""}, 71)
+    # line 67: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 67, raw: "GIVEN create_temp_dir"}, 67)
+    # line 68: GIVEN create_temp_file path="code.ex" content="test content\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "test content\\n", path: "code.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 68, raw: "GIVEN create_temp_file path=\"code.ex\" content=\"test content\\n\""}, 68)
+    # line 69: GIVEN create_temp_file path="code.js" content="test content\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "test content\\n", path: "code.js"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 69, raw: "GIVEN create_temp_file path=\"code.js\" content=\"test content\\n\""}, 69)
+    # line 70: WHEN tool_grep pattern="test" glob="*.ex"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{glob: "*.ex", pattern: "test"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 70, raw: "WHEN tool_grep pattern=\"test\" glob=\"*.ex\""}, 70)
+    # line 71: THEN assert_tool_success content_contains="code.ex"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "code.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 71, raw: "THEN assert_tool_success content_contains=\"code.ex\""}, 71)
+    # line 72: THEN assert_output_not_contains text="code.js"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "code.js"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 72, raw: "THEN assert_output_not_contains text=\"code.js\""}, 72)
     _ctx = ctx
     :ok
   end
@@ -191,16 +193,18 @@ defmodule Gong.BDD.Generated.GrepActionTest do
   test "[BDD-GREP-010] 二进制文件自动跳过" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-GREP-010"}
-    # line 74: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 74, raw: "GIVEN create_temp_dir"}, 74)
-    # line 75: GIVEN create_temp_file path="text.txt" content="search target\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "search target\\n", path: "text.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 75, raw: "GIVEN create_temp_file path=\"text.txt\" content=\"search target\\n\""}, 75)
-    # line 76: GIVEN create_binary_file path="binary.bin" bytes=100
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_binary_file, %{bytes: 100, path: "binary.bin"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 76, raw: "GIVEN create_binary_file path=\"binary.bin\" bytes=100"}, 76)
-    # line 77: WHEN tool_grep pattern="search"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{pattern: "search"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 77, raw: "WHEN tool_grep pattern=\"search\""}, 77)
-    # line 78: THEN assert_tool_success content_contains="text.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "text.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 78, raw: "THEN assert_tool_success content_contains=\"text.txt\""}, 78)
+    # line 75: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 75, raw: "GIVEN create_temp_dir"}, 75)
+    # line 76: GIVEN create_temp_file path="text.txt" content="search target\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "search target\\n", path: "text.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 76, raw: "GIVEN create_temp_file path=\"text.txt\" content=\"search target\\n\""}, 76)
+    # line 77: GIVEN create_binary_file path="binary.bin" bytes=100
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_binary_file, %{bytes: 100, path: "binary.bin"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 77, raw: "GIVEN create_binary_file path=\"binary.bin\" bytes=100"}, 77)
+    # line 78: WHEN tool_grep pattern="search"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{pattern: "search"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 78, raw: "WHEN tool_grep pattern=\"search\""}, 78)
+    # line 79: THEN assert_tool_success content_contains="text.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "text.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 79, raw: "THEN assert_tool_success content_contains=\"text.txt\""}, 79)
+    # line 80: THEN assert_output_not_contains text="binary.bin"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "binary.bin"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 80, raw: "THEN assert_output_not_contains text=\"binary.bin\""}, 80)
     _ctx = ctx
     :ok
   end
@@ -211,12 +215,12 @@ defmodule Gong.BDD.Generated.GrepActionTest do
   test "[BDD-GREP-011] 搜索路径不存在" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-GREP-011"}
-    # line 83: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 83, raw: "GIVEN create_temp_dir"}, 83)
-    # line 84: WHEN tool_grep pattern="test" path="nonexistent_dir"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{path: "nonexistent_dir", pattern: "test"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 84, raw: "WHEN tool_grep pattern=\"test\" path=\"nonexistent_dir\""}, 84)
-    # line 85: THEN assert_tool_error error_contains="ENOENT"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "ENOENT"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 85, raw: "THEN assert_tool_error error_contains=\"ENOENT\""}, 85)
+    # line 85: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 85, raw: "GIVEN create_temp_dir"}, 85)
+    # line 86: WHEN tool_grep pattern="test" path="nonexistent_dir"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{path: "nonexistent_dir", pattern: "test"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 86, raw: "WHEN tool_grep pattern=\"test\" path=\"nonexistent_dir\""}, 86)
+    # line 87: THEN assert_tool_error error_contains="ENOENT"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "ENOENT"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 87, raw: "THEN assert_tool_error error_contains=\"ENOENT\""}, 87)
     _ctx = ctx
     :ok
   end

@@ -79,6 +79,8 @@ defmodule Gong.BDD.Generated.WriteActionTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 32, raw: "THEN assert_tool_success"}, 32)
     # line 33: THEN assert_file_exists path="empty.txt"
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_exists, %{path: "empty.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 33, raw: "THEN assert_file_exists path=\"empty.txt\""}, 33)
+    # line 34: THEN assert_file_content path="empty.txt" expected=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "", path: "empty.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 34, raw: "THEN assert_file_content path=\"empty.txt\" expected=\"\""}, 34)
     _ctx = ctx
     :ok
   end
@@ -89,14 +91,14 @@ defmodule Gong.BDD.Generated.WriteActionTest do
   test "[BDD-WRITE-005]" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-WRITE-005"}
-    # line 36: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 36, raw: "GIVEN create_temp_dir"}, 36)
-    # line 37: WHEN tool_write path="utf8.txt" content="你好世界"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "你好世界", path: "utf8.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 37, raw: "WHEN tool_write path=\"utf8.txt\" content=\"你好世界\""}, 37)
-    # line 38: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 38, raw: "THEN assert_tool_success"}, 38)
-    # line 39: THEN assert_file_content path="utf8.txt" expected="你好世界"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "你好世界", path: "utf8.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 39, raw: "THEN assert_file_content path=\"utf8.txt\" expected=\"你好世界\""}, 39)
+    # line 37: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 37, raw: "GIVEN create_temp_dir"}, 37)
+    # line 38: WHEN tool_write path="utf8.txt" content="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "你好世界", path: "utf8.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 38, raw: "WHEN tool_write path=\"utf8.txt\" content=\"你好世界\""}, 38)
+    # line 39: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 39, raw: "THEN assert_tool_success"}, 39)
+    # line 40: THEN assert_file_content path="utf8.txt" expected="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "你好世界", path: "utf8.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 40, raw: "THEN assert_file_content path=\"utf8.txt\" expected=\"你好世界\""}, 40)
     _ctx = ctx
     :ok
   end
@@ -107,12 +109,14 @@ defmodule Gong.BDD.Generated.WriteActionTest do
   test "[BDD-WRITE-006] 目标是目录" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-WRITE-006"}
-    # line 44: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 44, raw: "GIVEN create_temp_dir"}, 44)
-    # line 45: WHEN tool_write path="" content="test"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "test", path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 45, raw: "WHEN tool_write path=\"\" content=\"test\""}, 45)
-    # line 46: THEN assert_tool_error error_contains="directory"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 46, raw: "THEN assert_tool_error error_contains=\"directory\""}, 46)
+    # line 45: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 45, raw: "GIVEN create_temp_dir"}, 45)
+    # line 46: GIVEN create_temp_file path="subdir/placeholder.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "subdir/placeholder.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 46, raw: "GIVEN create_temp_file path=\"subdir/placeholder.txt\" content=\"\""}, 46)
+    # line 47: WHEN tool_write path="subdir" content="test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "test", path: "subdir"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 47, raw: "WHEN tool_write path=\"subdir\" content=\"test\""}, 47)
+    # line 48: THEN assert_tool_error error_contains="Is a directory"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Is a directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 48, raw: "THEN assert_tool_error error_contains=\"Is a directory\""}, 48)
     _ctx = ctx
     :ok
   end
@@ -123,16 +127,16 @@ defmodule Gong.BDD.Generated.WriteActionTest do
   test "[BDD-WRITE-007] 权限不足的目录" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-WRITE-007"}
-    # line 49: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 49, raw: "GIVEN create_temp_dir"}, 49)
-    # line 50: GIVEN create_temp_file path="readonly_dir/placeholder.txt" content=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "readonly_dir/placeholder.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 50, raw: "GIVEN create_temp_file path=\"readonly_dir/placeholder.txt\" content=\"\""}, 50)
-    # line 51: GIVEN set_file_permission path="readonly_dir" mode="555"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "555", path: "readonly_dir"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 51, raw: "GIVEN set_file_permission path=\"readonly_dir\" mode=\"555\""}, 51)
-    # line 52: WHEN tool_write path="readonly_dir/new_file.txt" content="test"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "test", path: "readonly_dir/new_file.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 52, raw: "WHEN tool_write path=\"readonly_dir/new_file.txt\" content=\"test\""}, 52)
-    # line 53: THEN assert_tool_error error_contains="denied"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "denied"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 53, raw: "THEN assert_tool_error error_contains=\"denied\""}, 53)
+    # line 51: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 51, raw: "GIVEN create_temp_dir"}, 51)
+    # line 52: GIVEN create_temp_file path="readonly_dir/placeholder.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "readonly_dir/placeholder.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 52, raw: "GIVEN create_temp_file path=\"readonly_dir/placeholder.txt\" content=\"\""}, 52)
+    # line 53: GIVEN set_file_permission path="readonly_dir" mode="555"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :set_file_permission, %{mode: "555", path: "readonly_dir"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 53, raw: "GIVEN set_file_permission path=\"readonly_dir\" mode=\"555\""}, 53)
+    # line 54: WHEN tool_write path="readonly_dir/new_file.txt" content="test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "test", path: "readonly_dir/new_file.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 54, raw: "WHEN tool_write path=\"readonly_dir/new_file.txt\" content=\"test\""}, 54)
+    # line 55: THEN assert_tool_error error_contains="denied"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "denied"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 55, raw: "THEN assert_tool_error error_contains=\"denied\""}, 55)
     _ctx = ctx
     :ok
   end
@@ -143,12 +147,14 @@ defmodule Gong.BDD.Generated.WriteActionTest do
   test "[BDD-WRITE-008] tilde 路径展开" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-WRITE-008"}
-    # line 56: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 56, raw: "GIVEN create_temp_dir"}, 56)
-    # line 57: WHEN tool_write path="tilde_test.txt" content="tilde works"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "tilde works", path: "tilde_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 57, raw: "WHEN tool_write path=\"tilde_test.txt\" content=\"tilde works\""}, 57)
-    # line 58: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 58, raw: "THEN assert_tool_success"}, 58)
+    # line 58: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
+    # line 59: WHEN tool_write path="tilde_test.txt" content="tilde works"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "tilde works", path: "tilde_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 59, raw: "WHEN tool_write path=\"tilde_test.txt\" content=\"tilde works\""}, 59)
+    # line 60: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 60, raw: "THEN assert_tool_success"}, 60)
+    # line 61: THEN assert_file_content path="tilde_test.txt" expected="tilde works"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "tilde works", path: "tilde_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 61, raw: "THEN assert_file_content path=\"tilde_test.txt\" expected=\"tilde works\""}, 61)
     _ctx = ctx
     :ok
   end
@@ -159,14 +165,14 @@ defmodule Gong.BDD.Generated.WriteActionTest do
   test "[BDD-WRITE-009] 返回字节数" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-WRITE-009"}
-    # line 61: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 61, raw: "GIVEN create_temp_dir"}, 61)
-    # line 62: WHEN tool_write path="bytes.txt" content="12345"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "12345", path: "bytes.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 62, raw: "WHEN tool_write path=\"bytes.txt\" content=\"12345\""}, 62)
-    # line 63: THEN assert_tool_success
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 63, raw: "THEN assert_tool_success"}, 63)
-    # line 64: THEN assert_result_field field="bytes_written" expected="5"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "5", field: "bytes_written"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 64, raw: "THEN assert_result_field field=\"bytes_written\" expected=\"5\""}, 64)
+    # line 64: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
+    # line 65: WHEN tool_write path="bytes.txt" content="12345"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "12345", path: "bytes.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 65, raw: "WHEN tool_write path=\"bytes.txt\" content=\"12345\""}, 65)
+    # line 66: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 66, raw: "THEN assert_tool_success"}, 66)
+    # line 67: THEN assert_result_field field="bytes_written" expected="5"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "5", field: "bytes_written"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 67, raw: "THEN assert_result_field field=\"bytes_written\" expected=\"5\""}, 67)
     _ctx = ctx
     :ok
   end

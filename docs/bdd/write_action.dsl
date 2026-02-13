@@ -31,6 +31,7 @@ GIVEN create_temp_dir
 WHEN tool_write path="empty.txt" content=""
 THEN assert_tool_success
 THEN assert_file_exists path="empty.txt"
+THEN assert_file_content path="empty.txt" expected=""
 
 [SCENARIO: BDD-WRITE-005] TITLE: UTF-8 多字节 TAGS: unit external_io
 GIVEN create_temp_dir
@@ -42,8 +43,9 @@ THEN assert_file_content path="utf8.txt" expected="你好世界"
 
 [SCENARIO: BDD-WRITE-006] TITLE: 目标是目录 TAGS: unit external_io
 GIVEN create_temp_dir
-WHEN tool_write path="" content="test"
-THEN assert_tool_error error_contains="directory"
+GIVEN create_temp_file path="subdir/placeholder.txt" content=""
+WHEN tool_write path="subdir" content="test"
+THEN assert_tool_error error_contains="Is a directory"
 
 [SCENARIO: BDD-WRITE-007] TITLE: 权限不足的目录 TAGS: unit external_io
 GIVEN create_temp_dir
@@ -56,6 +58,7 @@ THEN assert_tool_error error_contains="denied"
 GIVEN create_temp_dir
 WHEN tool_write path="tilde_test.txt" content="tilde works"
 THEN assert_tool_success
+THEN assert_file_content path="tilde_test.txt" expected="tilde works"
 
 [SCENARIO: BDD-WRITE-009] TITLE: 返回字节数 TAGS: unit external_io
 GIVEN create_temp_dir

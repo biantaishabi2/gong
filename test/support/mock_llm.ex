@@ -35,10 +35,51 @@ defmodule Gong.MockLLM do
   - `{:tool_calls, [%{name: "...", arguments: %{}}]}` — 工具调用
   - `{:error, "错误信息"}` — LLM 错误
 
+  第 4 个参数 hooks 为 Hook 模块列表，默认为空。
+
   返回 `{:ok, reply, agent}` 或 `{:error, reason, agent}`
   """
-  @spec run_chat(struct(), String.t(), [tuple()]) :: {:ok, String.t(), struct()} | {:error, term(), struct()}
-  def run_chat(agent, prompt, response_queue) do
+  @spec run_chat(struct(), String.t(), [tuple()], [module()]) ::
+          {:ok, String.t(), struct()} | {:error, term(), struct()}
+  def run_chat(agent, prompt, response_queue, hooks \\ []) do
+    # 发送 telemetry: agent 开始
+    :telemetry.execute([:gong, :agent, :start], %{count: 1}, %{prompt: prompt})
+
+    # Hook: on_input — 变换或短路用户输入
+    case Gong.HookRunner.pipe_input(hooks, prompt, []) do
+      :handled ->
+        # 输入被 hook 完全处理，不进入 Agent 循环
+        :telemetry.execute([:gong, :agent, :end], %{count: 1}, %{prompt: prompt})
+        {:ok, "", agent}
+
+      {:transform, new_prompt, _images} ->
+        do_run_chat(agent, new_prompt, response_queue, hooks)
+
+      :passthrough ->
+        do_run_chat(agent, prompt, response_queue, hooks)
+    end
+  end
+
+  defp do_run_chat(agent, prompt, response_queue, hooks) do
+    # Hook: on_before_agent — Agent 调用前注入/变换
+    {prompt, _system, extra_messages} =
+      Gong.HookRunner.pipe_before_agent(hooks, prompt, "")
+
+    # 将 hook 注入的 extra messages 写入 conversation
+    agent =
+      if extra_messages != [] do
+        :telemetry.execute([:gong, :hook, :on_before_agent, :applied], %{count: 1}, %{
+          extra_count: length(extra_messages)
+        })
+        strategy = Map.get(agent.state, :__strategy__, %{})
+        conversation = Map.get(strategy, :conversation, [])
+        updated_strategy = Map.put(strategy, :conversation, extra_messages ++ conversation)
+        updated_state = Map.put(agent.state, :__strategy__, updated_strategy)
+        %{agent | state: updated_state}
+      else
+        agent
+      end
+
     # 发送 start 指令
     start_instruction = %Instruction{
       action: ReAct.start_action(),
@@ -51,12 +92,37 @@ defmodule Gong.MockLLM do
     call_id = extract_call_id(directives)
 
     # 驱动 ReAct 循环
-    drive_loop(agent, call_id, response_queue)
+    result = drive_loop(agent, call_id, response_queue, hooks)
+
+    # 发送 telemetry: agent 结束
+    :telemetry.execute([:gong, :agent, :end], %{count: 1}, %{prompt: prompt})
+
+    result
   end
 
   # ── 内部循环驱动 ──
 
-  defp drive_loop(agent, call_id, [response | rest]) do
+  defp drive_loop(agent, call_id, [response | rest], hooks) do
+    # 发送 telemetry: turn 开始
+    :telemetry.execute([:gong, :turn, :start], %{count: 1}, %{})
+
+    # Hook: on_context — 变换上下文消息
+    # 提取当前 conversation，让 hook 有机会注入/修改
+    strategy_state = StratState.get(agent, %{})
+    conversation = Map.get(strategy_state, :conversation, [])
+    new_conversation = Gong.HookRunner.pipe(hooks, :on_context, conversation, [])
+
+    # 如果 hook 修改了 conversation，更新到 agent state 中
+    agent =
+      if new_conversation != conversation do
+        :telemetry.execute([:gong, :hook, :on_context, :applied], %{count: 1}, %{
+          added_count: length(new_conversation) - length(conversation)
+        })
+        update_conversation(agent, new_conversation)
+      else
+        agent
+      end
+
     # 构建 LLM 结果
     llm_params = build_llm_result(call_id, response)
 
@@ -70,31 +136,56 @@ defmodule Gong.MockLLM do
     # 检查策略状态
     state = StratState.get(agent, %{})
 
-    case state[:status] do
-      :completed ->
-        {:ok, state[:result] || "", agent}
+    result =
+      case state[:status] do
+        :completed ->
+          {:ok, state[:result] || "", agent}
 
-      :error ->
-        {:error, state[:result] || "unknown error", agent}
+        :error ->
+          {:error, state[:result] || "unknown error", agent}
 
-      :awaiting_tool ->
-        # 执行工具调用
-        {agent, new_call_id} = execute_pending_tools(agent, state, directives)
+        :awaiting_tool ->
+          # 提取 tool_calls 用于 telemetry
+          pending = state[:pending_tool_calls] || []
+          tool_names = Enum.map(pending, & &1.name)
 
-        # 继续循环
-        drive_loop(agent, new_call_id, rest)
+          # 发送 telemetry: turn 结束（含 tool_calls）
+          :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: tool_names})
 
-      :awaiting_llm ->
-        # 需要下一次 LLM 调用
-        new_call_id = extract_call_id(directives) || call_id
-        drive_loop(agent, new_call_id, rest)
+          # 执行工具调用（带 hook）
+          {agent, new_call_id} = execute_pending_tools(agent, state, directives, hooks)
 
-      other ->
-        {:error, "unexpected status: #{other}", agent}
+          # 继续循环
+          drive_loop(agent, new_call_id, rest, hooks)
+
+        :awaiting_llm ->
+          # 发送 telemetry: turn 结束
+          :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
+
+          # 需要下一次 LLM 调用
+          new_call_id = extract_call_id(directives) || call_id
+          drive_loop(agent, new_call_id, rest, hooks)
+
+        other ->
+          {:error, "unexpected status: #{other}", agent}
+      end
+
+    # 非递归返回时发送 turn end
+    case result do
+      {:ok, _, _} ->
+        :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
+
+      {:error, _, _} ->
+        :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
+
+      _ ->
+        :ok
     end
+
+    result
   end
 
-  defp drive_loop(agent, _call_id, []) do
+  defp drive_loop(agent, _call_id, [], _hooks) do
     state = StratState.get(agent, %{})
 
     case state[:status] do
@@ -104,9 +195,9 @@ defmodule Gong.MockLLM do
     end
   end
 
-  # ── 工具执行 ──
+  # ── 工具执行（带 Hook 集成）──
 
-  defp execute_pending_tools(agent, state, _directives) do
+  defp execute_pending_tools(agent, state, _directives, hooks) do
     pending = state[:pending_tool_calls] || []
     config = state[:config] || %{}
     actions_by_name = config[:actions_by_name] || %{}
@@ -121,29 +212,54 @@ defmodule Gong.MockLLM do
       Enum.reduce(pending, agent, fn tc, acc_agent ->
         tool_name = tc.name
         arguments = tc.arguments || %{}
+        tool_atom = to_atom_safe(tool_name)
 
-        # 查找 action 模块
-        action_module = Map.get(actions_by_name, tool_name)
+        # 发送 telemetry: tool 开始
+        :telemetry.execute([:gong, :tool, :start], %{count: 1}, %{
+          tool: tool_name,
+          arguments: arguments
+        })
+
+        # Gate: before_tool_call
+        gate_result = Gong.HookRunner.gate(hooks, :before_tool_call, [tool_atom, arguments])
 
         result =
-          if action_module do
-            # 将 string keys 转为 atom keys
-            atom_args =
-              arguments
-              |> Enum.map(fn {k, v} -> {to_atom_safe(k), v} end)
-              |> Map.new()
+          case gate_result do
+            :ok ->
+              # 查找 action 模块并执行
+              action_module = Map.get(actions_by_name, tool_name)
 
-            try do
-              case action_module.run(atom_args, tool_context) do
-                {:ok, data} -> {:ok, data}
-                {:error, reason} -> {:error, to_string(reason)}
-              end
-            rescue
-              e -> {:error, Exception.message(e)}
-            end
-          else
-            {:error, "Unknown tool: #{tool_name}"}
+              raw_result =
+                if action_module do
+                  atom_args =
+                    arguments
+                    |> Enum.map(fn {k, v} -> {to_atom_safe(k), v} end)
+                    |> Map.new()
+
+                  try do
+                    case action_module.run(atom_args, tool_context) do
+                      {:ok, data} -> {:ok, data}
+                      {:error, reason} -> {:error, to_string(reason)}
+                    end
+                  rescue
+                    e -> {:error, Exception.message(e)}
+                  end
+                else
+                  {:error, "Unknown tool: #{tool_name}"}
+                end
+
+              # Pipe: on_tool_result 变换结果
+              Gong.HookRunner.pipe(hooks, :on_tool_result, raw_result, [tool_atom])
+
+            {:blocked, reason} ->
+              {:error, "Blocked by hook: #{reason}"}
           end
+
+        # 发送 telemetry: tool 结束
+        :telemetry.execute([:gong, :tool, :stop], %{count: 1}, %{
+          tool: tool_name,
+          result: result
+        })
 
         # 发送 tool_result
         tool_result_instruction = %Instruction{
@@ -212,6 +328,16 @@ defmodule Gong.MockLLM do
     rescue
       _ -> String.to_atom(key)
     end
+  end
+
+  # ── Conversation 更新辅助 ──
+
+  defp update_conversation(agent, new_conversation) do
+    # 更新 agent 策略状态中的 conversation
+    strategy = Map.get(agent.state, :__strategy__, %{})
+    updated_strategy = Map.put(strategy, :conversation, new_conversation)
+    updated_state = Map.put(agent.state, :__strategy__, updated_strategy)
+    %{agent | state: updated_state}
   end
 
   # ── AgentServer 辅助（用于 E2E 测试）──

@@ -24,6 +24,7 @@ GIVEN create_temp_dir
 GIVEN create_temp_file path="test.txt" content=""
 WHEN tool_find pattern="*.xyz"
 THEN assert_tool_success
+THEN assert_output_not_contains text=".txt"
 
 # ── 2. 过滤与限制 ──
 

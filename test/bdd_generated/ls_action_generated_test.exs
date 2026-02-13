@@ -39,6 +39,8 @@ defmodule Gong.BDD.Generated.LsActionTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 16, raw: "WHEN tool_ls path=\"\""}, 16)
     # line 17: THEN assert_tool_success
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 17, raw: "THEN assert_tool_success"}, 17)
+    # line 18: THEN assert_output_not_contains text=".txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: ".txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 18, raw: "THEN assert_output_not_contains text=\".txt\""}, 18)
     _ctx = ctx
     :ok
   end
@@ -49,18 +51,22 @@ defmodule Gong.BDD.Generated.LsActionTest do
   test "[BDD-LS-003] 排序验证" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-LS-003"}
-    # line 20: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 20, raw: "GIVEN create_temp_dir"}, 20)
-    # line 21: GIVEN create_temp_file path="zebra.txt" content=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "zebra.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 21, raw: "GIVEN create_temp_file path=\"zebra.txt\" content=\"\""}, 21)
-    # line 22: GIVEN create_temp_file path="apple.txt" content=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "apple.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 22, raw: "GIVEN create_temp_file path=\"apple.txt\" content=\"\""}, 22)
-    # line 23: GIVEN create_temp_file path="banana.txt" content=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "banana.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 23, raw: "GIVEN create_temp_file path=\"banana.txt\" content=\"\""}, 23)
-    # line 24: WHEN tool_ls path=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 24, raw: "WHEN tool_ls path=\"\""}, 24)
-    # line 25: THEN assert_tool_success content_contains="apple.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "apple.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 25, raw: "THEN assert_tool_success content_contains=\"apple.txt\""}, 25)
+    # line 21: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 21, raw: "GIVEN create_temp_dir"}, 21)
+    # line 22: GIVEN create_temp_file path="zebra.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "zebra.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 22, raw: "GIVEN create_temp_file path=\"zebra.txt\" content=\"\""}, 22)
+    # line 23: GIVEN create_temp_file path="apple.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "apple.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 23, raw: "GIVEN create_temp_file path=\"apple.txt\" content=\"\""}, 23)
+    # line 24: GIVEN create_temp_file path="banana.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "banana.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 24, raw: "GIVEN create_temp_file path=\"banana.txt\" content=\"\""}, 24)
+    # line 25: WHEN tool_ls path=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 25, raw: "WHEN tool_ls path=\"\""}, 25)
+    # line 26: THEN assert_tool_success content_contains="apple.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "apple.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 26, raw: "THEN assert_tool_success content_contains=\"apple.txt\""}, 26)
+    # line 27: THEN assert_output_contains text="banana.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "banana.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 27, raw: "THEN assert_output_contains text=\"banana.txt\""}, 27)
+    # line 28: THEN assert_output_contains text="zebra.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "zebra.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 28, raw: "THEN assert_output_contains text=\"zebra.txt\""}, 28)
     _ctx = ctx
     :ok
   end
@@ -71,14 +77,14 @@ defmodule Gong.BDD.Generated.LsActionTest do
   test "[BDD-LS-004] 路径是文件" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-LS-004"}
-    # line 30: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 30, raw: "GIVEN create_temp_dir"}, 30)
-    # line 31: GIVEN create_temp_file path="afile.txt" content="not a dir"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "not a dir", path: "afile.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 31, raw: "GIVEN create_temp_file path=\"afile.txt\" content=\"not a dir\""}, 31)
-    # line 32: WHEN tool_ls path="afile.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: "afile.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 32, raw: "WHEN tool_ls path=\"afile.txt\""}, 32)
-    # line 33: THEN assert_tool_error error_contains="Not a directory"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Not a directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 33, raw: "THEN assert_tool_error error_contains=\"Not a directory\""}, 33)
+    # line 33: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 33, raw: "GIVEN create_temp_dir"}, 33)
+    # line 34: GIVEN create_temp_file path="afile.txt" content="not a dir"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "not a dir", path: "afile.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 34, raw: "GIVEN create_temp_file path=\"afile.txt\" content=\"not a dir\""}, 34)
+    # line 35: WHEN tool_ls path="afile.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: "afile.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 35, raw: "WHEN tool_ls path=\"afile.txt\""}, 35)
+    # line 36: THEN assert_tool_error error_contains="Not a directory"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Not a directory"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 36, raw: "THEN assert_tool_error error_contains=\"Not a directory\""}, 36)
     _ctx = ctx
     :ok
   end
@@ -89,12 +95,12 @@ defmodule Gong.BDD.Generated.LsActionTest do
   test "[BDD-LS-005] 路径不存在" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-LS-005"}
-    # line 36: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 36, raw: "GIVEN create_temp_dir"}, 36)
-    # line 37: WHEN tool_ls path="nonexistent_dir"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: "nonexistent_dir"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 37, raw: "WHEN tool_ls path=\"nonexistent_dir\""}, 37)
-    # line 38: THEN assert_tool_error error_contains="ENOENT"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "ENOENT"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 38, raw: "THEN assert_tool_error error_contains=\"ENOENT\""}, 38)
+    # line 39: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 39, raw: "GIVEN create_temp_dir"}, 39)
+    # line 40: WHEN tool_ls path="nonexistent_dir"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: "nonexistent_dir"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 40, raw: "WHEN tool_ls path=\"nonexistent_dir\""}, 40)
+    # line 41: THEN assert_tool_error error_contains="ENOENT"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "ENOENT"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 41, raw: "THEN assert_tool_error error_contains=\"ENOENT\""}, 41)
     _ctx = ctx
     :ok
   end
@@ -105,18 +111,18 @@ defmodule Gong.BDD.Generated.LsActionTest do
   test "[BDD-LS-006] 隐藏文件可见" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-LS-006"}
-    # line 41: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 41, raw: "GIVEN create_temp_dir"}, 41)
-    # line 42: GIVEN create_temp_file path=".hidden" content="secret"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "secret", path: ".hidden"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 42, raw: "GIVEN create_temp_file path=\".hidden\" content=\"secret\""}, 42)
-    # line 43: GIVEN create_temp_file path="visible.txt" content="public"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "public", path: "visible.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 43, raw: "GIVEN create_temp_file path=\"visible.txt\" content=\"public\""}, 43)
-    # line 44: WHEN tool_ls path=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 44, raw: "WHEN tool_ls path=\"\""}, 44)
-    # line 45: THEN assert_tool_success content_contains=".hidden"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: ".hidden"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 45, raw: "THEN assert_tool_success content_contains=\".hidden\""}, 45)
-    # line 46: THEN assert_output_contains text="visible.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "visible.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 46, raw: "THEN assert_output_contains text=\"visible.txt\""}, 46)
+    # line 44: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 44, raw: "GIVEN create_temp_dir"}, 44)
+    # line 45: GIVEN create_temp_file path=".hidden" content="secret"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "secret", path: ".hidden"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 45, raw: "GIVEN create_temp_file path=\".hidden\" content=\"secret\""}, 45)
+    # line 46: GIVEN create_temp_file path="visible.txt" content="public"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "public", path: "visible.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 46, raw: "GIVEN create_temp_file path=\"visible.txt\" content=\"public\""}, 46)
+    # line 47: WHEN tool_ls path=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 47, raw: "WHEN tool_ls path=\"\""}, 47)
+    # line 48: THEN assert_tool_success content_contains=".hidden"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: ".hidden"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 48, raw: "THEN assert_tool_success content_contains=\".hidden\""}, 48)
+    # line 49: THEN assert_output_contains text="visible.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "visible.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 49, raw: "THEN assert_output_contains text=\"visible.txt\""}, 49)
     _ctx = ctx
     :ok
   end
@@ -127,14 +133,14 @@ defmodule Gong.BDD.Generated.LsActionTest do
   test "[BDD-LS-007] 大小格式化" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-LS-007"}
-    # line 51: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 51, raw: "GIVEN create_temp_dir"}, 51)
-    # line 52: GIVEN create_temp_file path="small.txt" content="abc"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "abc", path: "small.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 52, raw: "GIVEN create_temp_file path=\"small.txt\" content=\"abc\""}, 52)
-    # line 53: WHEN tool_ls path=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 53, raw: "WHEN tool_ls path=\"\""}, 53)
-    # line 54: THEN assert_tool_success content_contains="3B"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "3B"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 54, raw: "THEN assert_tool_success content_contains=\"3B\""}, 54)
+    # line 54: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 54, raw: "GIVEN create_temp_dir"}, 54)
+    # line 55: GIVEN create_temp_file path="small.txt" content="abc"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "abc", path: "small.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 55, raw: "GIVEN create_temp_file path=\"small.txt\" content=\"abc\""}, 55)
+    # line 56: WHEN tool_ls path=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 56, raw: "WHEN tool_ls path=\"\""}, 56)
+    # line 57: THEN assert_tool_success content_contains="3B"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "3B"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 57, raw: "THEN assert_tool_success content_contains=\"3B\""}, 57)
     _ctx = ctx
     :ok
   end

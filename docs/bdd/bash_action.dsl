@@ -32,8 +32,9 @@ THEN assert_output_contains text="line3"
 
 [SCENARIO: BDD-BASH-005] TITLE: 超时 TAGS: unit external_io
 GIVEN create_temp_dir
-WHEN tool_bash command="sleep 10" timeout=1
+WHEN tool_bash command="tail -f /dev/null" timeout=1
 THEN assert_output_contains text="timed out after 1 seconds"
+THEN assert_result_field field="timed_out" expected="true"
 
 [SCENARIO: BDD-BASH-006] TITLE: 不存在的工作目录 TAGS: unit external_io
 GIVEN create_temp_dir
@@ -76,7 +77,7 @@ THEN assert_tool_success content_contains="Hello"
 [SCENARIO: BDD-BASH-012] TITLE: 环境变量继承 TAGS: unit external_io
 GIVEN create_temp_dir
 WHEN tool_bash command="echo $HOME"
-THEN assert_tool_success
+THEN assert_tool_success content_contains="/home"
 
 [SCENARIO: BDD-BASH-013] TITLE: 命令不存在 TAGS: unit external_io
 GIVEN create_temp_dir

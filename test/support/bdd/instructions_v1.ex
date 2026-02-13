@@ -166,6 +166,12 @@ defmodule Gong.BDD.Instructions.V1 do
       {:given, :register_hook} ->
         register_hook!(ctx, args, meta)
 
+      {:given, :attach_telemetry_handler} ->
+        attach_telemetry_handler!(ctx, args, meta)
+
+      {:given, :configure_hooks} ->
+        configure_hooks!(ctx, args, meta)
+
       {:when, :agent_chat} ->
         agent_chat!(ctx, args, meta)
 
@@ -193,11 +199,165 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_hook_blocked} ->
         assert_hook_blocked!(ctx, args, meta)
 
+      {:then, :assert_telemetry_received} ->
+        assert_telemetry_received!(ctx, args, meta)
+
+      {:then, :assert_hook_error_logged} ->
+        assert_hook_error_logged!(ctx, args, meta)
+
+      {:then, :assert_result_content_contains} ->
+        assert_result_content_contains!(ctx, args, meta)
+
+      {:then, :assert_result_content_not_contains} ->
+        assert_result_content_not_contains!(ctx, args, meta)
+
+      {:then, :assert_conversation_contains} ->
+        assert_conversation_contains!(ctx, args, meta)
+
       {:then, :assert_stream_events} ->
         assert_stream_events!(ctx, args, meta)
 
       {:then, :assert_no_crash} ->
         assert_no_crash!(ctx, args, meta)
+
+      {:then, :assert_last_error} ->
+        assert_last_error!(ctx, args, meta)
+
+      # ── Tape 存储 ──
+
+      {:given, :tape_init} ->
+        tape_init_given!(ctx, args, meta)
+
+      {:given, :tape_append} ->
+        tape_append_given!(ctx, args, meta)
+
+      {:given, :tape_handoff} ->
+        tape_handoff_given!(ctx, args, meta)
+
+      {:given, :tape_fork} ->
+        tape_fork_given!(ctx, args, meta)
+
+      {:given, :tape_close_db} ->
+        tape_close_db!(ctx, args, meta)
+
+      {:given, :tape_restore_parent} ->
+        tape_restore_parent!(ctx, args, meta)
+
+      {:given, :corrupt_jsonl} ->
+        corrupt_jsonl!(ctx, args, meta)
+
+      {:given, :delete_file} ->
+        delete_file!(ctx, args, meta)
+
+      {:given, :clear_file} ->
+        clear_file!(ctx, args, meta)
+
+      {:when, :when_tape_init} ->
+        tape_init_when!(ctx, args, meta)
+
+      {:when, :when_tape_append} ->
+        tape_append_when!(ctx, args, meta)
+
+      {:when, :when_tape_handoff} ->
+        tape_handoff_when!(ctx, args, meta)
+
+      {:when, :when_tape_between_anchors} ->
+        tape_between_anchors_when!(ctx, args, meta)
+
+      {:when, :when_tape_search} ->
+        tape_search_when!(ctx, args, meta)
+
+      {:when, :when_tape_fork} ->
+        tape_fork_when!(ctx, args, meta)
+
+      {:when, :when_tape_merge} ->
+        tape_merge_when!(ctx, args, meta)
+
+      {:when, :when_tape_rebuild_index} ->
+        tape_rebuild_index_when!(ctx, args, meta)
+
+      {:then, :assert_dir_exists} ->
+        assert_dir_exists!(ctx, args, meta)
+
+      {:then, :assert_db_exists} ->
+        assert_db_exists!(ctx, args, meta)
+
+      {:then, :assert_entry_count} ->
+        assert_entry_count!(ctx, args, meta)
+
+      {:then, :assert_anchor_count} ->
+        assert_anchor_count!(ctx, args, meta)
+
+      {:then, :assert_jsonl_contains} ->
+        assert_jsonl_contains!(ctx, args, meta)
+
+      {:then, :assert_jsonl_not_contains} ->
+        assert_jsonl_not_contains!(ctx, args, meta)
+
+      {:then, :assert_query_results} ->
+        assert_query_results!(ctx, args, meta)
+
+      {:then, :assert_search_results} ->
+        assert_search_results!(ctx, args, meta)
+
+      {:then, :assert_tape_error} ->
+        assert_tape_error!(ctx, args, meta)
+
+      {:then, :assert_fork_cleaned} ->
+        assert_fork_cleaned!(ctx, args, meta)
+
+      # ── Compaction 压缩 ──
+
+      {:given, :compaction_messages} ->
+        compaction_messages!(ctx, args, meta)
+
+      {:given, :compaction_messages_with_system} ->
+        compaction_messages_with_system!(ctx, args, meta)
+
+      {:given, :compaction_lock_acquired} ->
+        compaction_lock_acquired!(ctx, args, meta)
+
+      {:given, :compaction_summarize_fn_ok} ->
+        compaction_summarize_fn_ok!(ctx, args, meta)
+
+      {:given, :compaction_summarize_fn_fail} ->
+        compaction_summarize_fn_fail!(ctx, args, meta)
+
+      {:when, :when_estimate_tokens} ->
+        when_estimate_tokens!(ctx, args, meta)
+
+      {:when, :when_compact} ->
+        when_compact!(ctx, args, meta)
+
+      {:when, :when_compact_and_handoff} ->
+        when_compact_and_handoff!(ctx, args, meta)
+
+      {:when, :when_acquire_lock} ->
+        when_acquire_lock!(ctx, args, meta)
+
+      {:then, :assert_token_estimate} ->
+        assert_token_estimate!(ctx, args, meta)
+
+      {:then, :assert_compacted} ->
+        assert_compacted!(ctx, args, meta)
+
+      {:then, :assert_not_compacted} ->
+        assert_not_compacted!(ctx, args, meta)
+
+      {:then, :assert_summary_exists} ->
+        assert_summary_exists!(ctx, args, meta)
+
+      {:then, :assert_summary_nil} ->
+        assert_summary_nil!(ctx, args, meta)
+
+      {:then, :assert_system_preserved} ->
+        assert_system_preserved!(ctx, args, meta)
+
+      {:then, :assert_compaction_error} ->
+        assert_compaction_error!(ctx, args, meta)
+
+      {:then, :assert_tape_has_compaction_anchor} ->
+        assert_tape_has_compaction_anchor!(ctx, args, meta)
 
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
@@ -629,6 +789,9 @@ defmodule Gong.BDD.Instructions.V1 do
     |> Map.put(:mock_queue, [])
     |> Map.put(:tool_call_log, [])
     |> Map.put(:hook_events, [])
+    |> Map.put(:hooks, [])
+    |> Map.put(:telemetry_events, [])
+    |> Map.put(:telemetry_handlers, [])
     |> Map.put(:stream_events, [])
   end
 
@@ -672,20 +835,73 @@ defmodule Gong.BDD.Instructions.V1 do
     |> Map.new()
   end
 
-  defp register_hook!(ctx, %{module: _module}, _meta) do
-    ctx
+  defp register_hook!(ctx, %{module: module_name}, _meta) do
+    # 解析模块名（支持 "Gong.TestHooks.AllowAll" 等格式）
+    hook_module = resolve_hook_module(module_name)
+    hooks = Map.get(ctx, :hooks, [])
+    Map.put(ctx, :hooks, hooks ++ [hook_module])
+  end
+
+  defp attach_telemetry_handler!(ctx, %{event: event_str}, _meta) do
+    # 解析事件名："gong.tool.start" → [:gong, :tool, :start]
+    event = event_str |> String.split(".") |> Enum.map(&String.to_atom/1)
+    handler_id = "bdd_telemetry_#{:erlang.unique_integer([:positive])}"
+    test_pid = self()
+
+    :telemetry.attach(
+      handler_id,
+      event,
+      fn event_name, measurements, metadata, _config ->
+        send(test_pid, {:telemetry_event, event_name, measurements, metadata})
+      end,
+      nil
+    )
+
+    # 测试结束后清理 handler
+    ExUnit.Callbacks.on_exit(fn ->
+      :telemetry.detach(handler_id)
+    end)
+
+    handlers = Map.get(ctx, :telemetry_handlers, [])
+    Map.put(ctx, :telemetry_handlers, handlers ++ [handler_id])
+  end
+
+  defp configure_hooks!(ctx, %{hooks: hooks_str}, _meta) do
+    # 逗号分隔的模块名列表
+    hook_modules =
+      hooks_str
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.map(&resolve_hook_module/1)
+
+    Map.put(ctx, :hooks, hook_modules)
+  end
+
+  defp resolve_hook_module(module_name) do
+    # 支持短名和全名
+    full_name =
+      if String.starts_with?(module_name, "Elixir.") or String.starts_with?(module_name, "Gong.") do
+        module_name
+      else
+        "Gong.TestHooks.#{module_name}"
+      end
+
+    Module.concat([full_name])
   end
 
   # ── Agent 操作实现 ──
 
   defp agent_chat!(ctx, %{prompt: prompt}, _meta) do
     queue = Map.get(ctx, :mock_queue, [])
+    hooks = Map.get(ctx, :hooks, [])
 
     if queue != [] do
-      # Mock 模式：策略层驱动
+      # Mock 模式：策略层驱动（传入 hooks）
       agent = ctx.agent
-      case Gong.MockLLM.run_chat(agent, prompt, queue) do
+      case Gong.MockLLM.run_chat(agent, prompt, queue, hooks) do
         {:ok, reply, updated_agent} ->
+          ctx = collect_telemetry_events(ctx)
+
           ctx
           |> Map.put(:agent, updated_agent)
           |> Map.put(:last_reply, reply)
@@ -693,6 +909,8 @@ defmodule Gong.BDD.Instructions.V1 do
           |> Map.put(:mock_queue, [])
 
         {:error, reason, updated_agent} ->
+          ctx = collect_telemetry_events(ctx)
+
           ctx
           |> Map.put(:agent, updated_agent)
           |> Map.put(:last_reply, to_string(reason))
@@ -769,7 +987,16 @@ defmodule Gong.BDD.Instructions.V1 do
   end
 
   defp trigger_compaction!(ctx, _args, _meta) do
-    ctx
+    hooks = Map.get(ctx, :hooks, [])
+
+    case Gong.HookRunner.gate(hooks, :before_session_op, [:compact, %{}]) do
+      :ok ->
+        ctx
+
+      {:blocked, reason} ->
+        ctx
+        |> Map.put(:last_error, "Blocked by hook: #{reason}")
+    end
   end
 
   # ── Agent 断言实现 ──
@@ -811,9 +1038,20 @@ defmodule Gong.BDD.Instructions.V1 do
   end
 
   defp assert_hook_fired!(ctx, %{event: event}, _meta) do
-    events = Map.get(ctx, :hook_events, [])
-    assert Enum.any?(events, fn e -> to_string(e) =~ event end),
-      "期望 hook 事件 #{event} 已触发，实际事件：#{inspect(events)}"
+    # 检查 hook_events 和 telemetry_events 两个来源
+    hook_events = Map.get(ctx, :hook_events, [])
+    telemetry_events = Map.get(ctx, :telemetry_events, [])
+
+    hook_match = Enum.any?(hook_events, fn e -> to_string(e) =~ event end)
+
+    telemetry_match =
+      Enum.any?(telemetry_events, fn {event_name, _measurements, _metadata} ->
+        event_str = event_name |> Enum.map(&to_string/1) |> Enum.join(".")
+        event_str =~ event
+      end)
+
+    assert hook_match or telemetry_match,
+      "期望 hook 事件 #{event} 已触发，实际 hook_events：#{inspect(hook_events)}，telemetry：#{length(telemetry_events)} 条"
     ctx
   end
 
@@ -840,6 +1078,16 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
+  defp assert_last_error!(ctx, %{error_contains: expected}, _meta) do
+    error = Map.get(ctx, :last_error)
+    assert error != nil, "期望存在错误，但 last_error 为 nil"
+    error_msg = to_string(error)
+    decoded = unescape(expected)
+    assert error_msg =~ decoded,
+      "期望错误包含 #{inspect(decoded)}，实际：#{inspect(error_msg)}"
+    ctx
+  end
+
   defp assert_no_crash!(ctx, _args, _meta) do
     # mock 模式检查 agent 结构体存在；E2E 模式检查进程存活
     if ctx[:agent_pid] do
@@ -848,6 +1096,118 @@ defmodule Gong.BDD.Instructions.V1 do
       assert ctx[:agent] != nil, "Agent 结构体不存在"
     end
     ctx
+  end
+
+  # ── Hook 断言实现 ──
+
+  defp assert_telemetry_received!(ctx, %{event: event_str} = args, _meta) do
+    telemetry_events = Map.get(ctx, :telemetry_events, [])
+    expected_event = event_str |> String.split(".") |> Enum.map(&String.to_atom/1)
+
+    matching =
+      Enum.filter(telemetry_events, fn {event_name, _m, _md} ->
+        event_name == expected_event
+      end)
+
+    assert length(matching) > 0,
+      "期望收到 telemetry 事件 #{event_str}，实际事件：#{inspect(Enum.map(telemetry_events, &elem(&1, 0)))}"
+
+    # 可选：检查 metadata 包含特定内容
+    if mc = args[:metadata_contains] do
+      has_match =
+        Enum.any?(matching, fn {_, _, metadata} ->
+          inspect(metadata) =~ mc
+        end)
+
+      assert has_match,
+        "期望 telemetry metadata 包含 #{inspect(mc)}，实际：#{inspect(Enum.map(matching, &elem(&1, 2)))}"
+    end
+
+    ctx
+  end
+
+  defp assert_hook_error_logged!(ctx, %{hook: hook_name} = args, _meta) do
+    telemetry_events = Map.get(ctx, :telemetry_events, [])
+
+    # 查找 [:gong, :hook, :error] 事件
+    error_events =
+      Enum.filter(telemetry_events, fn {event_name, _m, metadata} ->
+        event_name == [:gong, :hook, :error] and
+          inspect(metadata[:hook]) =~ hook_name
+      end)
+
+    assert length(error_events) > 0,
+      "期望 hook #{hook_name} 错误已记录，实际 hook error 事件：#{inspect(telemetry_events |> Enum.filter(fn {e, _, _} -> e == [:gong, :hook, :error] end))}"
+
+    # 可选：检查堆栈
+    if args[:has_stacktrace] == true do
+      has_stack =
+        Enum.any?(error_events, fn {_, _, metadata} ->
+          stacktrace = metadata[:stacktrace]
+          is_list(stacktrace) and length(stacktrace) > 0
+        end)
+
+      assert has_stack, "期望 hook 错误包含堆栈，但未找到"
+    end
+
+    ctx
+  end
+
+  defp assert_result_content_contains!(ctx, %{text: text}, _meta) do
+    # 检查 last_reply（agent 回复内容）
+    reply = Map.get(ctx, :last_reply, "")
+    decoded = unescape(text)
+
+    assert to_string(reply) =~ decoded,
+      "期望结果包含 #{inspect(decoded)}，实际：#{inspect(reply)}"
+
+    ctx
+  end
+
+  defp assert_result_content_not_contains!(ctx, %{text: text}, _meta) do
+    reply = Map.get(ctx, :last_reply, "")
+    decoded = unescape(text)
+
+    refute to_string(reply) =~ decoded,
+      "期望结果不包含 #{inspect(decoded)}，但包含了"
+
+    ctx
+  end
+
+  defp assert_conversation_contains!(ctx, %{text: text}, _meta) do
+    strategy_state = get_agent_strategy_state(ctx)
+    conversation = Map.get(strategy_state, :conversation, [])
+    decoded = unescape(text)
+
+    # 在所有消息的 content 中搜索目标文本
+    found =
+      Enum.any?(conversation, fn msg ->
+        content = msg[:content] || msg["content"] || ""
+        to_string(content) =~ decoded
+      end)
+
+    assert found,
+      "期望 conversation 包含 #{inspect(decoded)}，实际消息数：#{length(conversation)}，内容：#{inspect(Enum.map(conversation, fn m -> Map.get(m, :content, Map.get(m, "content", "")) end) |> Enum.take(5))}"
+
+    ctx
+  end
+
+  # ── Telemetry 事件收集 ──
+
+  defp collect_telemetry_events(ctx) do
+    # 从进程邮箱中收集所有 telemetry 事件
+    events = drain_telemetry_messages([])
+    existing = Map.get(ctx, :telemetry_events, [])
+    Map.put(ctx, :telemetry_events, existing ++ events)
+  end
+
+  defp drain_telemetry_messages(acc) do
+    receive do
+      {:telemetry_event, event_name, measurements, metadata} ->
+        drain_telemetry_messages(acc ++ [{event_name, measurements, metadata}])
+    after
+      0 -> acc
+    end
   end
 
   # ── Agent 状态提取辅助 ──
@@ -859,6 +1219,593 @@ defmodule Gong.BDD.Instructions.V1 do
       agent = ctx.agent
       Jido.Agent.Strategy.State.get(agent, %{})
     end
+  end
+
+  # ── Tape GIVEN 实现 ──
+
+  defp tape_init_given!(ctx, _args, _meta) do
+    workspace = ctx.workspace
+    tape_path = Path.join(workspace, "tape")
+    {:ok, store} = Gong.Tape.Store.init(tape_path)
+
+    ExUnit.Callbacks.on_exit(fn ->
+      Gong.Tape.Store.close(store)
+    end)
+
+    ctx
+    |> Map.put(:tape_store, store)
+    |> Map.put(:tape_path, tape_path)
+    |> Map.put(:tape_last_anchor, "session-start")
+  end
+
+  defp tape_append_given!(ctx, args, _meta) do
+    store = ctx.tape_store
+    anchor = Map.get(args, :anchor, Map.get(ctx, :tape_last_anchor, "session-start"))
+    kind = args.kind
+    content = unescape(args.content)
+
+    case Gong.Tape.Store.append(store, anchor, %{kind: kind, content: content}) do
+      {:ok, updated_store} ->
+        Map.put(ctx, :tape_store, updated_store)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_handoff_given!(ctx, %{name: name}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.handoff(store, name) do
+      {:ok, _dir_name, updated_store} ->
+        ctx
+        |> Map.put(:tape_store, updated_store)
+        |> Map.put(:tape_last_anchor, name)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_fork_given!(ctx, _args, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.fork(store) do
+      {:ok, fork_store} ->
+        ExUnit.Callbacks.on_exit(fn ->
+          Gong.Tape.Store.close(fork_store)
+          File.rm_rf(fork_store.workspace_path)
+        end)
+
+        # fork 成为活跃 store，父 store 保存为 tape_parent_store
+        ctx
+        |> Map.put(:tape_parent_store, store)
+        |> Map.put(:tape_store, fork_store)
+        |> Map.put(:fork_store, fork_store)
+        |> Map.put(:tape_path, fork_store.workspace_path)
+        |> Map.put(:tape_fork_path, fork_store.workspace_path)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_close_db!(ctx, _args, _meta) do
+    store = ctx.tape_store
+    Gong.Tape.Store.close(store)
+    ctx
+  end
+
+  defp tape_restore_parent!(ctx, _args, _meta) do
+    parent = Map.fetch!(ctx, :tape_parent_store)
+
+    ctx
+    |> Map.put(:tape_store, parent)
+    |> Map.put(:tape_path, parent.workspace_path)
+  end
+
+  defp corrupt_jsonl!(ctx, %{path: path, line_content: line_content}, _meta) do
+    full = resolve_tape_path(ctx, path)
+    File.write!(full, unescape(line_content) <> "\n", [:append])
+    ctx
+  end
+
+  defp delete_file!(ctx, %{path: path}, _meta) do
+    full = resolve_tape_path(ctx, path)
+    File.rm!(full)
+    ctx
+  end
+
+  defp clear_file!(ctx, %{path: path}, _meta) do
+    full = resolve_tape_path(ctx, path)
+    File.write!(full, "")
+    ctx
+  end
+
+  # ── Tape WHEN 实现 ──
+
+  defp tape_init_when!(ctx, _args, _meta) do
+    workspace = ctx.workspace
+    tape_path = Path.join(workspace, "tape")
+
+    case Gong.Tape.Store.init(tape_path) do
+      {:ok, store} ->
+        ExUnit.Callbacks.on_exit(fn ->
+          Gong.Tape.Store.close(store)
+        end)
+
+        ctx
+        |> Map.put(:tape_store, store)
+        |> Map.put(:tape_path, tape_path)
+        |> Map.put(:tape_last_anchor, "session-start")
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_append_when!(ctx, args, _meta) do
+    store = ctx.tape_store
+    anchor = Map.get(args, :anchor, Map.get(ctx, :tape_last_anchor, "session-start"))
+    kind = args.kind
+    content = unescape(args.content)
+
+    case Gong.Tape.Store.append(store, anchor, %{kind: kind, content: content}) do
+      {:ok, updated_store} ->
+        ctx
+        |> Map.put(:tape_store, updated_store)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_handoff_when!(ctx, %{name: name}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.handoff(store, name) do
+      {:ok, _dir_name, updated_store} ->
+        ctx
+        |> Map.put(:tape_store, updated_store)
+        |> Map.put(:tape_last_anchor, name)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_between_anchors_when!(ctx, %{start: start_a, end: end_a}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.between_anchors(store, start_a, end_a) do
+      {:ok, entries} ->
+        ctx
+        |> Map.put(:tape_query_results, entries)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_search_when!(ctx, %{query: query}, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.search(store, unescape(query)) do
+      {:ok, entries} ->
+        ctx
+        |> Map.put(:tape_search_results, entries)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_fork_when!(ctx, _args, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.fork(store) do
+      {:ok, fork_store} ->
+        ExUnit.Callbacks.on_exit(fn ->
+          Gong.Tape.Store.close(fork_store)
+          File.rm_rf(fork_store.workspace_path)
+        end)
+
+        ctx
+        |> Map.put(:tape_parent_store, store)
+        |> Map.put(:tape_store, fork_store)
+        |> Map.put(:fork_store, fork_store)
+        |> Map.put(:tape_path, fork_store.workspace_path)
+        |> Map.put(:tape_fork_path, fork_store.workspace_path)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  defp tape_merge_when!(ctx, _args, _meta) do
+    parent = Map.get(ctx, :tape_parent_store, ctx.tape_store)
+    fork_store = ctx.fork_store
+
+    case Gong.Tape.Store.merge(parent, fork_store) do
+      {:ok, updated_parent} ->
+        ctx
+        |> Map.put(:tape_store, updated_parent)
+        |> Map.put(:tape_path, updated_parent.workspace_path)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        # merge 失败时恢复到父工作区
+        ctx
+        |> Map.put(:tape_store, parent)
+        |> Map.put(:tape_path, parent.workspace_path)
+        |> Map.put(:tape_last_error, reason)
+    end
+  end
+
+  defp tape_rebuild_index_when!(ctx, _args, _meta) do
+    store = ctx.tape_store
+
+    case Gong.Tape.Store.rebuild_index(store) do
+      {:ok, updated_store} ->
+        ctx
+        |> Map.put(:tape_store, updated_store)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        Map.put(ctx, :tape_last_error, reason)
+    end
+  end
+
+  # ── Tape THEN 实现 ──
+
+  defp assert_dir_exists!(ctx, %{path: path}, _meta) do
+    full = resolve_tape_path(ctx, path)
+    assert File.dir?(full), "期望目录存在: #{full}"
+    ctx
+  end
+
+  defp assert_db_exists!(ctx, _args, _meta) do
+    db_path = Path.join(ctx.tape_path, "index.db")
+    assert File.exists?(db_path), "期望 index.db 存在: #{db_path}"
+    ctx
+  end
+
+  defp assert_entry_count!(ctx, %{expected: expected}, _meta) do
+    store = ctx.tape_store
+    actual = Gong.Tape.Store.entry_count(store)
+
+    assert actual == expected,
+      "期望条目数=#{expected}，实际：#{actual}"
+
+    ctx
+  end
+
+  defp assert_anchor_count!(ctx, %{expected: expected}, _meta) do
+    store = ctx.tape_store
+    actual = Gong.Tape.Store.anchor_count(store)
+
+    assert actual == expected,
+      "期望锚点数=#{expected}，实际：#{actual}"
+
+    ctx
+  end
+
+  defp assert_jsonl_contains!(ctx, %{path: path, text: text}, _meta) do
+    full = resolve_tape_path(ctx, path)
+    content = File.read!(full)
+    decoded = unescape(text)
+
+    assert content =~ decoded,
+      "期望 JSONL 文件 #{path} 包含 #{inspect(decoded)}，实际内容：#{String.slice(content, 0, 300)}"
+
+    ctx
+  end
+
+  defp assert_jsonl_not_contains!(ctx, %{path: path, text: text}, _meta) do
+    full = resolve_tape_path(ctx, path)
+    decoded = unescape(text)
+
+    case File.read(full) do
+      {:ok, content} ->
+        refute content =~ decoded,
+          "期望 JSONL 文件 #{path} 不包含 #{inspect(decoded)}，但包含了"
+
+      {:error, :enoent} ->
+        # 文件不存在意味着不包含目标文本
+        :ok
+    end
+
+    ctx
+  end
+
+  defp assert_query_results!(ctx, %{count: count} = args, _meta) do
+    results = Map.get(ctx, :tape_query_results, [])
+
+    assert length(results) == count,
+      "期望查询结果 #{count} 条，实际：#{length(results)}"
+
+    if text = args[:contains] do
+      decoded = unescape(text)
+
+      has_match =
+        Enum.any?(results, fn entry ->
+          to_string(entry.content) =~ decoded
+        end)
+
+      assert has_match,
+        "期望查询结果包含 #{inspect(decoded)}"
+    end
+
+    ctx
+  end
+
+  defp assert_search_results!(ctx, %{count: count} = args, _meta) do
+    results = Map.get(ctx, :tape_search_results, [])
+
+    assert length(results) == count,
+      "期望搜索结果 #{count} 条，实际：#{length(results)}"
+
+    if text = args[:contains] do
+      decoded = unescape(text)
+
+      has_match =
+        Enum.any?(results, fn entry ->
+          to_string(entry.content) =~ decoded
+        end)
+
+      assert has_match,
+        "期望搜索结果包含 #{inspect(decoded)}"
+    end
+
+    ctx
+  end
+
+  defp assert_tape_error!(ctx, %{error_contains: expected}, _meta) do
+    error = Map.get(ctx, :tape_last_error)
+    assert error != nil, "期望 Tape 错误，但 tape_last_error 为 nil"
+    decoded = unescape(expected)
+
+    assert to_string(error) =~ decoded,
+      "期望错误包含 #{inspect(decoded)}，实际：#{inspect(error)}"
+
+    ctx
+  end
+
+  defp assert_fork_cleaned!(ctx, _args, _meta) do
+    fork_path = Map.get(ctx, :tape_fork_path)
+    assert fork_path != nil, "tape_fork_path 为 nil，没有记录 fork 路径"
+    refute File.exists?(fork_path), "fork 工作区 #{fork_path} 应在 merge 后被清理"
+    ctx
+  end
+
+  # ── Tape 路径辅助 ──
+
+  defp resolve_tape_path(ctx, path) do
+    tape_path = Map.get(ctx, :tape_path, ctx.workspace)
+
+    if String.starts_with?(path, "/") do
+      path
+    else
+      Path.join(tape_path, path)
+    end
+  end
+
+  # ── Compaction GIVEN 实现 ──
+
+  defp compaction_messages!(ctx, %{count: count} = args, _meta) do
+    if count == 0 do
+      Map.put(ctx, :compaction_messages, [])
+    else
+      # 生成指定数量的测试消息
+      token_size = Map.get(args, :token_size, 100)
+      # 中文字符约 2 tokens/字，所以每条约 token_size/2 个中文字符
+      char_count = max(div(token_size, 2), 10)
+
+      messages =
+        Enum.map(1..count, fn i ->
+          content = "测试消息第#{i}条" <> String.duplicate("内容", max(div(char_count - 6, 2), 1))
+          %{role: "user", content: content}
+        end)
+
+      Map.put(ctx, :compaction_messages, messages)
+    end
+  end
+
+  defp compaction_messages_with_system!(ctx, %{count: count}, _meta) do
+    # 第一条为系统消息，其余为用户消息
+    system_msg = %{role: "system", content: "你是一个AI助手。"}
+
+    user_messages =
+      Enum.map(1..(count - 1), fn i ->
+        %{role: "user", content: "测试消息第#{i}条，包含一些需要较多token的中文内容用于测试压缩功能。"}
+      end)
+
+    Map.put(ctx, :compaction_messages, [system_msg | user_messages])
+  end
+
+  defp compaction_lock_acquired!(ctx, %{session_id: session_id}, _meta) do
+    Gong.Compaction.Lock.acquire(session_id)
+
+    ExUnit.Callbacks.on_exit(fn ->
+      Gong.Compaction.Lock.release(session_id)
+    end)
+
+    ctx
+  end
+
+  defp compaction_summarize_fn_ok!(ctx, _args, _meta) do
+    summarize_fn = fn _messages ->
+      {:ok, "这是一段会话摘要，包含了之前讨论的主要内容。"}
+    end
+
+    Map.put(ctx, :compaction_summarize_fn, summarize_fn)
+  end
+
+  defp compaction_summarize_fn_fail!(ctx, _args, _meta) do
+    summarize_fn = fn _messages ->
+      {:error, :llm_unavailable}
+    end
+
+    Map.put(ctx, :compaction_summarize_fn, summarize_fn)
+  end
+
+  # ── Compaction WHEN 实现 ──
+
+  defp when_estimate_tokens!(ctx, _args, _meta) do
+    messages = Map.fetch!(ctx, :compaction_messages)
+    estimate = Gong.Compaction.TokenEstimator.estimate_messages(messages)
+
+    ctx
+    |> Map.put(:token_estimate, estimate)
+    |> Map.put(:compaction_last_error, nil)
+  end
+
+  defp when_compact!(ctx, args, _meta) do
+    messages = Map.fetch!(ctx, :compaction_messages)
+    opts = build_compact_opts(ctx, args)
+
+    {compacted, summary} = Gong.Compaction.compact(messages, opts)
+
+    ctx
+    |> Map.put(:compacted_messages, compacted)
+    |> Map.put(:compaction_summary, summary)
+    |> Map.put(:compaction_last_error, nil)
+  end
+
+  defp when_compact_and_handoff!(ctx, args, _meta) do
+    messages = Map.fetch!(ctx, :compaction_messages)
+    tape_store = Map.fetch!(ctx, :tape_store)
+    opts = build_compact_opts(ctx, args)
+
+    {compacted, summary, updated_store} =
+      Gong.Compaction.compact_and_handoff(tape_store, messages, opts)
+
+    ctx
+    |> Map.put(:compacted_messages, compacted)
+    |> Map.put(:compaction_summary, summary)
+    |> Map.put(:tape_store, updated_store)
+    |> Map.put(:compaction_last_error, nil)
+  end
+
+  defp when_acquire_lock!(ctx, %{session_id: session_id}, _meta) do
+    case Gong.Compaction.Lock.acquire(session_id) do
+      :ok ->
+        ExUnit.Callbacks.on_exit(fn ->
+          Gong.Compaction.Lock.release(session_id)
+        end)
+
+        ctx |> Map.put(:compaction_last_error, nil)
+
+      {:error, reason} ->
+        ctx |> Map.put(:compaction_last_error, reason)
+    end
+  end
+
+  defp build_compact_opts(ctx, args) do
+    opts = []
+    opts = if args[:max_tokens], do: [{:max_tokens, args.max_tokens} | opts], else: opts
+    opts = if args[:window_size], do: [{:window_size, args.window_size} | opts], else: opts
+
+    if fn_ref = Map.get(ctx, :compaction_summarize_fn) do
+      [{:summarize_fn, fn_ref} | opts]
+    else
+      opts
+    end
+  end
+
+  # ── Compaction THEN 实现 ──
+
+  defp assert_token_estimate!(ctx, %{min: min, max: max}, _meta) do
+    estimate = Map.fetch!(ctx, :token_estimate)
+
+    assert estimate >= min,
+      "期望 token 估算 >= #{min}，实际：#{estimate}"
+
+    assert estimate <= max,
+      "期望 token 估算 <= #{max}，实际：#{estimate}"
+
+    ctx
+  end
+
+  defp assert_compacted!(ctx, %{message_count: expected}, _meta) do
+    compacted = Map.fetch!(ctx, :compacted_messages)
+    actual = length(compacted)
+
+    assert actual == expected,
+      "期望压缩后消息数=#{expected}，实际：#{actual}"
+
+    ctx
+  end
+
+  defp assert_not_compacted!(ctx, _args, _meta) do
+    summary = Map.get(ctx, :compaction_summary)
+    assert summary == nil, "期望未触发压缩，但 summary=#{inspect(summary)}"
+
+    # 压缩后消息应与原始消息相同
+    compacted = Map.get(ctx, :compacted_messages)
+    original = Map.get(ctx, :compaction_messages)
+
+    if compacted && original do
+      assert length(compacted) == length(original),
+        "期望消息数不变 #{length(original)}，实际：#{length(compacted)}"
+    end
+
+    ctx
+  end
+
+  defp assert_summary_exists!(ctx, _args, _meta) do
+    summary = Map.get(ctx, :compaction_summary)
+    assert summary != nil, "期望 summary 不为 nil"
+    assert is_binary(summary), "期望 summary 是字符串，实际：#{inspect(summary)}"
+    ctx
+  end
+
+  defp assert_summary_nil!(ctx, _args, _meta) do
+    summary = Map.get(ctx, :compaction_summary)
+    assert summary == nil, "期望 summary 为 nil，实际：#{inspect(summary)}"
+    ctx
+  end
+
+  defp assert_system_preserved!(ctx, _args, _meta) do
+    compacted = Map.fetch!(ctx, :compacted_messages)
+
+    # 检查压缩后的消息中仍包含系统消息
+    has_system =
+      Enum.any?(compacted, fn msg ->
+        role = Map.get(msg, :role) || Map.get(msg, "role")
+        to_string(role) == "system"
+      end)
+
+    assert has_system, "期望系统消息在压缩后仍然存在"
+    ctx
+  end
+
+  defp assert_compaction_error!(ctx, %{error_contains: expected}, _meta) do
+    error = Map.get(ctx, :compaction_last_error)
+    assert error != nil, "期望压缩错误，但 compaction_last_error 为 nil"
+    decoded = unescape(expected)
+
+    assert to_string(error) =~ decoded,
+      "期望错误包含 #{inspect(decoded)}，实际：#{inspect(error)}"
+
+    ctx
+  end
+
+  defp assert_tape_has_compaction_anchor!(ctx, _args, _meta) do
+    store = Map.fetch!(ctx, :tape_store)
+    # 检查 anchor 数量增加（至少 2：session-start + compaction）
+    anchor_count = Gong.Tape.Store.anchor_count(store)
+
+    assert anchor_count >= 2,
+      "期望至少 2 个 anchor（含 compaction），实际：#{anchor_count}"
+
+    ctx
   end
 
   # ── Helpers ──
