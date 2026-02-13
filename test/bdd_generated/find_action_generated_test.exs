@@ -149,4 +149,32 @@ defmodule Gong.BDD.Generated.FindActionTest do
     :ok
   end
 
+  # Source: BDD-FIND-008
+  @tag :external_io
+  @tag :unit
+  test "[BDD-FIND-008] 尊重 .gitignore" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-FIND-008"}
+    # line 64: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
+    # line 65: GIVEN create_temp_file path=".gitignore" content="*.log\nbuild/\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "*.log\\nbuild/\\n", path: ".gitignore"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 65, raw: "GIVEN create_temp_file path=\".gitignore\" content=\"*.log\\nbuild/\\n\""}, 65)
+    # line 66: GIVEN create_temp_file path="keep.txt" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "keep.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 66, raw: "GIVEN create_temp_file path=\"keep.txt\" content=\"\""}, 66)
+    # line 67: GIVEN create_temp_file path="debug.log" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "debug.log"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 67, raw: "GIVEN create_temp_file path=\"debug.log\" content=\"\""}, 67)
+    # line 68: GIVEN create_temp_file path="build/output.js" content=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "", path: "build/output.js"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 68, raw: "GIVEN create_temp_file path=\"build/output.js\" content=\"\""}, 68)
+    # line 69: WHEN tool_find pattern="**/*"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_find, %{pattern: "**/*"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 69, raw: "WHEN tool_find pattern=\"**/*\""}, 69)
+    # line 70: THEN assert_tool_success content_contains="keep.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "keep.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 70, raw: "THEN assert_tool_success content_contains=\"keep.txt\""}, 70)
+    # line 71: THEN assert_output_not_contains text="debug.log"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "debug.log"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 71, raw: "THEN assert_output_not_contains text=\"debug.log\""}, 71)
+    # line 72: THEN assert_output_not_contains text="output.js"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_not_contains, %{text: "output.js"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 72, raw: "THEN assert_output_not_contains text=\"output.js\""}, 72)
+    _ctx = ctx
+    :ok
+  end
+
 end

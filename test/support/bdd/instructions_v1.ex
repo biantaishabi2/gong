@@ -1840,6 +1840,8 @@ defmodule Gong.BDD.Instructions.V1 do
     opts = []
     opts = if args[:max_tokens], do: [{:max_tokens, args.max_tokens} | opts], else: opts
     opts = if args[:window_size], do: [{:window_size, args.window_size} | opts], else: opts
+    opts = if args[:context_window], do: [{:context_window, args.context_window} | opts], else: opts
+    opts = if args[:reserve_tokens], do: [{:reserve_tokens, args.reserve_tokens} | opts], else: opts
 
     if fn_ref = Map.get(ctx, :compaction_summarize_fn) do
       [{:summarize_fn, fn_ref} | opts]

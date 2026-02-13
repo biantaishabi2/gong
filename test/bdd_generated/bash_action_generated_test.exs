@@ -245,4 +245,44 @@ defmodule Gong.BDD.Generated.BashActionTest do
     :ok
   end
 
+  # Source: BDD-BASH-015
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-015] 大输出行截断保留尾部" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-015"}
+    # line 96: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 96, raw: "GIVEN create_temp_dir"}, 96)
+    # line 97: WHEN tool_bash command="seq 1 3000"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "seq 1 3000"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 97, raw: "WHEN tool_bash command=\"seq 1 3000\""}, 97)
+    # line 98: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 98, raw: "THEN assert_tool_success"}, 98)
+    # line 99: THEN assert_output_contains text="3000"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "3000"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 99, raw: "THEN assert_output_contains text=\"3000\""}, 99)
+    # line 100: THEN assert_output_contains text="omitted"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "omitted"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 100, raw: "THEN assert_output_contains text=\"omitted\""}, 100)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-BASH-016
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-016] 超大输出字节截断" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-016"}
+    # line 103: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 103, raw: "GIVEN create_temp_dir"}, 103)
+    # line 104: WHEN tool_bash command="seq 1 50000"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "seq 1 50000"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 104, raw: "WHEN tool_bash command=\"seq 1 50000\""}, 104)
+    # line 105: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 105, raw: "THEN assert_tool_success"}, 105)
+    # line 106: THEN assert_result_field field="truncated" expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "true", field: "truncated"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 106, raw: "THEN assert_result_field field=\"truncated\" expected=\"true\""}, 106)
+    # line 107: THEN assert_output_contains text="50000"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "50000"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 107, raw: "THEN assert_output_contains text=\"50000\""}, 107)
+    _ctx = ctx
+    :ok
+  end
+
 end

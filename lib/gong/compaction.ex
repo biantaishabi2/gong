@@ -13,6 +13,7 @@ defmodule Gong.Compaction do
 
   @default_window_size 20
   @default_max_tokens 100_000
+  @default_reserve_tokens 16_384
   @truncate_tool_max_chars 200
 
   @doc """
@@ -22,12 +23,14 @@ defmodule Gong.Compaction do
 
   - `:window_size` - 滑动窗口大小，保留最近 N 条非系统消息（默认 20）
   - `:max_tokens` - 最大 token 数阈值（默认 100_000）
+  - `:context_window` - 上下文窗口总 token 数（设置后 max_tokens = context_window - reserve_tokens）
+  - `:reserve_tokens` - 预留 token 数（默认 16_384，仅 context_window 模式生效）
   - `:summarize_fn` - 摘要函数 `(messages -> {:ok, summary} | {:error, reason})`
   """
   @spec compact([map()], keyword()) :: {[map()], String.t() | nil}
   def compact(messages, opts \\ []) do
     window_size = Keyword.get(opts, :window_size, @default_window_size)
-    max_tokens = Keyword.get(opts, :max_tokens, @default_max_tokens)
+    max_tokens = resolve_max_tokens(opts)
     summarize_fn = Keyword.get(opts, :summarize_fn, &default_summarize/1)
 
     total = TokenEstimator.estimate_messages(messages)
@@ -139,6 +142,18 @@ defmodule Gong.Compaction do
         msg
       end
     end)
+  end
+
+  # 阈值计算：context_window 模式 vs 固定 max_tokens
+  defp resolve_max_tokens(opts) do
+    case Keyword.get(opts, :context_window) do
+      nil ->
+        Keyword.get(opts, :max_tokens, @default_max_tokens)
+
+      ctx_window ->
+        reserve = Keyword.get(opts, :reserve_tokens, @default_reserve_tokens)
+        ctx_window - reserve
+    end
   end
 
   # 默认摘要函数（占位，生产环境应注入 ReqLLM 调用）

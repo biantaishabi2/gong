@@ -107,3 +107,20 @@ WHEN when_compact max_tokens=50 window_size=3
 THEN assert_summary_nil
 THEN assert_system_preserved
 THEN assert_compacted message_count=4
+
+# ══════════════════════════════════════════════
+# Group 5: Token 预算窗口（2 个）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-COMPACT-015] TITLE: 上下文窗口预算触发压缩 TAGS: unit compaction
+GIVEN compaction_messages count=10 token_size=500
+GIVEN compaction_summarize_fn_ok
+WHEN when_compact context_window=2000 reserve_tokens=500 window_size=3
+THEN assert_summary_exists
+THEN assert_compacted message_count=4
+
+[SCENARIO: BDD-COMPACT-016] TITLE: 上下文窗口充足不压缩 TAGS: unit compaction
+GIVEN compaction_messages count=3 token_size=10
+WHEN when_compact context_window=200000 reserve_tokens=16384 window_size=5
+THEN assert_not_compacted
+THEN assert_summary_nil

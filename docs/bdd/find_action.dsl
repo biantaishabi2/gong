@@ -57,3 +57,16 @@ THEN assert_tool_success content_contains="link.txt"
 GIVEN create_temp_dir
 WHEN tool_find pattern="*.txt" path="nonexistent"
 THEN assert_tool_error error_contains="ENOENT"
+
+# ── 4. .gitignore 过滤 ──
+
+[SCENARIO: BDD-FIND-008] TITLE: 尊重 .gitignore TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path=".gitignore" content="*.log\nbuild/\n"
+GIVEN create_temp_file path="keep.txt" content=""
+GIVEN create_temp_file path="debug.log" content=""
+GIVEN create_temp_file path="build/output.js" content=""
+WHEN tool_find pattern="**/*"
+THEN assert_tool_success content_contains="keep.txt"
+THEN assert_output_not_contains text="debug.log"
+THEN assert_output_not_contains text="output.js"

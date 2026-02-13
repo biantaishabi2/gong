@@ -17,6 +17,7 @@ defmodule Gong.Tools.Bash do
 
   @max_output_bytes 50_000
   @max_output_lines 2000
+  @max_buffer_bytes 102_400
 
   @impl true
   def run(params, _context) do
@@ -87,21 +88,29 @@ defmodule Gong.Tools.Bash do
     if cwd, do: [{:cd, String.to_charlist(cwd)} | base], else: base
   end
 
-  # ── 输出收集（deadline 模式） ──
+  # ── 输出收集（deadline 模式 + 滚动缓冲） ──
 
   defp collect_output(port, os_pid, timeout_ms) do
     deadline = System.monotonic_time(:millisecond) + timeout_ms
-    do_collect(port, os_pid, deadline, [], 0, timeout_ms)
+
+    state = %{
+      chunks: [],
+      buf_bytes: 0,
+      total_bytes: 0,
+      temp_path: nil
+    }
+
+    do_collect(port, os_pid, deadline, state, timeout_ms)
   end
 
-  defp do_collect(port, os_pid, deadline, chunks, total_bytes, original_timeout_ms) do
+  defp do_collect(port, os_pid, deadline, state, original_timeout_ms) do
     remaining = deadline - System.monotonic_time(:millisecond)
 
     if remaining <= 0 do
       # 超时：杀进程树
       kill_process_tree(os_pid)
       safe_close_port(port)
-      output = build_output(chunks, total_bytes)
+      output = build_output(state)
       timeout_sec = div(original_timeout_ms, 1000)
 
       {:ok,
@@ -109,37 +118,80 @@ defmodule Gong.Tools.Bash do
          content: output <> "\n\nCommand timed out after #{timeout_sec} seconds",
          exit_code: nil,
          timed_out: true,
-         truncated: total_bytes > @max_output_bytes
+         truncated: state.total_bytes > @max_output_bytes,
+         temp_file: state.temp_path
        }}
     else
       receive do
         {^port, {:data, data}} ->
-          new_total = total_bytes + byte_size(data)
-          do_collect(port, os_pid, deadline, chunks ++ [data], new_total, original_timeout_ms)
+          state = ingest_chunk(state, data)
+          do_collect(port, os_pid, deadline, state, original_timeout_ms)
 
         {^port, {:exit_status, exit_code}} ->
-          output = build_output(chunks, total_bytes)
-          format_result(output, exit_code, total_bytes)
+          output = build_output(state)
+          format_result(output, exit_code, state)
       after
         min(remaining, 200) ->
-          do_collect(port, os_pid, deadline, chunks, total_bytes, original_timeout_ms)
+          do_collect(port, os_pid, deadline, state, original_timeout_ms)
       end
     end
   end
 
+  # ── 滚动缓冲 + 临时文件 ──
+
+  defp ingest_chunk(state, data) do
+    chunk_size = byte_size(data)
+    new_total = state.total_bytes + chunk_size
+
+    # 当总输出超过阈值时创建临时文件
+    temp_path =
+      if new_total > @max_output_bytes and state.temp_path == nil do
+        path = Path.join(System.tmp_dir!(), "gong_bash_#{:erlang.unique_integer([:positive])}.out")
+        buffered = state.chunks |> IO.iodata_to_binary()
+        File.write!(path, buffered <> data)
+        path
+      else
+        if state.temp_path, do: File.write!(state.temp_path, data, [:append])
+        state.temp_path
+      end
+
+    # 加入缓冲区（prepend，O(1)）
+    new_chunks = [data | state.chunks]
+    new_buf = state.buf_bytes + chunk_size
+
+    # 超出缓冲限制时裁剪旧数据
+    {trimmed, trimmed_bytes} =
+      if new_buf > @max_buffer_bytes do
+        trim_buffer(new_chunks, new_buf)
+      else
+        {new_chunks, new_buf}
+      end
+
+    %{state | chunks: trimmed, buf_bytes: trimmed_bytes, total_bytes: new_total, temp_path: temp_path}
+  end
+
+  defp trim_buffer(chunks, buf_bytes) when buf_bytes <= @max_buffer_bytes, do: {chunks, buf_bytes}
+
+  defp trim_buffer(chunks, buf_bytes) do
+    # chunks 是 newest-first；反转后丢弃最老的
+    [oldest | rest] = Enum.reverse(chunks)
+    trim_buffer(Enum.reverse(rest), buf_bytes - byte_size(oldest))
+  end
+
   # ── 结果格式化 ──
 
-  defp format_result(output, 0, total_bytes) do
+  defp format_result(output, 0, state) do
     {:ok,
      %{
        content: output,
        exit_code: 0,
        timed_out: false,
-       truncated: total_bytes > @max_output_bytes
+       truncated: state.total_bytes > @max_output_bytes,
+       temp_file: state.temp_path
      }}
   end
 
-  defp format_result(output, exit_code, total_bytes) do
+  defp format_result(output, exit_code, state) do
     content =
       if output == "" do
         "Command exited with code #{exit_code}"
@@ -152,19 +204,20 @@ defmodule Gong.Tools.Bash do
        content: content,
        exit_code: exit_code,
        timed_out: false,
-       truncated: total_bytes > @max_output_bytes
+       truncated: state.total_bytes > @max_output_bytes,
+       temp_file: state.temp_path
      }}
   end
 
   # ── 输出构建 + 截断 ──
 
-  defp build_output(chunks, total_bytes) do
-    raw = IO.iodata_to_binary(chunks)
+  defp build_output(%{chunks: chunks, total_bytes: total_bytes}) do
+    raw = chunks |> Enum.reverse() |> IO.iodata_to_binary()
     raw = String.trim_trailing(raw, "\n")
 
     if total_bytes > @max_output_bytes do
       result = Gong.Truncate.truncate(raw, :tail, max_bytes: @max_output_bytes)
-      result.content <> "\n[原始 #{result.total_bytes} 字节]"
+      result.content <> "\n[原始 #{total_bytes} 字节]"
     else
       maybe_truncate_lines(raw)
     end

@@ -44,6 +44,7 @@ defmodule Gong.Tools.Find do
     files =
       Path.wildcard(glob_pattern, match_dot: true)
       |> maybe_exclude(exclude, base)
+      |> filter_gitignore(base)
       |> sort_by_mtime()
 
     total = length(files)
@@ -80,6 +81,72 @@ defmodule Gong.Tools.Find do
   defp maybe_exclude(files, exclude_pattern, base) do
     excluded = Path.wildcard(Path.join(base, exclude_pattern), match_dot: true) |> MapSet.new()
     Enum.reject(files, &MapSet.member?(excluded, &1))
+  end
+
+  # ── .gitignore 过滤 ──
+
+  defp filter_gitignore(files, base) do
+    ignored = collect_ignored_files(base)
+
+    if MapSet.size(ignored) == 0 do
+      files
+    else
+      Enum.reject(files, &MapSet.member?(ignored, &1))
+    end
+  end
+
+  defp collect_ignored_files(base) do
+    gitignore_path = Path.join(base, ".gitignore")
+
+    if File.exists?(gitignore_path) do
+      patterns = parse_gitignore(gitignore_path)
+
+      patterns
+      |> Enum.flat_map(fn pattern ->
+        gitignore_to_globs(pattern, base)
+        |> Enum.flat_map(&Path.wildcard(&1, match_dot: true))
+      end)
+      |> MapSet.new()
+    else
+      MapSet.new()
+    end
+  end
+
+  defp parse_gitignore(path) do
+    path
+    |> File.read!()
+    |> String.split("\n")
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == "" or String.starts_with?(&1, "#")))
+    |> Enum.reject(&String.starts_with?(&1, "!"))
+  end
+
+  defp gitignore_to_globs(pattern, base) do
+    # 去掉开头的 /
+    pattern =
+      if String.starts_with?(pattern, "/") do
+        String.slice(pattern, 1..-1//1)
+      else
+        pattern
+      end
+
+    cond do
+      # 目录模式：build/ → 匹配目录下所有文件
+      String.ends_with?(pattern, "/") ->
+        dir = String.trim_trailing(pattern, "/")
+        [Path.join(base, "**/" <> dir <> "/**")]
+
+      # 含路径分隔符：相对于 base 的精确路径
+      String.contains?(pattern, "/") ->
+        [Path.join(base, pattern)]
+
+      # 纯文件名/目录名模式：匹配任意深度
+      true ->
+        [
+          Path.join(base, "**/" <> pattern),
+          Path.join(base, "**/" <> pattern <> "/**")
+        ]
+    end
   end
 
   defp sort_by_mtime(files) do

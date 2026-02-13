@@ -271,4 +271,42 @@ defmodule Gong.BDD.Generated.CompactionTest do
     :ok
   end
 
+  # Source: BDD-COMPACT-015
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-015] 上下文窗口预算触发压缩" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-015"}
+    # line 116: GIVEN compaction_messages count=10 token_size=500
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages, %{count: 10, token_size: 500}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 116, raw: "GIVEN compaction_messages count=10 token_size=500"}, 116)
+    # line 117: GIVEN compaction_summarize_fn_ok
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_summarize_fn_ok, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 117, raw: "GIVEN compaction_summarize_fn_ok"}, 117)
+    # line 118: WHEN when_compact context_window=2000 reserve_tokens=500 window_size=3
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_compact, %{context_window: 2000, reserve_tokens: 500, window_size: 3}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 118, raw: "WHEN when_compact context_window=2000 reserve_tokens=500 window_size=3"}, 118)
+    # line 119: THEN assert_summary_exists
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_summary_exists, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 119, raw: "THEN assert_summary_exists"}, 119)
+    # line 120: THEN assert_compacted message_count=4
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compacted, %{message_count: 4}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 120, raw: "THEN assert_compacted message_count=4"}, 120)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-016
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-016] 上下文窗口充足不压缩" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-016"}
+    # line 123: GIVEN compaction_messages count=3 token_size=10
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages, %{count: 3, token_size: 10}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 123, raw: "GIVEN compaction_messages count=3 token_size=10"}, 123)
+    # line 124: WHEN when_compact context_window=200000 reserve_tokens=16384 window_size=5
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_compact, %{context_window: 200000, reserve_tokens: 16384, window_size: 5}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 124, raw: "WHEN when_compact context_window=200000 reserve_tokens=16384 window_size=5"}, 124)
+    # line 125: THEN assert_not_compacted
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_not_compacted, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 125, raw: "THEN assert_not_compacted"}, 125)
+    # line 126: THEN assert_summary_nil
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_summary_nil, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 126, raw: "THEN assert_summary_nil"}, 126)
+    _ctx = ctx
+    :ok
+  end
+
 end

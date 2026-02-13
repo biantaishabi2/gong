@@ -89,3 +89,19 @@ GIVEN create_temp_dir
 WHEN tool_bash command="echo quick"
 THEN assert_tool_success
 THEN assert_result_field field="timed_out" expected="false"
+
+# ── 6. 大输出处理 ──
+
+[SCENARIO: BDD-BASH-015] TITLE: 大输出行截断保留尾部 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="seq 1 3000"
+THEN assert_tool_success
+THEN assert_output_contains text="3000"
+THEN assert_output_contains text="omitted"
+
+[SCENARIO: BDD-BASH-016] TITLE: 超大输出字节截断 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="seq 1 50000"
+THEN assert_tool_success
+THEN assert_result_field field="truncated" expected="true"
+THEN assert_output_contains text="50000"

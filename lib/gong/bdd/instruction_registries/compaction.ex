@@ -105,7 +105,9 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         kind: :when,
         args: %{
           max_tokens: %{type: :int, required?: false, allowed: nil},
-          window_size: %{type: :int, required?: false, allowed: nil}
+          window_size: %{type: :int, required?: false, allowed: nil},
+          context_window: %{type: :int, required?: false, allowed: nil},
+          reserve_tokens: %{type: :int, required?: false, allowed: nil}
         },
         outputs: %{},
         rules: [],
@@ -120,7 +122,9 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         kind: :when,
         args: %{
           max_tokens: %{type: :int, required?: false, allowed: nil},
-          window_size: %{type: :int, required?: false, allowed: nil}
+          window_size: %{type: :int, required?: false, allowed: nil},
+          context_window: %{type: :int, required?: false, allowed: nil},
+          reserve_tokens: %{type: :int, required?: false, allowed: nil}
         },
         outputs: %{},
         rules: [],
