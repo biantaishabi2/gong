@@ -237,13 +237,13 @@ THEN assert_no_crash
 # Group 5: 错误恢复 (6 个场景)
 # ══════════════════════════════════════════════
 
-[SCENARIO: BDD-AGENT-021] TITLE: LLM 返回错误后恢复 TAGS: integration agent negative
+[SCENARIO: BDD-AGENT-021] TITLE: LLM 返回永久错误后传播 TAGS: integration agent negative
 GIVEN create_temp_dir
 GIVEN configure_agent
 GIVEN attach_telemetry_handler event="gong.agent.start"
-GIVEN mock_llm_response response_type="error" content="API rate limit exceeded"
+GIVEN mock_llm_response response_type="error" content="authentication failed: invalid API key"
 WHEN agent_chat prompt="你好"
-THEN assert_last_error error_contains="rate limit"
+THEN assert_last_error error_contains="authentication failed"
 THEN assert_telemetry_received event="gong.agent.start"
 THEN assert_no_crash
 
@@ -353,4 +353,157 @@ GIVEN mock_llm_response response_type="text" content="密钥已脱敏"
 WHEN agent_chat prompt="读取密钥"
 THEN assert_tool_was_called tool="read_file"
 THEN assert_agent_reply contains="密钥已脱敏"
+THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 8: Steering 中断集成（2 个场景）
+# 工具执行间隙的 steering 中断机制
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-AGENT-031] TITLE: Steering 中断跳过剩余工具 TAGS: integration agent steering
+GIVEN create_temp_dir
+GIVEN create_temp_file path="keep.txt" content="should be read"
+GIVEN configure_agent
+GIVEN inject_steering message="用户中断" after_tool=1
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/keep.txt" tool_id="tc_exec"
+GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/skip1.txt|content=should not exist" tool_id="tc_skip1" batch_with_previous="true"
+GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/skip2.txt|content=should not exist" tool_id="tc_skip2" batch_with_previous="true"
+GIVEN mock_llm_response response_type="text" content="第一个工具执行了，后两个被跳过"
+WHEN agent_chat prompt="读取文件并写入两个新文件"
+THEN assert_agent_reply contains="被跳过"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-032] TITLE: Steering 消息后 Agent 正常继续 TAGS: integration agent steering
+GIVEN create_temp_dir
+GIVEN create_temp_file path="data.txt" content="steering test data"
+GIVEN configure_agent
+GIVEN inject_steering message="请改为读取 data.txt" after_tool=1
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/data.txt" tool_id="tc_first"
+GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/nope.txt|content=nope" tool_id="tc_skipped" batch_with_previous="true"
+GIVEN mock_llm_response response_type="text" content="收到中断消息已处理"
+WHEN agent_chat prompt="读文件然后写文件"
+THEN assert_agent_reply contains="收到中断"
+THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 10: Auto-retry 集成（3 个场景）
+# LLM 调用失败时自动重试
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-AGENT-033] TITLE: 429 触发重试而非压缩 TAGS: integration agent retry
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.retry"
+GIVEN mock_llm_response response_type="error" content="429 rate limit exceeded"
+GIVEN mock_llm_response response_type="text" content="重试后成功返回"
+WHEN agent_chat prompt="你好"
+THEN assert_retry_happened
+THEN assert_agent_reply contains="重试后成功返回"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-034] TITLE: 重试成功后继续工具调用 TAGS: integration agent retry
+GIVEN create_temp_dir
+GIVEN create_temp_file path="retry.txt" content="retry success data"
+GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.retry"
+GIVEN attach_telemetry_handler event="gong.tool.stop"
+GIVEN mock_llm_response response_type="error" content="connection timeout"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/retry.txt"
+GIVEN mock_llm_response response_type="text" content="重试后读到了数据"
+WHEN agent_chat prompt="读取 retry.txt"
+THEN assert_retry_happened
+THEN assert_tool_was_called tool="read_file"
+THEN assert_agent_reply contains="重试后读到了数据"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-035] TITLE: 重试耗尽返回错误 TAGS: integration agent retry
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN attach_telemetry_handler event="gong.retry"
+GIVEN mock_llm_response response_type="error" content="429 rate limit"
+GIVEN mock_llm_response response_type="error" content="429 rate limit"
+GIVEN mock_llm_response response_type="error" content="429 rate limit"
+GIVEN mock_llm_response response_type="error" content="429 rate limit"
+WHEN agent_chat prompt="你好"
+THEN assert_retry_happened
+THEN assert_last_error error_contains="rate limit"
+THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 12: Auto-compaction 集成（2 个场景）
+# 上下文超限自动触发压缩
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-AGENT-036] TITLE: 上下文超限自动触发压缩 TAGS: integration agent compaction
+GIVEN create_temp_dir
+GIVEN create_temp_file path="big.txt" content="这是一段很长的中文文本用于测试自动压缩功能，当上下文超过预设的令牌预算阈值时系统应该自动触发压缩流程，将旧消息替换为摘要以节省令牌空间"
+GIVEN configure_agent context_window=200 reserve_tokens=50
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/big.txt"
+GIVEN mock_llm_response response_type="text" content="已读取大文件内容"
+WHEN agent_chat prompt="读取 big.txt 的全部内容"
+THEN assert_compaction_triggered
+THEN assert_agent_reply contains="已读取大文件内容"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-037] TITLE: 压缩后对话继续正常 TAGS: integration agent compaction
+GIVEN create_temp_dir
+GIVEN create_temp_file path="long.txt" content="自动压缩测试数据，包含足够多的中文字符来触发令牌预算超限检测，系统应在压缩后继续正常运行不影响后续的工具调用和对话流程"
+GIVEN configure_agent context_window=200 reserve_tokens=50
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/long.txt"
+GIVEN mock_llm_response response_type="text" content="压缩后依然正常工作"
+WHEN agent_chat prompt="读取 long.txt"
+THEN assert_compaction_triggered
+THEN assert_agent_reply contains="压缩后依然正常"
+THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 13: Pi Bug 回归补全（4 个场景）
+# Pi 历史 Bug 的 Gong 回归测试
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-AGENT-038] TITLE: 多步操作不破坏 Agent 状态 (Pi#403) TAGS: integration agent regression
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="tool_call" tool="write_file" tool_args="file_path={{workspace}}/state_test.txt|content=state integrity ok"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/state_test.txt"
+GIVEN mock_llm_response response_type="text" content="状态一致：文件内容是 state integrity ok"
+WHEN agent_chat prompt="写入然后读取 state_test.txt"
+THEN assert_tool_was_called tool="write_file"
+THEN assert_tool_was_called tool="read_file"
+THEN assert_file_content path="state_test.txt" expected="state integrity ok"
+THEN assert_agent_reply contains="状态一致"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-039] TITLE: 多工具批量部分失败不丢结果 (Pi#1454) TAGS: integration agent regression
+GIVEN create_temp_dir
+GIVEN create_temp_file path="exist.txt" content="file exists ok"
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/exist.txt" tool_id="tc_ok"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path=/nonexistent/ghost.txt" tool_id="tc_fail" batch_with_previous="true"
+GIVEN mock_llm_response response_type="text" content="一个成功一个失败但都有结果"
+WHEN agent_chat prompt="同时读取两个文件"
+THEN assert_tool_was_called tool="read_file" times=2
+THEN assert_agent_reply contains="一个成功一个失败"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-040] TITLE: 空内容回复不崩溃 (Pi#1434) TAGS: integration agent regression
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="text" content=""
+WHEN agent_chat prompt="空回复测试"
+THEN assert_no_crash
+
+[SCENARIO: BDD-AGENT-041] TITLE: 多工具结果顺序不错位 (Pi#1446) TAGS: integration agent regression
+GIVEN create_temp_dir
+GIVEN create_temp_file path="a.txt" content="content_a"
+GIVEN create_temp_file path="b.txt" content="content_b"
+GIVEN create_temp_file path="c.txt" content="content_c"
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/a.txt" tool_id="tc_a"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/b.txt" tool_id="tc_b" batch_with_previous="true"
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/c.txt" tool_id="tc_c" batch_with_previous="true"
+GIVEN mock_llm_response response_type="text" content="三个文件全部读取完成"
+WHEN agent_chat prompt="同时读取 a b c 三个文件"
+THEN assert_tool_was_called tool="read_file" times=3
+THEN assert_agent_reply contains="三个文件全部读取完成"
 THEN assert_no_crash

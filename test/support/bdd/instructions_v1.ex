@@ -175,6 +175,9 @@ defmodule Gong.BDD.Instructions.V1 do
       {:given, :mock_llm_response} ->
         mock_llm_response!(ctx, args, meta)
 
+      {:given, :inject_steering} ->
+        inject_steering!(ctx, args, meta)
+
       {:given, :register_hook} ->
         register_hook!(ctx, args, meta)
 
@@ -207,6 +210,18 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_hook_fired} ->
         assert_hook_fired!(ctx, args, meta)
+
+      {:then, :assert_compaction_triggered} ->
+        assert_compaction_triggered!(ctx, args, meta)
+
+      {:then, :assert_compaction_not_triggered} ->
+        assert_compaction_not_triggered!(ctx, args, meta)
+
+      {:then, :assert_retry_happened} ->
+        assert_retry_happened!(ctx, args, meta)
+
+      {:then, :assert_no_retry} ->
+        assert_no_retry!(ctx, args, meta)
 
       {:then, :assert_hook_blocked} ->
         assert_hook_blocked!(ctx, args, meta)
@@ -990,21 +1005,36 @@ defmodule Gong.BDD.Instructions.V1 do
 
   # ── Agent 配置实现 ──
 
-  defp configure_agent!(ctx, _args, _meta) do
+  defp configure_agent!(ctx, args, _meta) do
     # mock 测试用策略层（无 AgentServer），E2E 测试用 AgentServer
     # 根据 mock_queue 是否为空来区分
     agent = Gong.MockLLM.init_agent()
 
-    ctx
-    |> Map.put(:agent, agent)
-    |> Map.put(:agent_mode, :mock)
-    |> Map.put(:mock_queue, [])
-    |> Map.put(:tool_call_log, [])
-    |> Map.put(:hook_events, [])
-    |> Map.put(:hooks, [])
-    |> Map.put(:telemetry_events, [])
-    |> Map.put(:telemetry_handlers, [])
-    |> Map.put(:stream_events, [])
+    ctx =
+      ctx
+      |> Map.put(:agent, agent)
+      |> Map.put(:agent_mode, :mock)
+      |> Map.put(:mock_queue, [])
+      |> Map.put(:tool_call_log, [])
+      |> Map.put(:hook_events, [])
+      |> Map.put(:hooks, [])
+      |> Map.put(:telemetry_events, [])
+      |> Map.put(:telemetry_handlers, [])
+      |> Map.put(:stream_events, [])
+
+    # 如果提供了 context_window，配置自动压缩
+    if cw = args[:context_window] do
+      rt = args[:reserve_tokens] || 100
+      compaction_opts = [
+        context_window: cw,
+        reserve_tokens: rt,
+        window_size: 4,
+        summarize_fn: fn _messages -> {:ok, "自动压缩摘要"} end
+      ]
+      Map.put(ctx, :compaction_opts, compaction_opts)
+    else
+      ctx
+    end
   end
 
   defp mock_llm_response!(ctx, args, _meta) do
@@ -1016,7 +1046,10 @@ defmodule Gong.BDD.Instructions.V1 do
         "tool_call" ->
           tool = Map.get(args, :tool, "bash")
           tool_args = parse_tool_args(Map.get(args, :tool_args, ""), ctx)
-          {:tool_calls, [%{name: tool, arguments: tool_args}]}
+          tc = %{name: tool, arguments: tool_args}
+          # 支持自定义 tool_call ID（用于结果顺序验证）
+          tc = if id = Map.get(args, :tool_id), do: Map.put(tc, :id, id), else: tc
+          {:tool_calls, [tc]}
 
         "error" ->
           {:error, Map.get(args, :content, "LLM error")}
@@ -1026,7 +1059,22 @@ defmodule Gong.BDD.Instructions.V1 do
       end
 
     queue = Map.get(ctx, :mock_queue, [])
-    Map.put(ctx, :mock_queue, queue ++ [response])
+
+    # batch_with_previous: 将本次 tool_call 合并到队列最后一个 tool_calls 条目
+    # 用于模拟 LLM 单次返回多个 tool_call 的场景（Pi#1446, Pi#1454）
+    if Map.get(args, :batch_with_previous) == "true" do
+      case {response, List.last(queue)} do
+        {{:tool_calls, new_tcs}, {:tool_calls, existing_tcs}} ->
+          updated_last = {:tool_calls, existing_tcs ++ new_tcs}
+          Map.put(ctx, :mock_queue, List.replace_at(queue, -1, updated_last))
+
+        _ ->
+          # 前一个条目不是 tool_calls，正常追加
+          Map.put(ctx, :mock_queue, queue ++ [response])
+      end
+    else
+      Map.put(ctx, :mock_queue, queue ++ [response])
+    end
   end
 
   # 解析管道分隔的工具参数：key1=value1|key2=value2
@@ -1045,6 +1093,12 @@ defmodule Gong.BDD.Instructions.V1 do
       end
     end)
     |> Map.new()
+  end
+
+  defp inject_steering!(ctx, %{message: message} = args, _meta) do
+    after_tool = Map.get(args, :after_tool, 1)
+    steering_config = %{message: message, after_tool: after_tool}
+    Map.put(ctx, :steering_config, steering_config)
   end
 
   defp register_hook!(ctx, %{module: module_name}, _meta) do
@@ -1108,11 +1162,15 @@ defmodule Gong.BDD.Instructions.V1 do
     hooks = Map.get(ctx, :hooks, [])
 
     if queue != [] do
-      # Mock 模式：策略层驱动（传入 hooks）
+      # Mock 模式：策略层驱动（传入 hooks + steering）
       agent = ctx.agent
-      case Gong.MockLLM.run_chat(agent, prompt, queue, hooks) do
+      opts = if sc = ctx[:steering_config], do: [steering_config: sc], else: []
+      case Gong.MockLLM.run_chat(agent, prompt, queue, hooks, opts) do
         {:ok, reply, updated_agent} ->
           ctx = collect_telemetry_events(ctx)
+
+          # Auto-compaction 检查：对话成功后检查是否需要压缩
+          {ctx, updated_agent} = maybe_auto_compact(ctx, updated_agent)
 
           ctx
           |> Map.put(:agent, updated_agent)
@@ -1313,6 +1371,76 @@ defmodule Gong.BDD.Instructions.V1 do
     else
       assert ctx[:agent] != nil, "Agent 结构体不存在"
     end
+    ctx
+  end
+
+  # ── Auto-compaction 集成 ──
+
+  defp maybe_auto_compact(ctx, agent) do
+    compaction_opts = ctx[:compaction_opts]
+
+    if compaction_opts do
+      strategy_state = Map.get(agent.state, :__strategy__, %{})
+      conversation = Map.get(strategy_state, :conversation, [])
+
+      case Gong.AutoCompaction.auto_compact(conversation, compaction_opts) do
+        {:compacted, new_messages, summary} ->
+          :telemetry.execute([:gong, :compaction, :auto], %{count: 1}, %{
+            summary: summary,
+            before_count: length(conversation),
+            after_count: length(new_messages)
+          })
+          # 更新 agent conversation
+          strategy = Map.get(agent.state, :__strategy__, %{})
+          updated_strategy = Map.put(strategy, :conversation, new_messages)
+          updated_state = Map.put(agent.state, :__strategy__, updated_strategy)
+          updated_agent = %{agent | state: updated_state}
+          # 收集 compaction telemetry
+          ctx = collect_telemetry_events(ctx)
+          {Map.put(ctx, :compaction_happened, true), updated_agent}
+
+        {:no_action, _} ->
+          {ctx, agent}
+
+        {:skipped, _} ->
+          {ctx, agent}
+      end
+    else
+      {ctx, agent}
+    end
+  end
+
+  defp assert_compaction_triggered!(ctx, _args, _meta) do
+    assert ctx[:compaction_happened] == true,
+      "期望自动压缩被触发，但未发生"
+    ctx
+  end
+
+  defp assert_compaction_not_triggered!(ctx, _args, _meta) do
+    assert ctx[:compaction_happened] != true,
+      "期望不触发压缩，但压缩被触发了"
+    ctx
+  end
+
+  # ── Auto-retry 断言实现 ──
+
+  defp assert_retry_happened!(ctx, _args, _meta) do
+    telemetry_events = Map.get(ctx, :telemetry_events, [])
+    retry_events = Enum.filter(telemetry_events, fn {event_name, _m, _md} ->
+      event_name == [:gong, :retry]
+    end)
+    assert length(retry_events) > 0,
+      "期望发生重试，但未收到 [:gong, :retry] telemetry 事件"
+    ctx
+  end
+
+  defp assert_no_retry!(ctx, _args, _meta) do
+    telemetry_events = Map.get(ctx, :telemetry_events, [])
+    retry_events = Enum.filter(telemetry_events, fn {event_name, _m, _md} ->
+      event_name == [:gong, :retry]
+    end)
+    assert length(retry_events) == 0,
+      "期望无重试，但收到 #{length(retry_events)} 个 [:gong, :retry] 事件"
     ctx
   end
 

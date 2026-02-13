@@ -10,7 +10,9 @@ defmodule Gong.BDD.InstructionRegistries.Agent do
         kind: :given,
         args: %{
           model: %{type: :string, required?: false, allowed: nil},
-          tools: %{type: :string, required?: false, allowed: nil}
+          tools: %{type: :string, required?: false, allowed: nil},
+          context_window: %{type: :int, required?: false, allowed: nil},
+          reserve_tokens: %{type: :int, required?: false, allowed: nil}
         },
         outputs: %{},
         rules: [],
@@ -27,12 +29,29 @@ defmodule Gong.BDD.InstructionRegistries.Agent do
           response_type: %{type: :string, required?: true, allowed: nil},
           content: %{type: :string, required?: false, allowed: nil},
           tool: %{type: :string, required?: false, allowed: nil},
-          tool_args: %{type: :string, required?: false, allowed: nil}
+          tool_args: %{type: :string, required?: false, allowed: nil},
+          tool_id: %{type: :string, required?: false, allowed: nil},
+          batch_with_previous: %{type: :string, required?: false, allowed: nil}
         },
         outputs: %{},
         rules: [],
         boundary: :test_runtime,
         scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      inject_steering: %{
+        name: :inject_steering,
+        kind: :given,
+        args: %{
+          message: %{type: :string, required?: true, allowed: nil},
+          after_tool: %{type: :int, required?: false, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration],
         async?: false,
         eventually?: false,
         assert_class: nil
@@ -196,6 +215,54 @@ defmodule Gong.BDD.InstructionRegistries.Agent do
       },
       assert_no_crash: %{
         name: :assert_no_crash,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_compaction_triggered: %{
+        name: :assert_compaction_triggered,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_compaction_not_triggered: %{
+        name: :assert_compaction_not_triggered,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_retry_happened: %{
+        name: :assert_retry_happened,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:integration, :e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_no_retry: %{
+        name: :assert_no_retry,
         kind: :then,
         args: %{},
         outputs: %{},
