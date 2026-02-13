@@ -347,4 +347,78 @@ defmodule Gong.BDD.Generated.CompactionTest do
     :ok
   end
 
+  # Source: BDD-COMPACT-019
+  @tag :agent_loop
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-019] 压缩 prompt 包含结构化字段标记" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-019"}
+    # line 149: GIVEN compaction_messages count=5 token_size=100
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages, %{count: 5, token_size: 100}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 149, raw: "GIVEN compaction_messages count=5 token_size=100"}, 149)
+    # line 150: WHEN build_summarize_prompt
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :build_summarize_prompt, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 150, raw: "WHEN build_summarize_prompt"}, 150)
+    # line 151: THEN assert_prompt_contains text="Goal"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_prompt_contains, %{text: "Goal"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 151, raw: "THEN assert_prompt_contains text=\"Goal\""}, 151)
+    # line 152: THEN assert_prompt_contains text="Progress"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_prompt_contains, %{text: "Progress"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 152, raw: "THEN assert_prompt_contains text=\"Progress\""}, 152)
+    # line 153: THEN assert_prompt_contains text="Key Decisions"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_prompt_contains, %{text: "Key Decisions"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 153, raw: "THEN assert_prompt_contains text=\"Key Decisions\""}, 153)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-020
+  @tag :agent_loop
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-020] 摘要输入包含文件操作汇总" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-020"}
+    # line 156: GIVEN compaction_messages_with_tool_calls count=5
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages_with_tool_calls, %{count: 5}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 156, raw: "GIVEN compaction_messages_with_tool_calls count=5"}, 156)
+    # line 157: WHEN extract_file_operations
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :extract_file_operations, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 157, raw: "WHEN extract_file_operations"}, 157)
+    # line 158: THEN assert_file_ops_contains text="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_ops_contains, %{text: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 158, raw: "THEN assert_file_ops_contains text=\"read_file\""}, 158)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-021
+  @tag :agent_loop
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-021]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-021"}
+    # line 161: GIVEN compaction_messages count=5 token_size=100
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages, %{count: 5, token_size: 100}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 161, raw: "GIVEN compaction_messages count=5 token_size=100"}, 161)
+    # line 162: WHEN build_summarize_prompt
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :build_summarize_prompt, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 162, raw: "WHEN build_summarize_prompt"}, 162)
+    # line 163: THEN assert_prompt_mode expected="create"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_prompt_mode, %{expected: "create"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 163, raw: "THEN assert_prompt_mode expected=\"create\""}, 163)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-022
+  @tag :agent_loop
+  @tag :compaction
+  @tag :unit
+  test "[BDD-COMPACT-022]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-022"}
+    # line 166: GIVEN compaction_messages_with_summary count=5 summary="之前的摘要内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages_with_summary, %{count: 5, summary: "之前的摘要内容"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 166, raw: "GIVEN compaction_messages_with_summary count=5 summary=\"之前的摘要内容\""}, 166)
+    # line 167: WHEN build_summarize_prompt
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :build_summarize_prompt, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 167, raw: "WHEN build_summarize_prompt"}, 167)
+    # line 168: THEN assert_prompt_mode expected="update"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_prompt_mode, %{expected: "update"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 168, raw: "THEN assert_prompt_mode expected=\"update\""}, 168)
+    # line 169: THEN assert_prompt_contains text="之前的摘要内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_prompt_contains, %{text: "之前的摘要内容"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 169, raw: "THEN assert_prompt_contains text=\"之前的摘要内容\""}, 169)
+    _ctx = ctx
+    :ok
+  end
+
 end

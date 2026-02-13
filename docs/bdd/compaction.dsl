@@ -140,3 +140,30 @@ GIVEN compaction_messages_with_tools count=10 tool_pair_at=6 token_size=500
 GIVEN compaction_summarize_fn_fail
 WHEN when_compact max_tokens=50 window_size=3
 THEN assert_tool_pairs_intact
+
+# ══════════════════════════════════════════════
+# Group 7: 结构化摘要 Prompt（4 个）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-COMPACT-019] TITLE: 压缩 prompt 包含结构化字段标记 TAGS: unit compaction agent_loop
+GIVEN compaction_messages count=5 token_size=100
+WHEN build_summarize_prompt
+THEN assert_prompt_contains text="Goal"
+THEN assert_prompt_contains text="Progress"
+THEN assert_prompt_contains text="Key Decisions"
+
+[SCENARIO: BDD-COMPACT-020] TITLE: 摘要输入包含文件操作汇总 TAGS: unit compaction agent_loop
+GIVEN compaction_messages_with_tool_calls count=5
+WHEN extract_file_operations
+THEN assert_file_ops_contains text="read_file"
+
+[SCENARIO: BDD-COMPACT-021] TITLE: 首次压缩用 CREATE 模式 prompt TAGS: unit compaction agent_loop
+GIVEN compaction_messages count=5 token_size=100
+WHEN build_summarize_prompt
+THEN assert_prompt_mode expected="create"
+
+[SCENARIO: BDD-COMPACT-022] TITLE: 二次压缩用 UPDATE 模式 prompt TAGS: unit compaction agent_loop
+GIVEN compaction_messages_with_summary count=5 summary="之前的摘要内容"
+WHEN build_summarize_prompt
+THEN assert_prompt_mode expected="update"
+THEN assert_prompt_contains text="之前的摘要内容"

@@ -239,6 +239,156 @@ defmodule Gong.BDD.InstructionRegistries.AgentLoop do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── GIVEN: 结构化摘要 ──
+
+      compaction_messages_with_tool_calls: %{
+        name: :compaction_messages_with_tool_calls,
+        kind: :given,
+        args: %{
+          count: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{compaction_messages: :list},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      compaction_messages_with_summary: %{
+        name: :compaction_messages_with_summary,
+        kind: :given,
+        args: %{
+          count: %{type: :int, required?: true, allowed: nil},
+          summary: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{compaction_messages: :list},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── WHEN: 结构化摘要 ──
+
+      build_summarize_prompt: %{
+        name: :build_summarize_prompt,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      extract_file_operations: %{
+        name: :extract_file_operations,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── THEN: 结构化摘要 ──
+
+      assert_prompt_contains: %{
+        name: :assert_prompt_contains,
+        kind: :then,
+        args: %{
+          text: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_prompt_mode: %{
+        name: :assert_prompt_mode,
+        kind: :then,
+        args: %{
+          expected: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_file_ops_contains: %{
+        name: :assert_file_ops_contains,
+        kind: :then,
+        args: %{
+          text: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+
+      # ── WHEN: Auto-Compaction ──
+
+      auto_compact: %{
+        name: :auto_compact,
+        kind: :when,
+        args: %{
+          context_window: %{type: :int, required?: true, allowed: nil},
+          reserve_tokens: %{type: :int, required?: true, allowed: nil},
+          window_size: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
+      # ── THEN: Auto-Compaction ──
+
+      assert_auto_compacted: %{
+        name: :assert_auto_compacted,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_auto_no_action: %{
+        name: :assert_auto_no_action,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

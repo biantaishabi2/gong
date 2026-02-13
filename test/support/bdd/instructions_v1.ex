@@ -448,6 +448,40 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_tool_pairs_intact} ->
         assert_tool_pairs_intact!(ctx, args, meta)
 
+      # ── Agent Loop: 结构化摘要 ──
+
+      {:given, :compaction_messages_with_tool_calls} ->
+        compaction_messages_with_tool_calls!(ctx, args, meta)
+
+      {:given, :compaction_messages_with_summary} ->
+        compaction_messages_with_summary!(ctx, args, meta)
+
+      {:when, :build_summarize_prompt} ->
+        build_summarize_prompt!(ctx, args, meta)
+
+      {:when, :extract_file_operations} ->
+        extract_file_operations!(ctx, args, meta)
+
+      {:then, :assert_prompt_contains} ->
+        assert_prompt_contains!(ctx, args, meta)
+
+      {:then, :assert_prompt_mode} ->
+        assert_prompt_mode!(ctx, args, meta)
+
+      {:then, :assert_file_ops_contains} ->
+        assert_file_ops_contains!(ctx, args, meta)
+
+      # ── Agent Loop: Auto-Compaction ──
+
+      {:when, :auto_compact} ->
+        auto_compact!(ctx, args, meta)
+
+      {:then, :assert_auto_compacted} ->
+        assert_auto_compacted!(ctx, args, meta)
+
+      {:then, :assert_auto_no_action} ->
+        assert_auto_no_action!(ctx, args, meta)
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -2238,6 +2272,120 @@ defmodule Gong.BDD.Instructions.V1 do
   defp has_tool_calls_field?(%{tool_calls: tcs}) when is_list(tcs) and tcs != [], do: true
   defp has_tool_calls_field?(%{"tool_calls" => tcs}) when is_list(tcs) and tcs != [], do: true
   defp has_tool_calls_field?(_), do: false
+
+  # ── 结构化摘要实现 ──
+
+  defp compaction_messages_with_tool_calls!(ctx, %{count: count}, _meta) do
+    # 生成包含 tool_call 的消息序列
+    messages =
+      Enum.flat_map(1..count, fn i ->
+        [
+          %{
+            role: "assistant",
+            content: "执行操作#{i}",
+            tool_calls: [
+              %{id: "tc_#{i}", name: "read_file", arguments: %{"file_path" => "/tmp/file#{i}.txt"}}
+            ]
+          },
+          %{role: "tool", content: "文件内容#{i}", tool_call_id: "tc_#{i}"}
+        ]
+      end)
+
+    Map.put(ctx, :compaction_messages, messages)
+  end
+
+  defp compaction_messages_with_summary!(ctx, %{count: count, summary: summary}, _meta) do
+    # 第一条是前次摘要消息，其余是普通消息
+    summary_msg = %{role: "system", content: "[会话摘要] #{summary}"}
+
+    user_messages =
+      Enum.map(1..(count - 1), fn i ->
+        %{role: "user", content: "后续对话消息#{i}"}
+      end)
+
+    Map.put(ctx, :compaction_messages, [summary_msg | user_messages])
+  end
+
+  defp build_summarize_prompt!(ctx, _args, _meta) do
+    messages = Map.fetch!(ctx, :compaction_messages)
+    {mode, prompt} = Gong.Prompt.build_summarize_prompt(messages)
+
+    ctx
+    |> Map.put(:summarize_prompt, prompt)
+    |> Map.put(:summarize_prompt_mode, mode)
+  end
+
+  defp extract_file_operations!(ctx, _args, _meta) do
+    messages = Map.fetch!(ctx, :compaction_messages)
+    file_ops = Gong.Prompt.extract_file_operations(messages)
+    Map.put(ctx, :file_ops_result, file_ops)
+  end
+
+  defp assert_prompt_contains!(ctx, %{text: text}, _meta) do
+    prompt = Map.fetch!(ctx, :summarize_prompt)
+    assert prompt =~ text,
+      "期望 prompt 包含 #{inspect(text)}，实际：#{String.slice(prompt, 0, 300)}"
+    ctx
+  end
+
+  defp assert_prompt_mode!(ctx, %{expected: expected}, _meta) do
+    mode = Map.fetch!(ctx, :summarize_prompt_mode)
+    assert to_string(mode) == expected,
+      "期望 prompt 模式=#{expected}，实际：#{mode}"
+    ctx
+  end
+
+  defp assert_file_ops_contains!(ctx, %{text: text}, _meta) do
+    file_ops = Map.fetch!(ctx, :file_ops_result)
+    assert file_ops =~ text,
+      "期望文件操作包含 #{inspect(text)}，实际：#{inspect(file_ops)}"
+    ctx
+  end
+
+  # ── Auto-Compaction 实现 ──
+
+  defp auto_compact!(ctx, args, _meta) do
+    messages = Map.fetch!(ctx, :compaction_messages)
+    summarize_fn = Map.get(ctx, :compaction_summarize_fn)
+
+    opts = [
+      context_window: args.context_window,
+      reserve_tokens: args.reserve_tokens,
+      window_size: args.window_size
+    ]
+
+    opts = if summarize_fn, do: [{:summarize_fn, summarize_fn} | opts], else: opts
+
+    result = Gong.AutoCompaction.auto_compact(messages, opts)
+
+    case result do
+      {:compacted, compacted, summary} ->
+        ctx
+        |> Map.put(:auto_compact_result, :compacted)
+        |> Map.put(:compacted_messages, compacted)
+        |> Map.put(:compaction_summary, summary)
+
+      {:no_action, _msgs} ->
+        Map.put(ctx, :auto_compact_result, :no_action)
+
+      {:skipped, :lock_busy} ->
+        Map.put(ctx, :auto_compact_result, :skipped)
+    end
+  end
+
+  defp assert_auto_compacted!(ctx, _args, _meta) do
+    result = Map.fetch!(ctx, :auto_compact_result)
+    assert result == :compacted,
+      "期望自动压缩已触发，实际：#{result}"
+    ctx
+  end
+
+  defp assert_auto_no_action!(ctx, _args, _meta) do
+    result = Map.fetch!(ctx, :auto_compact_result)
+    assert result == :no_action,
+      "期望未触发压缩，实际：#{result}"
+    ctx
+  end
 
   # ── Helpers ──
 
