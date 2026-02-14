@@ -4940,8 +4940,6 @@ defmodule Gong.BDD.Instructions.V1 do
         Gong.ModelRegistry.current_model_string()
       rescue
         _ -> "deepseek:deepseek-chat"
-      catch
-        :error, _ -> "deepseek:deepseek-chat"
       end
 
     Map.put(ctx, :model_string, str)

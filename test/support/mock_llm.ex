@@ -60,7 +60,7 @@ defmodule Gong.MockLLM do
     end
   end
 
-  defp do_run_chat(agent, prompt, response_queue, hooks, opts \\ []) do
+  defp do_run_chat(agent, prompt, response_queue, hooks, opts) do
     # Hook: on_before_agent — Agent 调用前注入/变换
     {prompt, _system, extra_messages} =
       Gong.HookRunner.pipe_before_agent(hooks, prompt, "")
@@ -102,7 +102,7 @@ defmodule Gong.MockLLM do
 
   # ── 内部循环驱动 ──
 
-  defp drive_loop(agent, call_id, [response | rest], hooks, opts \\ []) do
+  defp drive_loop(agent, call_id, [response | rest], hooks, opts) do
     # ── Auto-retry：transient 错误自动重试 ──
     case response do
       {:error, error_msg} ->
@@ -125,6 +125,16 @@ defmodule Gong.MockLLM do
         # 成功响应：重置重试计数，走正常流程
         opts = Keyword.put(opts, :retry_attempt, 0)
         drive_loop_process(agent, call_id, response, rest, hooks, opts)
+    end
+  end
+
+  defp drive_loop(agent, _call_id, [], _hooks, _opts) do
+    state = StratState.get(agent, %{})
+
+    case state[:status] do
+      :completed -> {:ok, state[:result] || "", agent}
+      :error -> {:error, state[:result] || "unknown error", agent}
+      _ -> {:error, "response queue exhausted while status=#{state[:status]}", agent}
     end
   end
 
@@ -212,19 +222,9 @@ defmodule Gong.MockLLM do
     result
   end
 
-  defp drive_loop(agent, _call_id, [], _hooks, _opts) do
-    state = StratState.get(agent, %{})
-
-    case state[:status] do
-      :completed -> {:ok, state[:result] || "", agent}
-      :error -> {:error, state[:result] || "unknown error", agent}
-      _ -> {:error, "response queue exhausted while status=#{state[:status]}", agent}
-    end
-  end
-
   # ── 工具执行（带 Hook + Steering 集成）──
 
-  defp execute_pending_tools(agent, state, _directives, hooks, opts \\ []) do
+  defp execute_pending_tools(agent, state, _directives, hooks, opts) do
     pending = state[:pending_tool_calls] || []
     config = state[:config] || %{}
     actions_by_name = config[:actions_by_name] || %{}
