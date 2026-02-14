@@ -8,15 +8,23 @@ defmodule Gong.BDD.Generated.ToolConfigTest do
   # Source: TOOLCFG-001
   @tag :tool_config
   @tag :unit
-  test "[TOOLCFG-001] 默认激活全部工具" do
+  test "[TOOLCFG-001] 默认激活 4 个核心工具" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "TOOLCFG-001"}
     # line 5: GIVEN init_tool_config
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 5, raw: "GIVEN init_tool_config"}, 5)
     # line 6: WHEN get_active_tools
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_active_tools, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 6, raw: "WHEN get_active_tools"}, 6)
-    # line 7: THEN assert_active_tool_count expected=7
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_count, %{expected: 7}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 7, raw: "THEN assert_active_tool_count expected=7"}, 7)
+    # line 7: THEN assert_active_tool_count expected=4
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_count, %{expected: 4}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 7, raw: "THEN assert_active_tool_count expected=4"}, 7)
+    # line 8: THEN assert_active_tool_contains tool="read"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "read"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 8, raw: "THEN assert_active_tool_contains tool=\"read\""}, 8)
+    # line 9: THEN assert_active_tool_contains tool="write"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "write"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 9, raw: "THEN assert_active_tool_contains tool=\"write\""}, 9)
+    # line 10: THEN assert_active_tool_contains tool="edit"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "edit"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 10, raw: "THEN assert_active_tool_contains tool=\"edit\""}, 10)
+    # line 11: THEN assert_active_tool_contains tool="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 11, raw: "THEN assert_active_tool_contains tool=\"bash\""}, 11)
     _ctx = ctx
     :ok
   end
@@ -24,23 +32,25 @@ defmodule Gong.BDD.Generated.ToolConfigTest do
   # Source: TOOLCFG-002
   @tag :tool_config
   @tag :unit
-  test "[TOOLCFG-002] minimal 预设只含 4 个核心工具" do
+  test "[TOOLCFG-002] full 预设包含全部 7 个工具" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "TOOLCFG-002"}
-    # line 10: GIVEN init_tool_config
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 10, raw: "GIVEN init_tool_config"}, 10)
-    # line 11: WHEN get_preset name="minimal"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_preset, %{name: "minimal"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 11, raw: "WHEN get_preset name=\"minimal\""}, 11)
-    # line 12: THEN assert_preset_contains tool="read"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "read"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 12, raw: "THEN assert_preset_contains tool=\"read\""}, 12)
-    # line 13: THEN assert_preset_contains tool="write"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "write"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 13, raw: "THEN assert_preset_contains tool=\"write\""}, 13)
-    # line 14: THEN assert_preset_contains tool="edit"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "edit"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 14, raw: "THEN assert_preset_contains tool=\"edit\""}, 14)
-    # line 15: THEN assert_preset_contains tool="bash"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 15, raw: "THEN assert_preset_contains tool=\"bash\""}, 15)
-    # line 16: THEN assert_preset_count expected=4
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_count, %{expected: 4}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 16, raw: "THEN assert_preset_count expected=4"}, 16)
+    # line 14: GIVEN init_tool_config
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 14, raw: "GIVEN init_tool_config"}, 14)
+    # line 15: WHEN get_preset name="full"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_preset, %{name: "full"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 15, raw: "WHEN get_preset name=\"full\""}, 15)
+    # line 16: THEN assert_preset_contains tool="read"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "read"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 16, raw: "THEN assert_preset_contains tool=\"read\""}, 16)
+    # line 17: THEN assert_preset_contains tool="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 17, raw: "THEN assert_preset_contains tool=\"bash\""}, 17)
+    # line 18: THEN assert_preset_contains tool="grep"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "grep"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 18, raw: "THEN assert_preset_contains tool=\"grep\""}, 18)
+    # line 19: THEN assert_preset_contains tool="find"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "find"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 19, raw: "THEN assert_preset_contains tool=\"find\""}, 19)
+    # line 20: THEN assert_preset_contains tool="ls"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "ls"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 20, raw: "THEN assert_preset_contains tool=\"ls\""}, 20)
+    # line 21: THEN assert_preset_count expected=7
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_count, %{expected: 7}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 21, raw: "THEN assert_preset_count expected=7"}, 21)
     _ctx = ctx
     :ok
   end
@@ -51,24 +61,24 @@ defmodule Gong.BDD.Generated.ToolConfigTest do
   test "[TOOLCFG-003] readonly 预设不含写操作工具" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "TOOLCFG-003"}
-    # line 19: GIVEN init_tool_config
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 19, raw: "GIVEN init_tool_config"}, 19)
-    # line 20: WHEN get_preset name="readonly"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_preset, %{name: "readonly"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 20, raw: "WHEN get_preset name=\"readonly\""}, 20)
-    # line 21: THEN assert_preset_contains tool="read"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "read"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 21, raw: "THEN assert_preset_contains tool=\"read\""}, 21)
-    # line 22: THEN assert_preset_contains tool="grep"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "grep"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 22, raw: "THEN assert_preset_contains tool=\"grep\""}, 22)
-    # line 23: THEN assert_preset_contains tool="find"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "find"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 23, raw: "THEN assert_preset_contains tool=\"find\""}, 23)
-    # line 24: THEN assert_preset_contains tool="ls"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "ls"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 24, raw: "THEN assert_preset_contains tool=\"ls\""}, 24)
-    # line 25: THEN assert_preset_not_contains tool="write"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_not_contains, %{tool: "write"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 25, raw: "THEN assert_preset_not_contains tool=\"write\""}, 25)
-    # line 26: THEN assert_preset_not_contains tool="edit"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_not_contains, %{tool: "edit"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 26, raw: "THEN assert_preset_not_contains tool=\"edit\""}, 26)
-    # line 27: THEN assert_preset_not_contains tool="bash"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_not_contains, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 27, raw: "THEN assert_preset_not_contains tool=\"bash\""}, 27)
+    # line 24: GIVEN init_tool_config
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 24, raw: "GIVEN init_tool_config"}, 24)
+    # line 25: WHEN get_preset name="readonly"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_preset, %{name: "readonly"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 25, raw: "WHEN get_preset name=\"readonly\""}, 25)
+    # line 26: THEN assert_preset_contains tool="read"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "read"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 26, raw: "THEN assert_preset_contains tool=\"read\""}, 26)
+    # line 27: THEN assert_preset_contains tool="grep"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "grep"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 27, raw: "THEN assert_preset_contains tool=\"grep\""}, 27)
+    # line 28: THEN assert_preset_contains tool="find"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "find"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 28, raw: "THEN assert_preset_contains tool=\"find\""}, 28)
+    # line 29: THEN assert_preset_contains tool="ls"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_contains, %{tool: "ls"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 29, raw: "THEN assert_preset_contains tool=\"ls\""}, 29)
+    # line 30: THEN assert_preset_not_contains tool="write"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_not_contains, %{tool: "write"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 30, raw: "THEN assert_preset_not_contains tool=\"write\""}, 30)
+    # line 31: THEN assert_preset_not_contains tool="edit"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_not_contains, %{tool: "edit"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 31, raw: "THEN assert_preset_not_contains tool=\"edit\""}, 31)
+    # line 32: THEN assert_preset_not_contains tool="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_preset_not_contains, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 32, raw: "THEN assert_preset_not_contains tool=\"bash\""}, 32)
     _ctx = ctx
     :ok
   end
@@ -79,16 +89,16 @@ defmodule Gong.BDD.Generated.ToolConfigTest do
   test "[TOOLCFG-004] 运行时切换工具集" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "TOOLCFG-004"}
-    # line 30: GIVEN init_tool_config
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 30, raw: "GIVEN init_tool_config"}, 30)
-    # line 31: WHEN set_active_tools tools="read,bash"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :set_active_tools, %{tools: "read,bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 31, raw: "WHEN set_active_tools tools=\"read,bash\""}, 31)
-    # line 32: THEN assert_active_tool_count expected=2
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_count, %{expected: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 32, raw: "THEN assert_active_tool_count expected=2"}, 32)
-    # line 33: THEN assert_active_tool_contains tool="read"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "read"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 33, raw: "THEN assert_active_tool_contains tool=\"read\""}, 33)
-    # line 34: THEN assert_active_tool_contains tool="bash"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 34, raw: "THEN assert_active_tool_contains tool=\"bash\""}, 34)
+    # line 35: GIVEN init_tool_config
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 35, raw: "GIVEN init_tool_config"}, 35)
+    # line 36: WHEN set_active_tools tools="read,bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :set_active_tools, %{tools: "read,bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 36, raw: "WHEN set_active_tools tools=\"read,bash\""}, 36)
+    # line 37: THEN assert_active_tool_count expected=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_count, %{expected: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 37, raw: "THEN assert_active_tool_count expected=2"}, 37)
+    # line 38: THEN assert_active_tool_contains tool="read"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "read"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 38, raw: "THEN assert_active_tool_contains tool=\"read\""}, 38)
+    # line 39: THEN assert_active_tool_contains tool="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_active_tool_contains, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 39, raw: "THEN assert_active_tool_contains tool=\"bash\""}, 39)
     _ctx = ctx
     :ok
   end
@@ -99,12 +109,12 @@ defmodule Gong.BDD.Generated.ToolConfigTest do
   test "[TOOLCFG-005] 无效工具名被拒绝" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "TOOLCFG-005"}
-    # line 37: GIVEN init_tool_config
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 37, raw: "GIVEN init_tool_config"}, 37)
-    # line 38: WHEN validate_tools tools="read,nonexistent"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :validate_tools, %{tools: "read,nonexistent"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 38, raw: "WHEN validate_tools tools=\"read,nonexistent\""}, 38)
-    # line 39: THEN assert_tool_config_error contains="nonexistent"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_config_error, %{contains: "nonexistent"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 39, raw: "THEN assert_tool_config_error contains=\"nonexistent\""}, 39)
+    # line 42: GIVEN init_tool_config
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 42, raw: "GIVEN init_tool_config"}, 42)
+    # line 43: WHEN validate_tools tools="read,nonexistent"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :validate_tools, %{tools: "read,nonexistent"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 43, raw: "WHEN validate_tools tools=\"read,nonexistent\""}, 43)
+    # line 44: THEN assert_tool_config_error contains="nonexistent"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_config_error, %{contains: "nonexistent"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 44, raw: "THEN assert_tool_config_error contains=\"nonexistent\""}, 44)
     _ctx = ctx
     :ok
   end
@@ -115,12 +125,12 @@ defmodule Gong.BDD.Generated.ToolConfigTest do
   test "[TOOLCFG-006] 空列表被拒绝" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "TOOLCFG-006"}
-    # line 42: GIVEN init_tool_config
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 42, raw: "GIVEN init_tool_config"}, 42)
-    # line 43: WHEN set_active_tools_safe tools=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :set_active_tools_safe, %{tools: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 43, raw: "WHEN set_active_tools_safe tools=\"\""}, 43)
-    # line 44: THEN assert_tool_config_error contains="empty"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_config_error, %{contains: "empty"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 44, raw: "THEN assert_tool_config_error contains=\"empty\""}, 44)
+    # line 47: GIVEN init_tool_config
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 47, raw: "GIVEN init_tool_config"}, 47)
+    # line 48: WHEN set_active_tools_safe tools=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :set_active_tools_safe, %{tools: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 48, raw: "WHEN set_active_tools_safe tools=\"\""}, 48)
+    # line 49: THEN assert_tool_config_error contains="empty"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_config_error, %{contains: "empty"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 49, raw: "THEN assert_tool_config_error contains=\"empty\""}, 49)
     _ctx = ctx
     :ok
   end

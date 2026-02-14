@@ -2,20 +2,21 @@ defmodule Gong.ToolConfig do
   @moduledoc """
   工具配置系统 — 管理 Agent 激活的工具集。
 
-  支持预设组合（default/minimal/readonly）和运行时动态切换。
+  支持预设组合（default/full/readonly）和运行时动态切换。
+  默认激活 4 个核心工具（read/write/edit/bash），其余按需开启。
   """
 
   @all_tools [:read, :write, :edit, :bash, :grep, :find, :ls]
 
   @presets %{
-    default: @all_tools,
-    minimal: [:read, :write, :edit, :bash],
+    default: [:read, :write, :edit, :bash],
+    full: @all_tools,
     readonly: [:read, :grep, :find, :ls]
   }
 
   @table :gong_tool_config
 
-  @doc "初始化工具配置，默认激活全部工具"
+  @doc "初始化工具配置，默认激活 4 个核心工具"
   def init(opts \\ []) do
     if :ets.info(@table) == :undefined do
       :ets.new(@table, [:named_table, :set, :public])

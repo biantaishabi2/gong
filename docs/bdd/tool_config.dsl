@@ -1,19 +1,24 @@
 # 工具配置系统 BDD 场景
 # 覆盖 Gong.ToolConfig 的预设、运行时切换、校验
 
-[SCENARIO: TOOLCFG-001] TITLE: 默认激活全部工具 TAGS: unit tool_config
+[SCENARIO: TOOLCFG-001] TITLE: 默认激活 4 个核心工具 TAGS: unit tool_config
 GIVEN init_tool_config
 WHEN get_active_tools
-THEN assert_active_tool_count expected=7
+THEN assert_active_tool_count expected=4
+THEN assert_active_tool_contains tool="read"
+THEN assert_active_tool_contains tool="write"
+THEN assert_active_tool_contains tool="edit"
+THEN assert_active_tool_contains tool="bash"
 
-[SCENARIO: TOOLCFG-002] TITLE: minimal 预设只含 4 个核心工具 TAGS: unit tool_config
+[SCENARIO: TOOLCFG-002] TITLE: full 预设包含全部 7 个工具 TAGS: unit tool_config
 GIVEN init_tool_config
-WHEN get_preset name="minimal"
+WHEN get_preset name="full"
 THEN assert_preset_contains tool="read"
-THEN assert_preset_contains tool="write"
-THEN assert_preset_contains tool="edit"
 THEN assert_preset_contains tool="bash"
-THEN assert_preset_count expected=4
+THEN assert_preset_contains tool="grep"
+THEN assert_preset_contains tool="find"
+THEN assert_preset_contains tool="ls"
+THEN assert_preset_count expected=7
 
 [SCENARIO: TOOLCFG-003] TITLE: readonly 预设不含写操作工具 TAGS: unit tool_config
 GIVEN init_tool_config
