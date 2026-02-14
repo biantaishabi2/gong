@@ -13,7 +13,7 @@
 ## 核心功能
 
 - **ReAct Agent 循环** — LLM 推理 + 工具调用的自动状态机循环
-- **7 个内置工具** — read / write / edit / bash / grep / find / ls
+- **7 个内置工具** — 默认激活 4 个核心工具（read / write / edit / bash），可扩展至 full 预设（+ grep / find / ls）
 - **Hook 系统** — 拦截（before_tool_call）、变换（on_tool_result / on_context / on_input）、注入（on_before_agent），支持安全策略、脱敏、审计
 - **上下文压缩（Compaction）** — 滑动窗口 + LLM 摘要，自动管理长对话的 token 预算
 - **Steering 中断** — 运行时向 Agent 注入指令，改变执行方向
@@ -26,7 +26,7 @@
 
 ```
 Gong.Agent          — Jido ReActAgent 定义（工具集 + 模型 + 系统提示词）
-Gong.Tools.*        — 7 个 Jido Action（read/write/edit/bash/grep/find/ls）
+Gong.Tools.*        — 7 个 Jido Action（默认 4 个：read/write/edit/bash，可选：grep/find/ls）
 Gong.HookRunner     — Hook 执行引擎（gate 拦截 + pipe 变换，5s 超时保护）
 Gong.Compaction     — 上下文压缩（配对保护 + 结构化摘要）
 Gong.Steering       — 运行时中断队列
@@ -61,7 +61,7 @@ bddc compile
 mix test test/bdd_generated/
 ```
 
-当前覆盖 **439 测试场景**，包括：
+当前覆盖 **465 测试场景**，包括：
 - 工具单元测试（read / write / edit / bash / grep / find / ls）
 - Hook 系统测试（拦截 / 变换 / 崩溃容错 / 超时保护）
 - Agent 集成测试（mock LLM 驱动的完整 ReAct 循环）
