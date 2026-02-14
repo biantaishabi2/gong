@@ -188,6 +188,38 @@ defmodule Gong.BDD.InstructionRegistries.Model do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── 上下文窗口 + 默认值 ──
+      register_model_with_context_window: %{
+        name: :register_model_with_context_window, kind: :given,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          provider: %{type: :string, required?: true, allowed: nil},
+          model_id: %{type: :string, required?: true, allowed: nil},
+          context_window: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_context_window_size: %{
+        name: :assert_context_window_size, kind: :then,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          expected: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      register_model_with_defaults: %{
+        name: :register_model_with_defaults, kind: :given,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          provider: %{type: :string, required?: true, allowed: nil},
+          model_id: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
       }
     }
   end

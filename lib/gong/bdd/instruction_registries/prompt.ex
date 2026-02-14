@@ -194,6 +194,28 @@ defmodule Gong.BDD.InstructionRegistries.Prompt do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── 系统提示词组装 ──
+      build_system_prompt: %{
+        name: :build_system_prompt, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_prompt_contains_context: %{
+        name: :assert_prompt_contains_context, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_prompt_contains_time: %{
+        name: :assert_prompt_contains_time, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_prompt_contains_cwd: %{
+        name: :assert_prompt_contains_cwd, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

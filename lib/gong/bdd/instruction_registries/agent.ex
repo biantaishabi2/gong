@@ -286,6 +286,20 @@ defmodule Gong.BDD.InstructionRegistries.Agent do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── Hook 深拷贝隔离 ──
+
+      register_mutating_hook: %{
+        name: :register_mutating_hook, kind: :given,
+        args: %{module: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:integration, :e2e], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_original_messages_intact: %{
+        name: :assert_original_messages_intact, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:integration, :e2e], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

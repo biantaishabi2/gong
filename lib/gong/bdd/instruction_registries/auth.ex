@@ -73,6 +73,80 @@ defmodule Gong.BDD.InstructionRegistries.Auth do
         args: %{status: %{type: :string, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 认证锁文件 ──
+      create_auth_lock_file: %{
+        name: :create_auth_lock_file, kind: :given,
+        args: %{content: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      corrupt_auth_lock_file: %{
+        name: :corrupt_auth_lock_file, kind: :given,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_auth_lock_recovered: %{
+        name: :assert_auth_lock_recovered, kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      set_env_api_key: %{
+        name: :set_env_api_key, kind: :given,
+        args: %{
+          env_var: %{type: :string, required?: true, allowed: nil},
+          value: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      get_api_key_via_auth: %{
+        name: :get_api_key_via_auth, kind: :when,
+        args: %{env_var: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_env_unchanged: %{
+        name: :assert_env_unchanged, kind: :then,
+        args: %{
+          env_var: %{type: :string, required?: true, allowed: nil},
+          expected: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      auth_logout: %{
+        name: :auth_logout, kind: :when,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_model_references_cleaned: %{
+        name: :assert_model_references_cleaned, kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      create_expiring_token: %{
+        name: :create_expiring_token, kind: :given,
+        args: %{expires_in_seconds: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      simulate_token_check: %{
+        name: :simulate_token_check, kind: :when,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_token_refreshed: %{
+        name: :assert_token_refreshed, kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

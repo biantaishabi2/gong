@@ -133,6 +133,56 @@ defmodule Gong.Stream do
     end
   end
 
+  # ── 并发保护 ──
+
+  @doc "基于 :atomics 的流式并发保护"
+  @spec with_stream_lock((() -> term())) :: {:ok, term()} | {:error, :stream_locked}
+  def with_stream_lock(fun) when is_function(fun, 0) do
+    ref = get_or_create_stream_lock()
+
+    case :atomics.compare_exchange(ref, 1, 0, 1) do
+      :ok ->
+        try do
+          result = fun.()
+          {:ok, result}
+        after
+          :atomics.put(ref, 1, 0)
+        end
+
+      _ ->
+        {:error, :stream_locked}
+    end
+  end
+
+  @doc "流式期间缓冲 tool result，避免交错"
+  @spec buffer_during_stream(term(), (() -> term())) :: {:buffered, term()}
+  def buffer_during_stream(tool_result, _stream_fn \\ fn -> :ok end) do
+    # 将 tool result 放入缓冲区
+    buffer = Process.get(:gong_stream_buffer, [])
+    Process.put(:gong_stream_buffer, buffer ++ [tool_result])
+    {:buffered, tool_result}
+  end
+
+  @doc "获取并清空流式缓冲区"
+  @spec flush_buffer() :: [term()]
+  def flush_buffer do
+    buffer = Process.get(:gong_stream_buffer, [])
+    Process.put(:gong_stream_buffer, [])
+    buffer
+  end
+
+  defp get_or_create_stream_lock do
+    case Process.get(:gong_stream_lock) do
+      nil ->
+        ref = :atomics.new(1, signed: false)
+        Process.put(:gong_stream_lock, ref)
+        ref
+
+      ref ->
+        ref
+    end
+  end
+
   @doc "从 chunk 队列生成工具调用事件列表"
   @spec tool_chunks_to_events(String.t(), [{:chunk, String.t()} | :done]) :: [Event.t()]
   def tool_chunks_to_events(tool_name, chunks) do

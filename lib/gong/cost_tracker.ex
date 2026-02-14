@@ -82,6 +82,26 @@ defmodule Gong.CostTracker do
     Process.get(@key, []) |> Enum.reverse()
   end
 
+  @doc "记录流中断时的部分令牌（带 :partial 标记）"
+  @spec record_partial(String.t(), non_neg_integer(), non_neg_integer()) :: :ok
+  def record_partial(model, input_tokens, output_tokens) when is_binary(model) do
+    record = %{
+      model: model,
+      usage: %{
+        input_tokens: input_tokens,
+        output_tokens: output_tokens,
+        cache_hit_tokens: 0,
+        total_cost: 0.0
+      },
+      timestamp: System.monotonic_time(:millisecond),
+      partial: true
+    }
+
+    history = Process.get(@key, [])
+    Process.put(@key, [record | history])
+    :ok
+  end
+
   @doc "清空追踪数据"
   @spec reset() :: :ok
   def reset do

@@ -146,6 +146,53 @@ defmodule Gong.BDD.InstructionRegistries.Extension do
         args: %{},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 扩展禁用/冲突/导入 ──
+      set_no_extensions_flag: %{
+        name: :set_no_extensions_flag, kind: :given,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      discover_extensions_with_flag: %{
+        name: :discover_extensions_with_flag, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_no_extensions_loaded: %{
+        name: :assert_no_extensions_loaded, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      create_conflicting_extensions: %{
+        name: :create_conflicting_extensions, kind: :given,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_extension_conflict_error: %{
+        name: :assert_extension_conflict_error, kind: :then,
+        args: %{error_contains: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :error
+      },
+      create_extension_with_import: %{
+        name: :create_extension_with_import, kind: :given,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          import_path: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      load_extension_with_imports: %{
+        name: :load_extension_with_imports, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_import_resolved: %{
+        name: :assert_import_resolved, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

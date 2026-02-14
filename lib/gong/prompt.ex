@@ -60,6 +60,26 @@ defmodule Gong.Prompt do
     end
   end
 
+  @doc "组装完整系统提示词（base + context + skills + 时间 + cwd）"
+  @spec full_system_prompt(keyword()) :: String.t()
+  def full_system_prompt(opts \\ []) do
+    workspace = Keyword.get(opts, :workspace, ".")
+    context = Keyword.get(opts, :context, "")
+    skills = Keyword.get(opts, :skills, "")
+
+    now = DateTime.utc_now() |> DateTime.to_string()
+
+    parts = [
+      @default_prompt,
+      if(context != "", do: "\n## Context\n#{context}\n", else: ""),
+      if(skills != "", do: "\n## Skills\n#{skills}\n", else: ""),
+      "\n当前时间：#{now}",
+      "\n当前工作目录：#{workspace}\n"
+    ]
+
+    Enum.join(parts)
+  end
+
   # ── 内部实现 ──
 
   defp compaction_prompt(conversation, file_ops) do

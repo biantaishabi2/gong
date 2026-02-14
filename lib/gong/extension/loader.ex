@@ -7,21 +7,25 @@ defmodule Gong.Extension.Loader do
 
   require Logger
 
-  @doc "扫描目录列表，返回 .ex 文件列表"
-  @spec discover([Path.t()]) :: {:ok, [Path.t()]} | {:error, term()}
-  def discover(paths) do
-    files =
-      paths
-      |> Enum.filter(&File.dir?/1)
-      |> Enum.flat_map(fn dir ->
-        dir
-        |> File.ls!()
-        |> Enum.filter(&String.ends_with?(&1, ".ex"))
-        |> Enum.map(&Path.join(dir, &1))
-      end)
-      |> Enum.sort()
+  @doc "扫描目录列表，返回 .ex 文件列表。支持 no_extensions 选项。"
+  @spec discover([Path.t()], keyword()) :: {:ok, [Path.t()]} | {:error, term()}
+  def discover(paths, opts \\ []) do
+    if Keyword.get(opts, :no_extensions, false) do
+      {:ok, []}
+    else
+      files =
+        paths
+        |> Enum.filter(&File.dir?/1)
+        |> Enum.flat_map(fn dir ->
+          dir
+          |> File.ls!()
+          |> Enum.filter(&String.ends_with?(&1, ".ex"))
+          |> Enum.map(&Path.join(dir, &1))
+        end)
+        |> Enum.sort()
 
-    {:ok, files}
+      {:ok, files}
+    end
   end
 
   @doc "加载单个 Extension 文件"
@@ -64,6 +68,49 @@ defmodule Gong.Extension.Loader do
       end)
 
     {:ok, modules, errors}
+  end
+
+  @doc "检测跨扩展重名工具/命令冲突"
+  @spec detect_conflicts([module()]) :: {:ok, [module()]} | {:error, String.t()}
+  def detect_conflicts(modules) when is_list(modules) do
+    # 收集所有工具/命令名
+    names =
+      Enum.flat_map(modules, fn mod ->
+        if function_exported?(mod, :name, 0) do
+          [mod.name()]
+        else
+          []
+        end
+      end)
+
+    duplicates = names -- Enum.uniq(names)
+
+    if duplicates == [] do
+      {:ok, modules}
+    else
+      {:error, "extension conflict: duplicate names #{inspect(Enum.uniq(duplicates))}"}
+    end
+  end
+
+  @doc "解析子路径 import 到绝对路径"
+  @spec resolve_imports(Path.t(), [String.t()]) :: {:ok, [Path.t()]} | {:error, term()}
+  def resolve_imports(base_dir, import_paths) when is_list(import_paths) do
+    resolved =
+      Enum.map(import_paths, fn path ->
+        if String.starts_with?(path, "./") do
+          Path.join(base_dir, String.trim_leading(path, "./"))
+        else
+          path
+        end
+      end)
+
+    missing = Enum.reject(resolved, &File.exists?/1)
+
+    if missing == [] do
+      {:ok, resolved}
+    else
+      {:error, "import not found: #{inspect(missing)}"}
+    end
   end
 
   defp implements_extension?(module) do

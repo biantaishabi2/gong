@@ -139,6 +139,14 @@ defmodule Gong.HookRunner do
     end)
   end
 
+  @doc "深拷贝消息列表，防止 hook 修改原始数据"
+  @spec deep_copy_messages([map()]) :: [map()]
+  def deep_copy_messages(messages) when is_list(messages) do
+    messages
+    |> :erlang.term_to_binary()
+    |> :erlang.binary_to_term()
+  end
+
   # ── 安全调用 hook，带超时和异常捕获 ──
 
   defp safe_call(hook, callback, args) do

@@ -518,6 +518,49 @@ defmodule Gong.BDD.InstructionRegistries.Tape do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── 会话边界补充 ──
+
+      assert_entry_order: %{
+        name: :assert_entry_order, kind: :then,
+        args: %{sequence: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── Pending 消息 + 异步事件 ──
+      tape_add_pending: %{
+        name: :tape_add_pending, kind: :given,
+        args: %{content: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      tape_switch_session: %{
+        name: :tape_switch_session, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_pending_cleared: %{
+        name: :assert_pending_cleared, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      register_failing_event_handler: %{
+        name: :register_failing_event_handler, kind: :given,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      emit_event: %{
+        name: :emit_event, kind: :when,
+        args: %{event: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_handler_error_propagated: %{
+        name: :assert_handler_error_propagated, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

@@ -11,7 +11,8 @@ defmodule Gong.ProviderRegistry do
   @type provider_entry :: %{
           module: module(),
           config: map(),
-          priority: integer()
+          priority: integer(),
+          timeout: non_neg_integer() | nil
         }
 
   @spec init() :: :ok
@@ -31,7 +32,8 @@ defmodule Gong.ProviderRegistry do
 
     case module.validate_config(config) do
       :ok ->
-        entry = %{module: module, config: config, priority: priority}
+        timeout = Keyword.get(opts, :timeout)
+        entry = %{module: module, config: config, priority: priority, timeout: timeout}
         :ets.insert(@table, {name, entry})
 
         # 如果是第一个注册的 provider，自动设为当前
@@ -101,6 +103,17 @@ defmodule Gong.ProviderRegistry do
 
       [] ->
         {:error, :no_fallback}
+    end
+  end
+
+  @doc "查询指定 provider 的超时配置"
+  @spec get_timeout(String.t()) :: non_neg_integer() | nil
+  def get_timeout(name) when is_binary(name) do
+    ensure_table!()
+
+    case :ets.lookup(@table, name) do
+      [{^name, entry}] -> Map.get(entry, :timeout)
+      [] -> nil
     end
   end
 

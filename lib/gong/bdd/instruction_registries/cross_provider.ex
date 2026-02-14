@@ -111,6 +111,98 @@ defmodule Gong.BDD.InstructionRegistries.CrossProvider do
         name: :assert_converted_has_tool_calls, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 跨厂商边界补充 ──
+
+      cross_provider_messages_with_thinking: %{
+        name: :cross_provider_messages_with_thinking, kind: :given,
+        args: %{count: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      cross_provider_messages_with_error: %{
+        name: :cross_provider_messages_with_error, kind: :given,
+        args: %{count: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_error_messages_filtered: %{
+        name: :assert_error_messages_filtered, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_handoff_summary_max_lines: %{
+        name: :assert_handoff_summary_max_lines, kind: :then,
+        args: %{max: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── Provider 兼容性边界 ──
+
+      cross_provider_messages_with_custom_role: %{
+        name: :cross_provider_messages_with_custom_role, kind: :given,
+        args: %{
+          role: %{type: :string, required?: true, allowed: nil},
+          count: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      cross_provider_messages_with_string_keys: %{
+        name: :cross_provider_messages_with_string_keys, kind: :given,
+        args: %{count: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+
+      # ── 字段剥离 + 网关路由 + 事件状态 ──
+      cross_provider_messages_with_unsupported_fields: %{
+        name: :cross_provider_messages_with_unsupported_fields, kind: :given,
+        args: %{
+          count: %{type: :int, required?: true, allowed: nil},
+          field: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_fields_stripped: %{
+        name: :assert_fields_stripped, kind: :then,
+        args: %{field: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      cross_provider_messages_with_gateway: %{
+        name: :cross_provider_messages_with_gateway, kind: :given,
+        args: %{
+          provider: %{type: :string, required?: true, allowed: nil},
+          count: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_required_fields_added: %{
+        name: :assert_required_fields_added, kind: :then,
+        args: %{field: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      register_state_observer_hook: %{
+        name: :register_state_observer_hook, kind: :given,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      emit_event_with_message: %{
+        name: :emit_event_with_message, kind: :when,
+        args: %{content: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_observer_saw_updated_state: %{
+        name: :assert_observer_saw_updated_state, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

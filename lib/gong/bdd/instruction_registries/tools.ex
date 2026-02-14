@@ -367,6 +367,58 @@ defmodule Gong.BDD.InstructionRegistries.Tools do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── Bash 边界补充 ──
+
+      tool_bash_with_abort: %{
+        name: :tool_bash_with_abort, kind: :when,
+        args: %{
+          command: %{type: :string, required?: true, allowed: nil},
+          timeout: %{type: :int, required?: false, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :external_io,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_no_orphan_process: %{
+        name: :assert_no_orphan_process, kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 工具参数/孤儿/错误边界 ──
+      tool_dispatch_nil_params: %{
+        name: :tool_dispatch_nil_params, kind: :when,
+        args: %{tool_name: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_tool_error_has_available_tools: %{
+        name: :assert_tool_error_has_available_tools, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+      },
+      mock_orphan_tool_result: %{
+        name: :mock_orphan_tool_result, kind: :given,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:integration], async?: false, eventually?: false, assert_class: nil
+      },
+      agent_chat_with_orphan: %{
+        name: :agent_chat_with_orphan, kind: :when,
+        args: %{prompt: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:integration], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_no_loop_crash: %{
+        name: :assert_no_loop_crash, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:integration], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_empty_content_filtered: %{
+        name: :assert_empty_content_filtered, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:integration], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

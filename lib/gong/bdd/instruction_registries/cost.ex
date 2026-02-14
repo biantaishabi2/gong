@@ -54,6 +54,30 @@ defmodule Gong.BDD.InstructionRegistries.Cost do
         name: :assert_last_call_nil, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 流中断部分令牌 ──
+      record_partial_llm_call: %{
+        name: :record_partial_llm_call, kind: :when,
+        args: %{
+          model: %{type: :string, required?: true, allowed: nil},
+          input_tokens: %{type: :int, required?: true, allowed: nil},
+          output_tokens: %{type: :int, required?: true, allowed: nil},
+          reason: %{type: :string, required?: false, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_partial_tokens_preserved: %{
+        name: :assert_partial_tokens_preserved, kind: :then,
+        args: %{model: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_cost_includes_partial: %{
+        name: :assert_cost_includes_partial, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

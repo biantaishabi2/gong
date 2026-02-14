@@ -86,6 +86,27 @@ defmodule Gong.BDD.InstructionRegistries.ProviderReg do
         name: :assert_provider_current_nil, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 超时透传 ──
+      register_provider_with_timeout: %{
+        name: :register_provider_with_timeout, kind: :when,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          module: %{type: :string, required?: true, allowed: nil},
+          timeout: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_provider_timeout: %{
+        name: :assert_provider_timeout, kind: :then,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          expected: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

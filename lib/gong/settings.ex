@@ -61,6 +61,52 @@ defmodule Gong.Settings do
     |> Map.new()
   end
 
+  @doc "重新读取配置文件刷新 ETS"
+  @spec reload(String.t()) :: :ok
+  def reload(workspace) do
+    # 清空当前值并重新加载
+    if :ets.info(@table) != :undefined do
+      :ets.delete_all_objects(@table)
+    end
+
+    # 重新加载默认值 + 文件
+    for {k, v} <- @default_settings do
+      :ets.insert(@table, {k, v})
+    end
+
+    config_file = Path.join([workspace, ".gong", "settings.json"])
+    load_file(config_file)
+    :ok
+  end
+
+  @doc """
+  语义化类型获取：区分 [] 和 nil/缺失。
+
+  - `[]`（空数组）= 阻止全部（explicit empty）
+  - `nil` / 缺失 = 不过滤（no filter）
+  """
+  @spec get_typed(String.t(), atom()) :: term()
+  def get_typed(key, type \\ :string) do
+    case :ets.lookup(@table, key) do
+      [{^key, value}] ->
+        case type do
+          :list ->
+            cond do
+              is_list(value) -> value
+              value == "[]" -> []
+              is_binary(value) -> Jason.decode!(value)
+              true -> value
+            end
+
+          _ ->
+            value
+        end
+
+      [] ->
+        nil
+    end
+  end
+
   @doc "清理 ETS 表"
   @spec cleanup() :: :ok
   def cleanup do

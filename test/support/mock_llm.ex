@@ -281,8 +281,9 @@ defmodule Gong.MockLLM do
           result =
             case gate_result do
               :ok ->
-                # 查找 action 模块并执行
-                action_module = Map.get(actions_by_name, tool_name)
+                # 查找 action 模块并执行（大小写不敏感）
+                action_module = Map.get(actions_by_name, tool_name) ||
+                  Map.get(actions_by_name, String.downcase(tool_name))
 
                 raw_result =
                   if action_module do

@@ -58,6 +58,56 @@ defmodule Gong.BDD.InstructionRegistries.Stream do
         args: %{expected: %{type: :string, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 事件序列验证 ──
+      validate_stream_events: %{
+        name: :validate_stream_events, kind: :when,
+        args: %{types: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_sequence_valid: %{
+        name: :assert_sequence_valid, kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_sequence_invalid: %{
+        name: :assert_sequence_invalid, kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 流式并发安全 ──
+      start_mock_stream: %{
+        name: :start_mock_stream, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      execute_hook_during_stream: %{
+        name: :execute_hook_during_stream, kind: :when,
+        args: %{hook_module: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_no_race_condition: %{
+        name: :assert_no_race_condition, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 流式缓冲 ──
+      buffer_tool_result_during_stream: %{
+        name: :buffer_tool_result_during_stream, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_tool_result_buffered: %{
+        name: :assert_tool_result_buffered, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

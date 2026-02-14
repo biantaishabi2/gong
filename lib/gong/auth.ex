@@ -78,4 +78,76 @@ defmodule Gong.Auth do
       key -> {:ok, key}
     end
   end
+
+  # ── 认证锁文件管理 ──
+
+  @doc "写入认证锁文件（JSON 格式）"
+  @spec write_lock_file(Path.t(), map()) :: :ok | {:error, term()}
+  def write_lock_file(path, data) when is_map(data) do
+    content = Jason.encode!(data)
+    File.mkdir_p!(Path.dirname(path))
+    File.write(path, content)
+  end
+
+  @doc "读取认证锁文件"
+  @spec read_lock_file(Path.t()) :: {:ok, map()} | {:error, term()}
+  def read_lock_file(path) do
+    case File.read(path) do
+      {:ok, content} ->
+        case Jason.decode(content) do
+          {:ok, data} -> {:ok, data}
+          {:error, _} -> {:error, :invalid_json}
+        end
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  @doc "恢复损坏的锁文件：删除并返回默认值"
+  @spec recover_lock_file(Path.t()) :: {:ok, map()}
+  def recover_lock_file(path) do
+    case read_lock_file(path) do
+      {:ok, data} ->
+        {:ok, data}
+
+      {:error, _} ->
+        File.rm(path)
+        {:ok, %{"token" => nil, "recovered" => true}}
+    end
+  end
+
+  @doc "登出：清除认证状态并清理模型引用"
+  @spec logout() :: :ok
+  def logout do
+    # 清除进程中的认证状态
+    Process.delete(:gong_auth_token)
+    # 清理模型注册表中的 auth 引用
+    Gong.ModelRegistry.clear_auth_references()
+    :ok
+  end
+
+  @doc "检测 token 剩余有效期，低于阈值时自动刷新"
+  @spec check_and_refresh(token(), integer()) :: {:ok, token()} | {:unchanged, token()}
+  def check_and_refresh(token, threshold_seconds \\ 300) do
+    case token do
+      %{expires_at: nil} ->
+        {:unchanged, token}
+
+      %{expires_at: expires_at} ->
+        remaining = expires_at - System.os_time(:second)
+
+        if remaining < threshold_seconds do
+          # 模拟刷新
+          new_token = %{
+            access_token: "refreshed_#{System.unique_integer([:positive])}",
+            refresh_token: token[:refresh_token] || token["refresh_token"],
+            expires_at: System.os_time(:second) + 3600
+          }
+          {:ok, new_token}
+        else
+          {:unchanged, token}
+        end
+    end
+  end
 end

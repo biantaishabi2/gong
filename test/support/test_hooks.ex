@@ -166,4 +166,42 @@ defmodule Gong.TestHooks do
       :ok
     end
   end
+
+  # ── 深拷贝保护测试 ──
+
+  defmodule MessageMutatorHook do
+    @moduledoc "修改收到的 messages 以测试深拷贝保护"
+    @behaviour Gong.Hook
+
+    def on_context(messages) do
+      # 尝试在原始消息上做修改
+      Enum.map(messages, fn msg ->
+        Map.put(msg, :mutated_by_hook, true)
+      end)
+    end
+  end
+
+  # ── 状态观察测试 ──
+
+  defmodule StateObserverHook do
+    @moduledoc "记录事件触发时的 state 快照"
+    @behaviour Gong.Hook
+
+    def on_context(messages) do
+      # 记录观察到的消息到进程字典
+      Process.put(:state_observer_snapshot, messages)
+      messages
+    end
+  end
+
+  # ── 异常传播测试 ──
+
+  defmodule FailingEventHandler do
+    @moduledoc "抛出异常以测试错误传播"
+    @behaviour Gong.Hook
+
+    def on_context(_messages) do
+      raise "event handler failed deliberately"
+    end
+  end
 end

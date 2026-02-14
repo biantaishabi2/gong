@@ -79,6 +79,6 @@ THEN assert_tool_success content_contains="findme.txt"
 [SCENARIO: TOOLRES-107] TITLE: ls 返回双通道 ToolResult TAGS: external_io integration tool_result
 GIVEN create_temp_dir
 GIVEN create_temp_file path="visible.txt" content="y"
-WHEN tool_ls
+WHEN tool_ls path="."
 THEN assert_is_tool_result
 THEN assert_tool_success content_contains="visible.txt"

@@ -22,10 +22,11 @@ defmodule Gong.Tape.Store do
 
   @type t :: %__MODULE__{
           workspace_path: Path.t(),
-          db_conn: reference() | nil
+          db_conn: reference() | nil,
+          pending: [String.t()]
         }
 
-  defstruct [:workspace_path, :db_conn]
+  defstruct [:workspace_path, :db_conn, pending: []]
 
   @default_anchor "session-start"
 
@@ -338,6 +339,36 @@ defmodule Gong.Tape.Store do
 
       error ->
         error
+    end
+  end
+
+  # ── Pending 消息管理 ──
+
+  @doc "添加 pending 消息"
+  @spec add_pending(t(), String.t()) :: t()
+  def add_pending(%__MODULE__{} = store, content) do
+    pending = Map.get(store, :pending, [])
+    %{store | pending: pending ++ [content]}
+  end
+
+  # 需要在 struct 中添加 pending 字段 — 用 Map 模式兼容
+  @doc "清除所有 pending 消息"
+  @spec clear_pending(t()) :: t()
+  def clear_pending(%__MODULE__{} = store) do
+    Map.put(store, :pending, [])
+  end
+
+  @doc "切换 session 时自动清理 pending"
+  @spec switch_session(t(), String.t()) :: {:ok, t()} | {:error, term()}
+  def switch_session(%__MODULE__{} = store, new_anchor_name) do
+    cleaned = clear_pending(store)
+
+    case handoff(cleaned, new_anchor_name) do
+      {:ok, _dir, updated_store} ->
+        {:ok, updated_store}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

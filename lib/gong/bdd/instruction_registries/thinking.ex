@@ -69,6 +69,11 @@ defmodule Gong.BDD.InstructionRegistries.Thinking do
         name: :assert_parsed_thinking_error, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :error
+      },
+      assert_max_tokens_ge_budget: %{
+        name: :assert_max_tokens_ge_budget, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

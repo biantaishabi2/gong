@@ -12,7 +12,8 @@ defmodule Gong.ModelRegistry do
   @type model_config :: %{
           provider: String.t(),
           model_id: String.t(),
-          api_key_env: String.t()
+          api_key_env: String.t(),
+          context_window: non_neg_integer() | nil
         }
 
   # ── 初始化 ──
@@ -121,6 +122,51 @@ defmodule Gong.ModelRegistry do
       [] ->
         {:error, "模型 #{name} 未注册"}
     end
+  end
+
+  # ── 上下文窗口 ──
+
+  @default_context_window 128_000
+
+  @doc "返回模型的上下文窗口大小（默认 128000）"
+  @spec get_context_window(atom()) :: non_neg_integer()
+  def get_context_window(name) when is_atom(name) do
+    ensure_table!()
+
+    case :ets.lookup(@table, name) do
+      [{^name, config}] ->
+        Map.get(config, :context_window) || @default_context_window
+
+      [] ->
+        @default_context_window
+    end
+  end
+
+  @doc "补充缺失的可选字段为默认值"
+  @spec apply_defaults(model_config()) :: model_config()
+  def apply_defaults(config) when is_map(config) do
+    Map.merge(
+      %{api_key_env: "", context_window: @default_context_window},
+      config
+    )
+  end
+
+  @doc "清除带 auth 引用的模型条目"
+  @spec clear_auth_references() :: :ok
+  def clear_auth_references do
+    ensure_table!()
+
+    :ets.tab2list(@table)
+    |> Enum.each(fn
+      {@current_key, _} -> :ok
+      {name, config} when is_map(config) ->
+        if Map.has_key?(config, :auth_ref) do
+          :ets.delete(@table, name)
+        end
+      _ -> :ok
+    end)
+
+    :ok
   end
 
   # ── 清理 ──

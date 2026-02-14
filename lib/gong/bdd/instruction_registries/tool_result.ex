@@ -1,7 +1,7 @@
 defmodule Gong.BDD.InstructionRegistries.ToolResult do
   @moduledoc "工具结果双通道 BDD 指令注册表"
 
-  @base %{outputs: %{}, rules: [], boundary: :test_runtime, scopes: [:unit], async?: false, eventually?: false, assert_class: nil}
+  @base %{outputs: %{}, rules: [], boundary: :test_runtime, scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil}
 
   def specs(:v1) do
     %{
@@ -16,7 +16,8 @@ defmodule Gong.BDD.InstructionRegistries.ToolResult do
       assert_tool_result_has_details: Map.merge(@base, %{name: :assert_tool_result_has_details, kind: :then, args: %{key: %{type: :string, required?: true, allowed: nil}}}),
       assert_tool_result_details_value: Map.merge(@base, %{name: :assert_tool_result_details_value, kind: :then, args: %{key: %{type: :string, required?: true, allowed: nil}, expected: %{type: :string, required?: true, allowed: nil}}}),
       assert_tool_result_is_error: Map.merge(@base, %{name: :assert_tool_result_is_error, kind: :then, args: %{}}),
-      assert_tool_result_not_error: Map.merge(@base, %{name: :assert_tool_result_not_error, kind: :then, args: %{}})
+      assert_tool_result_not_error: Map.merge(@base, %{name: :assert_tool_result_not_error, kind: :then, args: %{}}),
+      assert_is_tool_result: Map.merge(@base, %{name: :assert_is_tool_result, kind: :then, args: %{}})
     }
   end
 end

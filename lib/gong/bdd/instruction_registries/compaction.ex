@@ -340,6 +340,53 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── Session header 边界 + 工具调用摘要 + 跨模型 overflow ──
+      compaction_messages_with_session_header: %{
+        name: :compaction_messages_with_session_header, kind: :given,
+        args: %{
+          count: %{type: :int, required?: true, allowed: nil},
+          header_at: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_session_header_preserved: %{
+        name: :assert_session_header_preserved, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      compact_with_tool_calls: %{
+        name: :compact_with_tool_calls, kind: :when,
+        args: %{
+          max_tokens: %{type: :int, required?: true, allowed: nil},
+          window_size: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_summary_has_tool_calls: %{
+        name: :assert_summary_has_tool_calls, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      trigger_overflow_on_model: %{
+        name: :trigger_overflow_on_model, kind: :when,
+        args: %{model: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      switch_model_after_overflow: %{
+        name: :switch_model_after_overflow, kind: :when,
+        args: %{new_model: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_no_compaction_on_new_model: %{
+        name: :assert_no_compaction_on_new_model, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

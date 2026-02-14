@@ -120,27 +120,73 @@ defmodule Gong.Compaction do
     end
   end
 
-  # tool_call/result 配对保护：确保分割点不在配对中间
+  # tool_call/result 配对保护 + session header 边界检查
   defp find_safe_boundary(_messages, split_at) when split_at <= 0, do: 0
 
   defp find_safe_boundary(messages, split_at) do
     if split_at >= length(messages) do
       split_at
     else
-      first_recent = Enum.at(messages, split_at)
+      # 检查 session header 边界：不越过带 [会话摘要] 标记的消息
+      adjusted = check_session_header_boundary(messages, split_at)
+
+      first_recent = Enum.at(messages, adjusted)
 
       cond do
         # recent 第一条是 tool result → 向前找到对应的 assistant(tool_calls)
         get_role(first_recent) == "tool" ->
-          scan_back_for_tool_call_start(messages, split_at)
+          scan_back_for_tool_call_start(messages, adjusted)
 
         # old 最后一条是 assistant(tool_calls) → 它的 results 在 recent，把它也放进 recent
-        split_at > 0 and has_tool_calls?(Enum.at(messages, split_at - 1)) ->
-          split_at - 1
+        adjusted > 0 and has_tool_calls?(Enum.at(messages, adjusted - 1)) ->
+          adjusted - 1
 
         true ->
-          split_at
+          adjusted
       end
+    end
+  end
+
+  # session header 边界检查：如果 split_at 正好在 session header 之后，调整到 header 之前
+  defp check_session_header_boundary(messages, split_at) do
+    # 向后检查 split_at 附近是否有 session header（[会话摘要]）
+    # 如果 old 区域最后一条是 session header，将其移入 recent
+    if split_at > 0 do
+      prev = Enum.at(messages, split_at - 1)
+      content = get_content(prev) || ""
+
+      if is_binary(content) and String.starts_with?(content, "[会话摘要]") do
+        split_at - 1
+      else
+        split_at
+      end
+    else
+      split_at
+    end
+  end
+
+  # ── 溢出模型跟踪 ──
+
+  @doc "设置触发 overflow 的模型（进程字典）"
+  @spec set_overflow_model(String.t()) :: :ok
+  def set_overflow_model(model) do
+    Process.put(:gong_overflow_model, model)
+    :ok
+  end
+
+  @doc "获取触发 overflow 的模型"
+  @spec get_overflow_model() :: String.t() | nil
+  def get_overflow_model do
+    Process.get(:gong_overflow_model)
+  end
+
+  @doc "判断是否应该对当前模型执行压缩（溢出来自不同模型时返回 false）"
+  @spec should_compact_for_model?(String.t()) :: boolean()
+  def should_compact_for_model?(current_model) do
+    case get_overflow_model() do
+      nil -> true
+      ^current_model -> true
+      _other_model -> false
     end
   end
 

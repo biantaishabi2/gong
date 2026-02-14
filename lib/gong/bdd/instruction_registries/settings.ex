@@ -63,6 +63,7 @@ defmodule Gong.BDD.InstructionRegistries.Settings do
         name: :assert_setting_value,
         kind: :then,
         args: %{
+          key: %{type: :string, required?: false, allowed: nil},
           expected: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{},
@@ -139,6 +140,31 @@ defmodule Gong.BDD.InstructionRegistries.Settings do
         async?: false,
         eventually?: false,
         assert_class: nil
+      },
+
+      # ── 配置语义 + 热重载 ──
+      set_config_empty_array: %{
+        name: :set_config_empty_array, kind: :given,
+        args: %{key: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_config_blocks_all: %{
+        name: :assert_config_blocks_all, kind: :then,
+        args: %{key: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_config_no_filter: %{
+        name: :assert_config_no_filter, kind: :then,
+        args: %{key: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      reload_settings: %{
+        name: :reload_settings, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
       }
     }
   end

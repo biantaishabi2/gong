@@ -66,4 +66,46 @@ defmodule Gong.CrossProvider do
     %{msg | tool_calls: normalized}
   end
   defp normalize_tool_calls(msg), do: msg
+
+  # ── 跨 Provider 高级转换 ──
+
+  @doc "过滤带错误状态的 assistant 消息"
+  @spec filter_error_messages([map()]) :: [map()]
+  def filter_error_messages(messages) when is_list(messages) do
+    Enum.reject(messages, fn msg ->
+      status = Map.get(msg, :status) || Map.get(msg, "status")
+      error_flag = Map.get(msg, :error) || Map.get(msg, "error")
+      status == :error or status == "error" or error_flag == true
+    end)
+  end
+
+  @doc "按目标 provider 剥离不支持的字段"
+  @spec strip_unsupported_fields([map()], String.t()) :: [map()]
+  def strip_unsupported_fields(messages, to_provider) when is_list(messages) do
+    unsupported = unsupported_fields_for(to_provider)
+
+    Enum.map(messages, fn msg ->
+      Map.drop(msg, unsupported)
+    end)
+  end
+
+  @doc "按目标 provider 添加必需字段"
+  @spec add_required_fields([map()], String.t()) :: [map()]
+  def add_required_fields(messages, to_provider) when is_list(messages) do
+    required = required_fields_for(to_provider)
+
+    Enum.map(messages, fn msg ->
+      Map.merge(required, msg)
+    end)
+  end
+
+  # Provider 特定的不支持字段
+  defp unsupported_fields_for("anthropic"), do: [:store, "store", :logprobs, "logprobs"]
+  defp unsupported_fields_for("openai"), do: [:thinking, "thinking"]
+  defp unsupported_fields_for("deepseek"), do: [:thinking, "thinking", :store, "store"]
+  defp unsupported_fields_for(_), do: []
+
+  # Provider 特定的必需字段
+  defp required_fields_for("anthropic"), do: %{"anthropic-version" => "2023-06-01"}
+  defp required_fields_for(_), do: %{}
 end
