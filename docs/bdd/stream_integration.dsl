@@ -69,3 +69,28 @@ GIVEN configure_agent
 WHEN agent_stream prompt="1加1等于几？只回答数字"
 THEN assert_stream_events sequence="start,delta,end"
 THEN assert_agent_reply contains="2"
+
+# ══════════════════════════════════════════════
+# Group 2: 流式边界补充（3 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: STREAM-009] TITLE: 多 chunk 拼接边界 TAGS: integration stream
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_stream_response chunks="chunk:a|chunk:b|chunk:c|chunk:d|chunk:e|done"
+WHEN agent_stream prompt="多chunk拼接"
+THEN assert_stream_content expected="abcde"
+
+[SCENARIO: STREAM-010] TITLE: 单字符 chunk 流 TAGS: integration stream
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_stream_response chunks="chunk:H|chunk:i|done"
+WHEN agent_stream prompt="单字符"
+THEN assert_stream_content expected="Hi"
+
+[SCENARIO: STREAM-011] TITLE: Unicode chunk 流 TAGS: integration stream
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_stream_response chunks="chunk:你|chunk:好|chunk:世|chunk:界|done"
+WHEN agent_stream prompt="Unicode流"
+THEN assert_stream_content expected="你好世界"

@@ -486,6 +486,261 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_file_ops_contains} ->
         assert_file_ops_contains!(ctx, args, meta)
 
+      # ── Prompt 工程 ──
+
+      {:given, :prompt_messages_with_long_content} ->
+        prompt_messages_with_long_content!(ctx, args, meta)
+
+      {:given, :prompt_messages_plain} ->
+        prompt_messages_plain!(ctx, args, meta)
+
+      {:given, :prompt_messages_multi_tools} ->
+        prompt_messages_multi_tools!(ctx, args, meta)
+
+      {:given, :prompt_messages_with_summary} ->
+        prompt_messages_with_summary_prompt!(ctx, args, meta)
+
+      {:when, :build_default_prompt} ->
+        build_default_prompt!(ctx, args, meta)
+
+      {:when, :build_workspace_prompt} ->
+        build_workspace_prompt!(ctx, args, meta)
+
+      {:when, :format_conversation} ->
+        format_conversation!(ctx, args, meta)
+
+      {:when, :extract_prompt_file_ops} ->
+        extract_prompt_file_ops!(ctx, args, meta)
+
+      {:when, :find_previous_summary} ->
+        find_previous_summary!(ctx, args, meta)
+
+      {:then, :assert_prompt_text} ->
+        assert_prompt_text!(ctx, args, meta)
+
+      {:then, :assert_formatted_length} ->
+        assert_formatted_length!(ctx, args, meta)
+
+      {:then, :assert_file_ops_text} ->
+        assert_file_ops_text!(ctx, args, meta)
+
+      {:then, :assert_previous_summary} ->
+        assert_previous_summary!(ctx, args, meta)
+
+      {:then, :assert_previous_summary_nil} ->
+        assert_previous_summary_nil!(ctx, args, meta)
+
+      # ── Lock 并发 & Token 精度 ──
+
+      {:when, :concurrent_lock_acquire} ->
+        concurrent_lock_acquire!(ctx, args, meta)
+
+      {:then, :assert_lock_race_result} ->
+        assert_lock_race_result!(ctx, args, meta)
+
+      {:when, :estimate_text} ->
+        estimate_text!(ctx, args, meta)
+
+      {:then, :assert_token_estimate_value} ->
+        assert_token_estimate_value!(ctx, args, meta)
+
+      # ── Provider Registry ──
+
+      {:when, :init_provider_registry} ->
+        init_provider_registry!(ctx, args, meta)
+
+      {:when, :register_provider} ->
+        register_provider!(ctx, args, meta)
+
+      {:when, :register_provider_with_invalid_config} ->
+        register_provider_with_invalid_config!(ctx, args, meta)
+
+      {:when, :switch_provider} ->
+        switch_provider!(ctx, args, meta)
+
+      {:when, :switch_provider_expect_error} ->
+        switch_provider_expect_error!(ctx, args, meta)
+
+      {:when, :provider_fallback} ->
+        provider_fallback!(ctx, args, meta)
+
+      {:when, :provider_fallback_expect_error} ->
+        provider_fallback_expect_error!(ctx, args, meta)
+
+      {:then, :assert_provider_count} ->
+        assert_provider_count!(ctx, args, meta)
+
+      {:then, :assert_current_provider} ->
+        assert_current_provider!(ctx, args, meta)
+
+      {:then, :assert_provider_error} ->
+        assert_provider_error!(ctx, args, meta)
+
+      {:then, :assert_provider_list_order} ->
+        assert_provider_list_order!(ctx, args, meta)
+
+      # ── Thinking 预算 ──
+
+      {:when, :validate_thinking_level} ->
+        validate_thinking_level!(ctx, args, meta)
+
+      {:when, :get_thinking_budget} ->
+        get_thinking_budget!(ctx, args, meta)
+
+      {:when, :thinking_to_provider} ->
+        thinking_to_provider!(ctx, args, meta)
+
+      {:then, :assert_thinking_valid} ->
+        assert_thinking_valid!(ctx, args, meta)
+
+      {:then, :assert_thinking_invalid} ->
+        assert_thinking_invalid!(ctx, args, meta)
+
+      {:then, :assert_thinking_budget} ->
+        assert_thinking_budget!(ctx, args, meta)
+
+      {:then, :assert_thinking_params} ->
+        assert_thinking_params!(ctx, args, meta)
+
+      {:then, :assert_thinking_params_empty} ->
+        assert_thinking_params_empty!(ctx, args, meta)
+
+      # ── Cost 追踪 ──
+
+      {:when, :init_cost_tracker} ->
+        init_cost_tracker!(ctx, args, meta)
+
+      {:when, :record_llm_call} ->
+        record_llm_call!(ctx, args, meta)
+
+      {:when, :reset_cost_tracker} ->
+        reset_cost_tracker!(ctx, args, meta)
+
+      {:then, :assert_cost_summary} ->
+        assert_cost_summary!(ctx, args, meta)
+
+      {:then, :assert_last_call} ->
+        assert_last_call!(ctx, args, meta)
+
+      # ── Prompt 模板 ──
+
+      {:when, :init_prompt_templates} ->
+        init_prompt_templates!(ctx, args, meta)
+
+      {:when, :register_template} ->
+        register_template!(ctx, args, meta)
+
+      {:when, :get_template} ->
+        get_template!(ctx, args, meta)
+
+      {:when, :get_template_expect_error} ->
+        get_template_expect_error!(ctx, args, meta)
+
+      {:when, :render_template} ->
+        render_template!(ctx, args, meta)
+
+      {:then, :assert_template_exists} ->
+        assert_template_exists!(ctx, args, meta)
+
+      {:then, :assert_template_variables} ->
+        assert_template_variables!(ctx, args, meta)
+
+      {:then, :assert_rendered_content} ->
+        assert_rendered_content!(ctx, args, meta)
+
+      {:then, :assert_template_error} ->
+        assert_template_error!(ctx, args, meta)
+
+      # ── RPC 模式 ──
+
+      {:when, :parse_rpc_request} ->
+        parse_rpc_request!(ctx, args, meta)
+
+      {:when, :rpc_dispatch} ->
+        rpc_dispatch!(ctx, args, meta)
+
+      {:when, :rpc_dispatch_missing} ->
+        rpc_dispatch_missing!(ctx, args, meta)
+
+      {:when, :rpc_handle} ->
+        rpc_handle!(ctx, args, meta)
+
+      {:then, :assert_rpc_parsed} ->
+        assert_rpc_parsed!(ctx, args, meta)
+
+      {:then, :assert_rpc_error} ->
+        assert_rpc_error!(ctx, args, meta)
+
+      {:then, :assert_rpc_result} ->
+        assert_rpc_result!(ctx, args, meta)
+
+      {:then, :assert_rpc_response_json} ->
+        assert_rpc_response_json!(ctx, args, meta)
+
+      # ── Auth OAuth ──
+
+      {:when, :detect_auth_method} ->
+        detect_auth_method!(ctx, args, meta)
+
+      {:when, :generate_authorize_url} ->
+        generate_authorize_url!(ctx, args, meta)
+
+      {:when, :exchange_auth_code} ->
+        exchange_auth_code!(ctx, args, meta)
+
+      {:then, :assert_auth_method} ->
+        assert_auth_method!(ctx, args, meta)
+
+      {:then, :assert_authorize_url} ->
+        assert_authorize_url!(ctx, args, meta)
+
+      {:then, :assert_auth_token} ->
+        assert_auth_token!(ctx, args, meta)
+
+      # ── Cross-provider & Command ──
+
+      {:given, :cross_provider_messages} ->
+        cross_provider_messages!(ctx, args, meta)
+
+      {:given, :cross_provider_multipart_message} ->
+        cross_provider_multipart_message!(ctx, args, meta)
+
+      {:when, :convert_messages} ->
+        convert_messages!(ctx, args, meta)
+
+      {:when, :build_handoff_summary} ->
+        build_handoff_summary!(ctx, args, meta)
+
+      {:then, :assert_converted_messages} ->
+        assert_converted_messages!(ctx, args, meta)
+
+      {:then, :assert_handoff_summary_not_empty} ->
+        assert_handoff_summary_not_empty!(ctx, args, meta)
+
+      {:then, :assert_content_is_text} ->
+        assert_content_is_text!(ctx, args, meta)
+
+      {:when, :init_command_registry} ->
+        init_command_registry!(ctx, args, meta)
+
+      {:when, :register_command} ->
+        register_command!(ctx, args, meta)
+
+      {:when, :execute_command} ->
+        execute_command!(ctx, args, meta)
+
+      {:when, :execute_command_expect_error} ->
+        execute_command_expect_error!(ctx, args, meta)
+
+      {:then, :assert_command_result} ->
+        assert_command_result!(ctx, args, meta)
+
+      {:then, :assert_command_error} ->
+        assert_command_error!(ctx, args, meta)
+
+      {:then, :assert_command_count} ->
+        assert_command_count!(ctx, args, meta)
+
       # ── Agent Loop: Auto-Compaction ──
 
       {:when, :auto_compact} ->
@@ -2682,6 +2937,679 @@ defmodule Gong.BDD.Instructions.V1 do
     file_ops = Map.fetch!(ctx, :file_ops_result)
     assert file_ops =~ text,
       "期望文件操作包含 #{inspect(text)}，实际：#{inspect(file_ops)}"
+    ctx
+  end
+
+  # ── Prompt 工程实现 ──
+
+  defp prompt_messages_with_long_content!(ctx, %{length: length}, _meta) do
+    long_text = String.duplicate("测试内容", div(length, 4) + 1) |> String.slice(0, length)
+    messages = [%{role: "user", content: long_text}]
+    Map.put(ctx, :prompt_messages, messages)
+  end
+
+  defp prompt_messages_plain!(ctx, %{count: count}, _meta) do
+    messages = Enum.map(1..count, fn i ->
+      %{role: "user", content: "普通消息#{i}"}
+    end)
+    Map.put(ctx, :prompt_messages, messages)
+  end
+
+  defp prompt_messages_multi_tools!(ctx, %{tools: tools_str}, _meta) do
+    # 格式: "read_file:/a.txt,write_file:/b.txt"
+    tool_pairs = String.split(tools_str, ",")
+    messages = Enum.map(tool_pairs, fn pair ->
+      [name, path] = String.split(pair, ":")
+      %{
+        role: "assistant",
+        content: "执行#{name}",
+        tool_calls: [%{name: name, arguments: %{"file_path" => path}}]
+      }
+    end)
+    Map.put(ctx, :prompt_messages, messages)
+  end
+
+  defp prompt_messages_with_summary_prompt!(ctx, %{summary: summary}, _meta) do
+    messages = [
+      %{role: "system", content: "[会话摘要] #{summary}"},
+      %{role: "user", content: "后续消息1"},
+      %{role: "assistant", content: "回复1"}
+    ]
+    Map.put(ctx, :prompt_messages, messages)
+  end
+
+  defp build_default_prompt!(ctx, _args, _meta) do
+    prompt = Gong.Prompt.default_system_prompt()
+    Map.put(ctx, :prompt_result, prompt)
+  end
+
+  defp build_workspace_prompt!(ctx, _args, _meta) do
+    workspace = Map.get(ctx, :workspace, "/tmp/test")
+    prompt = Gong.Prompt.system_prompt(workspace)
+    Map.put(ctx, :prompt_result, prompt)
+  end
+
+  defp format_conversation!(ctx, _args, _meta) do
+    messages = Map.fetch!(ctx, :prompt_messages)
+    # format_conversation 是私有函数，通过 build_summarize_prompt 间接测试
+    # 直接调用 build_summarize_prompt 取 prompt 文本
+    {_mode, prompt} = Gong.Prompt.build_summarize_prompt(messages)
+    Map.put(ctx, :formatted_result, prompt)
+  end
+
+  defp find_previous_summary!(ctx, _args, _meta) do
+    messages = Map.fetch!(ctx, :prompt_messages)
+    {mode, _prompt} = Gong.Prompt.build_summarize_prompt(messages)
+    # 如果 mode 是 :update，说明找到了前次摘要
+    case mode do
+      :update ->
+        # 从 messages 中提取摘要内容
+        summary = Enum.find_value(messages, fn msg ->
+          content = Map.get(msg, :content, "")
+          if String.starts_with?(to_string(content), "[会话摘要]") do
+            String.trim_leading(to_string(content), "[会话摘要] ")
+          end
+        end)
+        Map.put(ctx, :previous_summary, summary)
+      :create ->
+        Map.put(ctx, :previous_summary, nil)
+    end
+  end
+
+  defp assert_prompt_text!(ctx, %{contains: text}, _meta) do
+    prompt = Map.fetch!(ctx, :prompt_result)
+    assert prompt =~ text,
+      "期望 prompt 包含 #{inspect(text)}，实际：#{String.slice(prompt, 0, 200)}"
+    ctx
+  end
+
+  defp assert_formatted_length!(ctx, %{max: max}, _meta) do
+    formatted = Map.fetch!(ctx, :formatted_result)
+    # 检查每条消息的格式化内容是否被截断
+    assert String.length(formatted) > 0, "格式化结果不能为空"
+    # format_conversation 截断每条消息到 500 字符，检查总长度合理
+    # 单条消息格式化后 "[user] " + 500 字符 < max
+    lines = String.split(formatted, "\n") |> Enum.filter(&(&1 =~ ~r/\[user\]/))
+    Enum.each(lines, fn line ->
+      # 去掉 prompt 模板文本，只看 [user] 行
+      content_part = String.replace(line, ~r/^\[user\]\s*/, "")
+      assert String.length(content_part) <= max,
+        "格式化行长度#{String.length(content_part)}超过#{max}"
+    end)
+    ctx
+  end
+
+  defp extract_prompt_file_ops!(ctx, _args, _meta) do
+    messages = Map.fetch!(ctx, :prompt_messages)
+    file_ops = Gong.Prompt.extract_file_operations(messages)
+    Map.put(ctx, :prompt_file_ops_result, file_ops)
+  end
+
+  defp assert_file_ops_text!(ctx, %{contains: text}, _meta) do
+    file_ops = Map.fetch!(ctx, :prompt_file_ops_result)
+    assert file_ops =~ text,
+      "期望文件操作包含 #{inspect(text)}，实际：#{inspect(file_ops)}"
+    ctx
+  end
+
+  defp assert_previous_summary!(ctx, %{contains: text}, _meta) do
+    summary = Map.fetch!(ctx, :previous_summary)
+    assert summary != nil, "期望找到前次摘要但为 nil"
+    assert summary =~ text,
+      "期望前次摘要包含 #{inspect(text)}，实际：#{inspect(summary)}"
+    ctx
+  end
+
+  defp assert_previous_summary_nil!(ctx, _args, _meta) do
+    summary = Map.get(ctx, :previous_summary)
+    assert summary == nil, "期望无前次摘要，实际：#{inspect(summary)}"
+    ctx
+  end
+
+  # ── Lock 并发 & Token 精度实现 ──
+
+  defp concurrent_lock_acquire!(ctx, %{session_id: session_id, tasks: tasks}, _meta) do
+    Gong.Compaction.Lock.ensure_table()
+    # 先确保锁是空闲的
+    Gong.Compaction.Lock.release(session_id)
+
+    # 并发获取锁
+    results = 1..tasks
+    |> Enum.map(fn _i ->
+      Task.async(fn ->
+        Gong.Compaction.Lock.acquire(session_id)
+      end)
+    end)
+    |> Enum.map(&Task.await/1)
+
+    winners = Enum.count(results, &(&1 == :ok))
+    # 清理
+    Gong.Compaction.Lock.release(session_id)
+
+    Map.put(ctx, :lock_race_winners, winners)
+  end
+
+  defp assert_lock_race_result!(ctx, %{winners: expected}, _meta) do
+    actual = Map.fetch!(ctx, :lock_race_winners)
+    assert actual == expected,
+      "期望 #{expected} 个获胜者，实际：#{actual}"
+    ctx
+  end
+
+  defp estimate_text!(ctx, %{content: content}, _meta) do
+    estimate = Gong.Compaction.TokenEstimator.estimate(content)
+    Map.put(ctx, :token_estimate_value, estimate)
+  end
+
+  defp assert_token_estimate_value!(ctx, %{expected: expected}, _meta) do
+    actual = Map.fetch!(ctx, :token_estimate_value)
+    assert actual == expected,
+      "期望 token 估算=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  # ── Provider Registry 实现 ──
+
+  defp init_provider_registry!(ctx, _args, _meta) do
+    Gong.ProviderRegistry.cleanup()
+    Gong.ProviderRegistry.init()
+    ctx
+  end
+
+  defp register_provider!(ctx, args, _meta) do
+    name = args.name
+    priority = Map.get(args, :priority, 0)
+
+    # MockProvider 是一个简单的实现
+    module = mock_provider_module()
+
+    result = Gong.ProviderRegistry.register(name, module, %{}, priority: priority)
+
+    case result do
+      :ok -> ctx
+      {:error, reason} -> Map.put(ctx, :provider_error, to_string(reason))
+    end
+  end
+
+  defp register_provider_with_invalid_config!(ctx, %{name: name}, _meta) do
+    module = mock_provider_with_validation_module()
+    result = Gong.ProviderRegistry.register(name, module, %{invalid: true})
+
+    case result do
+      :ok -> ctx
+      {:error, reason} -> Map.put(ctx, :provider_error, to_string(reason))
+    end
+  end
+
+  defp switch_provider!(ctx, %{name: name}, _meta) do
+    Gong.ProviderRegistry.switch(name)
+    ctx
+  end
+
+  defp switch_provider_expect_error!(ctx, %{name: name}, _meta) do
+    case Gong.ProviderRegistry.switch(name) do
+      :ok -> ctx
+      {:error, reason} -> Map.put(ctx, :provider_error, to_string(reason))
+    end
+  end
+
+  defp provider_fallback!(ctx, %{from: from}, _meta) do
+    case Gong.ProviderRegistry.fallback(from) do
+      {:ok, _next} -> ctx
+      {:error, reason} -> Map.put(ctx, :provider_error, to_string(reason))
+    end
+  end
+
+  defp provider_fallback_expect_error!(ctx, %{from: from}, _meta) do
+    case Gong.ProviderRegistry.fallback(from) do
+      {:ok, _next} -> ctx
+      {:error, reason} -> Map.put(ctx, :provider_error, to_string(reason))
+    end
+  end
+
+  defp assert_provider_count!(ctx, %{expected: expected}, _meta) do
+    actual = length(Gong.ProviderRegistry.list())
+    assert actual == expected,
+      "期望 #{expected} 个 provider，实际：#{actual}"
+    ctx
+  end
+
+  defp assert_current_provider!(ctx, %{expected: expected}, _meta) do
+    case Gong.ProviderRegistry.current() do
+      {name, _entry} ->
+        assert name == expected,
+          "期望当前 provider=#{expected}，实际：#{name}"
+      nil ->
+        flunk("当前无 provider")
+    end
+    ctx
+  end
+
+  defp assert_provider_error!(ctx, %{contains: text}, _meta) do
+    error = Map.get(ctx, :provider_error, "")
+    assert error =~ text,
+      "期望 provider 错误包含 #{inspect(text)}，实际：#{inspect(error)}"
+    ctx
+  end
+
+  defp assert_provider_list_order!(ctx, %{expected: expected_str}, _meta) do
+    expected = String.split(expected_str, ",")
+    actual = Gong.ProviderRegistry.list() |> Enum.map(fn {name, _} -> name end)
+    assert actual == expected,
+      "期望 provider 顺序=#{inspect(expected)}，实际：#{inspect(actual)}"
+    ctx
+  end
+
+  # Mock Provider 模块（定义在 test/support/mock_provider.ex）
+  defp mock_provider_module, do: Gong.Test.MockProvider
+  defp mock_provider_with_validation_module, do: Gong.Test.MockProviderWithValidation
+
+  # ── Thinking 预算实现 ──
+
+  defp validate_thinking_level!(ctx, %{level: level_str}, _meta) do
+    case Gong.Thinking.parse(level_str) do
+      {:ok, level} -> Map.put(ctx, :thinking_level, level) |> Map.put(:thinking_valid, true)
+      {:error, _} -> Map.put(ctx, :thinking_valid, false)
+    end
+  end
+
+  defp get_thinking_budget!(ctx, %{level: level_str}, _meta) do
+    {:ok, level} = Gong.Thinking.parse(level_str)
+    budget = Gong.Thinking.budget(level)
+    Map.put(ctx, :thinking_budget, budget)
+  end
+
+  defp thinking_to_provider!(ctx, %{level: level_str, provider: provider}, _meta) do
+    {:ok, level} = Gong.Thinking.parse(level_str)
+    params = Gong.Thinking.to_provider_params(level, provider)
+    Map.put(ctx, :thinking_params, params)
+  end
+
+  defp assert_thinking_valid!(ctx, _args, _meta) do
+    assert Map.get(ctx, :thinking_valid) == true, "期望 thinking level 有效"
+    ctx
+  end
+
+  defp assert_thinking_invalid!(ctx, _args, _meta) do
+    assert Map.get(ctx, :thinking_valid) == false, "期望 thinking level 无效"
+    ctx
+  end
+
+  defp assert_thinking_budget!(ctx, %{expected: expected}, _meta) do
+    actual = Map.fetch!(ctx, :thinking_budget)
+    assert actual == expected,
+      "期望 thinking budget=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  defp assert_thinking_params!(ctx, %{contains: text}, _meta) do
+    params = Map.fetch!(ctx, :thinking_params)
+    params_str = inspect(params)
+    assert params_str =~ text,
+      "期望 thinking params 包含 #{inspect(text)}，实际：#{params_str}"
+    ctx
+  end
+
+  defp assert_thinking_params_empty!(ctx, _args, _meta) do
+    params = Map.fetch!(ctx, :thinking_params)
+    assert params == %{},
+      "期望 thinking params 为空，实际：#{inspect(params)}"
+    ctx
+  end
+
+  # ── Cost 追踪实现 ──
+
+  defp init_cost_tracker!(ctx, _args, _meta) do
+    Gong.CostTracker.init()
+    ctx
+  end
+
+  defp record_llm_call!(ctx, %{model: model, input_tokens: input, output_tokens: output}, _meta) do
+    usage = %{input_tokens: input, output_tokens: output, cache_hit_tokens: 0, total_cost: 0.0}
+    Gong.CostTracker.record(model, usage)
+    ctx
+  end
+
+  defp reset_cost_tracker!(ctx, _args, _meta) do
+    Gong.CostTracker.reset()
+    ctx
+  end
+
+  defp assert_cost_summary!(ctx, args, _meta) do
+    summary = Gong.CostTracker.summary()
+    assert summary.call_count == args.call_count,
+      "期望 call_count=#{args.call_count}，实际：#{summary.call_count}"
+
+    if Map.has_key?(args, :total_input) do
+      assert summary.total_input == args.total_input,
+        "期望 total_input=#{args.total_input}，实际：#{summary.total_input}"
+    end
+
+    if Map.has_key?(args, :total_output) do
+      assert summary.total_output == args.total_output,
+        "期望 total_output=#{args.total_output}，实际：#{summary.total_output}"
+    end
+
+    ctx
+  end
+
+  defp assert_last_call!(ctx, %{model: expected_model}, _meta) do
+    last = Gong.CostTracker.last_call()
+    assert last != nil, "期望有最近调用记录"
+    assert last.model == expected_model,
+      "期望最近调用 model=#{expected_model}，实际：#{last.model}"
+    ctx
+  end
+
+  # ── Prompt 模板实现 ──
+
+  defp init_prompt_templates!(ctx, _args, _meta) do
+    Gong.PromptTemplate.cleanup()
+    Gong.PromptTemplate.init()
+    ctx
+  end
+
+  defp register_template!(ctx, %{name: name, content: content}, _meta) do
+    Gong.PromptTemplate.register(name, unescape(content))
+    ctx
+  end
+
+  defp get_template!(ctx, %{name: name}, _meta) do
+    case Gong.PromptTemplate.get(name) do
+      {:ok, template} -> Map.put(ctx, :template_result, template)
+      {:error, reason} -> Map.put(ctx, :template_error, to_string(reason))
+    end
+  end
+
+  defp get_template_expect_error!(ctx, %{name: name}, _meta) do
+    case Gong.PromptTemplate.get(name) do
+      {:ok, _} -> ctx
+      {:error, reason} -> Map.put(ctx, :template_error, to_string(reason))
+    end
+  end
+
+  defp render_template!(ctx, %{name: name, bindings: bindings_str}, _meta) do
+    # 格式: "key1:value1,key2:value2"
+    bindings = bindings_str
+    |> String.split(",")
+    |> Enum.map(fn pair ->
+      case String.split(pair, ":", parts: 2) do
+        [k, v] -> {k, v}
+        _ -> nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+    |> Map.new()
+
+    case Gong.PromptTemplate.render(name, bindings) do
+      {:ok, rendered} -> Map.put(ctx, :rendered_content, rendered)
+      {:error, reason} -> Map.put(ctx, :template_error, to_string(reason))
+    end
+  end
+
+  defp assert_template_exists!(ctx, %{name: name}, _meta) do
+    template = Map.get(ctx, :template_result)
+    assert template != nil, "期望模板 #{name} 存在"
+    assert template.name == name,
+      "期望模板名=#{name}，实际：#{template.name}"
+    ctx
+  end
+
+  defp assert_template_variables!(ctx, %{expected: expected_str}, _meta) do
+    template = Map.fetch!(ctx, :template_result)
+    expected = String.split(expected_str, ",") |> Enum.sort()
+    actual = Enum.sort(template.variables)
+    assert actual == expected,
+      "期望变量=#{inspect(expected)}，实际：#{inspect(actual)}"
+    ctx
+  end
+
+  defp assert_rendered_content!(ctx, %{contains: text}, _meta) do
+    rendered = Map.fetch!(ctx, :rendered_content)
+    assert rendered =~ text,
+      "期望渲染内容包含 #{inspect(text)}，实际：#{String.slice(rendered, 0, 200)}"
+    ctx
+  end
+
+  defp assert_template_error!(ctx, %{contains: text}, _meta) do
+    error = Map.get(ctx, :template_error, "")
+    assert error =~ text,
+      "期望模板错误包含 #{inspect(text)}，实际：#{inspect(error)}"
+    ctx
+  end
+
+  # ── RPC 模式实现 ──
+
+  defp parse_rpc_request!(ctx, %{json: json}, _meta) do
+    case Gong.RPC.parse_request(unescape(json)) do
+      {:ok, request} -> Map.put(ctx, :rpc_request, request)
+      {:error, error} -> Map.put(ctx, :rpc_error, error)
+    end
+  end
+
+  defp rpc_dispatch!(ctx, %{method: method, params: params_json}, _meta) do
+    params = Jason.decode!(unescape(params_json))
+    handlers = %{
+      "echo" => fn p -> Map.get(p, "msg", "") end,
+      "add" => fn p -> Map.get(p, "a", 0) + Map.get(p, "b", 0) end
+    }
+    request = %{method: method, params: params, id: 1}
+    result = Gong.RPC.dispatch(request, handlers)
+    Map.put(ctx, :rpc_response, result)
+  end
+
+  defp rpc_dispatch_missing!(ctx, %{method: method}, _meta) do
+    handlers = %{"echo" => fn _p -> "ok" end}
+    request = %{method: method, params: %{}, id: 1}
+    result = Gong.RPC.dispatch(request, handlers)
+    Map.put(ctx, :rpc_response, result)
+  end
+
+  defp rpc_handle!(ctx, %{json: json}, _meta) do
+    handlers = %{
+      "echo" => fn p -> Map.get(p, "msg", "") end
+    }
+    response_json = Gong.RPC.handle(unescape(json), handlers)
+    Map.put(ctx, :rpc_response_json, response_json)
+  end
+
+  defp assert_rpc_parsed!(ctx, %{method: expected}, _meta) do
+    request = Map.fetch!(ctx, :rpc_request)
+    assert request.method == expected,
+      "期望 RPC method=#{expected}，实际：#{request.method}"
+    ctx
+  end
+
+  defp assert_rpc_error!(ctx, %{code: expected_code}, _meta) do
+    # 检查 rpc_error 或 rpc_response 中的错误
+    cond do
+      Map.has_key?(ctx, :rpc_error) ->
+        error = ctx.rpc_error
+        assert error.error.code == expected_code,
+          "期望 RPC 错误码=#{expected_code}，实际：#{error.error.code}"
+
+      Map.has_key?(ctx, :rpc_response) ->
+        response = ctx.rpc_response
+        assert Map.has_key?(response, :error),
+          "期望 RPC 响应有错误，实际：#{inspect(response)}"
+        assert response.error.code == expected_code,
+          "期望 RPC 错误码=#{expected_code}，实际：#{response.error.code}"
+
+      true ->
+        flunk("无 RPC 错误")
+    end
+    ctx
+  end
+
+  defp assert_rpc_result!(ctx, %{contains: text}, _meta) do
+    response = Map.fetch!(ctx, :rpc_response)
+    result_str = inspect(response.result)
+    assert result_str =~ text,
+      "期望 RPC result 包含 #{inspect(text)}，实际：#{result_str}"
+    ctx
+  end
+
+  defp assert_rpc_response_json!(ctx, %{contains: text}, _meta) do
+    json = Map.fetch!(ctx, :rpc_response_json)
+    assert json =~ text,
+      "期望 RPC 响应 JSON 包含 #{inspect(text)}，实际：#{json}"
+    ctx
+  end
+
+  # ── Auth OAuth 实现 ──
+
+  defp detect_auth_method!(ctx, %{provider: provider}, _meta) do
+    method = Gong.Auth.auth_method(provider)
+    Map.put(ctx, :auth_method, method)
+  end
+
+  defp generate_authorize_url!(ctx, %{client_id: client_id, authorize_url: auth_url}, _meta) do
+    config = %{
+      client_id: client_id,
+      client_secret: "test_secret",
+      authorize_url: auth_url,
+      token_url: "https://auth.example.com/token",
+      redirect_uri: "http://localhost:8080/callback",
+      scopes: ["read", "write"]
+    }
+    url = Gong.Auth.authorize_url(config)
+    Map.put(ctx, :authorize_url, url)
+  end
+
+  defp exchange_auth_code!(ctx, %{code: code}, _meta) do
+    config = %{
+      client_id: "test",
+      client_secret: "test",
+      authorize_url: "https://auth.example.com/authorize",
+      token_url: "https://auth.example.com/token",
+      redirect_uri: "http://localhost:8080/callback",
+      scopes: []
+    }
+    {:ok, token} = Gong.Auth.exchange_code(config, code)
+    Map.put(ctx, :auth_token, token)
+  end
+
+  defp assert_auth_method!(ctx, %{expected: expected}, _meta) do
+    actual = Map.fetch!(ctx, :auth_method)
+    assert to_string(actual) == expected,
+      "期望 auth method=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  defp assert_authorize_url!(ctx, %{contains: text}, _meta) do
+    url = Map.fetch!(ctx, :authorize_url)
+    assert url =~ text,
+      "期望 authorize URL 包含 #{inspect(text)}，实际：#{url}"
+    ctx
+  end
+
+  defp assert_auth_token!(ctx, %{contains: text}, _meta) do
+    token = Map.fetch!(ctx, :auth_token)
+    token_str = inspect(token)
+    assert token_str =~ text,
+      "期望 token 包含 #{inspect(text)}，实际：#{token_str}"
+    ctx
+  end
+
+  # ── Cross-provider & Command 实现 ──
+
+  defp cross_provider_messages!(ctx, %{count: count}, _meta) do
+    messages = Enum.map(1..count, fn i ->
+      %{role: "user", content: "消息#{i}"}
+    end)
+    Map.put(ctx, :cross_messages, messages)
+  end
+
+  defp cross_provider_multipart_message!(ctx, _args, _meta) do
+    messages = [%{
+      role: "assistant",
+      content: [
+        %{type: "text", text: "部分1"},
+        %{type: "text", text: "部分2"}
+      ]
+    }]
+    Map.put(ctx, :cross_messages, messages)
+  end
+
+  defp convert_messages!(ctx, %{from: from, to: to}, _meta) do
+    messages = Map.fetch!(ctx, :cross_messages)
+    converted = Gong.CrossProvider.convert_messages(messages, from, to)
+    Map.put(ctx, :converted_messages, converted)
+  end
+
+  defp build_handoff_summary!(ctx, _args, _meta) do
+    messages = Map.fetch!(ctx, :cross_messages)
+    summary = Gong.CrossProvider.build_handoff_summary(messages)
+    Map.put(ctx, :handoff_summary, summary)
+  end
+
+  defp assert_converted_messages!(ctx, %{count: expected}, _meta) do
+    converted = Map.fetch!(ctx, :converted_messages)
+    assert length(converted) == expected,
+      "期望 #{expected} 条转换消息，实际：#{length(converted)}"
+    ctx
+  end
+
+  defp assert_handoff_summary_not_empty!(ctx, _args, _meta) do
+    summary = Map.fetch!(ctx, :handoff_summary)
+    assert String.length(summary) > 0, "期望 handoff 摘要非空"
+    ctx
+  end
+
+  defp assert_content_is_text!(ctx, _args, _meta) do
+    converted = Map.fetch!(ctx, :converted_messages)
+    Enum.each(converted, fn msg ->
+      content = Map.get(msg, :content, Map.get(msg, "content"))
+      assert is_binary(content),
+        "期望 content 是文本，实际：#{inspect(content)}"
+    end)
+    ctx
+  end
+
+  defp init_command_registry!(ctx, _args, _meta) do
+    Gong.CommandRegistry.cleanup()
+    Gong.CommandRegistry.init()
+    ctx
+  end
+
+  defp register_command!(ctx, %{name: name, description: desc}, _meta) do
+    handler = fn _args -> {:ok, "#{name} executed"} end
+    Gong.CommandRegistry.register(name, handler, description: desc)
+    ctx
+  end
+
+  defp execute_command!(ctx, %{name: name}, _meta) do
+    case Gong.CommandRegistry.execute(name) do
+      {:ok, result} -> Map.put(ctx, :command_result, result)
+      {:error, reason} -> Map.put(ctx, :command_error, reason)
+    end
+  end
+
+  defp execute_command_expect_error!(ctx, %{name: name}, _meta) do
+    case Gong.CommandRegistry.execute(name) do
+      {:ok, result} -> Map.put(ctx, :command_result, result)
+      {:error, reason} -> Map.put(ctx, :command_error, reason)
+    end
+  end
+
+  defp assert_command_result!(ctx, %{contains: text}, _meta) do
+    result = Map.fetch!(ctx, :command_result)
+    assert result =~ text,
+      "期望命令结果包含 #{inspect(text)}，实际：#{inspect(result)}"
+    ctx
+  end
+
+  defp assert_command_error!(ctx, %{contains: text}, _meta) do
+    error = Map.get(ctx, :command_error, "")
+    assert error =~ text,
+      "期望命令错误包含 #{inspect(text)}，实际：#{inspect(error)}"
+    ctx
+  end
+
+  defp assert_command_count!(ctx, %{expected: expected}, _meta) do
+    actual = length(Gong.CommandRegistry.list())
+    assert actual == expected,
+      "期望 #{expected} 个命令，实际：#{actual}"
     ctx
   end
 

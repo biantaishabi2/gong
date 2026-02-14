@@ -51,3 +51,28 @@ GIVEN create_extension_dir
 GIVEN create_extension_file name="lifecycle_ext.ex" content="defmodule LifecycleExt do\n  use Gong.Extension\n  def name, do: \"lifecycle\"\n  def init(_opts), do: {:ok, %{initialized: true}}\n  def cleanup(_state), do: :ok\nend"
 WHEN load_extension path="lifecycle_ext.ex"
 THEN assert_extension_loaded name="LifecycleExt"
+
+# ══════════════════════════════════════════════
+# Group 2: Extension 深层补充（3 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: EXTEND-007] TITLE: 空 extensions 目录不崩溃 TAGS: unit extension
+GIVEN create_temp_dir
+GIVEN create_extension_dir
+WHEN load_all_extensions
+THEN assert_extension_count expected=0
+
+[SCENARIO: EXTEND-008] TITLE: Extension 重复加载幂等 TAGS: unit extension
+GIVEN create_temp_dir
+GIVEN create_extension_dir
+GIVEN create_extension_file name="idempotent.ex" content="defmodule IdempotentExt do\n  use Gong.Extension\n  def name, do: \"idempotent\"\nend"
+WHEN load_all_extensions
+WHEN load_all_extensions
+THEN assert_extension_loaded name="IdempotentExt"
+
+[SCENARIO: EXTEND-009] TITLE: Extension 无 name 回调处理 TAGS: unit extension
+GIVEN create_temp_dir
+GIVEN create_extension_dir
+GIVEN create_extension_file name="noname.ex" content="defmodule NoNameExt do\n  use Gong.Extension\nend"
+WHEN load_all_extensions
+THEN assert_extension_count expected=1

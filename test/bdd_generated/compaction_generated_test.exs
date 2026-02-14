@@ -421,4 +421,74 @@ defmodule Gong.BDD.Generated.CompactionTest do
     :ok
   end
 
+  # Source: BDD-COMPACT-023
+  @tag :compaction
+  @tag :lock
+  @tag :unit
+  test "[BDD-COMPACT-023] 并发锁竞争两进程同时获取" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-023"}
+    # line 176: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 176, raw: "GIVEN create_temp_dir"}, 176)
+    # line 177: WHEN concurrent_lock_acquire session_id="race-session" tasks=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :concurrent_lock_acquire, %{session_id: "race-session", tasks: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 177, raw: "WHEN concurrent_lock_acquire session_id=\"race-session\" tasks=2"}, 177)
+    # line 178: THEN assert_lock_race_result winners=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_lock_race_result, %{winners: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 178, raw: "THEN assert_lock_race_result winners=1"}, 178)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-024
+  @tag :compaction
+  @tag :lock
+  @tag :unit
+  test "[BDD-COMPACT-024] 锁持有者释放后其他进程可获取" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-024"}
+    # line 181: GIVEN compaction_lock_acquired session_id="handover-session"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_lock_acquired, %{session_id: "handover-session"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 181, raw: "GIVEN compaction_lock_acquired session_id=\"handover-session\""}, 181)
+    # line 182: WHEN when_release_lock session_id="handover-session"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_release_lock, %{session_id: "handover-session"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 182, raw: "WHEN when_release_lock session_id=\"handover-session\""}, 182)
+    # line 183: WHEN when_acquire_lock session_id="handover-session"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_acquire_lock, %{session_id: "handover-session"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 183, raw: "WHEN when_acquire_lock session_id=\"handover-session\""}, 183)
+    # line 184: THEN assert_no_compaction_error
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_compaction_error, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 184, raw: "THEN assert_no_compaction_error"}, 184)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-025
+  @tag :compaction
+  @tag :token
+  @tag :unit
+  test "[BDD-COMPACT-025]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-025"}
+    # line 187: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 187, raw: "GIVEN create_temp_dir"}, 187)
+    # line 188: WHEN estimate_text content="你好世界测试"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :estimate_text, %{content: "你好世界测试"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 188, raw: "WHEN estimate_text content=\"你好世界测试\""}, 188)
+    # line 189: THEN assert_token_estimate_value expected=12
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_token_estimate_value, %{expected: 12}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 189, raw: "THEN assert_token_estimate_value expected=12"}, 189)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-COMPACT-026
+  @tag :compaction
+  @tag :token
+  @tag :unit
+  test "[BDD-COMPACT-026]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-026"}
+    # line 192: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 192, raw: "GIVEN create_temp_dir"}, 192)
+    # line 193: WHEN estimate_text content="hello world test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :estimate_text, %{content: "hello world test"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 193, raw: "WHEN estimate_text content=\"hello world test\""}, 193)
+    # line 194: THEN assert_token_estimate_value expected=4
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_token_estimate_value, %{expected: 4}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 194, raw: "THEN assert_token_estimate_value expected=4"}, 194)
+    _ctx = ctx
+    :ok
+  end
+
 end

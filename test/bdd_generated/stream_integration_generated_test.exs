@@ -184,4 +184,64 @@ defmodule Gong.BDD.Generated.StreamIntegrationTest do
     :ok
   end
 
+  # Source: STREAM-009
+  @tag :integration
+  @tag :stream
+  test "[STREAM-009] 多 chunk 拼接边界" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "STREAM-009"}
+    # line 78: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 78, raw: "GIVEN create_temp_dir"}, 78)
+    # line 79: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 79, raw: "GIVEN configure_agent"}, 79)
+    # line 80: GIVEN mock_stream_response chunks="chunk:a|chunk:b|chunk:c|chunk:d|chunk:e|done"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_stream_response, %{chunks: "chunk:a|chunk:b|chunk:c|chunk:d|chunk:e|done"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 80, raw: "GIVEN mock_stream_response chunks=\"chunk:a|chunk:b|chunk:c|chunk:d|chunk:e|done\""}, 80)
+    # line 81: WHEN agent_stream prompt="多chunk拼接"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_stream, %{prompt: "多chunk拼接"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 81, raw: "WHEN agent_stream prompt=\"多chunk拼接\""}, 81)
+    # line 82: THEN assert_stream_content expected="abcde"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_stream_content, %{expected: "abcde"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 82, raw: "THEN assert_stream_content expected=\"abcde\""}, 82)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: STREAM-010
+  @tag :integration
+  @tag :stream
+  test "[STREAM-010] 单字符 chunk 流" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "STREAM-010"}
+    # line 85: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 85, raw: "GIVEN create_temp_dir"}, 85)
+    # line 86: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 86, raw: "GIVEN configure_agent"}, 86)
+    # line 87: GIVEN mock_stream_response chunks="chunk:H|chunk:i|done"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_stream_response, %{chunks: "chunk:H|chunk:i|done"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 87, raw: "GIVEN mock_stream_response chunks=\"chunk:H|chunk:i|done\""}, 87)
+    # line 88: WHEN agent_stream prompt="单字符"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_stream, %{prompt: "单字符"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 88, raw: "WHEN agent_stream prompt=\"单字符\""}, 88)
+    # line 89: THEN assert_stream_content expected="Hi"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_stream_content, %{expected: "Hi"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 89, raw: "THEN assert_stream_content expected=\"Hi\""}, 89)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: STREAM-011
+  @tag :integration
+  @tag :stream
+  test "[STREAM-011] Unicode chunk 流" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "STREAM-011"}
+    # line 92: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 92, raw: "GIVEN create_temp_dir"}, 92)
+    # line 93: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 93, raw: "GIVEN configure_agent"}, 93)
+    # line 94: GIVEN mock_stream_response chunks="chunk:你|chunk:好|chunk:世|chunk:界|done"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_stream_response, %{chunks: "chunk:你|chunk:好|chunk:世|chunk:界|done"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 94, raw: "GIVEN mock_stream_response chunks=\"chunk:你|chunk:好|chunk:世|chunk:界|done\""}, 94)
+    # line 95: WHEN agent_stream prompt="Unicode流"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_stream, %{prompt: "Unicode流"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 95, raw: "WHEN agent_stream prompt=\"Unicode流\""}, 95)
+    # line 96: THEN assert_stream_content expected="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_stream_content, %{expected: "你好世界"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 96, raw: "THEN assert_stream_content expected=\"你好世界\""}, 96)
+    _ctx = ctx
+    :ok
+  end
+
 end

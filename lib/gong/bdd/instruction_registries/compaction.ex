@@ -280,6 +280,66 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── Lock 并发 & Token 精度 ──
+
+      concurrent_lock_acquire: %{
+        name: :concurrent_lock_acquire,
+        kind: :when,
+        args: %{
+          session_id: %{type: :string, required?: true, allowed: nil},
+          tasks: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      assert_lock_race_result: %{
+        name: :assert_lock_race_result,
+        kind: :then,
+        args: %{
+          winners: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      estimate_text: %{
+        name: :estimate_text,
+        kind: :when,
+        args: %{
+          content: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      assert_token_estimate_value: %{
+        name: :assert_token_estimate_value,
+        kind: :then,
+        args: %{
+          expected: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

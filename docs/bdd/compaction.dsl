@@ -167,3 +167,28 @@ GIVEN compaction_messages_with_summary count=5 summary="之前的摘要内容"
 WHEN build_summarize_prompt
 THEN assert_prompt_mode expected="update"
 THEN assert_prompt_contains text="之前的摘要内容"
+
+# ══════════════════════════════════════════════
+# Group 8: Lock 并发与超时（4 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-COMPACT-023] TITLE: 并发锁竞争两进程同时获取 TAGS: unit compaction lock
+GIVEN create_temp_dir
+WHEN concurrent_lock_acquire session_id="race-session" tasks=2
+THEN assert_lock_race_result winners=1
+
+[SCENARIO: BDD-COMPACT-024] TITLE: 锁持有者释放后其他进程可获取 TAGS: unit compaction lock
+GIVEN compaction_lock_acquired session_id="handover-session"
+WHEN when_release_lock session_id="handover-session"
+WHEN when_acquire_lock session_id="handover-session"
+THEN assert_no_compaction_error
+
+[SCENARIO: BDD-COMPACT-025] TITLE: Token 估算中文纯文本精度 TAGS: unit compaction token
+GIVEN create_temp_dir
+WHEN estimate_text content="你好世界测试"
+THEN assert_token_estimate_value expected=12
+
+[SCENARIO: BDD-COMPACT-026] TITLE: Token 估算英文纯文本精度 TAGS: unit compaction token
+GIVEN create_temp_dir
+WHEN estimate_text content="hello world test"
+THEN assert_token_estimate_value expected=4

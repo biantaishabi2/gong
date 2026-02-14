@@ -30,6 +30,14 @@ defmodule Gong.BDD.InstructionRegistry do
     |> merge_specs!(Gong.BDD.InstructionRegistries.Settings.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.Resource.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.ToolExtra.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Prompt.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.ProviderReg.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Thinking.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Cost.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Template.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.RPC.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Auth.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.CrossProvider.specs(:v1))
   end
 
   def specs(:v2), do: specs(:v1)

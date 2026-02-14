@@ -135,4 +135,64 @@ defmodule Gong.BDD.Generated.ExtensionTest do
     :ok
   end
 
+  # Source: EXTEND-007
+  @tag :extension
+  @tag :unit
+  test "[EXTEND-007] 空 extensions 目录不崩溃" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-007"}
+    # line 60: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 60, raw: "GIVEN create_temp_dir"}, 60)
+    # line 61: GIVEN create_extension_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 61, raw: "GIVEN create_extension_dir"}, 61)
+    # line 62: WHEN load_all_extensions
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_all_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 62, raw: "WHEN load_all_extensions"}, 62)
+    # line 63: THEN assert_extension_count expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_count, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 63, raw: "THEN assert_extension_count expected=0"}, 63)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-008
+  @tag :extension
+  @tag :unit
+  test "[EXTEND-008] Extension 重复加载幂等" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-008"}
+    # line 66: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 66, raw: "GIVEN create_temp_dir"}, 66)
+    # line 67: GIVEN create_extension_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 67, raw: "GIVEN create_extension_dir"}, 67)
+    # line 68: GIVEN create_extension_file name="idempotent.ex" content="defmodule IdempotentExt do\n  use Gong.Extension\n  def name, do: \"idempotent\"\nend"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_file, %{content: "defmodule IdempotentExt do\\n  use Gong.Extension\\n  def name, do: \\\"idempotent\\\"\\nend", name: "idempotent.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 68, raw: "GIVEN create_extension_file name=\"idempotent.ex\" content=\"defmodule IdempotentExt do\\n  use Gong.Extension\\n  def name, do: \\\"idempotent\\\"\\nend\""}, 68)
+    # line 69: WHEN load_all_extensions
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_all_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 69, raw: "WHEN load_all_extensions"}, 69)
+    # line 70: WHEN load_all_extensions
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_all_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 70, raw: "WHEN load_all_extensions"}, 70)
+    # line 71: THEN assert_extension_loaded name="IdempotentExt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_loaded, %{name: "IdempotentExt"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 71, raw: "THEN assert_extension_loaded name=\"IdempotentExt\""}, 71)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-009
+  @tag :extension
+  @tag :unit
+  test "[EXTEND-009] Extension 无 name 回调处理" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-009"}
+    # line 74: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 74, raw: "GIVEN create_temp_dir"}, 74)
+    # line 75: GIVEN create_extension_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 75, raw: "GIVEN create_extension_dir"}, 75)
+    # line 76: GIVEN create_extension_file name="noname.ex" content="defmodule NoNameExt do\n  use Gong.Extension\nend"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_file, %{content: "defmodule NoNameExt do\\n  use Gong.Extension\\nend", name: "noname.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 76, raw: "GIVEN create_extension_file name=\"noname.ex\" content=\"defmodule NoNameExt do\\n  use Gong.Extension\\nend\""}, 76)
+    # line 77: WHEN load_all_extensions
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_all_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 77, raw: "WHEN load_all_extensions"}, 77)
+    # line 78: THEN assert_extension_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 78, raw: "THEN assert_extension_count expected=1"}, 78)
+    _ctx = ctx
+    :ok
+  end
+
 end
