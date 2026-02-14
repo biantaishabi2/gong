@@ -41,6 +41,38 @@ defmodule Gong.BDD.InstructionRegistries.Auth do
         args: %{contains: %{type: :string, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 补充覆盖 ──
+      refresh_auth_token: %{
+        name: :refresh_auth_token, kind: :when,
+        args: %{refresh: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      check_token_expired: %{
+        name: :check_token_expired, kind: :when,
+        args: %{expires_at: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_token_expired: %{
+        name: :assert_token_expired, kind: :then,
+        args: %{expected: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      get_api_key: %{
+        name: :get_api_key, kind: :when,
+        args: %{env_var: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_api_key_result: %{
+        name: :assert_api_key_result, kind: :then,
+        args: %{status: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

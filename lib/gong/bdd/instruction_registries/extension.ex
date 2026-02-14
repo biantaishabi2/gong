@@ -123,6 +123,29 @@ defmodule Gong.BDD.InstructionRegistries.Extension do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── 补充覆盖 ──
+      assert_extension_commands: %{
+        name: :assert_extension_commands,
+        kind: :then,
+        args: %{expected: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+      },
+      cleanup_extension: %{
+        name: :cleanup_extension,
+        kind: :when,
+        args: %{name: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_extension_cleanup_called: %{
+        name: :assert_extension_cleanup_called,
+        kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

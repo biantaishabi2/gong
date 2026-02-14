@@ -38,6 +38,22 @@ defmodule Gong.BDD.InstructionRegistries.Cost do
         args: %{model: %{type: :string, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 补充覆盖 ──
+      assert_cost_history: %{
+        name: :assert_cost_history, kind: :then,
+        args: %{
+          count: %{type: :int, required?: true, allowed: nil},
+          first_model: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_last_call_nil: %{
+        name: :assert_last_call_nil, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

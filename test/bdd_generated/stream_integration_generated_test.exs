@@ -244,4 +244,38 @@ defmodule Gong.BDD.Generated.StreamIntegrationTest do
     :ok
   end
 
+  # Source: STREAM-012
+  @tag :stream
+  @tag :unit
+  test "[STREAM-012] tool_chunks_to_events 事件序列" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "STREAM-012"}
+    # line 103: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 103, raw: "GIVEN create_temp_dir"}, 103)
+    # line 104: WHEN stream_tool_chunks tool_name="read_file" chunks="chunk:{\"path\":\"/tmp\"}|done"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :stream_tool_chunks, %{chunks: "chunk:{\\\"path\\\":\\\"/tmp\\\"}|done", tool_name: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 104, raw: "WHEN stream_tool_chunks tool_name=\"read_file\" chunks=\"chunk:{\\\"path\\\":\\\"/tmp\\\"}|done\""}, 104)
+    # line 105: THEN assert_tool_event_sequence sequence="tool_start,tool_delta,tool_end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_event_sequence, %{sequence: "tool_start,tool_delta,tool_end"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 105, raw: "THEN assert_tool_event_sequence sequence=\"tool_start,tool_delta,tool_end\""}, 105)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: STREAM-013
+  @tag :stream
+  @tag :unit
+  test "[STREAM-013] tool 事件包含工具名" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "STREAM-013"}
+    # line 108: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 108, raw: "GIVEN create_temp_dir"}, 108)
+    # line 109: WHEN stream_tool_chunks tool_name="bash" chunks="chunk:ls -la|done"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :stream_tool_chunks, %{chunks: "chunk:ls -la|done", tool_name: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 109, raw: "WHEN stream_tool_chunks tool_name=\"bash\" chunks=\"chunk:ls -la|done\""}, 109)
+    # line 110: THEN assert_tool_event_sequence sequence="tool_start,tool_delta,tool_end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_event_sequence, %{sequence: "tool_start,tool_delta,tool_end"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 110, raw: "THEN assert_tool_event_sequence sequence=\"tool_start,tool_delta,tool_end\""}, 110)
+    # line 111: THEN assert_tool_event_name expected="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_event_name, %{expected: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_integration.dsl", line: 111, raw: "THEN assert_tool_event_name expected=\"bash\""}, 111)
+    _ctx = ctx
+    :ok
+  end
+
 end

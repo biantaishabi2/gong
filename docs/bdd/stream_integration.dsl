@@ -94,3 +94,18 @@ GIVEN configure_agent
 GIVEN mock_stream_response chunks="chunk:你|chunk:好|chunk:世|chunk:界|done"
 WHEN agent_stream prompt="Unicode流"
 THEN assert_stream_content expected="你好世界"
+
+# ══════════════════════════════════════════════
+# Group 3: Tool 事件序列（2 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: STREAM-012] TITLE: tool_chunks_to_events 事件序列 TAGS: unit stream
+GIVEN create_temp_dir
+WHEN stream_tool_chunks tool_name="read_file" chunks="chunk:{\"path\":\"/tmp\"}|done"
+THEN assert_tool_event_sequence sequence="tool_start,tool_delta,tool_end"
+
+[SCENARIO: STREAM-013] TITLE: tool 事件包含工具名 TAGS: unit stream
+GIVEN create_temp_dir
+WHEN stream_tool_chunks tool_name="bash" chunks="chunk:ls -la|done"
+THEN assert_tool_event_sequence sequence="tool_start,tool_delta,tool_end"
+THEN assert_tool_event_name expected="bash"

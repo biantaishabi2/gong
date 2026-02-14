@@ -81,4 +81,40 @@ defmodule Gong.BDD.Generated.PromptTemplateTest do
     :ok
   end
 
+  # Source: TEMPLATE-005
+  @tag :template
+  @tag :unit
+  test "[TEMPLATE-005] list 返回全部模板" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TEMPLATE-005"}
+    # line 39: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 39, raw: "GIVEN create_temp_dir"}, 39)
+    # line 40: WHEN init_prompt_templates
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_prompt_templates, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 40, raw: "WHEN init_prompt_templates"}, 40)
+    # line 41: WHEN register_template name="custom" content="自定义{{var}}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_template, %{content: "自定义{{var}}", name: "custom"}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 41, raw: "WHEN register_template name=\"custom\" content=\"自定义{{var}}\""}, 41)
+    # line 42: THEN assert_template_list_count expected=4
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_template_list_count, %{expected: 4}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 42, raw: "THEN assert_template_list_count expected=4"}, 42)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: TEMPLATE-006
+  @tag :template
+  @tag :unit
+  test "[TEMPLATE-006] 缺失变量保留占位符" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TEMPLATE-006"}
+    # line 45: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 45, raw: "GIVEN create_temp_dir"}, 45)
+    # line 46: WHEN init_prompt_templates
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_prompt_templates, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 46, raw: "WHEN init_prompt_templates"}, 46)
+    # line 47: WHEN render_template name="code_review" bindings=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_template, %{bindings: "", name: "code_review"}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 47, raw: "WHEN render_template name=\"code_review\" bindings=\"\""}, 47)
+    # line 48: THEN assert_rendered_content contains="{{code}}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_rendered_content, %{contains: "{{code}}"}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 48, raw: "THEN assert_rendered_content contains=\"{{code}}\""}, 48)
+    _ctx = ctx
+    :ok
+  end
+
 end

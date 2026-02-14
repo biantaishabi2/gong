@@ -45,3 +45,27 @@ WHEN init_command_registry
 WHEN register_command name="cmd_a" description="命令A"
 WHEN register_command name="cmd_b" description="命令B"
 THEN assert_command_count expected=2
+
+# ══════════════════════════════════════════════
+# Group 3: 边界补充（3 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: CMD-004] TITLE: 命令存在性检查 TAGS: unit command
+GIVEN create_temp_dir
+WHEN init_command_registry
+WHEN register_command name="exists_cmd" description="存在检查"
+THEN assert_command_exists name="exists_cmd" expected="true"
+THEN assert_command_exists name="nonexistent" expected="false"
+
+[SCENARIO: CROSS-004] TITLE: 空消息列表转换 TAGS: unit cross_provider
+GIVEN create_temp_dir
+GIVEN cross_provider_messages count=0
+WHEN convert_messages from="openai" to="deepseek"
+THEN assert_converted_messages count=0
+
+[SCENARIO: CROSS-005] TITLE: 带 tool_calls 的消息转换 TAGS: unit cross_provider
+GIVEN create_temp_dir
+GIVEN cross_provider_tool_calls_message
+WHEN convert_messages from="openai" to="anthropic"
+THEN assert_converted_messages count=1
+THEN assert_converted_has_tool_calls

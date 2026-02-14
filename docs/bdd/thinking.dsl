@@ -29,3 +29,32 @@ THEN assert_thinking_params contains="budget_tokens"
 GIVEN create_temp_dir
 WHEN thinking_to_provider level="off" provider="anthropic"
 THEN assert_thinking_params_empty
+
+# ══════════════════════════════════════════════
+# Group 2: Thinking 补充覆盖（5 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: THINKING-006] TITLE: parse 有效字符串 TAGS: unit thinking
+GIVEN create_temp_dir
+WHEN parse_thinking_level str="high"
+THEN assert_parsed_thinking_level expected="high"
+
+[SCENARIO: THINKING-007] TITLE: parse 无效字符串 TAGS: unit thinking
+GIVEN create_temp_dir
+WHEN parse_thinking_level str="超高"
+THEN assert_parsed_thinking_error
+
+[SCENARIO: THINKING-008] TITLE: OpenAI provider 参数 TAGS: unit thinking
+GIVEN create_temp_dir
+WHEN thinking_to_provider level="high" provider="openai"
+THEN assert_thinking_params contains="reasoning_effort"
+
+[SCENARIO: THINKING-009] TITLE: DeepSeek provider 参数 TAGS: unit thinking
+GIVEN create_temp_dir
+WHEN thinking_to_provider level="medium" provider="deepseek"
+THEN assert_thinking_params contains="thinking_budget"
+
+[SCENARIO: THINKING-010] TITLE: budget 边界值 off 和 max TAGS: unit thinking
+GIVEN create_temp_dir
+WHEN get_thinking_budget level="off"
+THEN assert_thinking_budget expected=0

@@ -53,6 +53,14 @@ defmodule Gong.BDD.InstructionRegistries.RPC do
         args: %{contains: %{type: :string, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 补充覆盖 ──
+      rpc_dispatch_raise: %{
+        name: :rpc_dispatch_raise, kind: :when,
+        args: %{method: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
       }
     }
   end

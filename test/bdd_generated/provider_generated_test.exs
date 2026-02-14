@@ -187,4 +187,62 @@ defmodule Gong.BDD.Generated.ProviderTest do
     :ok
   end
 
+  # Source: PROVIDER-010
+  @tag :provider
+  @tag :unit
+  test "[PROVIDER-010] cleanup 后 current 为空" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "PROVIDER-010"}
+    # line 81: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 81, raw: "GIVEN create_temp_dir"}, 81)
+    # line 82: WHEN init_provider_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_provider_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 82, raw: "WHEN init_provider_registry"}, 82)
+    # line 83: WHEN register_provider name="test" module="MockProvider"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_provider, %{module: "MockProvider", name: "test"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 83, raw: "WHEN register_provider name=\"test\" module=\"MockProvider\""}, 83)
+    # line 84: WHEN cleanup_provider_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cleanup_provider_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 84, raw: "WHEN cleanup_provider_registry"}, 84)
+    # line 85: THEN assert_provider_current_nil
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_current_nil, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 85, raw: "THEN assert_provider_current_nil"}, 85)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: PROVIDER-011
+  @tag :provider
+  @tag :unit
+  test "[PROVIDER-011] 重复注册同名覆盖" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "PROVIDER-011"}
+    # line 88: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 88, raw: "GIVEN create_temp_dir"}, 88)
+    # line 89: WHEN init_provider_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_provider_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 89, raw: "WHEN init_provider_registry"}, 89)
+    # line 90: WHEN register_provider name="dup" module="MockProvider" priority=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_provider, %{module: "MockProvider", name: "dup", priority: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 90, raw: "WHEN register_provider name=\"dup\" module=\"MockProvider\" priority=1"}, 90)
+    # line 91: WHEN register_provider name="dup" module="MockProvider" priority=99
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_provider, %{module: "MockProvider", name: "dup", priority: 99}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 91, raw: "WHEN register_provider name=\"dup\" module=\"MockProvider\" priority=99"}, 91)
+    # line 92: THEN assert_provider_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 92, raw: "THEN assert_provider_count expected=1"}, 92)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: PROVIDER-012
+  @tag :provider
+  @tag :unit
+  test "[PROVIDER-012] 空注册表切换失败" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "PROVIDER-012"}
+    # line 95: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 95, raw: "GIVEN create_temp_dir"}, 95)
+    # line 96: WHEN init_provider_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_provider_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 96, raw: "WHEN init_provider_registry"}, 96)
+    # line 97: WHEN switch_provider_expect_error name="any"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :switch_provider_expect_error, %{name: "any"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 97, raw: "WHEN switch_provider_expect_error name=\"any\""}, 97)
+    # line 98: THEN assert_provider_error contains="not_found"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_error, %{contains: "not_found"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider.dsl", line: 98, raw: "THEN assert_provider_error contains=\"not_found\""}, 98)
+    _ctx = ctx
+    :ok
+  end
+
 end

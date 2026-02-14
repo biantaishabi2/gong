@@ -85,4 +85,36 @@ defmodule Gong.BDD.Generated.RpcTest do
     :ok
   end
 
+  # Source: RPC-006
+  @tag :rpc
+  @tag :unit
+  test "[RPC-006] 缺少 jsonrpc 字段返回 invalid_request" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RPC-006"}
+    # line 38: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 38, raw: "GIVEN create_temp_dir"}, 38)
+    # line 39: WHEN parse_rpc_request json="{\"method\":\"chat\",\"id\":1}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :parse_rpc_request, %{json: "{\\\"method\\\":\\\"chat\\\",\\\"id\\\":1}"}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 39, raw: "WHEN parse_rpc_request json=\"{\\\"method\\\":\\\"chat\\\",\\\"id\\\":1}\""}, 39)
+    # line 40: THEN assert_rpc_error code=-32600
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_rpc_error, %{code: -32600}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 40, raw: "THEN assert_rpc_error code=-32600"}, 40)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: RPC-007
+  @tag :rpc
+  @tag :unit
+  test "[RPC-007] handler 异常返回 internal_error" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RPC-007"}
+    # line 43: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 43, raw: "GIVEN create_temp_dir"}, 43)
+    # line 44: WHEN rpc_dispatch_raise method="crash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :rpc_dispatch_raise, %{method: "crash"}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 44, raw: "WHEN rpc_dispatch_raise method=\"crash\""}, 44)
+    # line 45: THEN assert_rpc_error code=-32603
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_rpc_error, %{code: -32603}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 45, raw: "THEN assert_rpc_error code=-32603"}, 45)
+    _ctx = ctx
+    :ok
+  end
+
 end

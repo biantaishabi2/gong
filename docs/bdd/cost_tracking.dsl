@@ -30,3 +30,24 @@ WHEN init_cost_tracker
 WHEN record_llm_call model="deepseek-chat" input_tokens=100 output_tokens=50
 WHEN reset_cost_tracker
 THEN assert_cost_summary call_count=0
+
+# ══════════════════════════════════════════════
+# Group 2: Cost 边界补充（3 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: COST-005] TITLE: history 返回时间序列表 TAGS: unit cost
+GIVEN create_temp_dir
+WHEN init_cost_tracker
+WHEN record_llm_call model="model-a" input_tokens=100 output_tokens=50
+WHEN record_llm_call model="model-b" input_tokens=200 output_tokens=100
+THEN assert_cost_history count=2 first_model="model-a"
+
+[SCENARIO: COST-006] TITLE: 空状态 last_call 为 nil TAGS: unit cost
+GIVEN create_temp_dir
+WHEN init_cost_tracker
+THEN assert_last_call_nil
+
+[SCENARIO: COST-007] TITLE: 空状态 summary 全零 TAGS: unit cost
+GIVEN create_temp_dir
+WHEN init_cost_tracker
+THEN assert_cost_summary call_count=0 total_input=0 total_output=0

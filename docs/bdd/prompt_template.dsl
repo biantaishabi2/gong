@@ -30,3 +30,19 @@ GIVEN create_temp_dir
 WHEN init_prompt_templates
 WHEN get_template_expect_error name="nonexistent"
 THEN assert_template_error contains="not_found"
+
+# ══════════════════════════════════════════════
+# Group 2: Template 边界补充（2 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: TEMPLATE-005] TITLE: list 返回全部模板 TAGS: unit template
+GIVEN create_temp_dir
+WHEN init_prompt_templates
+WHEN register_template name="custom" content="自定义{{var}}"
+THEN assert_template_list_count expected=4
+
+[SCENARIO: TEMPLATE-006] TITLE: 缺失变量保留占位符 TAGS: unit template
+GIVEN create_temp_dir
+WHEN init_prompt_templates
+WHEN render_template name="code_review" bindings=""
+THEN assert_rendered_content contains="{{code}}"

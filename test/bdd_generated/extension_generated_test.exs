@@ -178,19 +178,63 @@ defmodule Gong.BDD.Generated.ExtensionTest do
   # Source: EXTEND-009
   @tag :extension
   @tag :unit
-  test "[EXTEND-009] Extension 无 name 回调处理" do
+  test "[EXTEND-009] Extension 缺少必须回调" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "EXTEND-009"}
     # line 74: GIVEN create_temp_dir
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 74, raw: "GIVEN create_temp_dir"}, 74)
     # line 75: GIVEN create_extension_dir
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 75, raw: "GIVEN create_extension_dir"}, 75)
-    # line 76: GIVEN create_extension_file name="noname.ex" content="defmodule NoNameExt do\n  use Gong.Extension\nend"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_file, %{content: "defmodule NoNameExt do\\n  use Gong.Extension\\nend", name: "noname.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 76, raw: "GIVEN create_extension_file name=\"noname.ex\" content=\"defmodule NoNameExt do\\n  use Gong.Extension\\nend\""}, 76)
+    # line 76: GIVEN create_extension_file name="noname.ex" content="defmodule NoNameExt do\n  use Gong.Extension\n  def name, do: \"noname\"\nend"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_file, %{content: "defmodule NoNameExt do\\n  use Gong.Extension\\n  def name, do: \\\"noname\\\"\\nend", name: "noname.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 76, raw: "GIVEN create_extension_file name=\"noname.ex\" content=\"defmodule NoNameExt do\\n  use Gong.Extension\\n  def name, do: \\\"noname\\\"\\nend\""}, 76)
     # line 77: WHEN load_all_extensions
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_all_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 77, raw: "WHEN load_all_extensions"}, 77)
     # line 78: THEN assert_extension_count expected=1
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 78, raw: "THEN assert_extension_count expected=1"}, 78)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-010
+  @tag :extension
+  @tag :unit
+  test "[EXTEND-010] Extension commands 回调" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-010"}
+    # line 85: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 85, raw: "GIVEN create_temp_dir"}, 85)
+    # line 86: GIVEN create_extension_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 86, raw: "GIVEN create_extension_dir"}, 86)
+    # line 87: GIVEN create_extension_file name="cmd_ext.ex" content="defmodule CmdExt do\n  use Gong.Extension\n  def name, do: \"cmd_ext\"\n  def commands, do: [%{name: \"greet\", description: \"打招呼\"}]\nend"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_file, %{content: "defmodule CmdExt do\\n  use Gong.Extension\\n  def name, do: \\\"cmd_ext\\\"\\n  def commands, do: [%{name: \\\"greet\\\", description: \\\"打招呼\\\"}]\\nend", name: "cmd_ext.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 87, raw: "GIVEN create_extension_file name=\"cmd_ext.ex\" content=\"defmodule CmdExt do\\n  use Gong.Extension\\n  def name, do: \\\"cmd_ext\\\"\\n  def commands, do: [%{name: \\\"greet\\\", description: \\\"打招呼\\\"}]\\nend\""}, 87)
+    # line 88: WHEN load_extension path="cmd_ext.ex"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_extension, %{path: "cmd_ext.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 88, raw: "WHEN load_extension path=\"cmd_ext.ex\""}, 88)
+    # line 89: THEN assert_extension_loaded name="CmdExt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_loaded, %{name: "CmdExt"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 89, raw: "THEN assert_extension_loaded name=\"CmdExt\""}, 89)
+    # line 90: THEN assert_extension_commands expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_commands, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 90, raw: "THEN assert_extension_commands expected=1"}, 90)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-011
+  @tag :extension
+  @tag :unit
+  test "[EXTEND-011] Extension cleanup 回调验证" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-011"}
+    # line 93: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 93, raw: "GIVEN create_temp_dir"}, 93)
+    # line 94: GIVEN create_extension_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 94, raw: "GIVEN create_extension_dir"}, 94)
+    # line 95: GIVEN create_extension_file name="cleanup_ext.ex" content="defmodule CleanupExt do\n  use Gong.Extension\n  def name, do: \"cleanup\"\n  def init(_opts), do: {:ok, %{started: true}}\n  def cleanup(_state), do: :ok\nend"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_file, %{content: "defmodule CleanupExt do\\n  use Gong.Extension\\n  def name, do: \\\"cleanup\\\"\\n  def init(_opts), do: {:ok, %{started: true}}\\n  def cleanup(_state), do: :ok\\nend", name: "cleanup_ext.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 95, raw: "GIVEN create_extension_file name=\"cleanup_ext.ex\" content=\"defmodule CleanupExt do\\n  use Gong.Extension\\n  def name, do: \\\"cleanup\\\"\\n  def init(_opts), do: {:ok, %{started: true}}\\n  def cleanup(_state), do: :ok\\nend\""}, 95)
+    # line 96: WHEN load_extension path="cleanup_ext.ex"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_extension, %{path: "cleanup_ext.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 96, raw: "WHEN load_extension path=\"cleanup_ext.ex\""}, 96)
+    # line 97: WHEN cleanup_extension name="CleanupExt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cleanup_extension, %{name: "CleanupExt"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 97, raw: "WHEN cleanup_extension name=\"CleanupExt\""}, 97)
+    # line 98: THEN assert_extension_cleanup_called
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_cleanup_called, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 98, raw: "THEN assert_extension_cleanup_called"}, 98)
     _ctx = ctx
     :ok
   end

@@ -61,6 +61,14 @@ defmodule Gong.BDD.InstructionRegistries.Template do
         args: %{contains: %{type: :string, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :error
+      },
+
+      # ── 补充覆盖 ──
+      assert_template_list_count: %{
+        name: :assert_template_list_count, kind: :then,
+        args: %{expected: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

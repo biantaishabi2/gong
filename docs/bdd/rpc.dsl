@@ -29,3 +29,17 @@ THEN assert_rpc_error code=-32601
 GIVEN create_temp_dir
 WHEN rpc_handle json="{\"jsonrpc\":\"2.0\",\"method\":\"echo\",\"params\":{\"msg\":\"test\"},\"id\":42}"
 THEN assert_rpc_response_json contains="test"
+
+# ══════════════════════════════════════════════
+# Group 2: RPC 错误码补充（2 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: RPC-006] TITLE: 缺少 jsonrpc 字段返回 invalid_request TAGS: unit rpc
+GIVEN create_temp_dir
+WHEN parse_rpc_request json="{\"method\":\"chat\",\"id\":1}"
+THEN assert_rpc_error code=-32600
+
+[SCENARIO: RPC-007] TITLE: handler 异常返回 internal_error TAGS: unit rpc
+GIVEN create_temp_dir
+WHEN rpc_dispatch_raise method="crash"
+THEN assert_rpc_error code=-32603

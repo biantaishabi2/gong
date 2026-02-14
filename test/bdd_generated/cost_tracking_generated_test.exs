@@ -81,4 +81,56 @@ defmodule Gong.BDD.Generated.CostTrackingTest do
     :ok
   end
 
+  # Source: COST-005
+  @tag :cost
+  @tag :unit
+  test "[COST-005] history 返回时间序列表" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "COST-005"}
+    # line 39: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 39, raw: "GIVEN create_temp_dir"}, 39)
+    # line 40: WHEN init_cost_tracker
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_cost_tracker, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 40, raw: "WHEN init_cost_tracker"}, 40)
+    # line 41: WHEN record_llm_call model="model-a" input_tokens=100 output_tokens=50
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :record_llm_call, %{input_tokens: 100, model: "model-a", output_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 41, raw: "WHEN record_llm_call model=\"model-a\" input_tokens=100 output_tokens=50"}, 41)
+    # line 42: WHEN record_llm_call model="model-b" input_tokens=200 output_tokens=100
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :record_llm_call, %{input_tokens: 200, model: "model-b", output_tokens: 100}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 42, raw: "WHEN record_llm_call model=\"model-b\" input_tokens=200 output_tokens=100"}, 42)
+    # line 43: THEN assert_cost_history count=2 first_model="model-a"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cost_history, %{count: 2, first_model: "model-a"}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 43, raw: "THEN assert_cost_history count=2 first_model=\"model-a\""}, 43)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: COST-006
+  @tag :cost
+  @tag :unit
+  test "[COST-006] 空状态 last_call 为 nil" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "COST-006"}
+    # line 46: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 46, raw: "GIVEN create_temp_dir"}, 46)
+    # line 47: WHEN init_cost_tracker
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_cost_tracker, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 47, raw: "WHEN init_cost_tracker"}, 47)
+    # line 48: THEN assert_last_call_nil
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_last_call_nil, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 48, raw: "THEN assert_last_call_nil"}, 48)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: COST-007
+  @tag :cost
+  @tag :unit
+  test "[COST-007] 空状态 summary 全零" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "COST-007"}
+    # line 51: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 51, raw: "GIVEN create_temp_dir"}, 51)
+    # line 52: WHEN init_cost_tracker
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_cost_tracker, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 52, raw: "WHEN init_cost_tracker"}, 52)
+    # line 53: THEN assert_cost_summary call_count=0 total_input=0 total_output=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cost_summary, %{call_count: 0, total_input: 0, total_output: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_tracking.dsl", line: 53, raw: "THEN assert_cost_summary call_count=0 total_input=0 total_output=0"}, 53)
+    _ctx = ctx
+    :ok
+  end
+
 end

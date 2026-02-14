@@ -50,6 +50,25 @@ defmodule Gong.BDD.InstructionRegistries.Thinking do
         name: :assert_thinking_params_empty, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 补充覆盖 ──
+      parse_thinking_level: %{
+        name: :parse_thinking_level, kind: :when,
+        args: %{str: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_parsed_thinking_level: %{
+        name: :assert_parsed_thinking_level, kind: :then,
+        args: %{expected: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_parsed_thinking_error: %{
+        name: :assert_parsed_thinking_error, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :error
       }
     }
   end

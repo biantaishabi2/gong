@@ -24,3 +24,32 @@ THEN assert_authorize_url contains="client_id=test_client"
 GIVEN create_temp_dir
 WHEN exchange_auth_code code="test_code_123"
 THEN assert_auth_token contains="test_code_123"
+
+# ══════════════════════════════════════════════
+# Group 2: Auth 补充覆盖（5 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: AUTH-005] TITLE: 刷新 token TAGS: unit auth
+GIVEN create_temp_dir
+WHEN refresh_auth_token refresh="mock_refresh_abc"
+THEN assert_auth_token contains="refreshed_access"
+
+[SCENARIO: AUTH-006] TITLE: token 过期检测 TAGS: unit auth
+GIVEN create_temp_dir
+WHEN check_token_expired expires_at=0
+THEN assert_token_expired expected="true"
+
+[SCENARIO: AUTH-007] TITLE: token 未过期检测 TAGS: unit auth
+GIVEN create_temp_dir
+WHEN check_token_expired expires_at=9999999999
+THEN assert_token_expired expected="false"
+
+[SCENARIO: AUTH-008] TITLE: 获取 API Key 成功 TAGS: unit auth
+GIVEN create_temp_dir
+WHEN get_api_key env_var="GONG_TEST_API_KEY"
+THEN assert_api_key_result status="ok"
+
+[SCENARIO: AUTH-009] TITLE: 获取 API Key 缺失 TAGS: unit auth
+GIVEN create_temp_dir
+WHEN get_api_key env_var="GONG_NONEXISTENT_VAR_12345"
+THEN assert_api_key_result status="error"

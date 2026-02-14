@@ -69,4 +69,84 @@ defmodule Gong.BDD.Generated.AuthTest do
     :ok
   end
 
+  # Source: AUTH-005
+  @tag :auth
+  @tag :unit
+  test "[AUTH-005] 刷新 token" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "AUTH-005"}
+    # line 33: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 33, raw: "GIVEN create_temp_dir"}, 33)
+    # line 34: WHEN refresh_auth_token refresh="mock_refresh_abc"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :refresh_auth_token, %{refresh: "mock_refresh_abc"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 34, raw: "WHEN refresh_auth_token refresh=\"mock_refresh_abc\""}, 34)
+    # line 35: THEN assert_auth_token contains="refreshed_access"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_auth_token, %{contains: "refreshed_access"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 35, raw: "THEN assert_auth_token contains=\"refreshed_access\""}, 35)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: AUTH-006
+  @tag :auth
+  @tag :unit
+  test "[AUTH-006] token 过期检测" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "AUTH-006"}
+    # line 38: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 38, raw: "GIVEN create_temp_dir"}, 38)
+    # line 39: WHEN check_token_expired expires_at=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :check_token_expired, %{expires_at: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 39, raw: "WHEN check_token_expired expires_at=0"}, 39)
+    # line 40: THEN assert_token_expired expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_token_expired, %{expected: "true"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 40, raw: "THEN assert_token_expired expected=\"true\""}, 40)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: AUTH-007
+  @tag :auth
+  @tag :unit
+  test "[AUTH-007] token 未过期检测" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "AUTH-007"}
+    # line 43: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 43, raw: "GIVEN create_temp_dir"}, 43)
+    # line 44: WHEN check_token_expired expires_at=9999999999
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :check_token_expired, %{expires_at: 9999999999}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 44, raw: "WHEN check_token_expired expires_at=9999999999"}, 44)
+    # line 45: THEN assert_token_expired expected="false"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_token_expired, %{expected: "false"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 45, raw: "THEN assert_token_expired expected=\"false\""}, 45)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: AUTH-008
+  @tag :auth
+  @tag :unit
+  test "[AUTH-008] 获取 API Key 成功" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "AUTH-008"}
+    # line 48: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 48, raw: "GIVEN create_temp_dir"}, 48)
+    # line 49: WHEN get_api_key env_var="GONG_TEST_API_KEY"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_api_key, %{env_var: "GONG_TEST_API_KEY"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 49, raw: "WHEN get_api_key env_var=\"GONG_TEST_API_KEY\""}, 49)
+    # line 50: THEN assert_api_key_result status="ok"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_api_key_result, %{status: "ok"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 50, raw: "THEN assert_api_key_result status=\"ok\""}, 50)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: AUTH-009
+  @tag :auth
+  @tag :unit
+  test "[AUTH-009] 获取 API Key 缺失" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "AUTH-009"}
+    # line 53: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 53, raw: "GIVEN create_temp_dir"}, 53)
+    # line 54: WHEN get_api_key env_var="GONG_NONEXISTENT_VAR_12345"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_api_key, %{env_var: "GONG_NONEXISTENT_VAR_12345"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 54, raw: "WHEN get_api_key env_var=\"GONG_NONEXISTENT_VAR_12345\""}, 54)
+    # line 55: THEN assert_api_key_result status="error"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_api_key_result, %{status: "error"}, %{file: "/home/wangbo/document/gong/docs/bdd/auth.dsl", line: 55, raw: "THEN assert_api_key_result status=\"error\""}, 55)
+    _ctx = ctx
+    :ok
+  end
+
 end

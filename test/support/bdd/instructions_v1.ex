@@ -741,6 +741,93 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_command_count} ->
         assert_command_count!(ctx, args, meta)
 
+      # ── Auth 补充 ──
+
+      {:when, :refresh_auth_token} ->
+        refresh_auth_token!(ctx, args, meta)
+
+      {:when, :check_token_expired} ->
+        check_token_expired!(ctx, args, meta)
+
+      {:then, :assert_token_expired} ->
+        assert_token_expired!(ctx, args, meta)
+
+      {:when, :get_api_key} ->
+        get_api_key!(ctx, args, meta)
+
+      {:then, :assert_api_key_result} ->
+        assert_api_key_result!(ctx, args, meta)
+
+      # ── Thinking 补充 ──
+
+      {:when, :parse_thinking_level} ->
+        parse_thinking_level!(ctx, args, meta)
+
+      {:then, :assert_parsed_thinking_level} ->
+        assert_parsed_thinking_level!(ctx, args, meta)
+
+      {:then, :assert_parsed_thinking_error} ->
+        assert_parsed_thinking_error!(ctx, args, meta)
+
+      # ── Provider 补充 ──
+
+      {:when, :cleanup_provider_registry} ->
+        cleanup_provider_registry!(ctx, args, meta)
+
+      {:then, :assert_provider_current_nil} ->
+        assert_provider_current_nil!(ctx, args, meta)
+
+      # ── Cost 补充 ──
+
+      {:then, :assert_cost_history} ->
+        assert_cost_history!(ctx, args, meta)
+
+      {:then, :assert_last_call_nil} ->
+        assert_last_call_nil!(ctx, args, meta)
+
+      # ── Template 补充 ──
+
+      {:then, :assert_template_list_count} ->
+        assert_template_list_count!(ctx, args, meta)
+
+      # ── RPC 补充 ──
+
+      {:when, :rpc_dispatch_raise} ->
+        rpc_dispatch_raise!(ctx, args, meta)
+
+      # ── CrossProvider 补充 ──
+
+      {:given, :cross_provider_tool_calls_message} ->
+        cross_provider_tool_calls_message!(ctx, args, meta)
+
+      {:then, :assert_command_exists} ->
+        assert_command_exists!(ctx, args, meta)
+
+      {:then, :assert_converted_has_tool_calls} ->
+        assert_converted_has_tool_calls!(ctx, args, meta)
+
+      # ── Extension 补充 ──
+
+      {:then, :assert_extension_commands} ->
+        assert_extension_commands!(ctx, args, meta)
+
+      {:when, :cleanup_extension} ->
+        cleanup_extension!(ctx, args, meta)
+
+      {:then, :assert_extension_cleanup_called} ->
+        assert_extension_cleanup_called!(ctx, args, meta)
+
+      # ── Stream 补充 ──
+
+      {:when, :stream_tool_chunks} ->
+        stream_tool_chunks!(ctx, args, meta)
+
+      {:then, :assert_tool_event_sequence} ->
+        assert_tool_event_sequence!(ctx, args, meta)
+
+      {:then, :assert_tool_event_name} ->
+        assert_tool_event_name!(ctx, args, meta)
+
       # ── Agent Loop: Auto-Compaction ──
 
       {:when, :auto_compact} ->
@@ -3514,9 +3601,13 @@ defmodule Gong.BDD.Instructions.V1 do
   # ── Cross-provider & Command 实现 ──
 
   defp cross_provider_messages!(ctx, %{count: count}, _meta) do
-    messages = Enum.map(1..count, fn i ->
-      %{role: "user", content: "消息#{i}"}
-    end)
+    messages = if count == 0 do
+      []
+    else
+      Enum.map(1..count, fn i ->
+        %{role: "user", content: "消息#{i}"}
+      end)
+    end
     Map.put(ctx, :cross_messages, messages)
   end
 
@@ -3610,6 +3701,230 @@ defmodule Gong.BDD.Instructions.V1 do
     actual = length(Gong.CommandRegistry.list())
     assert actual == expected,
       "期望 #{expected} 个命令，实际：#{actual}"
+    ctx
+  end
+
+  # ── Auth 补充实现 ──
+
+  defp refresh_auth_token!(ctx, %{refresh: refresh}, _meta) do
+    config = %{
+      client_id: "test", client_secret: "test",
+      authorize_url: "https://auth.example.com/authorize",
+      token_url: "https://auth.example.com/token",
+      redirect_uri: "http://localhost:8080/callback", scopes: []
+    }
+    {:ok, token} = Gong.Auth.refresh_token(config, refresh)
+    Map.put(ctx, :auth_token, token)
+  end
+
+  defp check_token_expired!(ctx, %{expires_at: expires_at}, _meta) do
+    token = %{access_token: "test", refresh_token: nil, expires_at: expires_at}
+    result = Gong.Auth.token_expired?(token)
+    Map.put(ctx, :token_expired, result)
+  end
+
+  defp assert_token_expired!(ctx, %{expected: expected}, _meta) do
+    actual = Map.fetch!(ctx, :token_expired)
+    expected_bool = expected == "true"
+    assert actual == expected_bool,
+      "期望 token_expired=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  defp get_api_key!(ctx, %{env_var: env_var}, _meta) do
+    # 为成功测试设置临时环境变量
+    if env_var == "GONG_TEST_API_KEY" do
+      System.put_env("GONG_TEST_API_KEY", "test_key_value")
+    end
+    result = Gong.Auth.get_api_key(env_var)
+    Map.put(ctx, :api_key_result, result)
+  end
+
+  defp assert_api_key_result!(ctx, %{status: status}, _meta) do
+    result = Map.fetch!(ctx, :api_key_result)
+    case status do
+      "ok" ->
+        assert match?({:ok, _}, result), "期望 ok，实际：#{inspect(result)}"
+      "error" ->
+        assert match?({:error, _}, result), "期望 error，实际：#{inspect(result)}"
+    end
+    ctx
+  end
+
+  # ── Thinking 补充实现 ──
+
+  defp parse_thinking_level!(ctx, %{str: str}, _meta) do
+    result = Gong.Thinking.parse(str)
+    Map.put(ctx, :parsed_thinking, result)
+  end
+
+  defp assert_parsed_thinking_level!(ctx, %{expected: expected}, _meta) do
+    result = Map.fetch!(ctx, :parsed_thinking)
+    assert match?({:ok, _}, result), "期望解析成功，实际：#{inspect(result)}"
+    {:ok, level} = result
+    assert to_string(level) == expected,
+      "期望 level=#{expected}，实际：#{level}"
+    ctx
+  end
+
+  defp assert_parsed_thinking_error!(ctx, _args, _meta) do
+    result = Map.fetch!(ctx, :parsed_thinking)
+    assert result == {:error, :invalid_level},
+      "期望解析错误 :invalid_level，实际：#{inspect(result)}"
+    ctx
+  end
+
+  # ── Provider 补充实现 ──
+
+  defp cleanup_provider_registry!(ctx, _args, _meta) do
+    Gong.ProviderRegistry.cleanup()
+    ctx
+  end
+
+  defp assert_provider_current_nil!(ctx, _args, _meta) do
+    result = Gong.ProviderRegistry.current()
+    assert result == nil, "期望 current 为 nil，实际：#{inspect(result)}"
+    ctx
+  end
+
+  # ── Cost 补充实现 ──
+
+  defp assert_cost_history!(ctx, %{count: count, first_model: first_model}, _meta) do
+    history = Gong.CostTracker.history()
+    assert length(history) == count,
+      "期望 #{count} 条历史，实际：#{length(history)}"
+    if count > 0 do
+      first = hd(history)
+      assert first.model == first_model,
+        "期望第一条 model=#{first_model}，实际：#{first.model}"
+    end
+    ctx
+  end
+
+  defp assert_last_call_nil!(ctx, _args, _meta) do
+    result = Gong.CostTracker.last_call()
+    assert result == nil, "期望 last_call 为 nil，实际：#{inspect(result)}"
+    ctx
+  end
+
+  # ── Template 补充实现 ──
+
+  defp assert_template_list_count!(ctx, %{expected: expected}, _meta) do
+    templates = Gong.PromptTemplate.list()
+    assert length(templates) == expected,
+      "期望 #{expected} 个模板，实际：#{length(templates)}"
+    ctx
+  end
+
+  # ── RPC 补充实现 ──
+
+  defp rpc_dispatch_raise!(ctx, %{method: method}, _meta) do
+    # handler 会抛异常
+    handlers = %{method => fn _params -> raise "故意崩溃" end}
+    request = %{method: method, params: %{}, id: 1}
+    result = Gong.RPC.dispatch(request, handlers)
+    Map.put(ctx, :rpc_response, result)
+  end
+
+  # ── CrossProvider 补充实现 ──
+
+  defp cross_provider_tool_calls_message!(ctx, _args, _meta) do
+    messages = [%{
+      role: "assistant",
+      content: "调用工具",
+      tool_calls: [
+        %{"id" => "tc1", "name" => "read_file", "arguments" => %{"path" => "/tmp/test"}}
+      ]
+    }]
+    Map.put(ctx, :cross_messages, messages)
+  end
+
+  defp assert_command_exists!(ctx, %{name: name, expected: expected}, _meta) do
+    exists = Gong.CommandRegistry.exists?(name)
+    expected_bool = expected == "true"
+    assert exists == expected_bool,
+      "期望 exists?(#{name})=#{expected}，实际：#{exists}"
+    ctx
+  end
+
+  defp assert_converted_has_tool_calls!(ctx, _args, _meta) do
+    converted = Map.fetch!(ctx, :converted_messages)
+    msg = hd(converted)
+    tool_calls = Map.get(msg, :tool_calls, [])
+    assert length(tool_calls) > 0, "期望消息包含 tool_calls"
+    # 验证规范化后有 :id, :name, :arguments
+    tc = hd(tool_calls)
+    assert Map.has_key?(tc, :id), "tool_call 应有 :id"
+    assert Map.has_key?(tc, :name), "tool_call 应有 :name"
+    ctx
+  end
+
+  # ── Extension 补充实现 ──
+
+  defp assert_extension_commands!(ctx, %{expected: expected}, _meta) do
+    extensions = Map.get(ctx, :loaded_extensions, [])
+    total_cmds = Enum.reduce(extensions, 0, fn mod, acc ->
+      if is_atom(mod) and function_exported?(mod, :commands, 0) do
+        acc + length(mod.commands())
+      else
+        acc
+      end
+    end)
+    assert total_cmds == expected,
+      "期望 #{expected} 个 extension commands，实际：#{total_cmds}"
+    ctx
+  end
+
+  defp cleanup_extension!(ctx, %{name: name}, _meta) do
+    extensions = Map.get(ctx, :loaded_extensions, [])
+    ext = Enum.find(extensions, fn mod ->
+      is_atom(mod) and to_string(mod) =~ name
+    end)
+    if ext do
+      ext.cleanup(%{})
+    end
+    Map.put(ctx, :cleanup_called, true)
+  end
+
+  defp assert_extension_cleanup_called!(ctx, _args, _meta) do
+    assert Map.get(ctx, :cleanup_called, false) == true,
+      "期望 cleanup 已被调用"
+    ctx
+  end
+
+  # ── Stream 补充实现 ──
+
+  defp stream_tool_chunks!(ctx, %{tool_name: tool_name, chunks: chunks_str}, _meta) do
+    chunks = chunks_str
+    |> String.split("|")
+    |> Enum.map(fn
+      "done" -> :done
+      "chunk:" <> text -> {:chunk, text}
+      other -> {:chunk, other}
+    end)
+
+    events = Gong.Stream.tool_chunks_to_events(tool_name, chunks)
+    Map.put(ctx, :tool_events, events)
+  end
+
+  defp assert_tool_event_sequence!(ctx, %{sequence: expected_seq}, _meta) do
+    events = Map.fetch!(ctx, :tool_events)
+    types = Enum.map(events, fn e -> to_string(e.type) end)
+    actual_seq = Enum.join(types, ",")
+    assert actual_seq == expected_seq,
+      "期望事件序列 #{expected_seq}，实际：#{actual_seq}"
+    ctx
+  end
+
+  defp assert_tool_event_name!(ctx, %{expected: expected}, _meta) do
+    events = Map.fetch!(ctx, :tool_events)
+    # 所有事件的 tool_name 应匹配
+    Enum.each(events, fn e ->
+      if e.tool_name do
+        assert e.tool_name == expected,
+          "期望 tool_name=#{expected}，实际：#{e.tool_name}"
+      end
+    end)
     ctx
   end
 

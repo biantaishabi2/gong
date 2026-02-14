@@ -85,4 +85,84 @@ defmodule Gong.BDD.Generated.ThinkingTest do
     :ok
   end
 
+  # Source: THINKING-006
+  @tag :thinking
+  @tag :unit
+  test "[THINKING-006] parse 有效字符串" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "THINKING-006"}
+    # line 38: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 38, raw: "GIVEN create_temp_dir"}, 38)
+    # line 39: WHEN parse_thinking_level str="high"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :parse_thinking_level, %{str: "high"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 39, raw: "WHEN parse_thinking_level str=\"high\""}, 39)
+    # line 40: THEN assert_parsed_thinking_level expected="high"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_parsed_thinking_level, %{expected: "high"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 40, raw: "THEN assert_parsed_thinking_level expected=\"high\""}, 40)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: THINKING-007
+  @tag :thinking
+  @tag :unit
+  test "[THINKING-007] parse 无效字符串" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "THINKING-007"}
+    # line 43: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 43, raw: "GIVEN create_temp_dir"}, 43)
+    # line 44: WHEN parse_thinking_level str="超高"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :parse_thinking_level, %{str: "超高"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 44, raw: "WHEN parse_thinking_level str=\"超高\""}, 44)
+    # line 45: THEN assert_parsed_thinking_error
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_parsed_thinking_error, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 45, raw: "THEN assert_parsed_thinking_error"}, 45)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: THINKING-008
+  @tag :thinking
+  @tag :unit
+  test "[THINKING-008] OpenAI provider 参数" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "THINKING-008"}
+    # line 48: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 48, raw: "GIVEN create_temp_dir"}, 48)
+    # line 49: WHEN thinking_to_provider level="high" provider="openai"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :thinking_to_provider, %{level: "high", provider: "openai"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 49, raw: "WHEN thinking_to_provider level=\"high\" provider=\"openai\""}, 49)
+    # line 50: THEN assert_thinking_params contains="reasoning_effort"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_thinking_params, %{contains: "reasoning_effort"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 50, raw: "THEN assert_thinking_params contains=\"reasoning_effort\""}, 50)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: THINKING-009
+  @tag :thinking
+  @tag :unit
+  test "[THINKING-009] DeepSeek provider 参数" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "THINKING-009"}
+    # line 53: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 53, raw: "GIVEN create_temp_dir"}, 53)
+    # line 54: WHEN thinking_to_provider level="medium" provider="deepseek"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :thinking_to_provider, %{level: "medium", provider: "deepseek"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 54, raw: "WHEN thinking_to_provider level=\"medium\" provider=\"deepseek\""}, 54)
+    # line 55: THEN assert_thinking_params contains="thinking_budget"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_thinking_params, %{contains: "thinking_budget"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 55, raw: "THEN assert_thinking_params contains=\"thinking_budget\""}, 55)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: THINKING-010
+  @tag :thinking
+  @tag :unit
+  test "[THINKING-010] budget 边界值 off 和 max" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "THINKING-010"}
+    # line 58: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
+    # line 59: WHEN get_thinking_budget level="off"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_thinking_budget, %{level: "off"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 59, raw: "WHEN get_thinking_budget level=\"off\""}, 59)
+    # line 60: THEN assert_thinking_budget expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_thinking_budget, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking.dsl", line: 60, raw: "THEN assert_thinking_budget expected=0"}, 60)
+    _ctx = ctx
+    :ok
+  end
+
 end

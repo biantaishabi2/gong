@@ -90,6 +90,27 @@ defmodule Gong.BDD.InstructionRegistries.CrossProvider do
         args: %{expected: %{type: :int, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── 补充覆盖 ──
+      assert_command_exists: %{
+        name: :assert_command_exists, kind: :then,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          expected: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      cross_provider_tool_calls_message: %{
+        name: :cross_provider_tool_calls_message, kind: :given,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_converted_has_tool_calls: %{
+        name: :assert_converted_has_tool_calls, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

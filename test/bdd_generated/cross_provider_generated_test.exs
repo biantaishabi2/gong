@@ -117,4 +117,62 @@ defmodule Gong.BDD.Generated.CrossProviderTest do
     :ok
   end
 
+  # Source: CMD-004
+  @tag :command
+  @tag :unit
+  test "[CMD-004] 命令存在性检查" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CMD-004"}
+    # line 54: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 54, raw: "GIVEN create_temp_dir"}, 54)
+    # line 55: WHEN init_command_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_command_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 55, raw: "WHEN init_command_registry"}, 55)
+    # line 56: WHEN register_command name="exists_cmd" description="存在检查"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_command, %{description: "存在检查", name: "exists_cmd"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 56, raw: "WHEN register_command name=\"exists_cmd\" description=\"存在检查\""}, 56)
+    # line 57: THEN assert_command_exists name="exists_cmd" expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_command_exists, %{expected: "true", name: "exists_cmd"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 57, raw: "THEN assert_command_exists name=\"exists_cmd\" expected=\"true\""}, 57)
+    # line 58: THEN assert_command_exists name="nonexistent" expected="false"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_command_exists, %{expected: "false", name: "nonexistent"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 58, raw: "THEN assert_command_exists name=\"nonexistent\" expected=\"false\""}, 58)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CROSS-004
+  @tag :cross_provider
+  @tag :unit
+  test "[CROSS-004] 空消息列表转换" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CROSS-004"}
+    # line 61: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 61, raw: "GIVEN create_temp_dir"}, 61)
+    # line 62: GIVEN cross_provider_messages count=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_messages, %{count: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 62, raw: "GIVEN cross_provider_messages count=0"}, 62)
+    # line 63: WHEN convert_messages from="openai" to="deepseek"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "openai", to: "deepseek"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 63, raw: "WHEN convert_messages from=\"openai\" to=\"deepseek\""}, 63)
+    # line 64: THEN assert_converted_messages count=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_messages, %{count: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 64, raw: "THEN assert_converted_messages count=0"}, 64)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CROSS-005
+  @tag :cross_provider
+  @tag :unit
+  test "[CROSS-005] 带 tool_calls 的消息转换" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CROSS-005"}
+    # line 67: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 67, raw: "GIVEN create_temp_dir"}, 67)
+    # line 68: GIVEN cross_provider_tool_calls_message
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_tool_calls_message, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 68, raw: "GIVEN cross_provider_tool_calls_message"}, 68)
+    # line 69: WHEN convert_messages from="openai" to="anthropic"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "openai", to: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 69, raw: "WHEN convert_messages from=\"openai\" to=\"anthropic\""}, 69)
+    # line 70: THEN assert_converted_messages count=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_messages, %{count: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 70, raw: "THEN assert_converted_messages count=1"}, 70)
+    # line 71: THEN assert_converted_has_tool_calls
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_has_tool_calls, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider.dsl", line: 71, raw: "THEN assert_converted_has_tool_calls"}, 71)
+    _ctx = ctx
+    :ok
+  end
+
 end

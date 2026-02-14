@@ -70,9 +70,29 @@ WHEN load_all_extensions
 WHEN load_all_extensions
 THEN assert_extension_loaded name="IdempotentExt"
 
-[SCENARIO: EXTEND-009] TITLE: Extension 无 name 回调处理 TAGS: unit extension
+[SCENARIO: EXTEND-009] TITLE: Extension 缺少必须回调 TAGS: unit extension
 GIVEN create_temp_dir
 GIVEN create_extension_dir
-GIVEN create_extension_file name="noname.ex" content="defmodule NoNameExt do\n  use Gong.Extension\nend"
+GIVEN create_extension_file name="noname.ex" content="defmodule NoNameExt do\n  use Gong.Extension\n  def name, do: \"noname\"\nend"
 WHEN load_all_extensions
 THEN assert_extension_count expected=1
+
+# ══════════════════════════════════════════════
+# Group 3: Extension 深层补充（2 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: EXTEND-010] TITLE: Extension commands 回调 TAGS: unit extension
+GIVEN create_temp_dir
+GIVEN create_extension_dir
+GIVEN create_extension_file name="cmd_ext.ex" content="defmodule CmdExt do\n  use Gong.Extension\n  def name, do: \"cmd_ext\"\n  def commands, do: [%{name: \"greet\", description: \"打招呼\"}]\nend"
+WHEN load_extension path="cmd_ext.ex"
+THEN assert_extension_loaded name="CmdExt"
+THEN assert_extension_commands expected=1
+
+[SCENARIO: EXTEND-011] TITLE: Extension cleanup 回调验证 TAGS: unit extension
+GIVEN create_temp_dir
+GIVEN create_extension_dir
+GIVEN create_extension_file name="cleanup_ext.ex" content="defmodule CleanupExt do\n  use Gong.Extension\n  def name, do: \"cleanup\"\n  def init(_opts), do: {:ok, %{started: true}}\n  def cleanup(_state), do: :ok\nend"
+WHEN load_extension path="cleanup_ext.ex"
+WHEN cleanup_extension name="CleanupExt"
+THEN assert_extension_cleanup_called

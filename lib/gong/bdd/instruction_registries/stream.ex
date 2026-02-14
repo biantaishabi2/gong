@@ -35,6 +35,29 @@ defmodule Gong.BDD.InstructionRegistries.Stream do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── 补充覆盖：tool 事件 ──
+      stream_tool_chunks: %{
+        name: :stream_tool_chunks, kind: :when,
+        args: %{
+          tool_name: %{type: :string, required?: true, allowed: nil},
+          chunks: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_tool_event_sequence: %{
+        name: :assert_tool_event_sequence, kind: :then,
+        args: %{sequence: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      assert_tool_event_name: %{
+        name: :assert_tool_event_name, kind: :then,
+        args: %{expected: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

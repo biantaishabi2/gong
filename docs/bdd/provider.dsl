@@ -72,3 +72,27 @@ WHEN register_provider name="low" module="MockProvider" priority=1
 WHEN register_provider name="high" module="MockProvider" priority=10
 WHEN register_provider name="mid" module="MockProvider" priority=5
 THEN assert_provider_list_order expected="high,mid,low"
+
+# ══════════════════════════════════════════════
+# Group 3: Provider 边界补充（3 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: PROVIDER-010] TITLE: cleanup 后 current 为空 TAGS: unit provider
+GIVEN create_temp_dir
+WHEN init_provider_registry
+WHEN register_provider name="test" module="MockProvider"
+WHEN cleanup_provider_registry
+THEN assert_provider_current_nil
+
+[SCENARIO: PROVIDER-011] TITLE: 重复注册同名覆盖 TAGS: unit provider
+GIVEN create_temp_dir
+WHEN init_provider_registry
+WHEN register_provider name="dup" module="MockProvider" priority=1
+WHEN register_provider name="dup" module="MockProvider" priority=99
+THEN assert_provider_count expected=1
+
+[SCENARIO: PROVIDER-012] TITLE: 空注册表切换失败 TAGS: unit provider
+GIVEN create_temp_dir
+WHEN init_provider_registry
+WHEN switch_provider_expect_error name="any"
+THEN assert_provider_error contains="not_found"
