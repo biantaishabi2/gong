@@ -375,4 +375,38 @@ defmodule Gong.BDD.Generated.BashActionTest do
     :ok
   end
 
+  # Source: BDD-BASH-022
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-022] 特殊字符命令" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-022"}
+    # line 144: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 144, raw: "GIVEN create_temp_dir"}, 144)
+    # line 145: WHEN tool_bash command="echo 'hello \"world\"'"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo 'hello \\\"world\\\"'"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 145, raw: "WHEN tool_bash command=\"echo 'hello \\\"world\\\"'\""}, 145)
+    # line 146: THEN assert_tool_success content_contains="hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 146, raw: "THEN assert_tool_success content_contains=\"hello\""}, 146)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-BASH-023
+  @tag :external_io
+  @tag :unit
+  test "[BDD-BASH-023] 工作目录默认为 temp_dir" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-BASH-023"}
+    # line 149: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 149, raw: "GIVEN create_temp_dir"}, 149)
+    # line 150: GIVEN create_temp_file path="marker.txt" content="found it"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "found it", path: "marker.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 150, raw: "GIVEN create_temp_file path=\"marker.txt\" content=\"found it\""}, 150)
+    # line 151: WHEN tool_bash command="cat marker.txt" cwd=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "cat marker.txt", cwd: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 151, raw: "WHEN tool_bash command=\"cat marker.txt\" cwd=\"\""}, 151)
+    # line 152: THEN assert_tool_success content_contains="found it"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "found it"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_action.dsl", line: 152, raw: "THEN assert_tool_success content_contains=\"found it\""}, 152)
+    _ctx = ctx
+    :ok
+  end
+
 end

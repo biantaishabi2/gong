@@ -130,4 +130,108 @@ defmodule Gong.BDD.Generated.AbortSignalTest do
     :ok
   end
 
+  # Source: ABORT-006
+  @tag :abort
+  @tag :unit
+  test "[ABORT-006] signal 设置 abort 标记" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "ABORT-006"}
+    # line 60: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 60, raw: "GIVEN create_temp_dir"}, 60)
+    # line 61: WHEN abort_signal reason="user"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_signal, %{reason: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 61, raw: "WHEN abort_signal reason=\"user\""}, 61)
+    # line 62: THEN assert_abort_flag expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_abort_flag, %{expected: "true"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 62, raw: "THEN assert_abort_flag expected=\"true\""}, 62)
+    # line 63: THEN assert_abort_reason expected="user"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_abort_reason, %{expected: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 63, raw: "THEN assert_abort_reason expected=\"user\""}, 63)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: ABORT-007
+  @tag :abort
+  @tag :unit
+  test "[ABORT-007] check 在已 abort 时 throw" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "ABORT-007"}
+    # line 66: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 66, raw: "GIVEN create_temp_dir"}, 66)
+    # line 67: WHEN abort_signal reason="timeout"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_signal, %{reason: "timeout"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 67, raw: "WHEN abort_signal reason=\"timeout\""}, 67)
+    # line 68: WHEN abort_check_catch
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_check_catch, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 68, raw: "WHEN abort_check_catch"}, 68)
+    # line 69: THEN assert_abort_caught reason="timeout"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_abort_caught, %{reason: "timeout"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 69, raw: "THEN assert_abort_caught reason=\"timeout\""}, 69)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: ABORT-008
+  @tag :abort
+  @tag :unit
+  test "[ABORT-008] reset 清除 abort 标记" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "ABORT-008"}
+    # line 72: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 72, raw: "GIVEN create_temp_dir"}, 72)
+    # line 73: WHEN abort_signal reason="user"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_signal, %{reason: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 73, raw: "WHEN abort_signal reason=\"user\""}, 73)
+    # line 74: WHEN abort_reset
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_reset, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 74, raw: "WHEN abort_reset"}, 74)
+    # line 75: THEN assert_abort_flag expected="false"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_abort_flag, %{expected: "false"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 75, raw: "THEN assert_abort_flag expected=\"false\""}, 75)
+    # line 76: THEN assert_abort_reason expected="nil"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_abort_reason, %{expected: "nil"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 76, raw: "THEN assert_abort_reason expected=\"nil\""}, 76)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: ABORT-009
+  @tag :abort
+  @tag :unit
+  test "[ABORT-009] aborted? 默认 false" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "ABORT-009"}
+    # line 79: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 79, raw: "GIVEN create_temp_dir"}, 79)
+    # line 80: WHEN abort_reset
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_reset, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 80, raw: "WHEN abort_reset"}, 80)
+    # line 81: THEN assert_abort_flag expected="false"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_abort_flag, %{expected: "false"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 81, raw: "THEN assert_abort_flag expected=\"false\""}, 81)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: ABORT-010
+  @tag :abort
+  @tag :unit
+  test "[ABORT-010] reason 在未 abort 时返回 nil" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "ABORT-010"}
+    # line 84: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 84, raw: "GIVEN create_temp_dir"}, 84)
+    # line 85: WHEN abort_reset
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_reset, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 85, raw: "WHEN abort_reset"}, 85)
+    # line 86: THEN assert_abort_reason expected="nil"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_abort_reason, %{expected: "nil"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 86, raw: "THEN assert_abort_reason expected=\"nil\""}, 86)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: ABORT-011
+  @tag :abort
+  @tag :unit
+  test "[ABORT-011] safe_execute 捕获 abort throw" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "ABORT-011"}
+    # line 89: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 89, raw: "GIVEN create_temp_dir"}, 89)
+    # line 90: WHEN abort_safe_execute will_abort="true" reason="test_reason"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :abort_safe_execute, %{reason: "test_reason", will_abort: "true"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 90, raw: "WHEN abort_safe_execute will_abort=\"true\" reason=\"test_reason\""}, 90)
+    # line 91: THEN assert_safe_execute_result expected="aborted" reason="test_reason"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_safe_execute_result, %{expected: "aborted", reason: "test_reason"}, %{file: "/home/wangbo/document/gong/docs/bdd/abort_signal.dsl", line: 91, raw: "THEN assert_safe_execute_result expected=\"aborted\" reason=\"test_reason\""}, 91)
+    _ctx = ctx
+    :ok
+  end
+
 end

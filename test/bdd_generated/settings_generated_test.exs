@@ -63,4 +63,82 @@ defmodule Gong.BDD.Generated.SettingsTest do
     :ok
   end
 
+  # Source: SETTINGS-004
+  @tag :settings
+  @tag :unit
+  test "[SETTINGS-004] 不存在的 key 返回 nil" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SETTINGS-004"}
+    # line 33: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 33, raw: "GIVEN create_temp_dir"}, 33)
+    # line 34: GIVEN init_settings
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 34, raw: "GIVEN init_settings"}, 34)
+    # line 35: WHEN get_setting key="nonexistent_key"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_setting, %{key: "nonexistent_key"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 35, raw: "WHEN get_setting key=\"nonexistent_key\""}, 35)
+    # line 36: THEN assert_setting_nil
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_setting_nil, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 36, raw: "THEN assert_setting_nil"}, 36)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: SETTINGS-005
+  @tag :settings
+  @tag :unit
+  test "[SETTINGS-005] list 返回所有默认设置" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SETTINGS-005"}
+    # line 39: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 39, raw: "GIVEN create_temp_dir"}, 39)
+    # line 40: GIVEN init_settings
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 40, raw: "GIVEN init_settings"}, 40)
+    # line 41: WHEN list_settings
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :list_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 41, raw: "WHEN list_settings"}, 41)
+    # line 42: THEN assert_settings_list contains="model"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_settings_list, %{contains: "model"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 42, raw: "THEN assert_settings_list contains=\"model\""}, 42)
+    # line 43: THEN assert_settings_list contains="temperature"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_settings_list, %{contains: "temperature"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 43, raw: "THEN assert_settings_list contains=\"temperature\""}, 43)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: SETTINGS-006
+  @tag :settings
+  @tag :unit
+  test "[SETTINGS-006]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SETTINGS-006"}
+    # line 46: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 46, raw: "GIVEN create_temp_dir"}, 46)
+    # line 47: GIVEN init_settings
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 47, raw: "GIVEN init_settings"}, 47)
+    # line 48: WHEN cleanup_settings
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cleanup_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 48, raw: "WHEN cleanup_settings"}, 48)
+    # line 49: WHEN get_setting_safe key="model"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_setting_safe, %{key: "model"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 49, raw: "WHEN get_setting_safe key=\"model\""}, 49)
+    # line 50: THEN assert_setting_nil
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_setting_nil, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 50, raw: "THEN assert_setting_nil"}, 50)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: SETTINGS-007
+  @tag :settings
+  @tag :unit
+  test "[SETTINGS-007] 畸形 JSON 配置文件不崩溃" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SETTINGS-007"}
+    # line 53: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 53, raw: "GIVEN create_temp_dir"}, 53)
+    # line 54: GIVEN create_settings_file scope="project" content="not valid json{{"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_settings_file, %{content: "not valid json{{", scope: "project"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 54, raw: "GIVEN create_settings_file scope=\"project\" content=\"not valid json{{\""}, 54)
+    # line 55: GIVEN init_settings
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 55, raw: "GIVEN init_settings"}, 55)
+    # line 56: WHEN get_setting key="model"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_setting, %{key: "model"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 56, raw: "WHEN get_setting key=\"model\""}, 56)
+    # line 57: THEN assert_setting_value expected="deepseek:deepseek-chat"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_setting_value, %{expected: "deepseek:deepseek-chat"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 57, raw: "THEN assert_setting_value expected=\"deepseek:deepseek-chat\""}, 57)
+    _ctx = ctx
+    :ok
+  end
+
 end

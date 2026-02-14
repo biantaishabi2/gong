@@ -75,4 +75,82 @@ defmodule Gong.BDD.Generated.ResourceTest do
     :ok
   end
 
+  # Source: RESOURCE-004
+  @tag :resource
+  @tag :unit
+  test "[RESOURCE-004] 空 context 目录返回空列表" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RESOURCE-004"}
+    # line 39: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 39, raw: "GIVEN create_temp_dir"}, 39)
+    # line 40: GIVEN create_resource_dir scope="project"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_dir, %{scope: "project"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 40, raw: "GIVEN create_resource_dir scope=\"project\""}, 40)
+    # line 41: WHEN load_resources
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_resources, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 41, raw: "WHEN load_resources"}, 41)
+    # line 42: THEN assert_resource_count expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_resource_count, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 42, raw: "THEN assert_resource_count expected=0"}, 42)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: RESOURCE-005
+  @tag :resource
+  @tag :unit
+  test "[RESOURCE-005] 不存在的路径返回空列表" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RESOURCE-005"}
+    # line 45: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 45, raw: "GIVEN create_temp_dir"}, 45)
+    # line 46: WHEN load_resources_from_paths paths="/nonexistent/path"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_resources_from_paths, %{paths: "/nonexistent/path"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 46, raw: "WHEN load_resources_from_paths paths=\"/nonexistent/path\""}, 46)
+    # line 47: THEN assert_resource_count expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_resource_count, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 47, raw: "THEN assert_resource_count expected=0"}, 47)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: RESOURCE-006
+  @tag :resource
+  @tag :unit
+  test "[RESOURCE-006] 非 md 文件被忽略" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RESOURCE-006"}
+    # line 50: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 50, raw: "GIVEN create_temp_dir"}, 50)
+    # line 51: GIVEN create_resource_dir scope="project"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_dir, %{scope: "project"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 51, raw: "GIVEN create_resource_dir scope=\"project\""}, 51)
+    # line 52: GIVEN create_resource_file name="rules.md" content="# Rules"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_file, %{content: "# Rules", name: "rules.md"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 52, raw: "GIVEN create_resource_file name=\"rules.md\" content=\"# Rules\""}, 52)
+    # line 53: GIVEN create_resource_file name="notes.txt" content="not markdown"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_file, %{content: "not markdown", name: "notes.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 53, raw: "GIVEN create_resource_file name=\"notes.txt\" content=\"not markdown\""}, 53)
+    # line 54: WHEN load_resources
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_resources, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 54, raw: "WHEN load_resources"}, 54)
+    # line 55: THEN assert_resource_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_resource_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 55, raw: "THEN assert_resource_count expected=1"}, 55)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: RESOURCE-007
+  @tag :resource
+  @tag :unit
+  test "[RESOURCE-007] 多路径合并加载" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RESOURCE-007"}
+    # line 58: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
+    # line 59: GIVEN create_resource_dir scope="project"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_dir, %{scope: "project"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 59, raw: "GIVEN create_resource_dir scope=\"project\""}, 59)
+    # line 60: GIVEN create_resource_file name="a.md" content="# A"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_file, %{content: "# A", name: "a.md"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 60, raw: "GIVEN create_resource_file name=\"a.md\" content=\"# A\""}, 60)
+    # line 61: WHEN load_resources
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_resources, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 61, raw: "WHEN load_resources"}, 61)
+    # line 62: THEN assert_resource_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_resource_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 62, raw: "THEN assert_resource_count expected=1"}, 62)
+    # line 63: THEN assert_resource_content contains="# A"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_resource_content, %{contains: "# A"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 63, raw: "THEN assert_resource_content contains=\"# A\""}, 63)
+    _ctx = ctx
+    :ok
+  end
+
 end

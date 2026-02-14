@@ -83,6 +83,23 @@ defmodule Gong.BDD.InstructionRegistries.Resource do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── Resource 补充 ──
+
+      load_resources_from_paths: %{
+        name: :load_resources_from_paths,
+        kind: :when,
+        args: %{
+          paths: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
       }
     }
   end

@@ -137,3 +137,16 @@ WHEN tool_bash command="seq 1 2500"
 THEN assert_tool_success
 THEN assert_output_contains text="500 lines omitted"
 THEN assert_output_contains text="2500"
+
+# ── 8. 边界补充 ──
+
+[SCENARIO: BDD-BASH-022] TITLE: 特殊字符命令 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_bash command="echo 'hello \"world\"'"
+THEN assert_tool_success content_contains="hello"
+
+[SCENARIO: BDD-BASH-023] TITLE: 工作目录默认为 temp_dir TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="marker.txt" content="found it"
+WHEN tool_bash command="cat marker.txt" cwd=""
+THEN assert_tool_success content_contains="found it"

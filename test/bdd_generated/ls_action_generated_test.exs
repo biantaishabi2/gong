@@ -145,4 +145,44 @@ defmodule Gong.BDD.Generated.LsActionTest do
     :ok
   end
 
+  # Source: BDD-LS-008
+  @tag :external_io
+  @tag :unit
+  test "[BDD-LS-008] 子目录内容列表" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-LS-008"}
+    # line 62: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 62, raw: "GIVEN create_temp_dir"}, 62)
+    # line 63: GIVEN create_temp_file path="sub/nested.txt" content="nested"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "nested", path: "sub/nested.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 63, raw: "GIVEN create_temp_file path=\"sub/nested.txt\" content=\"nested\""}, 63)
+    # line 64: WHEN tool_ls path="sub"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: "sub"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 64, raw: "WHEN tool_ls path=\"sub\""}, 64)
+    # line 65: THEN assert_tool_success content_contains="nested.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "nested.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 65, raw: "THEN assert_tool_success content_contains=\"nested.txt\""}, 65)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-LS-009
+  @tag :external_io
+  @tag :unit
+  test "[BDD-LS-009] 符号链接显示" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-LS-009"}
+    # line 68: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 68, raw: "GIVEN create_temp_dir"}, 68)
+    # line 69: GIVEN create_temp_file path="real.txt" content="target"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "target", path: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 69, raw: "GIVEN create_temp_file path=\"real.txt\" content=\"target\""}, 69)
+    # line 70: GIVEN create_symlink link="link.txt" target="real.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_symlink, %{link: "link.txt", target: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 70, raw: "GIVEN create_symlink link=\"link.txt\" target=\"real.txt\""}, 70)
+    # line 71: WHEN tool_ls path=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{path: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 71, raw: "WHEN tool_ls path=\"\""}, 71)
+    # line 72: THEN assert_tool_success content_contains="link.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "link.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 72, raw: "THEN assert_tool_success content_contains=\"link.txt\""}, 72)
+    # line 73: THEN assert_output_contains text="real.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_output_contains, %{text: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/ls_action.dsl", line: 73, raw: "THEN assert_output_contains text=\"real.txt\""}, 73)
+    _ctx = ctx
+    :ok
+  end
+
 end

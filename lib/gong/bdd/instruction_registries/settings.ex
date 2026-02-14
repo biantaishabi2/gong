@@ -72,6 +72,73 @@ defmodule Gong.BDD.InstructionRegistries.Settings do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── Settings 补充 ──
+
+      assert_setting_nil: %{
+        name: :assert_setting_nil,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      list_settings: %{
+        name: :list_settings,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      assert_settings_list: %{
+        name: :assert_settings_list,
+        kind: :then,
+        args: %{
+          contains: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      cleanup_settings: %{
+        name: :cleanup_settings,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      get_setting_safe: %{
+        name: :get_setting_safe,
+        kind: :when,
+        args: %{
+          key: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
       }
     }
   end

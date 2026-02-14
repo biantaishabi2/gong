@@ -60,6 +60,35 @@ defmodule Gong.BDD.InstructionRegistries.ToolExtra do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── PathUtils 补充 ──
+
+      assert_normalized_path_contains: %{
+        name: :assert_normalized_path_contains,
+        kind: :then,
+        args: %{
+          text: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_normalized_path_is_absolute: %{
+        name: :assert_normalized_path_is_absolute,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

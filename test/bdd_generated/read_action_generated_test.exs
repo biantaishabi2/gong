@@ -369,4 +369,58 @@ defmodule Gong.BDD.Generated.ReadActionTest do
     :ok
   end
 
+  # Source: BDD-READ-021
+  @tag :external_io
+  @tag :unit
+  test "[BDD-READ-021] BOM 文件读取跳过 BOM" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-READ-021"}
+    # line 141: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 141, raw: "GIVEN create_temp_dir"}, 141)
+    # line 142: GIVEN create_bom_file path="bom.txt" content="BOM content here"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_bom_file, %{content: "BOM content here", path: "bom.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 142, raw: "GIVEN create_bom_file path=\"bom.txt\" content=\"BOM content here\""}, 142)
+    # line 143: WHEN tool_read path="bom.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "bom.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 143, raw: "WHEN tool_read path=\"bom.txt\""}, 143)
+    # line 144: THEN assert_tool_success content_contains="BOM content"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "BOM content"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 144, raw: "THEN assert_tool_success content_contains=\"BOM content\""}, 144)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-READ-022
+  @tag :external_io
+  @tag :unit
+  test "[BDD-READ-022] 二进制文件拒绝读取" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-READ-022"}
+    # line 147: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 147, raw: "GIVEN create_temp_dir"}, 147)
+    # line 148: GIVEN create_binary_file path="data.bin" bytes=100
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_binary_file, %{bytes: 100, path: "data.bin"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 148, raw: "GIVEN create_binary_file path=\"data.bin\" bytes=100"}, 148)
+    # line 149: WHEN tool_read path="data.bin"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "data.bin"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 149, raw: "WHEN tool_read path=\"data.bin\""}, 149)
+    # line 150: THEN assert_tool_error error_contains="Binary file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_error, %{error_contains: "Binary file"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 150, raw: "THEN assert_tool_error error_contains=\"Binary file\""}, 150)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-READ-023
+  @tag :external_io
+  @tag :unit
+  test "[BDD-READ-023] JPEG 图片检测" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-READ-023"}
+    # line 153: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 153, raw: "GIVEN create_temp_dir"}, 153)
+    # line 154: GIVEN create_png_file path="photo.jpg"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_png_file, %{path: "photo.jpg"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 154, raw: "GIVEN create_png_file path=\"photo.jpg\""}, 154)
+    # line 155: WHEN tool_read path="photo.jpg"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "photo.jpg"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 155, raw: "WHEN tool_read path=\"photo.jpg\""}, 155)
+    # line 156: THEN assert_read_image mime_type="image/png"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_read_image, %{mime_type: "image/png"}, %{file: "/home/wangbo/document/gong/docs/bdd/read_action.dsl", line: 156, raw: "THEN assert_read_image mime_type=\"image/png\""}, 156)
+    _ctx = ctx
+    :ok
+  end
+
 end

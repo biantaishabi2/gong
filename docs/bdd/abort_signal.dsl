@@ -51,3 +51,41 @@ GIVEN mock_stream_response chunks="chunk:已保留内容|abort:中断"
 WHEN agent_stream prompt="流式中断"
 THEN assert_stream_content expected="已保留内容"
 THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 2: Abort 模块 unit 测试 (6 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: ABORT-006] TITLE: signal 设置 abort 标记 TAGS: unit abort
+GIVEN create_temp_dir
+WHEN abort_signal reason="user"
+THEN assert_abort_flag expected="true"
+THEN assert_abort_reason expected="user"
+
+[SCENARIO: ABORT-007] TITLE: check 在已 abort 时 throw TAGS: unit abort
+GIVEN create_temp_dir
+WHEN abort_signal reason="timeout"
+WHEN abort_check_catch
+THEN assert_abort_caught reason="timeout"
+
+[SCENARIO: ABORT-008] TITLE: reset 清除 abort 标记 TAGS: unit abort
+GIVEN create_temp_dir
+WHEN abort_signal reason="user"
+WHEN abort_reset
+THEN assert_abort_flag expected="false"
+THEN assert_abort_reason expected="nil"
+
+[SCENARIO: ABORT-009] TITLE: aborted? 默认 false TAGS: unit abort
+GIVEN create_temp_dir
+WHEN abort_reset
+THEN assert_abort_flag expected="false"
+
+[SCENARIO: ABORT-010] TITLE: reason 在未 abort 时返回 nil TAGS: unit abort
+GIVEN create_temp_dir
+WHEN abort_reset
+THEN assert_abort_reason expected="nil"
+
+[SCENARIO: ABORT-011] TITLE: safe_execute 捕获 abort throw TAGS: unit abort
+GIVEN create_temp_dir
+WHEN abort_safe_execute will_abort="true" reason="test_reason"
+THEN assert_safe_execute_result expected="aborted" reason="test_reason"

@@ -116,6 +116,63 @@ defmodule Gong.BDD.InstructionRegistries.AgentLoop do
         assert_class: :C
       },
 
+      # ── THEN: Steering 补充 ──
+
+      assert_steering_message_nil: %{
+        name: :assert_steering_message_nil,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_steering_not_pending: %{
+        name: :assert_steering_not_pending,
+        kind: :then,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+
+      # ── WHEN: Steering 补充 ──
+
+      steering_push_typed: %{
+        name: :steering_push_typed,
+        kind: :when,
+        args: %{
+          type: %{type: :string, required?: true, allowed: nil},
+          message: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      steering_check_steering: %{
+        name: :steering_check_steering,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
       # ── WHEN: Retry ──
 
       classify_error: %{

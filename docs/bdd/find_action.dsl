@@ -70,3 +70,11 @@ WHEN tool_find pattern="**/*"
 THEN assert_tool_success content_contains="keep.txt"
 THEN assert_output_not_contains text="debug.log"
 THEN assert_output_not_contains text="output.js"
+
+# ── 5. 边界补充 ──
+
+[SCENARIO: BDD-FIND-009] TITLE: 深层嵌套查找 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="a/b/c/d/deep.txt" content="deep"
+WHEN tool_find pattern="**/*.txt"
+THEN assert_tool_success content_contains="deep.txt"

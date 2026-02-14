@@ -435,6 +435,18 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_steering_skip_contains} ->
         assert_steering_skip_contains!(ctx, args, meta)
 
+      {:then, :assert_steering_message_nil} ->
+        assert_steering_message_nil!(ctx, args, meta)
+
+      {:then, :assert_steering_not_pending} ->
+        assert_steering_not_pending!(ctx, args, meta)
+
+      {:when, :steering_push_typed} ->
+        steering_push_typed!(ctx, args, meta)
+
+      {:when, :steering_check_steering} ->
+        steering_check_steering!(ctx, args, meta)
+
       # ── Agent Loop: Retry ──
 
       {:when, :classify_error} ->
@@ -876,6 +888,24 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_model_count} ->
         assert_model_count!(ctx, args, meta)
 
+      {:when, :get_model_string} ->
+        get_model_string!(ctx, args, meta)
+
+      {:when, :list_models} ->
+        list_models!(ctx, args, meta)
+
+      {:when, :cleanup_model_registry} ->
+        cleanup_model_registry!(ctx, args, meta)
+
+      {:when, :get_model_string_safe} ->
+        get_model_string_safe!(ctx, args, meta)
+
+      {:then, :assert_model_string} ->
+        assert_model_string!(ctx, args, meta)
+
+      {:then, :assert_model_list_count} ->
+        assert_model_list_count!(ctx, args, meta)
+
       # ── Stream ──
 
       {:given, :mock_stream_response} ->
@@ -897,6 +927,32 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_abort_reset} ->
         assert_abort_reset!(ctx, args, meta)
+
+      # ── Abort unit ──
+
+      {:when, :abort_signal} ->
+        abort_signal!(ctx, args, meta)
+
+      {:when, :abort_check_catch} ->
+        abort_check_catch!(ctx, args, meta)
+
+      {:when, :abort_reset} ->
+        abort_reset!(ctx, args, meta)
+
+      {:when, :abort_safe_execute} ->
+        abort_safe_execute!(ctx, args, meta)
+
+      {:then, :assert_abort_flag} ->
+        assert_abort_flag!(ctx, args, meta)
+
+      {:then, :assert_abort_reason} ->
+        assert_abort_reason!(ctx, args, meta)
+
+      {:then, :assert_abort_caught} ->
+        assert_abort_caught!(ctx, args, meta)
+
+      {:then, :assert_safe_execute_result} ->
+        assert_safe_execute_result!(ctx, args, meta)
 
       {:then, :assert_partial_content} ->
         assert_partial_content!(ctx, args, meta)
@@ -981,6 +1037,21 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_setting_value} ->
         assert_setting_value!(ctx, args, meta)
 
+      {:then, :assert_setting_nil} ->
+        assert_setting_nil!(ctx, args, meta)
+
+      {:when, :list_settings} ->
+        list_settings!(ctx, args, meta)
+
+      {:then, :assert_settings_list} ->
+        assert_settings_list!(ctx, args, meta)
+
+      {:when, :cleanup_settings} ->
+        cleanup_settings!(ctx, args, meta)
+
+      {:when, :get_setting_safe} ->
+        get_setting_safe!(ctx, args, meta)
+
       # ── Resource ──
 
       {:given, :create_resource_dir} ->
@@ -1000,6 +1071,9 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_resource_count} ->
         assert_resource_count!(ctx, args, meta)
+
+      {:when, :load_resources_from_paths} ->
+        load_resources_from_paths!(ctx, args, meta)
 
       # ── Branch Summary ──
 
@@ -1026,6 +1100,12 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_normalized_path} ->
         assert_normalized_path!(ctx, args, meta)
+
+      {:then, :assert_normalized_path_contains} ->
+        assert_normalized_path_contains!(ctx, args, meta)
+
+      {:then, :assert_normalized_path_is_absolute} ->
+        assert_normalized_path_is_absolute!(ctx, args, meta)
 
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
@@ -4660,6 +4740,261 @@ defmodule Gong.BDD.Instructions.V1 do
     assert actual == decoded,
       "期望路径=#{inspect(decoded)}，实际：#{inspect(actual)}"
 
+    ctx
+  end
+
+  # ── Abort unit 实现 ──
+
+  defp abort_signal!(ctx, args, _meta) do
+    reason = Map.get(args, :reason, "user")
+    Gong.Abort.signal!(reason)
+    ctx
+  end
+
+  defp abort_check_catch!(ctx, _args, _meta) do
+    result =
+      try do
+        Gong.Abort.check!()
+        {:ok, :no_abort}
+      catch
+        {:aborted, reason} -> {:caught, reason}
+      end
+
+    Map.put(ctx, :abort_catch_result, result)
+  end
+
+  defp abort_reset!(ctx, _args, _meta) do
+    Gong.Abort.reset!()
+    ctx
+  end
+
+  defp abort_safe_execute!(ctx, args, _meta) do
+    will_abort = Map.get(args, :will_abort, "false") == "true"
+    reason = Map.get(args, :reason, "user")
+
+    result =
+      if will_abort do
+        Gong.Abort.safe_execute(fn ->
+          Gong.Abort.signal!(reason)
+          Gong.Abort.check!()
+        end)
+      else
+        Gong.Abort.safe_execute(fn -> :normal_result end)
+      end
+
+    Map.put(ctx, :safe_execute_result, result)
+  end
+
+  defp assert_abort_flag!(ctx, %{expected: expected}, _meta) do
+    actual = Gong.Abort.aborted?()
+    exp = expected == "true"
+
+    assert actual == exp,
+      "期望 aborted?=#{exp}，实际：#{actual}"
+
+    ctx
+  end
+
+  defp assert_abort_reason!(ctx, %{expected: expected}, _meta) do
+    actual = Gong.Abort.reason()
+
+    if expected == "nil" do
+      assert actual == nil,
+        "期望 reason=nil，实际：#{inspect(actual)}"
+    else
+      assert to_string(actual) == expected,
+        "期望 reason=#{expected}，实际：#{inspect(actual)}"
+    end
+
+    ctx
+  end
+
+  defp assert_abort_caught!(ctx, %{reason: expected_reason}, _meta) do
+    result = Map.fetch!(ctx, :abort_catch_result)
+
+    case result do
+      {:caught, reason} ->
+        assert to_string(reason) == expected_reason,
+          "期望 caught reason=#{expected_reason}，实际：#{inspect(reason)}"
+
+      other ->
+        flunk("期望 abort 被捕获，实际结果：#{inspect(other)}")
+    end
+
+    ctx
+  end
+
+  defp assert_safe_execute_result!(ctx, %{expected: expected} = args, _meta) do
+    result = Map.fetch!(ctx, :safe_execute_result)
+
+    case expected do
+      "aborted" ->
+        expected_reason = Map.get(args, :reason, "user")
+
+        case result do
+          {:aborted, reason} ->
+            assert to_string(reason) == expected_reason,
+              "期望 aborted reason=#{expected_reason}，实际：#{inspect(reason)}"
+
+          other ->
+            flunk("期望 {:aborted, ...}，实际：#{inspect(other)}")
+        end
+
+      "ok" ->
+        case result do
+          {:ok, _} -> :ok
+          other -> flunk("期望 {:ok, ...}，实际：#{inspect(other)}")
+        end
+    end
+
+    ctx
+  end
+
+  # ── Steering unit 补充实现 ──
+
+  defp assert_steering_message_nil!(ctx, _args, _meta) do
+    msg = Map.get(ctx, :steering_last_message)
+    assert msg == nil, "期望 steering 消息为 nil，实际：#{inspect(msg)}"
+    ctx
+  end
+
+  defp assert_steering_not_pending!(ctx, _args, _meta) do
+    queue = Map.get(ctx, :steering_queue, [])
+    refute Gong.Steering.pending?(queue), "期望 steering 队列无待处理消息"
+    ctx
+  end
+
+  defp steering_push_typed!(ctx, %{type: type, message: message}, _meta) do
+    queue = Map.get(ctx, :steering_queue, Gong.Steering.new())
+    typed_msg = {String.to_atom(type), message}
+    Map.put(ctx, :steering_queue, Gong.Steering.push(queue, typed_msg))
+  end
+
+  defp steering_check_steering!(ctx, _args, _meta) do
+    queue = Map.get(ctx, :steering_queue, Gong.Steering.new())
+    {msg, new_queue} = Gong.Steering.check_steering(queue)
+
+    ctx
+    |> Map.put(:steering_queue, new_queue)
+    |> Map.put(:steering_last_message, msg)
+  end
+
+  # ── Settings 补充实现 ──
+
+  defp assert_setting_nil!(ctx, _args, _meta) do
+    value = Map.get(ctx, :setting_last_value)
+    assert value == nil, "期望 setting 为 nil，实际：#{inspect(value)}"
+    ctx
+  end
+
+  defp list_settings!(ctx, _args, _meta) do
+    settings = Gong.Settings.list()
+    Map.put(ctx, :settings_list, settings)
+  end
+
+  defp assert_settings_list!(ctx, %{contains: key}, _meta) do
+    settings = Map.get(ctx, :settings_list, %{})
+    assert Map.has_key?(settings, key),
+      "期望设置列表包含 key=#{key}，实际 keys：#{inspect(Map.keys(settings))}"
+    ctx
+  end
+
+  defp cleanup_settings!(ctx, _args, _meta) do
+    Gong.Settings.cleanup()
+    ctx
+  end
+
+  defp get_setting_safe!(ctx, %{key: key}, _meta) do
+    value =
+      try do
+        Gong.Settings.get(key)
+      rescue
+        ArgumentError -> nil
+      catch
+        :error, _ -> nil
+      end
+
+    Map.put(ctx, :setting_last_value, value)
+  end
+
+  # ── ModelRegistry 补充实现 ──
+
+  defp get_model_string!(ctx, _args, _meta) do
+    str = Gong.ModelRegistry.current_model_string()
+    Map.put(ctx, :model_string, str)
+  end
+
+  defp list_models!(ctx, _args, _meta) do
+    models = Gong.ModelRegistry.list()
+    Map.put(ctx, :model_list, models)
+  end
+
+  defp cleanup_model_registry!(ctx, _args, _meta) do
+    Gong.ModelRegistry.cleanup()
+    ctx
+  end
+
+  defp get_model_string_safe!(ctx, _args, _meta) do
+    str =
+      try do
+        Gong.ModelRegistry.current_model_string()
+      rescue
+        _ -> "deepseek:deepseek-chat"
+      catch
+        :error, _ -> "deepseek:deepseek-chat"
+      end
+
+    Map.put(ctx, :model_string, str)
+  end
+
+  defp assert_model_string!(ctx, %{expected: expected}, _meta) do
+    actual = Map.get(ctx, :model_string)
+    assert actual == expected,
+      "期望 model_string=#{expected}，实际：#{inspect(actual)}"
+    ctx
+  end
+
+  defp assert_model_list_count!(ctx, %{expected: expected}, _meta) do
+    models = Map.get(ctx, :model_list, [])
+    actual = length(models)
+    assert actual == expected,
+      "期望 model 列表数=#{expected}，实际：#{actual}"
+    ctx
+  end
+
+  # ── Resource 补充实现 ──
+
+  defp load_resources_from_paths!(ctx, %{paths: paths_str}, _meta) do
+    paths = String.split(paths_str, ",", trim: true)
+
+    case Gong.ResourceLoader.load(paths) do
+      {:ok, resources} ->
+        ctx
+        |> Map.put(:loaded_resources, resources)
+        |> Map.put(:resource_last_error, nil)
+
+      {:error, reason} ->
+        ctx
+        |> Map.put(:loaded_resources, [])
+        |> Map.put(:resource_last_error, reason)
+    end
+  end
+
+  # ── PathUtils 补充实现 ──
+
+  defp assert_normalized_path_contains!(ctx, %{text: text}, _meta) do
+    actual = Map.get(ctx, :normalized_path)
+    assert actual != nil, "期望 normalized_path 不为 nil"
+    assert actual =~ text,
+      "期望 normalized_path 包含 #{inspect(text)}，实际：#{inspect(actual)}"
+    ctx
+  end
+
+  defp assert_normalized_path_is_absolute!(ctx, _args, _meta) do
+    actual = Map.get(ctx, :normalized_path)
+    assert actual != nil, "期望 normalized_path 不为 nil"
+    assert String.starts_with?(actual, "/"),
+      "期望 normalized_path 为绝对路径，实际：#{inspect(actual)}"
     ctx
   end
 

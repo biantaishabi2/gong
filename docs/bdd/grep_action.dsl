@@ -85,3 +85,12 @@ THEN assert_output_not_contains text="binary.bin"
 GIVEN create_temp_dir
 WHEN tool_grep pattern="test" path="nonexistent_dir"
 THEN assert_tool_error error_contains="ENOENT"
+
+# ── 5. count 模式 ──
+
+[SCENARIO: BDD-GREP-012] TITLE: count 输出模式 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="a.txt" content="hello\nhello\nworld\n"
+GIVEN create_temp_file path="b.txt" content="hello\n"
+WHEN tool_grep pattern="hello" output_mode="count"
+THEN assert_tool_success content_contains="a.txt"

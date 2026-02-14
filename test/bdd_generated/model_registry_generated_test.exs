@@ -114,4 +114,56 @@ defmodule Gong.BDD.Generated.ModelRegistryTest do
     :ok
   end
 
+  # Source: MODEL-007
+  @tag :model
+  @tag :unit
+  test "[MODEL-007] current_model_string 返回 provider:model 格式" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "MODEL-007"}
+    # line 49: GIVEN init_model_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_model_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 49, raw: "GIVEN init_model_registry"}, 49)
+    # line 50: WHEN get_model_string
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_model_string, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 50, raw: "WHEN get_model_string"}, 50)
+    # line 51: THEN assert_model_string expected="deepseek:deepseek-chat"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_model_string, %{expected: "deepseek:deepseek-chat"}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 51, raw: "THEN assert_model_string expected=\"deepseek:deepseek-chat\""}, 51)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: MODEL-008
+  @tag :model
+  @tag :unit
+  test "[MODEL-008] list 返回所有注册模型" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "MODEL-008"}
+    # line 54: GIVEN init_model_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_model_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 54, raw: "GIVEN init_model_registry"}, 54)
+    # line 55: GIVEN register_model name="alpha" provider="openai" model_id="gpt-4o" api_key_env="OPENAI_API_KEY"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :register_model, %{api_key_env: "OPENAI_API_KEY", model_id: "gpt-4o", name: "alpha", provider: "openai"}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 55, raw: "GIVEN register_model name=\"alpha\" provider=\"openai\" model_id=\"gpt-4o\" api_key_env=\"OPENAI_API_KEY\""}, 55)
+    # line 56: WHEN list_models
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :list_models, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 56, raw: "WHEN list_models"}, 56)
+    # line 57: THEN assert_model_list_count expected=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_model_list_count, %{expected: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 57, raw: "THEN assert_model_list_count expected=2"}, 57)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: MODEL-009
+  @tag :model
+  @tag :unit
+  test "[MODEL-009]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "MODEL-009"}
+    # line 60: GIVEN init_model_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_model_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 60, raw: "GIVEN init_model_registry"}, 60)
+    # line 61: WHEN cleanup_model_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cleanup_model_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 61, raw: "WHEN cleanup_model_registry"}, 61)
+    # line 62: WHEN get_model_string_safe
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_model_string_safe, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 62, raw: "WHEN get_model_string_safe"}, 62)
+    # line 63: THEN assert_model_string expected="deepseek:deepseek-chat"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_model_string, %{expected: "deepseek:deepseek-chat"}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 63, raw: "THEN assert_model_string expected=\"deepseek:deepseek-chat\""}, 63)
+    _ctx = ctx
+    :ok
+  end
+
 end

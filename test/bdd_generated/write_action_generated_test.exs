@@ -177,4 +177,44 @@ defmodule Gong.BDD.Generated.WriteActionTest do
     :ok
   end
 
+  # Source: BDD-WRITE-010
+  @tag :external_io
+  @tag :unit
+  test "[BDD-WRITE-010] 符号链接覆写" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-WRITE-010"}
+    # line 72: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 72, raw: "GIVEN create_temp_dir"}, 72)
+    # line 73: GIVEN create_temp_file path="real.txt" content="original"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "original", path: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 73, raw: "GIVEN create_temp_file path=\"real.txt\" content=\"original\""}, 73)
+    # line 74: GIVEN create_symlink link="link.txt" target="real.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_symlink, %{link: "link.txt", target: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 74, raw: "GIVEN create_symlink link=\"link.txt\" target=\"real.txt\""}, 74)
+    # line 75: WHEN tool_write path="link.txt" content="via symlink"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "via symlink", path: "link.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 75, raw: "WHEN tool_write path=\"link.txt\" content=\"via symlink\""}, 75)
+    # line 76: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 76, raw: "THEN assert_tool_success"}, 76)
+    # line 77: THEN assert_file_content path="real.txt" expected="via symlink"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_file_content, %{expected: "via symlink", path: "real.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 77, raw: "THEN assert_file_content path=\"real.txt\" expected=\"via symlink\""}, 77)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-WRITE-011
+  @tag :external_io
+  @tag :unit
+  test "[BDD-WRITE-011]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-WRITE-011"}
+    # line 80: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 80, raw: "GIVEN create_temp_dir"}, 80)
+    # line 81: WHEN tool_write path="utf8_bytes.txt" content="你好"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{content: "你好", path: "utf8_bytes.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 81, raw: "WHEN tool_write path=\"utf8_bytes.txt\" content=\"你好\""}, 81)
+    # line 82: THEN assert_tool_success
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 82, raw: "THEN assert_tool_success"}, 82)
+    # line 83: THEN assert_result_field field="bytes_written" expected="6"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{expected: "6", field: "bytes_written"}, %{file: "/home/wangbo/document/gong/docs/bdd/write_action.dsl", line: 83, raw: "THEN assert_result_field field=\"bytes_written\" expected=\"6\""}, 83)
+    _ctx = ctx
+    :ok
+  end
+
 end

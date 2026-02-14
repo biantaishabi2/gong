@@ -55,3 +55,17 @@ THEN assert_normalized_path expected="/tmp/bar"
 GIVEN create_temp_dir
 WHEN normalize_path path="/tmp/test"
 THEN assert_normalized_path expected="/tmp/test"
+
+# ══════════════════════════════════════════════
+# Group 4: PathUtils 边界补充 (2 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: PATH-003] TITLE: 波浪号展开为 home 目录 TAGS: unit tool_extra
+GIVEN create_temp_dir
+WHEN normalize_path path="~/test"
+THEN assert_normalized_path_contains text="/test"
+
+[SCENARIO: PATH-004] TITLE: 相对路径展开为绝对路径 TAGS: unit tool_extra
+GIVEN create_temp_dir
+WHEN normalize_path path="foo/bar"
+THEN assert_normalized_path_is_absolute

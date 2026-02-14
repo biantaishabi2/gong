@@ -134,3 +134,23 @@ GIVEN create_temp_dir
 GIVEN create_temp_file path="subdir/placeholder.txt" content=""
 WHEN tool_read path="subdir"
 THEN assert_tool_error error_contains="Is a directory"
+
+# ── 7. BOM 和格式检测补充 ──
+
+[SCENARIO: BDD-READ-021] TITLE: BOM 文件读取跳过 BOM TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_bom_file path="bom.txt" content="BOM content here"
+WHEN tool_read path="bom.txt"
+THEN assert_tool_success content_contains="BOM content"
+
+[SCENARIO: BDD-READ-022] TITLE: 二进制文件拒绝读取 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_binary_file path="data.bin" bytes=100
+WHEN tool_read path="data.bin"
+THEN assert_tool_error error_contains="Binary file"
+
+[SCENARIO: BDD-READ-023] TITLE: JPEG 图片检测 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_png_file path="photo.jpg"
+WHEN tool_read path="photo.jpg"
+THEN assert_read_image mime_type="image/png"

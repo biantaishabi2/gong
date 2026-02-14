@@ -133,4 +133,36 @@ defmodule Gong.BDD.Generated.ToolExtraTest do
     :ok
   end
 
+  # Source: PATH-003
+  @tag :tool_extra
+  @tag :unit
+  test "[PATH-003] 波浪号展开为 home 目录" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "PATH-003"}
+    # line 64: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_extra.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
+    # line 65: WHEN normalize_path path="~/test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :normalize_path, %{path: "~/test"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_extra.dsl", line: 65, raw: "WHEN normalize_path path=\"~/test\""}, 65)
+    # line 66: THEN assert_normalized_path_contains text="/test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_normalized_path_contains, %{text: "/test"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_extra.dsl", line: 66, raw: "THEN assert_normalized_path_contains text=\"/test\""}, 66)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: PATH-004
+  @tag :tool_extra
+  @tag :unit
+  test "[PATH-004] 相对路径展开为绝对路径" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "PATH-004"}
+    # line 69: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_extra.dsl", line: 69, raw: "GIVEN create_temp_dir"}, 69)
+    # line 70: WHEN normalize_path path="foo/bar"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :normalize_path, %{path: "foo/bar"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_extra.dsl", line: 70, raw: "WHEN normalize_path path=\"foo/bar\""}, 70)
+    # line 71: THEN assert_normalized_path_is_absolute
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_normalized_path_is_absolute, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_extra.dsl", line: 71, raw: "THEN assert_normalized_path_is_absolute"}, 71)
+    _ctx = ctx
+    :ok
+  end
+
 end

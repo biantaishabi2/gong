@@ -225,4 +225,24 @@ defmodule Gong.BDD.Generated.GrepActionTest do
     :ok
   end
 
+  # Source: BDD-GREP-012
+  @tag :external_io
+  @tag :unit
+  test "[BDD-GREP-012] count 输出模式" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-GREP-012"}
+    # line 92: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 92, raw: "GIVEN create_temp_dir"}, 92)
+    # line 93: GIVEN create_temp_file path="a.txt" content="hello\nhello\nworld\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello\\nhello\\nworld\\n", path: "a.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 93, raw: "GIVEN create_temp_file path=\"a.txt\" content=\"hello\\nhello\\nworld\\n\""}, 93)
+    # line 94: GIVEN create_temp_file path="b.txt" content="hello\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "hello\\n", path: "b.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 94, raw: "GIVEN create_temp_file path=\"b.txt\" content=\"hello\\n\""}, 94)
+    # line 95: WHEN tool_grep pattern="hello" output_mode="count"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{output_mode: "count", pattern: "hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 95, raw: "WHEN tool_grep pattern=\"hello\" output_mode=\"count\""}, 95)
+    # line 96: THEN assert_tool_success content_contains="a.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "a.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/grep_action.dsl", line: 96, raw: "THEN assert_tool_success content_contains=\"a.txt\""}, 96)
+    _ctx = ctx
+    :ok
+  end
+
 end

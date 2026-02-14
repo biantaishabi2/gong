@@ -45,4 +45,114 @@ defmodule Gong.BDD.Generated.SteeringTest do
     :ok
   end
 
+  # Source: BDD-STEER-003
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-STEER-003] 空队列 check 返回 nil" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-STEER-003"}
+    # line 21: GIVEN steering_queue_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :steering_queue_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 21, raw: "GIVEN steering_queue_empty"}, 21)
+    # line 22: WHEN steering_check
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 22, raw: "WHEN steering_check"}, 22)
+    # line 23: THEN assert_steering_message_nil
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_steering_message_nil, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 23, raw: "THEN assert_steering_message_nil"}, 23)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-STEER-004
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-STEER-004] pending? 空队列返回 false" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-STEER-004"}
+    # line 26: GIVEN steering_queue_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :steering_queue_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 26, raw: "GIVEN steering_queue_empty"}, 26)
+    # line 27: THEN assert_steering_not_pending
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_steering_not_pending, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 27, raw: "THEN assert_steering_not_pending"}, 27)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-STEER-005
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-STEER-005] 多消息 FIFO 出队" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-STEER-005"}
+    # line 30: GIVEN steering_queue_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :steering_queue_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 30, raw: "GIVEN steering_queue_empty"}, 30)
+    # line 31: WHEN steering_push message="first"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_push, %{message: "first"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 31, raw: "WHEN steering_push message=\"first\""}, 31)
+    # line 32: WHEN steering_push message="second"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_push, %{message: "second"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 32, raw: "WHEN steering_push message=\"second\""}, 32)
+    # line 33: WHEN steering_check
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 33, raw: "WHEN steering_check"}, 33)
+    # line 34: THEN assert_steering_message contains="first"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_steering_message, %{contains: "first"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 34, raw: "THEN assert_steering_message contains=\"first\""}, 34)
+    # line 35: WHEN steering_check
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 35, raw: "WHEN steering_check"}, 35)
+    # line 36: THEN assert_steering_message contains="second"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_steering_message, %{contains: "second"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 36, raw: "THEN assert_steering_message contains=\"second\""}, 36)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-STEER-006
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-STEER-006] typed steering 消息入队出队" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-STEER-006"}
+    # line 39: GIVEN steering_queue_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :steering_queue_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 39, raw: "GIVEN steering_queue_empty"}, 39)
+    # line 40: WHEN steering_push_typed type="steering" message="urgent"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_push_typed, %{message: "urgent", type: "steering"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 40, raw: "WHEN steering_push_typed type=\"steering\" message=\"urgent\""}, 40)
+    # line 41: WHEN steering_check
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 41, raw: "WHEN steering_check"}, 41)
+    # line 42: THEN assert_steering_message contains="urgent"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_steering_message, %{contains: "urgent"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 42, raw: "THEN assert_steering_message contains=\"urgent\""}, 42)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-STEER-007
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-STEER-007] check 跳过 follow_up 只取 steering" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-STEER-007"}
+    # line 45: GIVEN steering_queue_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :steering_queue_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 45, raw: "GIVEN steering_queue_empty"}, 45)
+    # line 46: WHEN steering_push_typed type="follow_up" message="later"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_push_typed, %{message: "later", type: "follow_up"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 46, raw: "WHEN steering_push_typed type=\"follow_up\" message=\"later\""}, 46)
+    # line 47: WHEN steering_push_typed type="steering" message="now"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_push_typed, %{message: "now", type: "steering"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 47, raw: "WHEN steering_push_typed type=\"steering\" message=\"now\""}, 47)
+    # line 48: WHEN steering_check
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 48, raw: "WHEN steering_check"}, 48)
+    # line 49: THEN assert_steering_message contains="now"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_steering_message, %{contains: "now"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 49, raw: "THEN assert_steering_message contains=\"now\""}, 49)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-STEER-008
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-STEER-008] check_steering 等价于 check" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-STEER-008"}
+    # line 52: GIVEN steering_queue_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :steering_queue_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 52, raw: "GIVEN steering_queue_empty"}, 52)
+    # line 53: WHEN steering_push message="via_check_steering"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_push, %{message: "via_check_steering"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 53, raw: "WHEN steering_push message=\"via_check_steering\""}, 53)
+    # line 54: WHEN steering_check_steering
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check_steering, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 54, raw: "WHEN steering_check_steering"}, 54)
+    # line 55: THEN assert_steering_message contains="via_check_steering"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_steering_message, %{contains: "via_check_steering"}, %{file: "/home/wangbo/document/gong/docs/bdd/steering.dsl", line: 55, raw: "THEN assert_steering_message contains=\"via_check_steering\""}, 55)
+    _ctx = ctx
+    :ok
+  end
+
 end

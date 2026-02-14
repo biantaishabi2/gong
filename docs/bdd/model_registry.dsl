@@ -40,3 +40,24 @@ GIVEN init_model_registry
 GIVEN register_model name="live" provider="deepseek" model_id="deepseek-chat" api_key_env="DEEPSEEK_API_KEY"
 WHEN switch_model name="live"
 THEN assert_current_model name="live"
+
+# ══════════════════════════════════════════════
+# Group 2: ModelRegistry 补全 (3 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: MODEL-007] TITLE: current_model_string 返回 provider:model 格式 TAGS: unit model
+GIVEN init_model_registry
+WHEN get_model_string
+THEN assert_model_string expected="deepseek:deepseek-chat"
+
+[SCENARIO: MODEL-008] TITLE: list 返回所有注册模型 TAGS: unit model
+GIVEN init_model_registry
+GIVEN register_model name="alpha" provider="openai" model_id="gpt-4o" api_key_env="OPENAI_API_KEY"
+WHEN list_models
+THEN assert_model_list_count expected=2
+
+[SCENARIO: MODEL-009] TITLE: cleanup 清除 ETS 表 TAGS: unit model
+GIVEN init_model_registry
+WHEN cleanup_model_registry
+WHEN get_model_string_safe
+THEN assert_model_string expected="deepseek:deepseek-chat"

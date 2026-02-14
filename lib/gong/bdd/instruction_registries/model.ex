@@ -109,6 +109,85 @@ defmodule Gong.BDD.InstructionRegistries.Model do
         async?: false,
         eventually?: false,
         assert_class: :C
+      },
+
+      # ── ModelRegistry 补充 ──
+
+      get_model_string: %{
+        name: :get_model_string,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      list_models: %{
+        name: :list_models,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      cleanup_model_registry: %{
+        name: :cleanup_model_registry,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      get_model_string_safe: %{
+        name: :get_model_string_safe,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+      assert_model_string: %{
+        name: :assert_model_string,
+        kind: :then,
+        args: %{
+          expected: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
+      },
+      assert_model_list_count: %{
+        name: :assert_model_list_count,
+        kind: :then,
+        args: %{
+          expected: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: :C
       }
     }
   end

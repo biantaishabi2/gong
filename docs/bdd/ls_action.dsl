@@ -55,3 +55,19 @@ GIVEN create_temp_dir
 GIVEN create_temp_file path="small.txt" content="abc"
 WHEN tool_ls path=""
 THEN assert_tool_success content_contains="3B"
+
+# ── 4. 边界补充 ──
+
+[SCENARIO: BDD-LS-008] TITLE: 子目录内容列表 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="sub/nested.txt" content="nested"
+WHEN tool_ls path="sub"
+THEN assert_tool_success content_contains="nested.txt"
+
+[SCENARIO: BDD-LS-009] TITLE: 符号链接显示 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="real.txt" content="target"
+GIVEN create_symlink link="link.txt" target="real.txt"
+WHEN tool_ls path=""
+THEN assert_tool_success content_contains="link.txt"
+THEN assert_output_contains text="real.txt"

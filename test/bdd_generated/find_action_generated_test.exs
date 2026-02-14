@@ -177,4 +177,22 @@ defmodule Gong.BDD.Generated.FindActionTest do
     :ok
   end
 
+  # Source: BDD-FIND-009
+  @tag :external_io
+  @tag :unit
+  test "[BDD-FIND-009] 深层嵌套查找" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-FIND-009"}
+    # line 77: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 77, raw: "GIVEN create_temp_dir"}, 77)
+    # line 78: GIVEN create_temp_file path="a/b/c/d/deep.txt" content="deep"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "deep", path: "a/b/c/d/deep.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 78, raw: "GIVEN create_temp_file path=\"a/b/c/d/deep.txt\" content=\"deep\""}, 78)
+    # line 79: WHEN tool_find pattern="**/*.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_find, %{pattern: "**/*.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 79, raw: "WHEN tool_find pattern=\"**/*.txt\""}, 79)
+    # line 80: THEN assert_tool_success content_contains="deep.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "deep.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/find_action.dsl", line: 80, raw: "THEN assert_tool_success content_contains=\"deep.txt\""}, 80)
+    _ctx = ctx
+    :ok
+  end
+
 end

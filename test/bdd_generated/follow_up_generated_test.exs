@@ -47,4 +47,66 @@ defmodule Gong.BDD.Generated.FollowUpTest do
     :ok
   end
 
+  # Source: FOLLOWUP-003
+  @tag :follow_up
+  @tag :unit
+  test "[FOLLOWUP-003] 空队列 check_follow_up 返回 nil" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "FOLLOWUP-003"}
+    # line 28: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 28, raw: "GIVEN create_temp_dir"}, 28)
+    # line 29: GIVEN steering_queue_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :steering_queue_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 29, raw: "GIVEN steering_queue_empty"}, 29)
+    # line 30: WHEN steering_check_follow_up
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check_follow_up, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 30, raw: "WHEN steering_check_follow_up"}, 30)
+    # line 31: THEN assert_follow_up_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_follow_up_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 31, raw: "THEN assert_follow_up_empty"}, 31)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: FOLLOWUP-004
+  @tag :follow_up
+  @tag :unit
+  test "[FOLLOWUP-004] 多 follow_up 消息 FIFO 出队" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "FOLLOWUP-004"}
+    # line 34: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 34, raw: "GIVEN create_temp_dir"}, 34)
+    # line 35: GIVEN inject_follow_up message="first follow up"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :inject_follow_up, %{message: "first follow up"}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 35, raw: "GIVEN inject_follow_up message=\"first follow up\""}, 35)
+    # line 36: GIVEN inject_follow_up message="second follow up"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :inject_follow_up, %{message: "second follow up"}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 36, raw: "GIVEN inject_follow_up message=\"second follow up\""}, 36)
+    # line 37: WHEN steering_check_follow_up
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check_follow_up, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 37, raw: "WHEN steering_check_follow_up"}, 37)
+    # line 38: THEN assert_follow_up_message contains="first follow up"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_follow_up_message, %{contains: "first follow up"}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 38, raw: "THEN assert_follow_up_message contains=\"first follow up\""}, 38)
+    # line 39: WHEN steering_check_follow_up
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check_follow_up, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 39, raw: "WHEN steering_check_follow_up"}, 39)
+    # line 40: THEN assert_follow_up_message contains="second follow up"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_follow_up_message, %{contains: "second follow up"}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 40, raw: "THEN assert_follow_up_message contains=\"second follow up\""}, 40)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: FOLLOWUP-005
+  @tag :follow_up
+  @tag :unit
+  test "[FOLLOWUP-005] check_follow_up 跳过 steering 消息" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "FOLLOWUP-005"}
+    # line 43: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 43, raw: "GIVEN create_temp_dir"}, 43)
+    # line 44: GIVEN push_steering_message message="steering msg"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :push_steering_message, %{message: "steering msg"}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 44, raw: "GIVEN push_steering_message message=\"steering msg\""}, 44)
+    # line 45: GIVEN inject_follow_up message="follow up msg"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :inject_follow_up, %{message: "follow up msg"}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 45, raw: "GIVEN inject_follow_up message=\"follow up msg\""}, 45)
+    # line 46: WHEN steering_check_follow_up
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :steering_check_follow_up, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 46, raw: "WHEN steering_check_follow_up"}, 46)
+    # line 47: THEN assert_follow_up_message contains="follow up msg"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_follow_up_message, %{contains: "follow up msg"}, %{file: "/home/wangbo/document/gong/docs/bdd/follow_up.dsl", line: 47, raw: "THEN assert_follow_up_message contains=\"follow up msg\""}, 47)
+    _ctx = ctx
+    :ok
+  end
+
 end

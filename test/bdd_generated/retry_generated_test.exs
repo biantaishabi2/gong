@@ -51,4 +51,88 @@ defmodule Gong.BDD.Generated.RetryTest do
     :ok
   end
 
+  # Source: BDD-RETRY-004
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-004] connection error 分类为 transient" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-004"}
+    # line 21: WHEN classify_error error="connect ECONNREFUSED 127.0.0.1:443"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :classify_error, %{error: "connect ECONNREFUSED 127.0.0.1:443"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 21, raw: "WHEN classify_error error=\"connect ECONNREFUSED 127.0.0.1:443\""}, 21)
+    # line 22: THEN assert_error_class expected="transient"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_class, %{expected: "transient"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 22, raw: "THEN assert_error_class expected=\"transient\""}, 22)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-RETRY-005
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-005] timeout 分类为 transient" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-005"}
+    # line 25: WHEN classify_error error="request timeout after 30s"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :classify_error, %{error: "request timeout after 30s"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 25, raw: "WHEN classify_error error=\"request timeout after 30s\""}, 25)
+    # line 26: THEN assert_error_class expected="transient"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_class, %{expected: "transient"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 26, raw: "THEN assert_error_class expected=\"transient\""}, 26)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-RETRY-006
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-006] 认证失败分类为 permanent" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-006"}
+    # line 29: WHEN classify_error error="Invalid API key provided"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :classify_error, %{error: "Invalid API key provided"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 29, raw: "WHEN classify_error error=\"Invalid API key provided\""}, 29)
+    # line 30: THEN assert_error_class expected="permanent"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_class, %{expected: "permanent"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 30, raw: "THEN assert_error_class expected=\"permanent\""}, 30)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-RETRY-007
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-007] should_retry transient attempt=0 返回 true" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-007"}
+    # line 33: WHEN retry_should_retry error_class="transient" attempt=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :retry_should_retry, %{attempt: 0, error_class: "transient"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 33, raw: "WHEN retry_should_retry error_class=\"transient\" attempt=0"}, 33)
+    # line 34: THEN assert_should_retry expected=true
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_should_retry, %{expected: true}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 34, raw: "THEN assert_should_retry expected=true"}, 34)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-RETRY-008
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-008] should_retry transient attempt=3 返回 false" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-008"}
+    # line 37: WHEN retry_should_retry error_class="transient" attempt=3
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :retry_should_retry, %{attempt: 3, error_class: "transient"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 37, raw: "WHEN retry_should_retry error_class=\"transient\" attempt=3"}, 37)
+    # line 38: THEN assert_should_retry expected=false
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_should_retry, %{expected: false}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 38, raw: "THEN assert_should_retry expected=false"}, 38)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-RETRY-009
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-009] should_retry permanent 返回 false" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-009"}
+    # line 41: WHEN retry_should_retry error_class="permanent" attempt=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :retry_should_retry, %{attempt: 0, error_class: "permanent"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 41, raw: "WHEN retry_should_retry error_class=\"permanent\" attempt=0"}, 41)
+    # line 42: THEN assert_should_retry expected=false
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_should_retry, %{expected: false}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 42, raw: "THEN assert_should_retry expected=false"}, 42)
+    _ctx = ctx
+    :ok
+  end
+
 end

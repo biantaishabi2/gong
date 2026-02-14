@@ -65,3 +65,19 @@ GIVEN create_temp_dir
 WHEN tool_write path="bytes.txt" content="12345"
 THEN assert_tool_success
 THEN assert_result_field field="bytes_written" expected="5"
+
+# ── 4. 安全补充 ──
+
+[SCENARIO: BDD-WRITE-010] TITLE: 符号链接覆写 TAGS: unit external_io
+GIVEN create_temp_dir
+GIVEN create_temp_file path="real.txt" content="original"
+GIVEN create_symlink link="link.txt" target="real.txt"
+WHEN tool_write path="link.txt" content="via symlink"
+THEN assert_tool_success
+THEN assert_file_content path="real.txt" expected="via symlink"
+
+[SCENARIO: BDD-WRITE-011] TITLE: UTF-8 多字节字节数计算 TAGS: unit external_io
+GIVEN create_temp_dir
+WHEN tool_write path="utf8_bytes.txt" content="你好"
+THEN assert_tool_success
+THEN assert_result_field field="bytes_written" expected="6"
