@@ -72,12 +72,10 @@ defmodule Gong.Tools.Ls do
           end
 
         {:ok,
-         %{
-           content: content <> hint,
-           entries: shown,
-           total: total,
-           truncated: truncated
-         }}
+         Gong.ToolResult.new(
+           content <> hint,
+           %{entries: shown, total: total, truncated: truncated}
+         )}
 
       {:error, reason} ->
         {:error, "#{path}: #{inspect(reason)}"}

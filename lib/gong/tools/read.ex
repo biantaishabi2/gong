@@ -112,12 +112,10 @@ defmodule Gong.Tools.Read do
         base64 = Base.encode64(data)
 
         {:ok,
-         %{
-           content: "[Image: #{mime}, #{byte_size(data)} bytes]",
-           image: %{mime_type: mime, data: base64},
-           truncated: false,
-           truncated_details: nil
-         }}
+         Gong.ToolResult.new(
+           "[Image: #{mime}, #{byte_size(data)} bytes]",
+           %{image: %{mime_type: mime, data: base64}, truncated: false, truncated_details: nil}
+         )}
 
       :not_image ->
         {:error, "#{path}: Binary file detected, cannot display as text"}
@@ -146,11 +144,10 @@ defmodule Gong.Tools.Read do
     cond do
       total_lines == 0 ->
         {:ok,
-         %{
-           content: "",
-           truncated: false,
-           truncated_details: nil
-         }}
+         Gong.ToolResult.new(
+           "",
+           %{truncated: false, truncated_details: nil}
+         )}
 
       start_line > total_lines ->
         {:error,
@@ -200,11 +197,10 @@ defmodule Gong.Tools.Read do
           end
 
         {:ok,
-         %{
-           content: final_content <> hint,
-           truncated: truncated,
-           truncated_details: details
-         }}
+         Gong.ToolResult.new(
+           final_content <> hint,
+           %{truncated: truncated, truncated_details: details}
+         )}
     end
   end
 

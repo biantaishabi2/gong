@@ -20,10 +20,10 @@ defmodule Gong.Tools.Write do
          :ok <- ensure_parent_dir(path),
          :ok <- write_file(path, params.content) do
       {:ok,
-       %{
-         file_path: path,
-         bytes_written: byte_size(params.content)
-       }}
+       Gong.ToolResult.new(
+         "File written: #{path} (#{byte_size(params.content)} bytes)",
+         %{file_path: path, bytes_written: byte_size(params.content)}
+       )}
     end
   end
 

@@ -114,13 +114,10 @@ defmodule Gong.Tools.Bash do
       timeout_sec = div(original_timeout_ms, 1000)
 
       {:ok,
-       %{
-         content: output <> "\n\nCommand timed out after #{timeout_sec} seconds",
-         exit_code: nil,
-         timed_out: true,
-         truncated: state.total_bytes > @max_output_bytes,
-         temp_file: state.temp_path
-       }}
+       Gong.ToolResult.new(
+         output <> "\n\nCommand timed out after #{timeout_sec} seconds",
+         %{exit_code: nil, timed_out: true, truncated: state.total_bytes > @max_output_bytes, temp_file: state.temp_path}
+       )}
     else
       receive do
         {^port, {:data, data}} ->
@@ -182,13 +179,10 @@ defmodule Gong.Tools.Bash do
 
   defp format_result(output, 0, state) do
     {:ok,
-     %{
-       content: output,
-       exit_code: 0,
-       timed_out: false,
-       truncated: state.total_bytes > @max_output_bytes,
-       temp_file: state.temp_path
-     }}
+     Gong.ToolResult.new(
+       output,
+       %{exit_code: 0, timed_out: false, truncated: state.total_bytes > @max_output_bytes, temp_file: state.temp_path}
+     )}
   end
 
   defp format_result(output, exit_code, state) do
@@ -200,13 +194,10 @@ defmodule Gong.Tools.Bash do
       end
 
     {:ok,
-     %{
-       content: content,
-       exit_code: exit_code,
-       timed_out: false,
-       truncated: state.total_bytes > @max_output_bytes,
-       temp_file: state.temp_path
-     }}
+     Gong.ToolResult.new(
+       content,
+       %{exit_code: exit_code, timed_out: false, truncated: state.total_bytes > @max_output_bytes, temp_file: state.temp_path}
+     )}
   end
 
   # ── 输出构建 + 截断 ──

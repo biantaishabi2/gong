@@ -47,7 +47,7 @@ defmodule Gong.Tools.Grep do
 
       {_output, 1} ->
         # rg exit 1 = no matches
-        {:ok, %{content: "No matches found.", matches: [], total: 0, truncated: false}}
+        {:ok, Gong.ToolResult.new("No matches found.", %{matches: [], total: 0, truncated: false})}
 
       {output, 2} ->
         {:error, "grep error: #{String.trim(output)}"}
@@ -96,16 +96,14 @@ defmodule Gong.Tools.Grep do
       |> Enum.take(@max_matches)
 
     {:ok,
-     %{
-       content: Enum.join(files, "\n"),
-       files: files,
-       total: length(files),
-       truncated: false
-     }}
+     Gong.ToolResult.new(
+       Enum.join(files, "\n"),
+       %{files: files, total: length(files), truncated: false}
+     )}
   end
 
   defp parse_output(output, "count") do
-    {:ok, %{content: String.trim(output), matches: [], total: 0, truncated: false}}
+    {:ok, Gong.ToolResult.new(String.trim(output), %{matches: [], total: 0, truncated: false})}
   end
 
   defp parse_output(output, "content") do
@@ -131,12 +129,10 @@ defmodule Gong.Tools.Grep do
     hint = if truncated, do: "\n[Results truncated at #{@max_matches} matches or #{@max_bytes} bytes]", else: ""
 
     {:ok,
-     %{
-       content: final_content <> hint,
-       matches: matches,
-       total: total,
-       truncated: truncated
-     }}
+     Gong.ToolResult.new(
+       final_content <> hint,
+       %{matches: matches, total: total, truncated: truncated}
+     )}
   end
 
   defp parse_json_line(line) do
@@ -193,10 +189,10 @@ defmodule Gong.Tools.Grep do
     case System.cmd("grep", args, stderr_to_stdout: true) do
       {output, 0} ->
         lines = String.split(output, "\n", trim: true) |> Enum.take(@max_matches)
-        {:ok, %{content: Enum.join(lines, "\n"), matches: [], total: length(lines), truncated: false}}
+        {:ok, Gong.ToolResult.new(Enum.join(lines, "\n"), %{matches: [], total: length(lines), truncated: false})}
 
       {_output, 1} ->
-        {:ok, %{content: "No matches found.", matches: [], total: 0, truncated: false}}
+        {:ok, Gong.ToolResult.new("No matches found.", %{matches: [], total: 0, truncated: false})}
 
       {output, _} ->
         {:error, "grep error: #{String.trim(output)}"}

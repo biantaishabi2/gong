@@ -67,12 +67,10 @@ defmodule Gong.Tools.Find do
       end
 
     {:ok,
-     %{
-       content: content <> hint,
-       files: relative,
-       total: total,
-       truncated: truncated
-     }}
+     Gong.ToolResult.new(
+       content <> hint,
+       %{files: relative, total: total, truncated: truncated}
+     )}
   end
 
   defp maybe_exclude(files, nil, _base), do: files

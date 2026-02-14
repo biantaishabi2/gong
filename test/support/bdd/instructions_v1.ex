@@ -1152,6 +1152,8 @@ defmodule Gong.BDD.Instructions.V1 do
         assert_tool_result_is_error!(ctx, args, meta)
       {:then, :assert_tool_result_not_error} ->
         assert_tool_result_not_error!(ctx, args, meta)
+      {:then, :assert_is_tool_result} ->
+        assert_is_tool_result!(ctx, args, meta)
 
       # ── PartialJson ──
       {:when, :partial_json_parse} ->
@@ -1369,16 +1371,26 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp assert_tool_success!(ctx, args, _meta) do
     result = ctx.last_result
-    assert {:ok, data} = result, "期望成功，实际：#{inspect(result)}"
+    assert {:ok, tr} = result, "期望成功，实际：#{inspect(result)}"
+
+    # 兼容 ToolResult 和普通 map
+    content = case tr do
+      %Gong.ToolResult{content: c} -> c
+      %{content: c} -> c
+    end
 
     if cc = args[:content_contains] do
-      assert data.content =~ unescape(cc),
-        "期望内容包含 #{inspect(cc)}，实际：#{String.slice(data.content, 0, 200)}"
+      assert content =~ unescape(cc),
+        "期望内容包含 #{inspect(cc)}，实际：#{String.slice(content, 0, 200)}"
     end
 
     if args[:truncated] != nil do
-      assert data.truncated == args.truncated,
-        "期望 truncated=#{args.truncated}，实际：#{data.truncated}"
+      truncated = case tr do
+        %Gong.ToolResult{details: %{truncated: t}} -> t
+        %{truncated: t} -> t
+      end
+      assert truncated == args.truncated,
+        "期望 truncated=#{args.truncated}，实际：#{truncated}"
     end
 
     ctx
@@ -1397,18 +1409,25 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp assert_tool_truncated!(ctx, args, _meta) do
     result = ctx.last_result
-    assert {:ok, data} = result
-    assert data.truncated == true, "期望 truncated=true"
+    assert {:ok, tr} = result
+
+    # 兼容 ToolResult 和普通 map
+    {truncated, truncated_details} = case tr do
+      %Gong.ToolResult{details: details} -> {details.truncated, details[:truncated_details]}
+      data -> {data.truncated, data[:truncated_details]}
+    end
+
+    assert truncated == true, "期望 truncated=true"
 
     if tb = args[:truncated_by] do
-      assert data.truncated_details != nil
-      assert to_string(data.truncated_details.truncated_by) == tb,
-        "期望 truncated_by=#{tb}，实际：#{inspect(data.truncated_details.truncated_by)}"
+      assert truncated_details != nil
+      assert to_string(truncated_details.truncated_by) == tb,
+        "期望 truncated_by=#{tb}，实际：#{inspect(truncated_details.truncated_by)}"
     end
 
     if ol = args[:original_lines] do
-      assert data.truncated_details.total_lines == ol,
-        "期望 total_lines=#{ol}，实际：#{data.truncated_details.total_lines}"
+      assert truncated_details.total_lines == ol,
+        "期望 total_lines=#{ol}，实际：#{truncated_details.total_lines}"
     end
 
     ctx
@@ -1416,17 +1435,31 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp assert_read_image!(ctx, %{mime_type: expected_mime}, _meta) do
     result = ctx.last_result
-    assert {:ok, data} = result
-    assert data[:image] != nil, "期望返回图片数据"
-    assert data.image.mime_type == expected_mime,
-      "期望 MIME=#{expected_mime}，实际：#{data.image.mime_type}"
+    assert {:ok, tr} = result
+
+    # 兼容 ToolResult 和普通 map
+    image = case tr do
+      %Gong.ToolResult{details: %{image: img}} -> img
+      %{image: img} -> img
+    end
+
+    assert image != nil, "期望返回图片数据"
+    assert image.mime_type == expected_mime,
+      "期望 MIME=#{expected_mime}，实际：#{image.mime_type}"
     ctx
   end
 
   defp assert_read_text!(ctx, _args, _meta) do
     result = ctx.last_result
-    assert {:ok, data} = result
-    assert data[:image] == nil, "期望返回文本，但收到图片数据"
+    assert {:ok, tr} = result
+
+    # 兼容 ToolResult 和普通 map
+    image = case tr do
+      %Gong.ToolResult{details: details} -> details[:image]
+      data -> data[:image]
+    end
+
+    assert image == nil, "期望返回文本，但收到图片数据"
     ctx
   end
 
@@ -1474,7 +1507,14 @@ defmodule Gong.BDD.Instructions.V1 do
   # ── 结果字段断言 ──
 
   defp assert_result_field!(ctx, %{field: field, expected: expected}, _meta) do
-    assert {:ok, data} = ctx.last_result
+    assert {:ok, tr} = ctx.last_result
+
+    # 兼容 ToolResult（从 details 查找字段）和普通 map
+    data = case tr do
+      %Gong.ToolResult{details: details} -> details || %{}
+      other -> other
+    end
+
     actual = get_nested_field(data, field)
     assert to_string(actual) == expected,
       "期望 #{field}=#{expected}，实际：#{inspect(actual)}"
@@ -1526,24 +1566,42 @@ defmodule Gong.BDD.Instructions.V1 do
   # ── Bash 特有断言 ──
 
   defp assert_exit_code!(ctx, %{expected: expected}, _meta) do
-    assert {:ok, data} = ctx.last_result
-    assert data.exit_code == expected,
-      "期望 exit_code=#{expected}，实际：#{data.exit_code}"
+    assert {:ok, tr} = ctx.last_result
+
+    exit_code = case tr do
+      %Gong.ToolResult{details: %{exit_code: c}} -> c
+      %{exit_code: c} -> c
+    end
+
+    assert exit_code == expected,
+      "期望 exit_code=#{expected}，实际：#{exit_code}"
     ctx
   end
 
   defp assert_output_contains!(ctx, %{text: text}, _meta) do
-    assert {:ok, data} = ctx.last_result
+    assert {:ok, tr} = ctx.last_result
+
+    content = case tr do
+      %Gong.ToolResult{content: c} -> c
+      %{content: c} -> c
+    end
+
     decoded = unescape(text)
-    assert data.content =~ decoded,
-      "期望输出包含 #{inspect(decoded)}，实际：#{String.slice(data.content, 0, 200)}"
+    assert content =~ decoded,
+      "期望输出包含 #{inspect(decoded)}，实际：#{String.slice(content, 0, 200)}"
     ctx
   end
 
   defp assert_output_not_contains!(ctx, %{text: text}, _meta) do
-    assert {:ok, data} = ctx.last_result
+    assert {:ok, tr} = ctx.last_result
+
+    content = case tr do
+      %Gong.ToolResult{content: c} -> c
+      %{content: c} -> c
+    end
+
     decoded = unescape(text)
-    refute data.content =~ decoded,
+    refute content =~ decoded,
       "期望输出不包含 #{inspect(decoded)}，但包含了"
     ctx
   end
@@ -5252,6 +5310,13 @@ defmodule Gong.BDD.Instructions.V1 do
     result = ctx[:tool_result]
     assert result, "no tool_result in context"
     refute result.is_error, "expected is_error=false, got true"
+    ctx
+  end
+
+  # 验证 last_result 是 ToolResult 结构体
+  defp assert_is_tool_result!(ctx, _args, _meta) do
+    assert {:ok, tr} = ctx.last_result, "期望成功结果"
+    assert %Gong.ToolResult{} = tr, "期望结果为 ToolResult 结构体，实际：#{inspect(tr)}"
     ctx
   end
 

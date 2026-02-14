@@ -55,11 +55,10 @@ defmodule Gong.Tools.Edit do
         case File.write(path, final) do
           :ok ->
             {:ok,
-             %{
-               file_path: path,
-               replacements: count,
-               diff: diff
-             }}
+             Gong.ToolResult.new(
+               "Edited: #{path} (#{count} replacements)",
+               %{file_path: path, replacements: count, diff: diff}
+             )}
 
           {:error, reason} ->
             {:error, "#{path}: Write failed (#{reason})"}
@@ -81,7 +80,10 @@ defmodule Gong.Tools.Edit do
         {:ok, new_content, changes} ->
           case File.write(path, new_content) do
             :ok ->
-              {:ok, %{file_path: path, replacements: changes, mode: "diff"}}
+              {:ok, Gong.ToolResult.new(
+                "Edited: #{path} (#{changes} replacements, diff mode)",
+                %{file_path: path, replacements: changes, mode: "diff"}
+              )}
 
             {:error, reason} ->
               {:error, "#{path}: Write failed (#{reason})"}

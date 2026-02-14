@@ -316,13 +316,18 @@ defmodule Gong.MockLLM do
             result: result
           })
 
-          # 发送 tool_result
+          # 发送 tool_result（从 ToolResult 提取 content 给 ReAct）
+          result_for_react = case result do
+            {:ok, %Gong.ToolResult{content: content}} -> {:ok, %{content: content}}
+            other -> other
+          end
+
           tool_result_instruction = %Instruction{
             action: ReAct.tool_result_action(),
             params: %{
               call_id: tc.id,
               tool_name: tool_name,
-              result: result
+              result: result_for_react
             }
           }
 

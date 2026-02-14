@@ -101,4 +101,133 @@ defmodule Gong.BDD.Generated.ToolResultTest do
     :ok
   end
 
+  # Source: TOOLRES-101
+  @tag :tool_result
+  @tag :integration
+  @tag :external_io
+  test "[TOOLRES-101] edit 返回双通道 ToolResult" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLRES-101"}
+    # line 37: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 37, raw: "GIVEN create_temp_dir"}, 37)
+    # line 38: GIVEN create_temp_file path="target.txt" content="hello world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{path: "target.txt", content: "hello world"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 38, raw: "GIVEN create_temp_file path=\"target.txt\" content=\"hello world\""}, 38)
+    # line 39: WHEN tool_edit path="target.txt" old_string="hello" new_string="hi"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_edit, %{path: "target.txt", old_string: "hello", new_string: "hi"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 39, raw: "WHEN tool_edit path=\"target.txt\" old_string=\"hello\" new_string=\"hi\""}, 39)
+    # line 40: THEN assert_is_tool_result
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_tool_result, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 40, raw: "THEN assert_is_tool_result"}, 40)
+    # line 41: THEN assert_tool_success content_contains="target.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "target.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 41, raw: "THEN assert_tool_success content_contains=\"target.txt\""}, 41)
+    # line 42: THEN assert_result_field field="replacements" expected="1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{field: "replacements", expected: "1"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 42, raw: "THEN assert_result_field field=\"replacements\" expected=\"1\""}, 42)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: TOOLRES-102
+  @tag :tool_result
+  @tag :integration
+  @tag :external_io
+  test "[TOOLRES-102] bash 返回双通道 ToolResult" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLRES-102"}
+    # line 45: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 45, raw: "GIVEN create_temp_dir"}, 45)
+    # line 46: WHEN tool_bash command="echo dual_channel_test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo dual_channel_test"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 46, raw: "WHEN tool_bash command=\"echo dual_channel_test\""}, 46)
+    # line 47: THEN assert_is_tool_result
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_tool_result, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 47, raw: "THEN assert_is_tool_result"}, 47)
+    # line 48: THEN assert_tool_success content_contains="dual_channel_test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "dual_channel_test"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 48, raw: "THEN assert_tool_success content_contains=\"dual_channel_test\""}, 48)
+    # line 49: THEN assert_exit_code expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_exit_code, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 49, raw: "THEN assert_exit_code expected=0"}, 49)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: TOOLRES-103
+  @tag :tool_result
+  @tag :integration
+  @tag :external_io
+  test "[TOOLRES-103] read 返回双通道 ToolResult" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLRES-103"}
+    # line 52: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 52, raw: "GIVEN create_temp_dir"}, 52)
+    # line 53: GIVEN create_temp_file path="sample.txt" content="line1\nline2\nline3"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{path: "sample.txt", content: "line1\\nline2\\nline3"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 53, raw: "GIVEN create_temp_file path=\"sample.txt\" content=\"line1\\nline2\\nline3\""}, 53)
+    # line 54: WHEN tool_read path="sample.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_read, %{path: "sample.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 54, raw: "WHEN tool_read path=\"sample.txt\""}, 54)
+    # line 55: THEN assert_is_tool_result
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_tool_result, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 55, raw: "THEN assert_is_tool_result"}, 55)
+    # line 56: THEN assert_tool_success content_contains="line1" truncated=false
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "line1", truncated: false}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 56, raw: "THEN assert_tool_success content_contains=\"line1\" truncated=false"}, 56)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: TOOLRES-104
+  @tag :tool_result
+  @tag :integration
+  @tag :external_io
+  test "[TOOLRES-104] write 返回双通道 ToolResult" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLRES-104"}
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 59, raw: "GIVEN create_temp_dir"}, 59)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_write, %{path: "out.txt", content: "written"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 60, raw: "WHEN tool_write path=\"out.txt\" content=\"written\""}, 60)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_tool_result, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 61, raw: "THEN assert_is_tool_result"}, 61)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "out.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 62, raw: "THEN assert_tool_success content_contains=\"out.txt\""}, 62)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_result_field, %{field: "bytes_written", expected: "7"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 63, raw: "THEN assert_result_field field=\"bytes_written\" expected=\"7\""}, 63)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: TOOLRES-105
+  @tag :tool_result
+  @tag :integration
+  @tag :external_io
+  test "[TOOLRES-105] grep 返回双通道 ToolResult" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLRES-105"}
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 66, raw: "GIVEN create_temp_dir"}, 66)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{path: "grep_target.txt", content: "alpha\\nbeta\\ngamma"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 67, raw: "GIVEN create_temp_file path=\"grep_target.txt\" content=\"alpha\\nbeta\\ngamma\""}, 67)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_grep, %{pattern: "beta", path: "grep_target.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 68, raw: "WHEN tool_grep pattern=\"beta\" path=\"grep_target.txt\""}, 68)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_tool_result, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 69, raw: "THEN assert_is_tool_result"}, 69)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "beta"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 70, raw: "THEN assert_tool_success content_contains=\"beta\""}, 70)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: TOOLRES-106
+  @tag :tool_result
+  @tag :integration
+  @tag :external_io
+  test "[TOOLRES-106] find 返回双通道 ToolResult" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLRES-106"}
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 73, raw: "GIVEN create_temp_dir"}, 73)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{path: "findme.txt", content: "x"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 74, raw: "GIVEN create_temp_file path=\"findme.txt\" content=\"x\""}, 74)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_find, %{pattern: "findme.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 75, raw: "WHEN tool_find pattern=\"findme.txt\""}, 75)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_tool_result, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 76, raw: "THEN assert_is_tool_result"}, 76)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "findme.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 77, raw: "THEN assert_tool_success content_contains=\"findme.txt\""}, 77)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: TOOLRES-107
+  @tag :tool_result
+  @tag :integration
+  @tag :external_io
+  test "[TOOLRES-107] ls 返回双通道 ToolResult" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLRES-107"}
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 80, raw: "GIVEN create_temp_dir"}, 80)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{path: "visible.txt", content: "y"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 81, raw: "GIVEN create_temp_file path=\"visible.txt\" content=\"y\""}, 81)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_ls, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 82, raw: "WHEN tool_ls"}, 82)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_tool_result, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 83, raw: "THEN assert_is_tool_result"}, 83)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "visible.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_result.dsl", line: 84, raw: "THEN assert_tool_success content_contains=\"visible.txt\""}, 84)
+    _ctx = ctx
+    :ok
+  end
+
 end
