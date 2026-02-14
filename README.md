@@ -1,5 +1,7 @@
 # Gong (工)
 
+[![CI](https://github.com/biantaishabi2/gong/actions/workflows/ci.yml/badge.svg)](https://github.com/biantaishabi2/gong/actions/workflows/ci.yml)
+
 通用 Agent 引擎 — 基于 Elixir/OTP 的自主编码代理框架。
 
 ## 项目背景
@@ -59,7 +61,7 @@ bddc compile
 mix test test/bdd_generated/
 ```
 
-当前覆盖 **245+ 测试场景**，包括：
+当前覆盖 **439 测试场景**，包括：
 - 工具单元测试（read / write / edit / bash / grep / find / ls）
 - Hook 系统测试（拦截 / 变换 / 崩溃容错 / 超时保护）
 - Agent 集成测试（mock LLM 驱动的完整 ReAct 循环）
