@@ -38,6 +38,9 @@ defmodule Gong.BDD.InstructionRegistry do
     |> merge_specs!(Gong.BDD.InstructionRegistries.RPC.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.Auth.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.CrossProvider.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.ToolConfig.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.ToolResult.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.PartialJson.specs(:v1))
   end
 
   def specs(:v2), do: specs(:v1)

@@ -1107,6 +1107,66 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_normalized_path_is_absolute} ->
         assert_normalized_path_is_absolute!(ctx, args, meta)
 
+      # ── ToolConfig ──
+      {:given, :init_tool_config} ->
+        init_tool_config!(ctx, args, meta)
+      {:when, :get_active_tools} ->
+        get_active_tools!(ctx, args, meta)
+      {:when, :get_preset} ->
+        get_preset!(ctx, args, meta)
+      {:when, :set_active_tools} ->
+        set_active_tools!(ctx, args, meta)
+      {:when, :set_active_tools_safe} ->
+        set_active_tools_safe!(ctx, args, meta)
+      {:when, :validate_tools} ->
+        validate_tools!(ctx, args, meta)
+      {:then, :assert_active_tool_count} ->
+        assert_active_tool_count!(ctx, args, meta)
+      {:then, :assert_active_tool_contains} ->
+        assert_active_tool_contains!(ctx, args, meta)
+      {:then, :assert_preset_contains} ->
+        assert_preset_contains!(ctx, args, meta)
+      {:then, :assert_preset_not_contains} ->
+        assert_preset_not_contains!(ctx, args, meta)
+      {:then, :assert_preset_count} ->
+        assert_preset_count!(ctx, args, meta)
+      {:then, :assert_tool_config_error} ->
+        assert_tool_config_error!(ctx, args, meta)
+
+      # ── ToolResult ──
+      {:when, :tool_result_from_text} ->
+        tool_result_from_text!(ctx, args, meta)
+      {:when, :tool_result_new} ->
+        tool_result_new!(ctx, args, meta)
+      {:when, :tool_result_error} ->
+        tool_result_error!(ctx, args, meta)
+      {:then, :assert_tool_result_content} ->
+        assert_tool_result_content!(ctx, args, meta)
+      {:then, :assert_tool_result_details_nil} ->
+        assert_tool_result_details_nil!(ctx, args, meta)
+      {:then, :assert_tool_result_has_details} ->
+        assert_tool_result_has_details!(ctx, args, meta)
+      {:then, :assert_tool_result_details_value} ->
+        assert_tool_result_details_value!(ctx, args, meta)
+      {:then, :assert_tool_result_is_error} ->
+        assert_tool_result_is_error!(ctx, args, meta)
+      {:then, :assert_tool_result_not_error} ->
+        assert_tool_result_not_error!(ctx, args, meta)
+
+      # ── PartialJson ──
+      {:when, :partial_json_parse} ->
+        partial_json_parse!(ctx, args, meta)
+      {:when, :partial_json_accumulate} ->
+        partial_json_accumulate!(ctx, args, meta)
+      {:then, :assert_partial_json_ok} ->
+        assert_partial_json_ok!(ctx, args, meta)
+      {:then, :assert_partial_json_field} ->
+        assert_partial_json_field!(ctx, args, meta)
+      {:then, :assert_partial_json_has_key} ->
+        assert_partial_json_has_key!(ctx, args, meta)
+      {:then, :assert_partial_json_empty} ->
+        assert_partial_json_empty!(ctx, args, meta)
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -5012,5 +5072,241 @@ defmodule Gong.BDD.Instructions.V1 do
 
     IO.puts("错误: #{Exception.message(error)}")
     IO.puts("=== 诊断结束 ===\n")
+  end
+
+  # ══════════════════════════════════════════════════════════════
+  # ToolConfig 实现
+  # ══════════════════════════════════════════════════════════════
+
+  defp init_tool_config!(ctx, _args, _meta) do
+    Gong.ToolConfig.init()
+    ctx
+  end
+
+  defp get_active_tools!(ctx, _args, _meta) do
+    tools = Gong.ToolConfig.active_tools()
+    Map.put(ctx, :tool_config_active, tools)
+  end
+
+  defp get_preset!(ctx, args, _meta) do
+    name = String.to_atom(args.name)
+    {:ok, tools} = Gong.ToolConfig.preset(name)
+    Map.put(ctx, :tool_config_preset, tools)
+  end
+
+  defp set_active_tools!(ctx, args, _meta) do
+    tools =
+      args.tools
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.map(&String.to_atom/1)
+
+    :ok = Gong.ToolConfig.set_active_tools(tools)
+    updated = Gong.ToolConfig.active_tools()
+    Map.put(ctx, :tool_config_active, updated)
+  end
+
+  defp set_active_tools_safe!(ctx, args, _meta) do
+    tools =
+      if args.tools == "" do
+        []
+      else
+        args.tools
+        |> String.split(",")
+        |> Enum.map(&String.trim/1)
+        |> Enum.map(&String.to_atom/1)
+      end
+
+    case Gong.ToolConfig.set_active_tools(tools) do
+      :ok ->
+        Map.put(ctx, :tool_config_error, nil)
+
+      {:error, msg} ->
+        Map.put(ctx, :tool_config_error, msg)
+    end
+  end
+
+  defp validate_tools!(ctx, args, _meta) do
+    tools =
+      args.tools
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.map(&String.to_atom/1)
+
+    case Gong.ToolConfig.validate(tools) do
+      :ok ->
+        Map.put(ctx, :tool_config_error, nil)
+
+      {:error, msg} ->
+        Map.put(ctx, :tool_config_error, msg)
+    end
+  end
+
+  defp assert_active_tool_count!(ctx, args, _meta) do
+    expected = if is_binary(args.expected), do: String.to_integer(args.expected), else: args.expected
+    tools = ctx[:tool_config_active] || Gong.ToolConfig.active_tools()
+    assert length(tools) == expected, "expected #{expected} active tools, got #{length(tools)}"
+    ctx
+  end
+
+  defp assert_active_tool_contains!(ctx, args, _meta) do
+    tool = String.to_atom(args.tool)
+    tools = ctx[:tool_config_active] || Gong.ToolConfig.active_tools()
+    assert tool in tools, "expected #{tool} in active tools: #{inspect(tools)}"
+    ctx
+  end
+
+  defp assert_preset_contains!(ctx, args, _meta) do
+    tool = String.to_atom(args.tool)
+    preset = ctx[:tool_config_preset]
+    assert preset, "no preset loaded in context"
+    assert tool in preset, "expected #{tool} in preset: #{inspect(preset)}"
+    ctx
+  end
+
+  defp assert_preset_not_contains!(ctx, args, _meta) do
+    tool = String.to_atom(args.tool)
+    preset = ctx[:tool_config_preset]
+    assert preset, "no preset loaded in context"
+    refute tool in preset, "expected #{tool} NOT in preset: #{inspect(preset)}"
+    ctx
+  end
+
+  defp assert_preset_count!(ctx, args, _meta) do
+    expected = if is_binary(args.expected), do: String.to_integer(args.expected), else: args.expected
+    preset = ctx[:tool_config_preset]
+    assert preset, "no preset loaded in context"
+    assert length(preset) == expected, "expected #{expected} tools in preset, got #{length(preset)}"
+    ctx
+  end
+
+  defp assert_tool_config_error!(ctx, args, _meta) do
+    error = ctx[:tool_config_error]
+    assert error, "expected tool config error but got none"
+    assert String.contains?(error, args.contains), "expected error to contain '#{args.contains}', got: #{error}"
+    ctx
+  end
+
+  # ══════════════════════════════════════════════════════════════
+  # ToolResult 实现
+  # ══════════════════════════════════════════════════════════════
+
+  defp tool_result_from_text!(ctx, args, _meta) do
+    result = Gong.ToolResult.from_text(args.text)
+    Map.put(ctx, :tool_result, result)
+  end
+
+  defp tool_result_new!(ctx, args, _meta) do
+    details = %{args.details_key => args.details_value}
+    result = Gong.ToolResult.new(args.content, details)
+    Map.put(ctx, :tool_result, result)
+  end
+
+  defp tool_result_error!(ctx, args, _meta) do
+    result = Gong.ToolResult.error(args.content)
+    Map.put(ctx, :tool_result, result)
+  end
+
+  defp assert_tool_result_content!(ctx, args, _meta) do
+    result = ctx[:tool_result]
+    assert result, "no tool_result in context"
+    assert String.contains?(result.content, args.contains),
+      "expected content to contain '#{args.contains}', got: #{result.content}"
+    ctx
+  end
+
+  defp assert_tool_result_details_nil!(ctx, _args, _meta) do
+    result = ctx[:tool_result]
+    assert result, "no tool_result in context"
+    assert is_nil(result.details), "expected details to be nil, got: #{inspect(result.details)}"
+    ctx
+  end
+
+  defp assert_tool_result_has_details!(ctx, args, _meta) do
+    result = ctx[:tool_result]
+    assert result, "no tool_result in context"
+    assert result.details, "details is nil"
+    assert Map.has_key?(result.details, args.key),
+      "expected details to have key '#{args.key}', got: #{inspect(Map.keys(result.details))}"
+    ctx
+  end
+
+  defp assert_tool_result_details_value!(ctx, args, _meta) do
+    result = ctx[:tool_result]
+    assert result, "no tool_result in context"
+    assert result.details, "details is nil"
+    actual = Map.get(result.details, args.key)
+    assert to_string(actual) == args.expected,
+      "expected details[#{args.key}] to be '#{args.expected}', got: #{inspect(actual)}"
+    ctx
+  end
+
+  defp assert_tool_result_is_error!(ctx, _args, _meta) do
+    result = ctx[:tool_result]
+    assert result, "no tool_result in context"
+    assert result.is_error, "expected is_error=true, got false"
+    ctx
+  end
+
+  defp assert_tool_result_not_error!(ctx, _args, _meta) do
+    result = ctx[:tool_result]
+    assert result, "no tool_result in context"
+    refute result.is_error, "expected is_error=false, got true"
+    ctx
+  end
+
+  # ══════════════════════════════════════════════════════════════
+  # PartialJson 实现
+  # ══════════════════════════════════════════════════════════════
+
+  defp partial_json_parse!(ctx, args, _meta) do
+    # bddc 保留 DSL 中的 \" 转义，这里还原为实际双引号
+    input = String.replace(args.input, "\\\"", "\"")
+    result = Gong.PartialJson.parse(input)
+    Map.put(ctx, :partial_json_result, result)
+  end
+
+  defp partial_json_accumulate!(ctx, args, _meta) do
+    # DSL 中用 % 代替双引号避免解析冲突，这里替换回来
+    c1 = String.replace(args.chunk1, "%", "\"")
+    c2 = String.replace(args.chunk2, "%", "\"")
+    c3 = String.replace(args.chunk3, "%", "\"")
+    {buf1, _} = Gong.PartialJson.accumulate("", c1)
+    {buf2, _} = Gong.PartialJson.accumulate(buf1, c2)
+    {_buf3, result} = Gong.PartialJson.accumulate(buf2, c3)
+    Map.put(ctx, :partial_json_result, {:ok, result})
+  end
+
+  defp assert_partial_json_ok!(ctx, _args, _meta) do
+    result = ctx[:partial_json_result]
+    assert match?({:ok, _}, result), "expected {:ok, _}, got: #{inspect(result)}"
+    ctx
+  end
+
+  defp assert_partial_json_field!(ctx, args, _meta) do
+    {_, map} = ctx[:partial_json_result]
+    actual = Map.get(map, args.key)
+    assert to_string(actual) == args.expected,
+      "expected field '#{args.key}' to be '#{args.expected}', got: #{inspect(actual)}"
+    ctx
+  end
+
+  defp assert_partial_json_has_key!(ctx, args, _meta) do
+    result = ctx[:partial_json_result]
+    map = case result do
+      {:ok, m} -> m
+      {:partial, m} -> m
+      _ -> %{}
+    end
+    assert Map.has_key?(map, args.key),
+      "expected result to have key '#{args.key}', got: #{inspect(Map.keys(map))}"
+    ctx
+  end
+
+  defp assert_partial_json_empty!(ctx, _args, _meta) do
+    result = ctx[:partial_json_result]
+    assert match?({:ok, m} when m == %{}, result),
+      "expected {:ok, %{}}, got: #{inspect(result)}"
+    ctx
   end
 end
