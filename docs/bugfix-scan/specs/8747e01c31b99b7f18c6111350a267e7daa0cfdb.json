@@ -1,0 +1,48 @@
+{
+  "source_commit": "8747e01c31b99b7f18c6111350a267e7daa0cfdb",
+  "bug_summary": "REPL 异常路径先 console.error 又返回错误文本，导致错误信息重复显示；且缺少返回值展示",
+  "module": "sandboxed_iframe",
+  "action": "executeJavaScript",
+  "fix_summary": "移除 sandbox 中的 console.error 调用避免重复；REPL 工具中增加 returnValue 展示逻辑",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "错误时控制台和返回结果都输出错误信息；成功时不显示返回值",
+  "correct_behavior": "错误仅通过返回结果展示一次；成功时附加 => returnValue 显示",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "REPL sandbox 已初始化",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "sandboxed_iframe",
+      "method": "executeJavaScript"
+    },
+    "args": {
+      "code": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "output": "string",
+      "returnValue": "any"
+    },
+    "assertions": [
+      {
+        "what": "错误仅出现一次",
+        "type": "return_value",
+        "expected": "output 中错误消息不重复"
+      },
+      {
+        "what": "成功时包含返回值",
+        "type": "return_value",
+        "expected": "output.includes('=> ' + returnValue)"
+      }
+    ]
+  }
+}

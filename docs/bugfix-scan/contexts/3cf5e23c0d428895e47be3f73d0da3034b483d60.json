@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex a49fb757..cc5b9863 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -359,6 +359,9 @@ export class InteractiveMode {\n \t\t\tfdPath,\n \t\t);\n \t\tthis.defaultEditor.setAutocompleteProvider(this.autocompleteProvider);\n+\t\tif (this.editor !== this.defaultEditor) {\n+\t\t\tthis.editor.setAutocompleteProvider?.(this.autocompleteProvider);\n+\t\t}\n \t}\n \n \tasync init(): Promise<void> {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3cf5e23c0d428895e47be3f73d0da3034b483d60",
+  "message": "fix(coding-agent): propagate autocomplete to custom editors (#1372)",
+  "module": "interactive-mode",
+  "tags": []
+}

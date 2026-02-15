@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 106ffe70..48674319 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -104,6 +104,7 @@ import {\n \tgetThemeByName,\n \tinitTheme,\n \tonThemeChange,\n+\tsetRegisteredThemes,\n \tsetTheme,\n \tsetThemeInstance,\n \tTheme,\n@@ -268,7 +269,8 @@ export class InteractiveMode {\n \t\t// Load hide thinking block setting\n \t\tthis.hideThinkingBlock = this.settingsManager.getHideThinkingBlock();\n \n-\t\t// Initialize theme with watcher for interactive mode\n+\t\t// Register themes from resource loader and initialize\n+\t\tsetRegisteredThemes(this.session.resourceLoader.getThemes().themes);\n \t\tinitTheme(this.settingsManager.getTheme(), true);\n \t}\n \n@@ -3353,6 +3355,7 @@ export class InteractiveMode {\n \n \t\ttry {\n \t\t\tawait this.session.reload();\n+\t\t\tsetRegisteredThemes(this.session.resourceLoader.getThemes().themes);\n \t\t\tthis.rebuildAutocomplete();\n \t\t\tconst runner = this.session.extensionRunner;\n \t\t\tif (runner) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "75eb841bb214a8880daf8e8dd9133d2b62f7b09d",
+  "message": "fix(coding-agent): register themes from resource loader",
+  "module": "interactive-mode",
+  "tags": []
+}

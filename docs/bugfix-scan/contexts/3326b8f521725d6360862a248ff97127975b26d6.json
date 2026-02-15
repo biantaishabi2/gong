@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/main.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/main.ts b/packages/coding-agent/src/main.ts\nindex 8b5860b7..cd6d88ec 100644\n--- a/packages/coding-agent/src/main.ts\n+++ b/packages/coding-agent/src/main.ts\n@@ -304,7 +304,7 @@ function buildSessionOptions(\n \t}\n \n \t// Pre-loaded extensions (from early CLI flag discovery)\n-\tif (extensionsResult && extensionsResult.extensions.length > 0) {\n+\tif (extensionsResult) {\n \t\toptions.preloadedExtensions = extensionsResult;\n \t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3326b8f521725d6360862a248ff97127975b26d6",
+  "message": "Fix --no-extensions flag not preventing extension discovery",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

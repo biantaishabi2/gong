@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/anthropic.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/anthropic.ts b/packages/ai/src/providers/anthropic.ts\nindex dbaaa879..1edb726f 100644\n--- a/packages/ai/src/providers/anthropic.ts\n+++ b/packages/ai/src/providers/anthropic.ts\n@@ -302,7 +302,6 @@ function createClient(\n \t\t\tbaseURL: model.baseUrl,\n \t\t\tdefaultHeaders,\n \t\t\tdangerouslyAllowBrowser: true,\n-\t\t\tmaxRetries: 0, // Disable SDK retries, handled by coding-agent\n \t\t});\n \n \t\treturn { client, isOAuthToken: true };\n@@ -319,7 +318,6 @@ function createClient(\n \t\t\tbaseURL: model.baseUrl,\n \t\t\tdangerouslyAllowBrowser: true,\n \t\t\tdefaultHeaders,\n-\t\t\tmaxRetries: 0, // Disable SDK retries, handled by coding-agent\n \t\t});\n \n \t\treturn { client, isOAuthToken: false };\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "0fc6689dfbed8eb0105d29bbdd7cccca2c6a34be",
+  "message": "fix(ai): re-enable SDK retries for Anthropic provider",
+  "module": "anthropic",
+  "tags": []
+}

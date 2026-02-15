@@ -1,0 +1,50 @@
+{
+  "action": "start",
+  "boundary": "service",
+  "bug_summary": "恢复会话时初始化顺序错误，导致消息先渲染而资源后显示",
+  "correct_behavior": "恢复会话时先显示已加载资源，再渲染初始消息",
+  "data_dependencies": [
+    "session",
+    "config"
+  ],
+  "fix_summary": "将 initExtensions() 提前到 renderInitialMessages() 之前执行，确保资源先显示再渲染初始消息",
+  "module": "interactive-mode",
+  "source_commit": "d1e33599f6cb23ae993ba17313b50ce757b410f8",
+  "test_spec": {
+    "args": {},
+    "assertions": [
+      {
+        "expected": "initExtensions < renderInitialMessages",
+        "type": "event_order",
+        "what": "start 执行时先完成 initExtensions 再执行 renderInitialMessages"
+      },
+      {
+        "expected": "resources_visible=true before initial_messages_rendered=true",
+        "type": "ui_state",
+        "what": "初始消息渲染前资源区已可见"
+      }
+    ],
+    "outputs": {
+      "initial_messages_rendered": "bool",
+      "render_order": "array",
+      "resources_visible": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "session",
+        "what": "会话处于恢复模式且存在可恢复的历史消息"
+      },
+      {
+        "involves": "config",
+        "what": "至少一个扩展在初始化后会暴露资源项"
+      }
+    ],
+    "trigger": {
+      "method": "start",
+      "target": "InteractiveMode",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "恢复会话时先渲染初始消息，资源随后才出现"
+}

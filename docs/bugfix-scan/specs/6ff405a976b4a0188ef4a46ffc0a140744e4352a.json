@@ -1,0 +1,49 @@
+{
+  "source_commit": "6ff405a976b4a0188ef4a46ffc0a140744e4352a",
+  "bug_summary": "自定义 baseUrl 已包含版本路径时，Google provider 仍追加 apiVersion，导致 URL 出现双重版本路径",
+  "module": "google",
+  "action": "createGoogleClient",
+  "fix_summary": "检测 baseUrl 是否包含版本路径，若包含则设置 apiVersion 为空字符串禁用追加",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "baseUrl='https://api.example.com/v1beta' 请求时 URL 变为 .../v1beta/v1beta/...",
+  "correct_behavior": "检测到 baseUrl 含版本路径后禁用 apiVersion 追加，URL 仅含一个版本路径",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Google 模型配置了包含版本路径的自定义 baseUrl",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "google",
+      "method": "createGoogleClient"
+    },
+    "args": {
+      "baseUrl": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "httpOptions": "object"
+    },
+    "assertions": [
+      {
+        "what": "含版本路径的 baseUrl 设置 apiVersion 为空",
+        "type": "return_value",
+        "expected": "httpOptions.apiVersion === '' when baseUrl contains version"
+      },
+      {
+        "what": "普通 baseUrl 不影响 apiVersion",
+        "type": "return_value",
+        "expected": "httpOptions.apiVersion undefined when baseUrl has no version"
+      }
+    ]
+  }
+}

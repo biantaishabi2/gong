@@ -1,0 +1,44 @@
+{
+  "source_commit": "da43e625f805a287bab553b9bfcc1114ecbddd7f",
+  "bug_summary": "Anthropic 客户端初始化未传 dangerouslyAllowBrowser，浏览器环境下行为异常",
+  "module": "anthropic",
+  "action": "createClient",
+  "fix_summary": "为所有 Anthropic 客户端实例添加 dangerouslyAllowBrowser: true 参数",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "浏览器环境下客户端因缺少 dangerouslyAllowBrowser 标志而异常",
+  "correct_behavior": "客户端配置包含 dangerouslyAllowBrowser: true，浏览器环境正常工作",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "在浏览器环境初始化 Anthropic 客户端",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "anthropic",
+      "method": "createClient"
+    },
+    "args": {
+      "apiKey": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "client": "object"
+    },
+    "assertions": [
+      {
+        "what": "包含 dangerouslyAllowBrowser",
+        "type": "return_value",
+        "expected": "client config includes dangerouslyAllowBrowser: true"
+      }
+    ]
+  }
+}

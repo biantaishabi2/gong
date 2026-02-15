@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/gemini.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/gemini.ts b/packages/ai/src/providers/gemini.ts\nindex dbe26a41..6f9c705a 100644\n--- a/packages/ai/src/providers/gemini.ts\n+++ b/packages/ai/src/providers/gemini.ts\n@@ -63,11 +63,9 @@ export class GeminiLLM implements LLM<GeminiLLMOptions> {\n \n \t\t\t// Add thinking configuration if enabled\n \t\t\tif (options?.thinking?.enabled && this.supportsThinking()) {\n-\t\t\t\tconfig.config = {\n-\t\t\t\t\tthinkingConfig: {\n-\t\t\t\t\t\tincludeThoughts: true,\n-\t\t\t\t\t\tthinkingBudget: options.thinking.budgetTokens ?? -1, // Default to dynamic\n-\t\t\t\t\t},\n+\t\t\t\tconfig.thinkingConfig = {\n+\t\t\t\t\tincludeThoughts: true,\n+\t\t\t\t\tthinkingBudget: options.thinking.budgetTokens ?? -1, // Default to dynamic\n \t\t\t\t};\n \t\t\t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "289e60ab88da50039b8df256226d86d0edd96bee",
+  "message": "fix(ai): Correct Gemini thinking config structure",
+  "module": "gemini",
+  "tags": []
+}

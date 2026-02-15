@@ -1,0 +1,36 @@
+{
+  "source_commit": "b49ac57d59578a112bb766bebb3c16ee81ba785e",
+  "bug_summary": "changelog 渲染在 DynamicBorder 后额外插入 Spacer(1)，界面出现多余空行",
+  "module": "tui-renderer",
+  "action": "renderChangelog",
+  "fix_summary": "移除 changelog DynamicBorder 后的 Spacer(1) 添加",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "changelog 与聊天容器之间有多余的一行空白",
+  "correct_behavior": "changelog DynamicBorder 后直接是聊天容器，无额外间距",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "渲染器有非空 changelog 内容",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tui-renderer",
+      "method": "renderChangelog"
+    },
+    "args": {},
+    "outputs": {
+      "ui_tree": "object"
+    },
+    "assertions": [
+      {
+        "what": "DynamicBorder 后无 Spacer",
+        "type": "return_value",
+        "expected": "no Spacer(1) after DynamicBorder in changelog branch"
+      }
+    ]
+  }
+}

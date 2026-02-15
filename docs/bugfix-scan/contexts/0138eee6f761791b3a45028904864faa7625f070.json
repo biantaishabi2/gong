@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/anthropic.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/anthropic.ts b/packages/ai/src/providers/anthropic.ts\nindex d40224f2..7def6efa 100644\n--- a/packages/ai/src/providers/anthropic.ts\n+++ b/packages/ai/src/providers/anthropic.ts\n@@ -39,7 +39,7 @@ const claudeCodeToolNames: Record<string, string> = {\n \tbash: \"Bash\",\n \tgrep: \"Grep\",\n \tfind: \"Glob\",\n-\tls: \"Glob\",\n+\tls: \"Ls\",\n };\n \n const toClaudeCodeName = (name: string) => claudeCodeToolNames[name] || name;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "0138eee6f761791b3a45028904864faa7625f070",
+  "message": "Fix tool mapping",
+  "module": "anthropic",
+  "tags": []
+}

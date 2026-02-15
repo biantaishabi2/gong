@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 8171ee7f..bf95009b 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -920,6 +920,12 @@ export class InteractiveMode {\n \t\tthis.footer.invalidate();\n \t\tthis.setCustomEditorComponent(undefined);\n \t\tthis.defaultEditor.onExtensionShortcut = undefined;\n+\t\tthis.updateTerminalTitle();\n+\t\tif (this.loadingAnimation) {\n+\t\t\tthis.loadingAnimation.setMessage(\n+\t\t\t\t`${this.defaultWorkingMessage} (${appKey(this.keybindings, \"interrupt\")} to interrupt)`,\n+\t\t\t);\n+\t\t}\n \t}\n \n \t// Maximum total widget lines to prevent viewport overflow\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "7d2255ddc2a6a7cd4202a4b3aae4d29ed8271c9f",
+  "message": "fix(coding-agent): reset terminal title and working message in resetExtensionUI",
+  "module": "interactive-mode",
+  "tags": []
+}

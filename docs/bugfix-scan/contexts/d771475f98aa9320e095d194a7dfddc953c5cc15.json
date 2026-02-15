@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/tui-renderer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/tui-renderer.ts b/packages/coding-agent/src/tui/tui-renderer.ts\nindex ec5cfe87..30afb97e 100644\n--- a/packages/coding-agent/src/tui/tui-renderer.ts\n+++ b/packages/coding-agent/src/tui/tui-renderer.ts\n@@ -197,7 +197,6 @@ export class TuiRenderer {\n \t\t\t\t\t0,\n \t\t\t\t),\n \t\t\t);\n-\t\t\tthis.ui.addChild(new Spacer(1));\n \t\t\tthis.ui.addChild(new DynamicBorder(chalk.yellow));\n \t\t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d771475f98aa9320e095d194a7dfddc953c5cc15",
+  "message": "Fix superfluous newline in update notification",
+  "module": "package",
+  "tags": []
+}

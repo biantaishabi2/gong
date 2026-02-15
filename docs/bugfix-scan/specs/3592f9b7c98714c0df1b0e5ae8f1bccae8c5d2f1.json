@@ -1,0 +1,49 @@
+{
+  "source_commit": "3592f9b7c98714c0df1b0e5ae8f1bccae8c5d2f1",
+  "bug_summary": "模型模糊搜索只匹配 id 字段，输入 provider 名称（如 'anthropic opus'）无法命中",
+  "module": "model-selector",
+  "action": "fuzzy_search",
+  "fix_summary": "fuzzyFilter 的匹配键从 id 改为 provider + ' ' + id，支持 provider+id 组合搜索",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "输入 'anthropic' 无法过滤出 Anthropic 的模型",
+  "correct_behavior": "输入 'anthropic opus' 可匹配 provider=anthropic, id=opus 的模型",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "模型列表包含多个 provider 的模型",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "model-selector",
+      "method": "filterModels"
+    },
+    "args": {
+      "query": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "filteredModels": "array"
+    },
+    "assertions": [
+      {
+        "what": "按 provider 名搜索能命中",
+        "type": "return_value",
+        "expected": "query='anthropic' 返回所有 Anthropic 模型"
+      },
+      {
+        "what": "provider+id 组合搜索能命中",
+        "type": "return_value",
+        "expected": "query='anthropic opus' 精确命中目标模型"
+      }
+    ]
+  }
+}

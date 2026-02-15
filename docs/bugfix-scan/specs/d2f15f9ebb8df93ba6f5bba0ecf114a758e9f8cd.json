@@ -1,0 +1,43 @@
+{
+  "source_commit": "d2f15f9ebb8df93ba6f5bba0ecf114a758e9f8cd",
+  "bug_summary": "Bun 二进制安装(mise)扁平目录下 theme 子目录不存在，主题加载路径错误",
+  "module": "config",
+  "action": "getThemesDir",
+  "fix_summary": "检查 theme 子目录是否存在，不存在时回退到 execDir（mise 扁平结构）",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "固定返回 execDir/theme，mise 安装下该目录不存在导致主题加载失败",
+  "correct_behavior": "theme 目录不存在时回退到 execDir，兼容 mise 扁平结构",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "execDir/theme 目录不存在（mise 扁平安装）",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "config",
+      "method": "getThemesDir"
+    },
+    "args": {},
+    "outputs": {
+      "path": "string"
+    },
+    "assertions": [
+      {
+        "what": "theme 目录不存在时回退 execDir",
+        "type": "return_value",
+        "expected": "path === execDir when theme/ missing"
+      },
+      {
+        "what": "theme 目录存在时正常返回",
+        "type": "return_value",
+        "expected": "path === execDir/theme when exists"
+      }
+    ]
+  }
+}

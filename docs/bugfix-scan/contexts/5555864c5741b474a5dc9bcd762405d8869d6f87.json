@@ -1,0 +1,16 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/theme/theme.ts b/packages/coding-agent/src/modes/interactive/theme/theme.ts\nindex 583245bb..b00e7566 100644\n--- a/packages/coding-agent/src/modes/interactive/theme/theme.ts\n+++ b/packages/coding-agent/src/modes/interactive/theme/theme.ts\n@@ -552,6 +552,14 @@ function loadThemeJson(name: string): ThemeJson {\n \tif (name in builtinThemes) {\n \t\treturn builtinThemes[name];\n \t}\n+\tconst registeredTheme = registeredThemes.get(name);\n+\tif (registeredTheme?.sourcePath) {\n+\t\tconst content = fs.readFileSync(registeredTheme.sourcePath, \"utf-8\");\n+\t\treturn parseThemeJsonContent(registeredTheme.sourcePath, content);\n+\t}\n+\tif (registeredTheme) {\n+\t\tthrow new Error(`Theme \"${name}\" does not have a source path for export`);\n+\t}\n \tconst customThemesDir = getCustomThemesDir();\n \tconst themePath = path.join(customThemesDir, `${name}.json`);\n \tif (!fs.existsSync(themePath)) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "5555864c5741b474a5dc9bcd762405d8869d6f87",
+  "message": "Fixes distributed themes breaking /export (#946)",
+  "module": "theme",
+  "tags": [
+    "export"
+  ]
+}

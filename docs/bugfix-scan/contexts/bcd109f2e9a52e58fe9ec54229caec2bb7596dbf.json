@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/ChatPanel.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/ChatPanel.ts b/packages/web-ui/src/ChatPanel.ts\nindex 2215a434..128e7413 100644\n--- a/packages/web-ui/src/ChatPanel.ts\n+++ b/packages/web-ui/src/ChatPanel.ts\n@@ -141,7 +141,6 @@ export class ChatPanel extends LitElement {\n \t\tthis.artifactCount = this.artifactsPanel.artifacts.size;\n \n \t\tthis.requestUpdate();\n-\t\tconsole.log(\"ChatPanel: Agent set with tools:\", tools);\n \t}\n \n \trender() {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "bcd109f2e9a52e58fe9ec54229caec2bb7596dbf",
+  "message": "Remove debug console.log from ChatPanel",
+  "module": "chat_panel",
+  "tags": []
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "86c2a33df4d47fa0cc7782b8efb52f5affb682d7",
+  "bug_summary": "initHooks 在未配置任何 hook 路径时仍执行初始化，创建无效的 Hook UI 上下文",
+  "module": "interactive-mode",
+  "action": "initHooks",
+  "fix_summary": "在 initHooks 开头检查 hookPaths.length === 0 时直接 return，跳过初始化",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "hookPaths 为空时仍创建 Hook UI 上下文和相关资源",
+  "correct_behavior": "hookPaths 为空时直接返回，不创建任何 Hook 相关资源",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "settings 中未配置任何 hook 路径",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "initHooks"
+    },
+    "args": {},
+    "outputs": {
+      "initialized": "bool"
+    },
+    "assertions": [
+      {
+        "what": "无 hooks 配置时跳过初始化",
+        "type": "return_value",
+        "expected": "hookPaths.length === 0 → early return"
+      },
+      {
+        "what": "不创建 Hook UI 上下文",
+        "type": "side_effect",
+        "expected": "no Hook UI context created"
+      }
+    ]
+  }
+}

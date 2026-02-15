@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/bash-execution.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/bash-execution.ts b/packages/coding-agent/src/modes/interactive/components/bash-execution.ts\nindex 9dd5f371..2893cce0 100644\n--- a/packages/coding-agent/src/modes/interactive/components/bash-execution.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/bash-execution.ts\n@@ -166,7 +166,11 @@ export class BashExecutionComponent extends Container {\n \n \t\t\t// Show how many lines are hidden (collapsed preview)\n \t\t\tif (hiddenLineCount > 0) {\n-\t\t\t\tstatusParts.push(theme.fg(\"dim\", `... ${hiddenLineCount} more lines (ctrl+o to expand)`));\n+\t\t\t\tif (this.expanded) {\n+\t\t\t\t\tstatusParts.push(theme.fg(\"dim\", \"(ctrl+o to collapse)\"));\n+\t\t\t\t} else {\n+\t\t\t\t\tstatusParts.push(theme.fg(\"dim\", `... ${hiddenLineCount} more lines (ctrl+o to expand)`));\n+\t\t\t\t}\n \t\t\t}\n \n \t\t\tif (this.status === \"cancelled\") {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "7a8ea9020f80e5a7c40db7636a2edb4467a6a777",
+  "message": "fix(coding-agent): show '(ctrl+o to collapse)' hint for bash output when expanded",
+  "module": "bash-execution",
+  "tags": []
+}

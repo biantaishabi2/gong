@@ -1,0 +1,255 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "tree-selector",
+  "spec_count": 5,
+  "specs": [
+    {
+      "action": "tree_traversal",
+      "boundary": "service",
+      "bug_summary": "多根节点树选择器入栈时缩进为 0，未按虚拟分叉根处理，导致根层级缩进和分叉线错误",
+      "correct_behavior": "多根节点从缩进 1 开始并标记 justBranched，正确显示虚拟根分叉结构",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "多根时入栈缩进改为 1（虚拟根的子节点），justBranched 设为 true",
+      "module": "tree-selector",
+      "source_commit": "32ec1fa883a5a37f6a6d8e8f7c5c7d2e9bb3f18e",
+      "test_spec": {
+        "args": {
+          "roots": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "roots.length > 1 时 root indent === 1",
+            "type": "return_value",
+            "what": "多根时根节点缩进为 1"
+          },
+          {
+            "expected": "roots.length === 1 时 root indent === 0",
+            "type": "return_value",
+            "what": "单根时根节点缩进为 0"
+          },
+          {
+            "expected": "multipleRoots 时 justBranched === true",
+            "type": "return_value",
+            "what": "多根时 justBranched 为 true"
+          }
+        ],
+        "outputs": {
+          "lines": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "树选择器数据包含多个根节点"
+          }
+        ],
+        "trigger": {
+          "method": "buildTreeLines",
+          "target": "tree-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "多根节点全部从缩进 0 开始，与单根展示无区别且分叉线缺失"
+    },
+    {
+      "action": "render_tree_line",
+      "boundary": "service",
+      "bug_summary": "激活路径标记●被拼接在树形前缀之前且非激活项强制占位空格，导致标记位置与文本对齐错误",
+      "correct_behavior": "● 标记紧贴在标签文本之前，非激活项无多余占位",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 pathMarker 从前缀前移到前缀后（紧贴标签文本前），非激活项不再占位",
+      "module": "tree-selector",
+      "source_commit": "3493e47b4dba16a5ef3bae4e8d2e1f0c3e9d0a7b",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "line 格式为 cursor + prefix + ● + label",
+            "type": "return_value",
+            "what": "激活路径标记在前缀之后、标签之前"
+          },
+          {
+            "expected": "非激活项 pathMarker 为空字符串",
+            "type": "return_value",
+            "what": "非激活项无多余空格占位"
+          }
+        ],
+        "outputs": {
+          "line": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "树选择器包含激活路径和非激活路径节点"
+          }
+        ],
+        "trigger": {
+          "method": "renderLine",
+          "target": "tree-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "● 标记在树形连接线之前显示，非激活项有多余空格"
+    },
+    {
+      "action": "renderLine",
+      "boundary": "service",
+      "bug_summary": "多根树渲染虚拟根子节点时错误裁剪首层 gutters，导致缩进对齐丢失",
+      "correct_behavior": "虚拟根子节点保留完整 gutters，前缀对齐正确",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "移除 multipleRoots 时 gutters.slice(1) 的裁剪逻辑，保留完整 gutters",
+      "module": "tree-selector",
+      "source_commit": "8d3b4dd762ece93ec5dcecc9c06b638736f36587",
+      "test_spec": {
+        "args": {
+          "gutters": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          },
+          "multipleRoots": {
+            "allowed": null,
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "displayGutters.length === flatNode.gutters.length",
+            "type": "return_value",
+            "what": "gutters 不被裁剪"
+          },
+          {
+            "expected": "prefix 列数等于 gutters 长度",
+            "type": "return_value",
+            "what": "缩进对齐正确"
+          }
+        ],
+        "outputs": {
+          "prefix": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "树为多根模式，存在虚拟根子节点"
+          }
+        ],
+        "trigger": {
+          "method": "renderLine",
+          "target": "tree-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "虚拟根子节点的 gutters 被 slice(1) 裁掉首层，缩进对齐错误"
+    },
+    {
+      "action": "renderActivePathMarker",
+      "boundary": "service",
+      "bug_summary": "活跃路径标记使用过大圆点●且无尾随空格，导致条目文本贴连和显示不一致",
+      "correct_behavior": "标记为 '• '（小圆点加空格），与文本有间距",
+      "data_dependencies": [],
+      "fix_summary": "将标记从 ● 改为 • 加尾随空格，使用更小圆点且与文本间有间距",
+      "module": "tree-selector",
+      "source_commit": "97e5e8c918995c7003a52d1a5624cd3c0d1fc4de",
+      "test_spec": {
+        "args": {
+          "isOnActivePath": {
+            "allowed": null,
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "marker === '• '",
+            "type": "return_value",
+            "what": "活跃路径使用小圆点加空格"
+          },
+          {
+            "expected": "marker === '' when !isOnActivePath",
+            "type": "return_value",
+            "what": "非活跃路径为空"
+          }
+        ],
+        "outputs": {
+          "marker": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "树选择器有活跃路径条目"
+          }
+        ],
+        "trigger": {
+          "method": "renderActivePathMarker",
+          "target": "tree-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "标记为 ●（大圆点无空格），与条目文本紧贴"
+    },
+    {
+      "action": "renderTreeList",
+      "boundary": "service",
+      "bug_summary": "多根树渲染直接使用原始层级缩进，根节点错误右移一级",
+      "correct_behavior": "根节点缩进归零，子节点缩进正确递减",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "多根时缩进减 1 归零显示（displayIndent = indent - 1），子节点相应下移",
+      "module": "tree-selector",
+      "source_commit": "e50eae105476c7177a2d36f97f1271d4fe39f222",
+      "test_spec": {
+        "args": {
+          "multipleRoots": {
+            "allowed": null,
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "displayIndent === 0 for root",
+            "type": "return_value",
+            "what": "根节点缩进为 0"
+          },
+          {
+            "expected": "displayIndent === 1 for first-level child",
+            "type": "return_value",
+            "what": "子节点缩进为 1"
+          }
+        ],
+        "outputs": {
+          "childIndent": "number",
+          "rootIndent": "number"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "树有多个根节点"
+          }
+        ],
+        "trigger": {
+          "method": "renderTreeList",
+          "target": "tree-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "根节点缩进为 1（虚拟根层级），显示不在最左"
+    }
+  ]
+}

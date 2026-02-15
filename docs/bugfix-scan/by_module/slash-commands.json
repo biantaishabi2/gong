@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "slash-commands",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "loadCommandsFromDir",
+      "boundary": "service",
+      "bug_summary": "命令发现逻辑仅识别普通 .md 文件，忽略指向 .md 的符号链接",
+      "correct_behavior": "符号链接的 .md 文件与普通 .md 一样被发现和加载",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "在文件过滤条件中增加 isSymbolicLink 检查，允许符号链接 .md 文件被加载",
+      "module": "slash-commands",
+      "source_commit": "b9fd912ecf07758939da46bf8dc6be9897027fda",
+      "test_spec": {
+        "args": {
+          "dir": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "commands 包含符号链接对应的命令",
+            "type": "return_value",
+            "what": "符号链接命令被发现"
+          },
+          {
+            "expected": "commands 包含普通 .md 对应的命令",
+            "type": "return_value",
+            "what": "普通文件命令仍正常"
+          }
+        ],
+        "outputs": {
+          "commands": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "命令目录包含指向 .md 文件的符号链接"
+          }
+        ],
+        "trigger": {
+          "method": "loadCommandsFromDir",
+          "target": "slash-commands",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "指向 .md 的符号链接不被发现，相关斜杠命令不可用"
+    }
+  ]
+}

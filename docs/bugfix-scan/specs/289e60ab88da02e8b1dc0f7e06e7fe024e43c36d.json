@@ -1,0 +1,54 @@
+{
+  "source_commit": "289e60ab88da02e8b1dc0f7e06e7fe024e43c36d",
+  "bug_summary": "Gemini thinking 配置被错误嵌套在 config.config 下，Gemini API 无法识别思考参数",
+  "module": "gemini",
+  "action": "build_gemini_config",
+  "fix_summary": "将 thinkingConfig 从 config.config.thinkingConfig 提升到 config.thinkingConfig 正确层级",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "config.config = {thinkingConfig: {...}} — Gemini API 忽略嵌套配置",
+  "correct_behavior": "config.thinkingConfig = {includeThoughts: true, thinkingBudget: N} — 正确层级",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "请求选项中 thinking 已启用",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "gemini",
+      "method": "buildRequestConfig"
+    },
+    "args": {
+      "thinking": {
+        "type": "object",
+        "required": false,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "config": "object"
+    },
+    "assertions": [
+      {
+        "what": "thinkingConfig 在 config 顶层",
+        "type": "return_value",
+        "expected": "config.thinkingConfig !== undefined"
+      },
+      {
+        "what": "不存在 config.config 嵌套",
+        "type": "return_value",
+        "expected": "config.config === undefined"
+      },
+      {
+        "what": "thinkingBudget 正确传递",
+        "type": "return_value",
+        "expected": "config.thinkingConfig.thinkingBudget === options.thinking.budgetTokens"
+      }
+    ]
+  }
+}

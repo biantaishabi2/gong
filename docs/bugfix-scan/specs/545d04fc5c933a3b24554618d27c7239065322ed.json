@@ -1,0 +1,43 @@
+{
+  "source_commit": "545d04fc5c933a3b24554618d27c7239065322ed",
+  "bug_summary": "OpenAI completions 通过 (params as any).store 绕过类型约束，可能导致类型安全问题",
+  "module": "openai-completions",
+  "action": "set_store_param",
+  "fix_summary": "移除 as any 类型断言，直接使用 params.store = false",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "通过 (params as any) 设置 store 字段，绕过 TypeScript 类型检查",
+  "correct_behavior": "直接 params.store = false，保持类型安全",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "OpenAI completions 请求参数已构建",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "openai-completions",
+      "method": "buildParams"
+    },
+    "args": {},
+    "outputs": {
+      "params": "object"
+    },
+    "assertions": [
+      {
+        "what": "store 字段为 false",
+        "type": "return_value",
+        "expected": "params.store === false"
+      },
+      {
+        "what": "无 as any 类型断言",
+        "type": "return_value",
+        "expected": "代码中无 (params as any)"
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "source_commit": "77595b97f94e5693a8ee87673b4da811f340bc8b",
+  "bug_summary": "会话管理器重置时总是重新生成 sessionFile 路径，覆盖了 --session 标志指定的文件名",
+  "module": "session-manager",
+  "action": "resetState",
+  "fix_summary": "仅在 sessionFile 未预设时生成新文件名，保留 --session 指定的路径",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "resetState 总是覆盖 sessionFile，--session=myfile.jsonl 指定的文件名被丢弃",
+  "correct_behavior": "resetState 检查 sessionFile 已设置则跳过重新生成，保留用户指定的文件名",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "sessionFile 已通过 --session 标志预设",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "session-manager",
+      "method": "resetState"
+    },
+    "args": {
+      "timestamp": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "sessionFile": "string"
+    },
+    "assertions": [
+      {
+        "what": "预设的 sessionFile 不被覆盖",
+        "type": "return_value",
+        "expected": "this.sessionFile === presetFile"
+      },
+      {
+        "what": "未预设时正常生成",
+        "type": "return_value",
+        "expected": "this.sessionFile 基于 timestamp 生成"
+      }
+    ]
+  }
+}

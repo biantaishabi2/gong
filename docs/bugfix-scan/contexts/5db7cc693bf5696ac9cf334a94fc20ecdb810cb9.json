@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/model-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/model-selector.ts b/packages/coding-agent/src/modes/interactive/components/model-selector.ts\nindex ce901e1a..b0b2d209 100644\n--- a/packages/coding-agent/src/modes/interactive/components/model-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/model-selector.ts\n@@ -153,7 +153,7 @@ export class ModelSelectorComponent extends Container {\n \t}\n \n \tprivate filterModels(query: string): void {\n-\t\tthis.filteredModels = fuzzyFilter(this.allModels, query, ({ provider, id }) => `${provider} ${id}`);\n+\t\tthis.filteredModels = fuzzyFilter(this.allModels, query, ({ id, provider }) => `${id} ${provider}`);\n \t\tthis.selectedIndex = Math.min(this.selectedIndex, Math.max(0, this.filteredModels.length - 1));\n \t\tthis.updateList();\n \t}\n"
+    },
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 526608e4..9efd3c39 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -268,8 +268,8 @@ export class InteractiveMode {\n \t\t\t\t\t\tlabel: `${m.provider}/${m.id}`,\n \t\t\t\t\t}));\n \n-\t\t\t\t\t// Fuzzy filter by provider + model ID (allows \"anthropic opus\" to match)\n-\t\t\t\t\tconst filtered = fuzzyFilter(items, prefix, (item) => `${item.provider} ${item.id}`);\n+\t\t\t\t\t// Fuzzy filter by model ID + provider (allows \"opus anthropic\" to match)\n+\t\t\t\t\tconst filtered = fuzzyFilter(items, prefix, (item) => `${item.id} ${item.provider}`);\n \n \t\t\t\t\tif (filtered.length === 0) return null;\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "5db7cc693bf5696ac9cf334a94fc20ecdb810cb9",
+  "message": "fix: Model selector fuzzy search matches id + provider",
+  "module": "model-selector",
+  "tags": []
+}

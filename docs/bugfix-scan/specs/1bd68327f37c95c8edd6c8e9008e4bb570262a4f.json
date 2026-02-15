@@ -1,0 +1,5 @@
+{
+  "reason": "refactor",
+  "skip": true,
+  "summary": "该提交主要将字符串拼接改为模板字面量以修复 lint/template literal 警告，并调整对应测试用例写法，未体现可验证的业务缺陷修复行为。"
+}

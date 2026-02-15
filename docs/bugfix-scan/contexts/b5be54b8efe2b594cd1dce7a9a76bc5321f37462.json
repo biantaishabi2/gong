@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/session-manager.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/session-manager.ts b/packages/coding-agent/src/core/session-manager.ts\nindex 839a9e9b..e28224ff 100644\n--- a/packages/coding-agent/src/core/session-manager.ts\n+++ b/packages/coding-agent/src/core/session-manager.ts\n@@ -792,7 +792,11 @@ export class SessionManager {\n \t\tif (!this.persist || !this.sessionFile) return;\n \n \t\tconst hasAssistant = this.fileEntries.some((e) => e.type === \"message\" && e.message.role === \"assistant\");\n-\t\tif (!hasAssistant) return;\n+\t\tif (!hasAssistant) {\n+\t\t\t// Mark as not flushed so when assistant arrives, all entries get written\n+\t\t\tthis.flushed = false;\n+\t\t\treturn;\n+\t\t}\n \n \t\tif (!this.flushed) {\n \t\t\tfor (const e of this.fileEntries) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "b5be54b8efe2b594cd1dce7a9a76bc5321f37462",
+  "message": "fix(coding-agent): persist user message after fork",
+  "module": "session-manager",
+  "tags": []
+}

@@ -1,0 +1,49 @@
+{
+  "action": "flushSessionToFile",
+  "boundary": "service",
+  "bug_summary": "会话分叉后仅有 user 消息时提前返回且未重置 flushed，导致后续 assistant 到来时历史 user 消息未落盘",
+  "correct_behavior": "仅有 user 消息时返回前设置 flushed=false，后续 assistant 到来时执行全量补写",
+  "data_dependencies": [
+    "file",
+    "session"
+  ],
+  "fix_summary": "在无 assistant 消息时将 this.flushed 显式设为 false，再返回，确保后续可完整写入",
+  "module": "session-manager",
+  "source_commit": "b5be54b8efe2b594cd1dce7a9a76bc5321f37462",
+  "test_spec": {
+    "args": {},
+    "assertions": [
+      {
+        "expected": "flushed=false",
+        "type": "state",
+        "what": "当仅有 user 消息时本次不写文件但 flushed 被置为 false"
+      },
+      {
+        "expected": "persisted_entry_count>=2 且包含 fork 后 user 消息",
+        "type": "file_state",
+        "what": "assistant 消息到达后再次触发会将此前 user+assistant 消息一起写入 session 文件"
+      }
+    ],
+    "outputs": {
+      "flushed": "bool",
+      "persisted_entry_count": "int"
+    },
+    "preconditions": [
+      {
+        "involves": "file",
+        "what": "开启会话持久化且存在可写 session 文件路径"
+      },
+      {
+        "involves": "session",
+        "what": "内存 fileEntries 中存在 user 消息且暂不存在 assistant 消息"
+      }
+    ],
+    "trigger": {
+      "method": "flushSessionToFile",
+      "target": "SessionManager",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "仅有 user 消息时直接返回且保持 flushed=true，后续写入跳过历史 user 消息"
+}

@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tool-execution.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tool-execution.ts b/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\nindex 5e77e974..7df4baf4 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\n@@ -479,8 +479,13 @@ export class ToolExecutionComponent extends Container {\n \t\t\t\tif (errorText) {\n \t\t\t\t\ttext += `\\n\\n${theme.fg(\"error\", errorText)}`;\n \t\t\t\t}\n+\t\t\t} else if (this.result?.details?.diff) {\n+\t\t\t\t// Tool executed successfully - use the diff from result\n+\t\t\t\t// This takes priority over editDiffPreview which may have a stale error\n+\t\t\t\t// due to race condition (async preview computed after file was modified)\n+\t\t\t\ttext += `\\n\\n${renderDiff(this.result.details.diff, { filePath: rawPath })}`;\n \t\t\t} else if (this.editDiffPreview) {\n-\t\t\t\t// Use cached diff preview (works both before and after execution)\n+\t\t\t\t// Use cached diff preview (before tool executes)\n \t\t\t\tif (\"error\" in this.editDiffPreview) {\n \t\t\t\t\ttext += `\\n\\n${theme.fg(\"error\", this.editDiffPreview.error)}`;\n \t\t\t\t} else if (this.editDiffPreview.diff) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "0f81b096252674f3324c19748af9a91ef679253b",
+  "message": "Fix edit tool diff not showing in TUI",
+  "module": "tool-execution",
+  "tags": []
+}

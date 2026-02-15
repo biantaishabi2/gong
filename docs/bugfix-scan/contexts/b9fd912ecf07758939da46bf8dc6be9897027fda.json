@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/slash-commands.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/slash-commands.ts b/packages/coding-agent/src/core/slash-commands.ts\nindex 57f37f2d..5450d622 100644\n--- a/packages/coding-agent/src/core/slash-commands.ts\n+++ b/packages/coding-agent/src/core/slash-commands.ts\n@@ -99,7 +99,7 @@ export function substituteArgs(content: string, args: string[]): string {\n }\n \n /**\n- * Recursively scan a directory for .md files and load them as slash commands\n+ * Recursively scan a directory for .md files (and symlinks to .md files) and load them as slash commands\n  */\n function loadCommandsFromDir(dir: string, source: \"user\" | \"project\", subdir: string = \"\"): FileSlashCommand[] {\n \tconst commands: FileSlashCommand[] = [];\n@@ -118,7 +118,7 @@ function loadCommandsFromDir(dir: string, source: \"user\" | \"project\", subdir: st\n \t\t\t\t// Recurse into subdirectory\n \t\t\t\tconst newSubdir = subdir ? `${subdir}:${entry.name}` : entry.name;\n \t\t\t\tcommands.push(...loadCommandsFromDir(fullPath, source, newSubdir));\n-\t\t\t} else if (entry.isFile() && entry.name.endsWith(\".md\")) {\n+\t\t\t} else if ((entry.isFile() || entry.isSymbolicLink()) && entry.name.endsWith(\".md\")) {\n \t\t\t\ttry {\n \t\t\t\t\tconst rawContent = readFileSync(fullPath, \"utf-8\");\n \t\t\t\t\tconst { frontmatter, content } = parseFrontmatter(rawContent);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "b9fd912ecf07758939da46bf8dc6be9897027fda",
+  "message": "fix(coding-agent): support symlinked slash commands in discovery",
+  "module": "slash-commands",
+  "tags": []
+}

@@ -1,0 +1,54 @@
+{
+  "source_commit": "05d78ea2de8a7316207b7e504f5c900a45dce36b",
+  "bug_summary": "会话选择器的 No sessions found 空状态文案未按终端宽度截断，导致窄终端下文本溢出",
+  "module": "session-selector",
+  "action": "session_picker_render",
+  "fix_summary": "将空状态文案包裹 truncateToWidth 调用，按 width 截断并添加省略号",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "终端宽度不足时 'No sessions found' 文本溢出破坏布局",
+  "correct_behavior": "'No sessions found' 文本按终端宽度截断并以 '…' 结尾",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话选择器筛选结果为空",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "session-selector",
+      "method": "render"
+    },
+    "args": {
+      "width": {
+        "type": "int",
+        "required": true,
+        "allowed": null
+      },
+      "filter": {
+        "type": "string",
+        "required": false,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rendered_line": "string"
+    },
+    "assertions": [
+      {
+        "what": "空状态文案不超过终端宽度",
+        "type": "return_value",
+        "expected": "rendered_line.length <= width"
+      },
+      {
+        "what": "宽度不足时以省略号截断",
+        "type": "return_value",
+        "expected": "width < 20 时 rendered_line.endsWith('…')"
+      }
+    ]
+  }
+}

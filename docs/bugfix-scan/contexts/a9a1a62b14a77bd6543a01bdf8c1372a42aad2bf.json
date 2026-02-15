@@ -1,0 +1,27 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/system-prompt.ts",
+      "hunks": [
+        {
+          "after_function": "export function loadProjectContextFiles(): Array<{ path: string; content: string }> {\n\tconst contextFiles: Array<{ path: string; content: string }> = [];\n\tconst seenPaths = new Set<string>();\n\n\t// 1. Load global context from ~/{CONFIG_DIR_NAME}/agent/\n\tconst globalContextDir = getAgentDir();\n\tconst globalContext = loadContextFileFromDir(globalContextDir);\n\tif (globalContext) {\n\t\tcontextFiles.push(globalContext);\n\t\tseenPaths.add(globalContext.path);\n\t}\n\n\t// 2. Walk up from cwd to root, collecting all context files\n\tconst cwd = process.cwd();\n\tconst ancestorContextFiles: Array<{ path: string; content: string }> = [];\n\n\tlet currentDir = cwd;\n\tconst root = resolve(\"/\");\n\n\twhile (true) {\n\t\tconst contextFile = loadContextFileFromDir(currentDir);\n\t\tif (contextFile && !seenPaths.has(contextFile.path)) {\n\t\t\t// Add to beginning so we get top-most parent first\n\t\t\tancestorContextFiles.unshift(contextFile);\n\t\t\tseenPaths.add(contextFile.path);\n\t\t}\n\n\t\t// Stop if we've reached root\n\t\tif (currentDir === root) break;\n\n\t\t// Move up one directory\n\t\tconst parentDir = resolve(currentDir, \"..\");\n\t\tif (parentDir === currentDir) break; // Safety check\n\t\tcurrentDir = parentDir;\n\t}\n\n\t// Add ancestor files in order (top-most → cwd)\n\tcontextFiles.push(...ancestorContextFiles);\n\n\treturn contextFiles;\n}",
+          "before_function": "export function loadProjectContextFiles(): Array<{ path: string; content: string }> {\n\tconst contextFiles: Array<{ path: string; content: string }> = [];\n\n\t// 1. Load global context from ~/{CONFIG_DIR_NAME}/agent/\n\tconst globalContextDir = getAgentDir();\n\tconst globalContext = loadContextFileFromDir(globalContextDir);\n\tif (globalContext) {\n\t\tcontextFiles.push(globalContext);\n\t}\n\n\t// 2. Walk up from cwd to root, collecting all context files\n\tconst cwd = process.cwd();\n\tconst ancestorContextFiles: Array<{ path: string; content: string }> = [];\n\n\tlet currentDir = cwd;\n\tconst root = resolve(\"/\");\n\n\twhile (true) {\n\t\tconst contextFile = loadContextFileFromDir(currentDir);\n\t\tif (contextFile) {\n\t\t\t// Add to beginning so we get top-most parent first\n\t\t\tancestorContextFiles.unshift(contextFile);\n\t\t}\n\n\t\t// Stop if we've reached root\n\t\tif (currentDir === root) break;\n\n\t\t// Move up one directory\n\t\tconst parentDir = resolve(currentDir, \"..\");\n\t\tif (parentDir === currentDir) break; // Safety check\n\t\tcurrentDir = parentDir;\n\t}\n\n\t// Add ancestor files in order (top-most → cwd)\n\tcontextFiles.push(...ancestorContextFiles);\n\n\treturn contextFiles;\n}",
+          "changed_lines": [
+            68,
+            75,
+            87,
+            90
+          ],
+          "function_line": 66,
+          "function_name": "loadProjectContextFiles"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/system-prompt.ts b/packages/coding-agent/src/core/system-prompt.ts\nindex b1305d30..4df25c41 100644\n--- a/packages/coding-agent/src/core/system-prompt.ts\n+++ b/packages/coding-agent/src/core/system-prompt.ts\n@@ -65,12 +65,14 @@ function loadContextFileFromDir(dir: string): { path: string; content: string }\n  */\n export function loadProjectContextFiles(): Array<{ path: string; content: string }> {\n \tconst contextFiles: Array<{ path: string; content: string }> = [];\n+\tconst seenPaths = new Set<string>();\n \n \t// 1. Load global context from ~/{CONFIG_DIR_NAME}/agent/\n \tconst globalContextDir = getAgentDir();\n \tconst globalContext = loadContextFileFromDir(globalContextDir);\n \tif (globalContext) {\n \t\tcontextFiles.push(globalContext);\n+\t\tseenPaths.add(globalContext.path);\n \t}\n \n \t// 2. Walk up from cwd to root, collecting all context files\n@@ -82,9 +84,10 @@ export function loadProjectContextFiles(): Array<{ path: string; content: string\n \n \twhile (true) {\n \t\tconst contextFile = loadContextFileFromDir(currentDir);\n-\t\tif (contextFile) {\n+\t\tif (contextFile && !seenPaths.has(contextFile.path)) {\n \t\t\t// Add to beginning so we get top-most parent first\n \t\t\tancestorContextFiles.unshift(contextFile);\n+\t\t\tseenPaths.add(contextFile.path);\n \t\t}\n \n \t\t// Stop if we've reached root\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "a9a1a62b14a77bd6543a01bdf8c1372a42aad2bf",
+  "message": "fix(coding-agent): prevent global AGENTS.md from being loaded twice (#239)",
+  "module": "system-prompt",
+  "tags": []
+}

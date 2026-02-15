@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/editor.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/editor.ts b/packages/tui/src/components/editor.ts\nindex c5765162..82e849a3 100644\n--- a/packages/tui/src/components/editor.ts\n+++ b/packages/tui/src/components/editor.ts\n@@ -834,7 +834,7 @@ export class Editor implements Component {\n \t\t\t\t}\n \t\t\t}\n \t\t\t// Also auto-trigger when typing letters in a slash command context\n-\t\t\telse if (/[a-zA-Z0-9]/.test(char)) {\n+\t\t\telse if (/[a-zA-Z0-9.\\-_]/.test(char)) {\n \t\t\t\tconst currentLine = this.state.lines[this.state.cursorLine] || \"\";\n \t\t\t\tconst textBeforeCursor = currentLine.slice(0, this.state.cursorCol);\n \t\t\t\t// Check if we're in a slash command (with or without space for arguments)\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "69a8ecd5b37fdde6eb2b93b78a3c7feefb54bec0",
+  "message": "fix: slash command autocomplete triggers for . - _ prefixes",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

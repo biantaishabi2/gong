@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 1a2cf540..35065b32 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1051,7 +1051,7 @@ export class InteractiveMode {\n \n \t\t\t\t\tthis.chatContainer.clear();\n \t\t\t\t\tthis.renderInitialMessages();\n-\t\t\t\t\tif (result.editorText) {\n+\t\t\t\t\tif (result.editorText && !this.editor.getText().trim()) {\n \t\t\t\t\t\tthis.editor.setText(result.editorText);\n \t\t\t\t\t}\n \t\t\t\t\tthis.showStatus(\"Navigated to selected point\");\n@@ -3443,7 +3443,7 @@ export class InteractiveMode {\n \t\t\t\t\t\t// Update UI\n \t\t\t\t\t\tthis.chatContainer.clear();\n \t\t\t\t\t\tthis.renderInitialMessages();\n-\t\t\t\t\t\tif (result.editorText) {\n+\t\t\t\t\t\tif (result.editorText && !this.editor.getText().trim()) {\n \t\t\t\t\t\t\tthis.editor.setText(result.editorText);\n \t\t\t\t\t\t}\n \t\t\t\t\t\tthis.showStatus(\"Navigated to selected point\");\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "fe1d0ae7f33cc99d7f7d1805ae3ae99e0e77fc54",
+  "message": "fix(coding-agent): preserve editor content during tree navigation summarization (#1169)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

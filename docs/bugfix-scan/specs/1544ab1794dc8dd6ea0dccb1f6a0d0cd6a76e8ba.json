@@ -1,0 +1,43 @@
+{
+  "source_commit": "1544ab1794dc8dd6ea0dccb1f6a0d0cd6a76e8ba",
+  "bug_summary": "启动提示中 thinking 相关文案含糊：'to cycle thinking' 缺少 'level'，'to toggle thinking' 应为 'to expand thinking'",
+  "module": "interactive-mode",
+  "action": "startup_hints",
+  "fix_summary": "将 cycleThinkingLevel 提示从 'to cycle thinking' 改为 'to cycle thinking level'，toggleThinking 从 'to toggle thinking' 改为 'to expand thinking'",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "提示显示 'to cycle thinking' 和 'to toggle thinking'，语义模糊",
+  "correct_behavior": "提示显示 'to cycle thinking level' 和 'to expand thinking'，准确描述功能",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "交互模式已启动并生成启动快捷键提示",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "getStartupHints"
+    },
+    "args": {},
+    "outputs": {
+      "hints": "array"
+    },
+    "assertions": [
+      {
+        "what": "cycleThinkingLevel 提示包含 'thinking level'",
+        "type": "return_value",
+        "expected": "hint.text === 'to cycle thinking level'"
+      },
+      {
+        "what": "toggleThinking 提示显示 'expand' 而非 'toggle'",
+        "type": "return_value",
+        "expected": "hint.text === 'to expand thinking'"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "source_commit": "9b903656aea9b0646244d295e578933bd0c888a8",
+  "bug_summary": "多个 provider 的 aborted/error 分支错误消息存在拼写错误 'unkown' 和 'ocurred'",
+  "module": "providers",
+  "action": "handleStopReason",
+  "fix_summary": "将 'An unkown error ocurred' 统一修正为 'An unknown error occurred'，涉及 4 个 provider 文件",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "抛出 'An unkown error ocurred'，拼写错误导致依赖精确文案的处理失败",
+  "correct_behavior": "抛出 'An unknown error occurred'，拼写正确",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "provider 处理 aborted 或 error stop reason",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "providers",
+      "method": "handleStopReason"
+    },
+    "args": {
+      "stopReason": {
+        "type": "string",
+        "required": true,
+        "allowed": [
+          "aborted",
+          "error"
+        ]
+      }
+    },
+    "outputs": {
+      "error_message": "string"
+    },
+    "assertions": [
+      {
+        "what": "错误消息拼写正确",
+        "type": "return_value",
+        "expected": "error.message === 'An unknown error occurred'"
+      },
+      {
+        "what": "不含旧拼写",
+        "type": "return_value",
+        "expected": "!error.message.includes('unkown') && !error.message.includes('ocurred')"
+      }
+    ]
+  }
+}

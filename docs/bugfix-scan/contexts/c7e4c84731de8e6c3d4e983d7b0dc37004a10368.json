@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/footer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/footer.ts b/packages/coding-agent/src/tui/footer.ts\nindex edeffa71..5bf05a07 100644\n--- a/packages/coding-agent/src/tui/footer.ts\n+++ b/packages/coding-agent/src/tui/footer.ts\n@@ -93,7 +93,7 @@ export class FooterComponent {\n \t\tif (this.state.model?.reasoning) {\n \t\t\tconst thinkingLevel = this.state.thinkingLevel || \"off\";\n \t\t\tif (thinkingLevel !== \"off\") {\n-\t\t\t\trightSide = `${modelName} • Thinking: ${thinkingLevel}`;\n+\t\t\t\trightSide = `${modelName} • ${thinkingLevel}`;\n \t\t\t}\n \t\t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "c7e4c84731de8e6c3d4e983d7b0dc37004a10368",
+  "message": "Simplify thinking level display in footer (remove 'Thinking:' prefix)",
+  "module": "footer",
+  "tags": []
+}

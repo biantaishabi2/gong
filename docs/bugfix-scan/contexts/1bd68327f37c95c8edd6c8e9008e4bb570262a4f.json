@@ -1,0 +1,21 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/daxnuts.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/daxnuts.ts b/packages/coding-agent/src/modes/interactive/components/daxnuts.ts\nindex 3e6f12b1..54170c27 100644\n--- a/packages/coding-agent/src/modes/interactive/components/daxnuts.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/daxnuts.ts\n@@ -46,7 +46,7 @@ function buildImage(): string[] {\n \t\tfor (let x = 0; x < WIDTH; x++) {\n \t\t\tconst top = pixels[row][x];\n \t\t\tconst bottom = pixels[row + 1]?.[x] ?? top;\n-\t\t\tline += rgb(bottom[0], bottom[1], bottom[2]) + rgb(top[0], top[1], top[2], true) + \"▄\";\n+\t\t\tline += `${rgb(bottom[0], bottom[1], bottom[2])}${rgb(top[0], top[1], top[2], true)}▄`;\n \t\t}\n \t\tline += RESET;\n \t\tlines.push(line);\n"
+    },
+    {
+      "file": "packages/tui/test/bug-regression-isimageline-startswith-bug.test.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/test/bug-regression-isimageline-startswith-bug.test.ts b/packages/tui/test/bug-regression-isimageline-startswith-bug.test.ts\nindex 2ab162ac..ff15d18f 100644\n--- a/packages/tui/test/bug-regression-isimageline-startswith-bug.test.ts\n+++ b/packages/tui/test/bug-regression-isimageline-startswith-bug.test.ts\n@@ -76,7 +76,7 @@ describe(\"Bug regression: isImageLine() crash with image escape sequences\", () =\n \t\t\t\t\"Suffix text \\x1b_Ga=T,data...\\x1b\\\\ suffix\",\n \t\t\t\t\"Middle \\x1b_Ga=T,data...\\x1b\\\\ more text\",\n \t\t\t\t// Very long line (simulating 300KB+ crash scenario)\n-\t\t\t\t\"Text before \" + \"\\x1b_Ga=T,f=100\" + \"A\".repeat(300000) + \" text after\",\n+\t\t\t\t`Text before \\x1b_Ga=T,f=100${\"A\".repeat(300000)} text after`,\n \t\t\t];\n \n \t\t\tfor (const line of scenarios) {\n@@ -93,7 +93,7 @@ describe(\"Bug regression: isImageLine() crash with image escape sequences\", () =\n \t\t\t\t\"Suffix text \\x1b]1337;File=inline=1:data==\\x07 suffix\",\n \t\t\t\t\"Middle \\x1b]1337;File=inline=1:data==\\x07 more text\",\n \t\t\t\t// Very long line (simulating 304KB crash scenario)\n-\t\t\t\t\"Text before \" + \"\\x1b]1337;File=size=800,600;inline=1:\" + \"B\".repeat(300000) + \" text after\",\n+\t\t\t\t`Text before \\x1b]1337;File=size=800,600;inline=1:${\"B\".repeat(300000)} text after`,\n \t\t\t];\n \n \t\t\tfor (const line of scenarios) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "1bd68327f37c95c8edd6c8e9008e4bb570262a4f",
+  "message": "fix: make pre-commit hook fail on lint warnings, fix template literal warnings",
+  "module": "package",
+  "tags": [
+    "transaction"
+  ]
+}

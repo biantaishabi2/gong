@@ -1,0 +1,49 @@
+{
+  "source_commit": "958d265112e1bb969ed656adb6e126db2dc0378a",
+  "bug_summary": "RPC prompt 分支调用 agent.prompt 时未传 attachments 参数，附件上下文丢失",
+  "module": "coding-agent",
+  "action": "rpcPrompt",
+  "fix_summary": "将 agent.prompt(input.message) 改为 agent.prompt(input.message, input.attachments)",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "RPC 带附件的 prompt 请求在 agent 侧丢失附件",
+  "correct_behavior": "RPC prompt 将 attachments 透传给 agent.prompt",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "RPC 请求包含 message 和 attachments",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent/main",
+      "method": "handleRpcPrompt"
+    },
+    "args": {
+      "message": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "attachments": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "prompt_called_with_attachments": "bool"
+    },
+    "assertions": [
+      {
+        "what": "agent.prompt 接收到 attachments",
+        "type": "side_effect",
+        "expected": "agent.prompt called with (message, attachments)"
+      }
+    ]
+  }
+}

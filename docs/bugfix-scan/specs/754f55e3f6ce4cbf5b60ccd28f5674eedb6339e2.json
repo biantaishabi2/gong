@@ -1,0 +1,55 @@
+{
+  "source_commit": "754f55e3f6ce4cbf5b60ccd28f5674eedb6339e2",
+  "bug_summary": "compaction 前的 kept 区间未处理 branch_summary 类型条目，导致上下文缺失分支摘要",
+  "module": "session-manager",
+  "action": "buildSessionContext",
+  "fix_summary": "在 kept 区间遍历中增加 branch_summary 分支处理，将其转换为摘要消息并加入 contextEntries",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "branch_summary 条目被跳过，compaction 后的上下文缺失分支摘要信息",
+  "correct_behavior": "branch_summary 条目通过 createSummaryMessage 转换并包含在 messages 和 contextEntries 中",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话条目中包含 compaction 和 branch_summary 条目",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "session-manager",
+      "method": "buildSessionContext"
+    },
+    "args": {
+      "entries": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      },
+      "leafId": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "messages": "array",
+      "contextEntries": "array"
+    },
+    "assertions": [
+      {
+        "what": "返回的 messages 包含 branch_summary 对应的摘要消息",
+        "type": "return_value",
+        "expected": "messages 含 summary message from branch_summary"
+      },
+      {
+        "what": "contextEntries 包含 branch_summary 条目",
+        "type": "return_value",
+        "expected": "contextEntries 含 branch_summary entry"
+      }
+    ]
+  }
+}

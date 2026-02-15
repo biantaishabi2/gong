@@ -1,0 +1,50 @@
+{
+  "source_commit": "e50eae105476c7177a2d36f97f1271d4fe39f222",
+  "bug_summary": "多根树渲染直接使用原始层级缩进，根节点错误右移一级",
+  "module": "tree-selector",
+  "action": "renderTreeList",
+  "fix_summary": "多根时缩进减 1 归零显示（displayIndent = indent - 1），子节点相应下移",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "根节点缩进为 1（虚拟根层级），显示不在最左",
+  "correct_behavior": "根节点缩进归零，子节点缩进正确递减",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "树有多个根节点",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tree-selector",
+      "method": "renderTreeList"
+    },
+    "args": {
+      "multipleRoots": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rootIndent": "number",
+      "childIndent": "number"
+    },
+    "assertions": [
+      {
+        "what": "根节点缩进为 0",
+        "type": "return_value",
+        "expected": "displayIndent === 0 for root"
+      },
+      {
+        "what": "子节点缩进为 1",
+        "type": "return_value",
+        "expected": "displayIndent === 1 for first-level child"
+      }
+    ]
+  }
+}

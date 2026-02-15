@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/openai-completions.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-completions.ts b/packages/ai/src/providers/openai-completions.ts\nindex c4332b3c..5724ad93 100644\n--- a/packages/ai/src/providers/openai-completions.ts\n+++ b/packages/ai/src/providers/openai-completions.ts\n@@ -763,6 +763,7 @@ function detectCompat(model: Model<\"openai-completions\">): Required<OpenAIComple\n \t\tprovider === \"mistral\" ||\n \t\tbaseUrl.includes(\"mistral.ai\") ||\n \t\tbaseUrl.includes(\"chutes.ai\") ||\n+\t\tbaseUrl.includes(\"deepseek.com\") ||\n \t\tisZai ||\n \t\tprovider === \"opencode\" ||\n \t\tbaseUrl.includes(\"opencode.ai\");\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "4f9deddd477dfbcb39d6274751cd1b44b7507aff",
+  "message": "fix(ai): detect DeepSeek URLs and disable unsupported developer role",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

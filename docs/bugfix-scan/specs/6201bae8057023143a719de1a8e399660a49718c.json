@@ -1,0 +1,54 @@
+{
+  "source_commit": "6201bae8057023143a719de1a8e399660a49718c",
+  "bug_summary": "同时传入 systemPrompt 与 appendSystemPrompt 时将 systemPrompt 设为函数而非合并字符串，导致类型不符",
+  "module": "coding-agent",
+  "action": "buildSessionOptions",
+  "fix_summary": "将 systemPrompt 从返回函数改为直接拼接 systemPrompt + appendSystemPrompt 的字符串",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "options.systemPrompt 被设为 (defaultPrompt) => {...} 函数，类型与预期的字符串不一致",
+  "correct_behavior": "options.systemPrompt 被设为 systemPrompt + '\\n\\n' + appendSystemPrompt 的合并字符串",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "CLI 参数同时包含 --system-prompt 和 --append-system-prompt",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent/main",
+      "method": "buildSessionOptions"
+    },
+    "args": {
+      "systemPrompt": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "appendSystemPrompt": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "merged_prompt": "string"
+    },
+    "assertions": [
+      {
+        "what": "systemPrompt 为字符串类型",
+        "type": "return_value",
+        "expected": "typeof options.systemPrompt === 'string'"
+      },
+      {
+        "what": "合并后包含两部分",
+        "type": "return_value",
+        "expected": "options.systemPrompt === systemPrompt + '\\n\\n' + appendSystemPrompt"
+      }
+    ]
+  }
+}

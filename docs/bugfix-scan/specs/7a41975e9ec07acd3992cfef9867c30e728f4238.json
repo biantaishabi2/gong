@@ -1,0 +1,55 @@
+{
+  "source_commit": "7a41975e9ec07acd3992cfef9867c30e728f4238",
+  "bug_summary": "Claude 模型经由 Google APIs 调用时工具调用和结果未携带 tool call id，导致调用链无法关联",
+  "module": "google-shared",
+  "action": "convertMessages",
+  "fix_summary": "新增 requiresToolCallId 检测 Claude 模型，为 functionCall 和 functionResponse 添加 id 字段",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Claude 模型的 functionCall 和 functionResponse 缺少 id，调用结果无法正确关联",
+  "correct_behavior": "Claude 模型的 functionCall.id 和 functionResponse.id 均等于原始 toolCallId",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "模型为 Claude 系列且消息中包含 toolCall 和 toolResult",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "google-shared",
+      "method": "convertMessages"
+    },
+    "args": {
+      "modelId": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "toolCallId": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "functionCall": "object",
+      "functionResponse": "object"
+    },
+    "assertions": [
+      {
+        "what": "functionCall 包含 id",
+        "type": "return_value",
+        "expected": "functionCall.id === toolCallId"
+      },
+      {
+        "what": "functionResponse 包含 id",
+        "type": "return_value",
+        "expected": "functionResponse.id === toolCallId"
+      }
+    ]
+  }
+}

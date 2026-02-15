@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 72bd88bd..b89a6e4c 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -4010,7 +4010,8 @@ export class InteractiveMode {\n `;\n \t\t\t\tfor (const [key, shortcut] of shortcuts) {\n \t\t\t\t\tconst description = shortcut.description ?? shortcut.extensionPath;\n-\t\t\t\t\thotkeys += `| \\`${key}\\` | ${description} |\\n`;\n+\t\t\t\t\tconst keyDisplay = key.replace(/\\b\\w/g, (c) => c.toUpperCase());\n+\t\t\t\t\thotkeys += `| \\`${keyDisplay}\\` | ${description} |\\n`;\n \t\t\t\t}\n \t\t\t}\n \t\t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3ae0cbe3847813ec93632df1ca02e46d4edb3bbd",
+  "message": "fix(coding-agent): Title Case extension hotkeys in /hotkeys output (#969)",
+  "module": "interactive-mode",
+  "tags": []
+}

@@ -1,0 +1,66 @@
+{
+  "action": "setEditor",
+  "boundary": "service",
+  "bug_summary": "扩展自定义编辑器时直接复制默认回调引用，导致回调执行上下文/可调用性不稳定并中断重试流程",
+  "correct_behavior": "扩展自定义编辑器后，回调通过包装函数稳定委托给默认编辑器且不再中断重试",
+  "data_dependencies": [
+    "config"
+  ],
+  "fix_summary": "将 onEscape/onCtrlD/onPasteImage 从直接赋值改为箭头函数包装并使用可选调用，确保委托调用稳定",
+  "module": "interactive-mode",
+  "source_commit": "828c40cf68984ede829c6fa6adac9a697ca14d8a",
+  "test_spec": {
+    "args": {
+      "newEditor": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "onEscape_delegate_called=true",
+        "type": "runtime_behavior",
+        "what": "注册自定义编辑器后调用 customEditor.onEscape 可成功委托到 defaultEditor.onEscape"
+      },
+      {
+        "expected": "onCtrlD_delegate_called=true",
+        "type": "runtime_behavior",
+        "what": "调用 customEditor.onCtrlD 可成功委托到 defaultEditor.onCtrlD"
+      },
+      {
+        "expected": "onPasteImage_delegate_called=true",
+        "type": "runtime_behavior",
+        "what": "调用 customEditor.onPasteImage 可成功委托到 defaultEditor.onPasteImage"
+      },
+      {
+        "expected": "retry_aborted=false",
+        "type": "runtime_behavior",
+        "what": "上述委托调用过程中不会触发重试中断"
+      }
+    ],
+    "outputs": {
+      "onCtrlD_delegate_called": "bool",
+      "onEscape_delegate_called": "bool",
+      "onPasteImage_delegate_called": "bool",
+      "retry_aborted": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "已加载默认编辑器且存在重试流程"
+      },
+      {
+        "involves": "config",
+        "what": "扩展提供的自定义编辑器包含 actionHandlers(Map)"
+      }
+    ],
+    "trigger": {
+      "method": "setEditor",
+      "target": "InteractiveMode",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "扩展自定义编辑器后，按键/粘贴相关回调可能失效或抛错，进而中断重试"
+}

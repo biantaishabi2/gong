@@ -1,0 +1,49 @@
+{
+  "source_commit": "b288cd9448de8fc944575b79e82af6d6a64cae9a",
+  "bug_summary": "API Key 校验请求 maxTokens 仅为 10，模型无法稳定返回 stop 导致误判密钥无效",
+  "module": "provider_key_input",
+  "action": "validateApiKey",
+  "fix_summary": "将 maxTokens 从 10 提高到 200，确保模型有足够 token 完成生成并返回 stop",
+  "test_type": "regression",
+  "boundary": "http",
+  "wrong_behavior": "maxTokens=10 导致模型截断无法 stop，有效密钥被误判为无效",
+  "correct_behavior": "maxTokens=200 给予足够空间，有效密钥校验通过",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "API key 有效，模型可完成短文本",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "http_request",
+      "target": "provider",
+      "method": "POST"
+    },
+    "args": {
+      "apiKey": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "isValid": "bool"
+    },
+    "assertions": [
+      {
+        "what": "maxTokens 为 200",
+        "type": "return_value",
+        "expected": "requestBody.maxTokens === 200"
+      },
+      {
+        "what": "有效密钥校验通过",
+        "type": "return_value",
+        "expected": "isValid === true"
+      }
+    ]
+  }
+}

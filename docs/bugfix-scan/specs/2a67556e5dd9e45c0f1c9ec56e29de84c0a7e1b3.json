@@ -1,0 +1,43 @@
+{
+  "source_commit": "2a67556e5dd9e45c0f1c9ec56e29de84c0a7e1b3",
+  "bug_summary": "沙箱 iframe 未设置 html 根字号，继承父页面 font-size 导致 HTML artifact 显示异常",
+  "module": "sandboxed_iframe",
+  "action": "inject_iframe_content",
+  "fix_summary": "在 iframe 注入内容头部增加 <style>html{font-size:16px}</style> 显式设置根字号",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "iframe 继承父页面字号，artifact 文字大小不一致",
+  "correct_behavior": "iframe html 根字号固定为 16px，artifact 显示独立于父页面",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "沙箱 iframe 准备注入 HTML artifact",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "SandboxedIframe",
+      "method": "getInjectedContent"
+    },
+    "args": {},
+    "outputs": {
+      "html": "string"
+    },
+    "assertions": [
+      {
+        "what": "注入内容包含 font-size: 16px 样式",
+        "type": "return_value",
+        "expected": "html.includes('font-size: 16px')"
+      },
+      {
+        "what": "样式在 script 标签之前",
+        "type": "return_value",
+        "expected": "<style> 在 <script> 之前"
+      }
+    ]
+  }
+}

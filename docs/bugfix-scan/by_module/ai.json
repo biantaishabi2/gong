@@ -1,0 +1,317 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "ai",
+  "spec_count": 5,
+  "specs": [
+    {
+      "action": "buildBaseOptions",
+      "boundary": "service",
+      "bug_summary": "buildBaseOptions 未透传 cacheRetention，导致上游缓存保留策略配置失效",
+      "correct_behavior": "返回基础选项时正确包含并透传 options.cacheRetention",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在返回的基础选项中新增 cacheRetention: options?.cacheRetention 透传",
+      "module": "ai",
+      "source_commit": "8f7ef85833c3e590ed862e76a25f209fd9b28623",
+      "test_spec": {
+        "args": {
+          "apiKey": {
+            "allowed": null,
+            "required": false,
+            "type": "string"
+          },
+          "model": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          },
+          "options": {
+            "allowed": null,
+            "required": false,
+            "type": "json"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "stream_options.cacheRetention === options.cacheRetention",
+            "type": "return_value",
+            "what": "当 options.cacheRetention 提供时，返回结果包含同值 cacheRetention"
+          },
+          {
+            "expected": "stream_options.cacheRetention === undefined",
+            "type": "return_value",
+            "what": "未提供 options.cacheRetention 时，返回结果的 cacheRetention 为 undefined"
+          }
+        ],
+        "outputs": {
+          "cacheRetention": "string",
+          "stream_options": "json"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "存在可用模型对象且包含 maxTokens 配置"
+          }
+        ],
+        "trigger": {
+          "method": "buildBaseOptions",
+          "target": "simple-options",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "返回基础选项时丢失 options.cacheRetention"
+    },
+    {
+      "action": "package_entry_exports",
+      "boundary": "service",
+      "bug_summary": "ai 包未导出 TypeBox 符号，导致下游扩展示例与实际 API 不一致并产生导入错误",
+      "correct_behavior": "下游代码统一从 @mariozechner/pi-ai 获取 Type、Static、TSchema，示例与公共 API 一致",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "在 packages/ai/src/index.ts 中新增导出 Static、TSchema 与 Type，并将 hello 示例改为从 @mariozechner/pi-ai 导入 Type",
+      "module": "ai",
+      "source_commit": "0232c4406468d6737ba8230ef553eb1c20a62bd2",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "type_export_available=true",
+            "type": "return_value",
+            "what": "@mariozechner/pi-ai 可直接导出 Type"
+          },
+          {
+            "expected": "static_type_export_available=true && tschema_type_export_available=true",
+            "type": "return_value",
+            "what": "@mariozechner/pi-ai 可导出 Static 与 TSchema 类型"
+          },
+          {
+            "expected": "hello_example_import_source='@mariozechner/pi-ai' 且编译成功",
+            "type": "return_value",
+            "what": "hello 示例从 @mariozechner/pi-ai 导入 Type 后可通过类型检查/构建"
+          }
+        ],
+        "outputs": {
+          "hello_example_import_source": "string",
+          "static_type_export_available": "bool",
+          "tschema_type_export_available": "bool",
+          "type_export_available": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "已安装并可解析本地工作区包 @mariozechner/pi-ai 与 @mariozechner/pi-coding-agent"
+          },
+          {
+            "involves": "file",
+            "what": "示例文件 packages/coding-agent/examples/extensions/hello.ts 使用 Type 构建 schema"
+          }
+        ],
+        "trigger": {
+          "method": "module_export_resolution",
+          "target": "@mariozechner/pi-ai",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "下游代码需直接依赖 @sinclair/typebox 或出现“Type 未导出/导入来源不一致”问题"
+    },
+    {
+      "action": "buildParams",
+      "boundary": "service",
+      "bug_summary": "OpenAI Responses 请求参数未显式禁用存储，导致默认可能开启服务端存储",
+      "correct_behavior": "请求参数显式设置 store=false，默认禁用存储",
+      "data_dependencies": [
+        "config",
+        "session"
+      ],
+      "fix_summary": "在 openai-responses 参数构建中新增 `store: false`，默认禁用存储",
+      "module": "ai",
+      "source_commit": "d1fce2ba1d5784e76341d44c4fdd9dcfe683e57f",
+      "test_spec": {
+        "args": {
+          "context": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          },
+          "model": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          },
+          "options": {
+            "allowed": null,
+            "required": false,
+            "type": "json"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "store=false",
+            "type": "response_field",
+            "what": "构建出的请求参数包含 store 且值为 false"
+          },
+          {
+            "expected": "stream=true",
+            "type": "response_field",
+            "what": "其余关键参数仍正常保留（如 stream=true）"
+          }
+        ],
+        "outputs": {
+          "params": "json",
+          "store": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "模型提供方为 openai-responses 且可发起 Responses 请求"
+          },
+          {
+            "involves": "session",
+            "what": "存在会话上下文可生成请求参数"
+          }
+        ],
+        "trigger": {
+          "method": "buildParams",
+          "target": "openai-responses",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "请求参数未设置 store，导致默认存储行为未被禁用"
+    },
+    {
+      "action": "antigravity_request",
+      "boundary": "service",
+      "bug_summary": "Antigravity 请求头中的 User-Agent 版本过旧，导致与沙箱端点协议不匹配并可能请求失败",
+      "correct_behavior": "请求使用新值 antigravity/1.15.8 darwin/arm64",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 ANTIGRAVITY_HEADERS 的 User-Agent 从 antigravity/1.11.5 darwin/arm64 更新为 antigravity/1.15.8 darwin/arm64（含 provider 与示例扩展）",
+      "module": "ai",
+      "source_commit": "52532c7c008102d2555d2ecc49a120dd7741c879",
+      "test_spec": {
+        "args": {
+          "endpoint": {
+            "allowed": [
+              "https://daily-cloudcode-pa.sandbox.googleapis.com"
+            ],
+            "required": true,
+            "type": "string"
+          },
+          "headers": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          },
+          "payload": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "headers.User-Agent=antigravity/1.15.8 darwin/arm64",
+            "type": "service_call",
+            "what": "出站请求头 User-Agent 为 antigravity/1.15.8 darwin/arm64"
+          },
+          {
+            "expected": "headers.User-Agent!=antigravity/1.11.5 darwin/arm64",
+            "type": "service_call",
+            "what": "不再出现旧版本 User-Agent"
+          }
+        ],
+        "outputs": {
+          "http_status": "int",
+          "response_body": "json"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "服务已加载 Antigravity 请求头配置"
+          },
+          {
+            "involves": "config",
+            "what": "可向 Antigravity sandbox endpoint 发起请求"
+          }
+        ],
+        "trigger": {
+          "method": "request",
+          "target": "GoogleGeminiCliProvider",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "请求使用旧值 antigravity/1.11.5 darwin/arm64"
+    },
+    {
+      "action": "detectCompat",
+      "boundary": "service",
+      "bug_summary": "兼容性检测未识别 DeepSeek 域名，导致其被错误地走到支持 developer role 的路径",
+      "correct_behavior": "baseUrl 包含 deepseek.com 时被识别为兼容提供方，并禁用不支持的 developer role",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 detectCompat 中新增 baseUrl.includes(\"deepseek.com\")，将 DeepSeek URL 纳入兼容检测并关闭不支持的 developer role",
+      "module": "ai",
+      "source_commit": "4f9deddd477dfbcb39d6274751cd1b44b7507aff",
+      "test_spec": {
+        "args": {
+          "baseUrl": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "model": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          },
+          "provider": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "is_compat_provider=true",
+            "type": "return_value",
+            "what": "当 baseUrl 包含 deepseek.com 时应判定为兼容提供方"
+          },
+          {
+            "expected": "compat 中 developer role 标记为禁用",
+            "type": "return_value",
+            "what": "DeepSeek 场景下禁用不支持的 developer role"
+          }
+        ],
+        "outputs": {
+          "compat": "json",
+          "is_compat_provider": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "AI 提供方配置可传入自定义 baseUrl"
+          },
+          {
+            "involves": "config",
+            "what": "请求模型信息包含 provider 与 baseUrl"
+          }
+        ],
+        "trigger": {
+          "method": "detectCompat",
+          "target": "openai-completions",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "baseUrl 为 DeepSeek 时未被识别为兼容提供方，developer role 未被禁用"
+    }
+  ]
+}

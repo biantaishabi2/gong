@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/theme/theme.ts b/packages/coding-agent/src/modes/interactive/theme/theme.ts\nindex 97a7a691..ae43e14a 100644\n--- a/packages/coding-agent/src/modes/interactive/theme/theme.ts\n+++ b/packages/coding-agent/src/modes/interactive/theme/theme.ts\n@@ -166,10 +166,14 @@ function detectColorMode(): ColorMode {\n \t\treturn \"truecolor\";\n \t}\n \tconst term = process.env.TERM || \"\";\n-\t// Only fall back to 256color for truly limited terminals\n+\t// Fall back to 256color for truly limited terminals\n \tif (term === \"dumb\" || term === \"\" || term === \"linux\") {\n \t\treturn \"256color\";\n \t}\n+\t// Terminal.app also doesn't support truecolor\n+\tif (process.env.TERM_PROGRAM === \"Apple_Terminal\") {\n+\t\treturn \"256color\";\n+\t}\n \t// Assume truecolor for everything else - virtually all modern terminals support it\n \treturn \"truecolor\";\n }\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "236285b3909bc1bc7f16f74d1e337576ffbb18e2",
+  "message": "fix(coding-agent): fall back to 256color in Terminal.app (#869)",
+  "module": "theme",
+  "tags": []
+}

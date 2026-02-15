@@ -1,0 +1,51 @@
+{
+  "action": "doRender",
+  "boundary": "service",
+  "bug_summary": "TUI 在调用 stop() 后仍可能继续执行 doRender()，导致退出后终端内容被再次覆盖或产生渲染伪影",
+  "correct_behavior": "调用 stop() 后，doRender() 立即返回不执行渲染；再次 start() 后恢复正常渲染",
+  "data_dependencies": [],
+  "fix_summary": "新增 stopped 状态位；start() 时重置为 false，stop() 时置为 true，并在 doRender() 开头短路返回",
+  "module": "tui",
+  "source_commit": "836e852af178a6f6b49fffea8ce4e6440f2c60cb",
+  "test_spec": {
+    "args": {},
+    "assertions": [
+      {
+        "expected": "render_executed=false",
+        "type": "state",
+        "what": "stop() 之后调用 doRender() 不再进入渲染主体"
+      },
+      {
+        "expected": "terminal_buffer_changed=false",
+        "type": "state",
+        "what": "stop() 之后终端缓冲区不再被 doRender() 改写"
+      },
+      {
+        "expected": "render_executed=true",
+        "type": "state",
+        "what": "重新调用 start() 后 stopped 被重置，后续 doRender() 可正常执行"
+      }
+    ],
+    "outputs": {
+      "render_executed": "bool",
+      "terminal_buffer_changed": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "TUI 实例已初始化并启动过渲染循环"
+      },
+      {
+        "involves": "session",
+        "what": "存在一次已排队但尚未执行的渲染请求"
+      }
+    ],
+    "trigger": {
+      "method": "doRender",
+      "target": "TUI",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "调用 stop() 后，异步/延迟触发的 doRender() 仍会继续执行并写入终端"
+}

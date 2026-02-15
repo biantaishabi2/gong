@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/session-selector.ts b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\nindex 191066d8..ec156a73 100644\n--- a/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n@@ -95,7 +95,9 @@ class SessionSelectorHeader implements Component {\n \t\tconst availableLeft = Math.max(0, width - visibleWidth(rightText) - 1);\n \t\tconst left = truncateToWidth(leftText, availableLeft, \"\");\n \t\tconst spacing = Math.max(0, width - visibleWidth(left) - visibleWidth(rightText));\n-\t\tconst hint = theme.fg(\"muted\", 'Tab: scope · Ctrl+R: sort · re:<pattern> for regex · \"phrase\" for exact phrase');\n+\t\tconst hintText = 'Tab: scope · Ctrl+R: sort · re:<pattern> for regex · \"phrase\" for exact phrase';\n+\t\tconst truncatedHint = truncateToWidth(hintText, width, \"…\");\n+\t\tconst hint = theme.fg(\"muted\", truncatedHint);\n \t\treturn [`${left}${\" \".repeat(spacing)}${rightText}`, hint];\n \t}\n }\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "588399594c36cf4ee5bb04d4ab9e8220adc66b5f",
+  "message": "Fix session picker hint overflow (closes #764)",
+  "module": "session-selector",
+  "tags": []
+}

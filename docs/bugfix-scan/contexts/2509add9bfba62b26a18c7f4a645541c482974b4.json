@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/tui-renderer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/tui-renderer.ts b/packages/coding-agent/src/tui/tui-renderer.ts\nindex 0269b6a4..1dcd7582 100644\n--- a/packages/coding-agent/src/tui/tui-renderer.ts\n+++ b/packages/coding-agent/src/tui/tui-renderer.ts\n@@ -429,7 +429,6 @@ export class TuiRenderer {\n \n \tclearEditor(): void {\n \t\tthis.editor.setText(\"\");\n-\t\tthis.statusContainer.clear();\n \t\tthis.ui.requestRender();\n \t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2509add9bfba62b26a18c7f4a645541c482974b4",
+  "message": "fix: don't clear loading animation when Ctrl+C clears editor",
+  "module": "tui-renderer",
+  "tags": []
+}

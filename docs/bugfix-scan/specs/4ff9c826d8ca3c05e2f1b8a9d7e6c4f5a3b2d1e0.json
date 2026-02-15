@@ -1,0 +1,44 @@
+{
+  "source_commit": "4ff9c826d8ca3c05e2f1b8a9d7e6c4f5a3b2d1e0",
+  "bug_summary": "上下文占比计算选中了最近一条 aborted assistant 消息，该消息无 token 信息导致显示 0%",
+  "module": "footer",
+  "action": "calculate_context_percent",
+  "fix_summary": "查找最后一条 assistant 消息时增加 stopReason !== 'aborted' 过滤条件",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "最近消息是 aborted 时上下文占比显示 0%",
+  "correct_behavior": "跳过 aborted 消息，使用最近的非 aborted assistant 消息计算占比",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "消息历史中最近一条 assistant 消息的 stopReason 为 'aborted'",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "footer",
+      "method": "getContextPercent"
+    },
+    "args": {},
+    "outputs": {
+      "percent": "int",
+      "selectedMessage": "object"
+    },
+    "assertions": [
+      {
+        "what": "跳过 aborted 消息",
+        "type": "return_value",
+        "expected": "selectedMessage.stopReason !== 'aborted'"
+      },
+      {
+        "what": "占比不为 0（有有效消息时）",
+        "type": "return_value",
+        "expected": "percent > 0"
+      }
+    ]
+  }
+}

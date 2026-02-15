@@ -1,0 +1,36 @@
+{
+  "source_commit": "bfe7df6a491b59e220e4f58a1fcd75e4dc465b67",
+  "bug_summary": "函数参数 toolName/source 未使用但未加下划线前缀，触发 Biome unused parameter 告警",
+  "module": "agent",
+  "action": "lint_compliance",
+  "fix_summary": "将未使用参数 toolName 和 source 重命名为 _toolName 和 _source",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Biome lint 报 unused-parameters 告警",
+  "correct_behavior": "参数以 _ 前缀命名，lint 通过",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Biome linter 已配置 unused-parameters 规则",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "agent",
+      "method": "lint"
+    },
+    "args": {},
+    "outputs": {
+      "warnings": "number"
+    },
+    "assertions": [
+      {
+        "what": "无 unused-parameters 告警",
+        "type": "return_value",
+        "expected": "lint warnings for unused-parameters === 0"
+      }
+    ]
+  }
+}

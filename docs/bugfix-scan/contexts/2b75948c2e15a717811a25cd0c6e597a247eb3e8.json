@@ -1,0 +1,21 @@
+{
+  "diffs": [
+    {
+      "file": "packages/agent/src/proxy.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/agent/src/proxy.ts b/packages/agent/src/proxy.ts\nindex ba098cd6..dfa72c73 100644\n--- a/packages/agent/src/proxy.ts\n+++ b/packages/agent/src/proxy.ts\n@@ -3,18 +3,18 @@\n  * The server manages auth and proxies requests to LLM providers.\n  */\n \n+// Internal import for JSON parsing utility\n import {\n \ttype AssistantMessage,\n \ttype AssistantMessageEvent,\n \ttype Context,\n \tEventStream,\n \ttype Model,\n+\tparseStreamingJson,\n \ttype SimpleStreamOptions,\n \ttype StopReason,\n \ttype ToolCall,\n } from \"@mariozechner/pi-ai\";\n-// Internal import for JSON parsing utility\n-import { parseStreamingJson } from \"@mariozechner/pi-ai/dist/utils/json-parse.js\";\n \n // Create stream class matching ProxyMessageEventStream\n class ProxyMessageEventStream extends EventStream<AssistantMessageEvent, AssistantMessage> {\n"
+    },
+    {
+      "file": "packages/ai/src/index.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/index.ts b/packages/ai/src/index.ts\nindex 73a56538..67f94618 100644\n--- a/packages/ai/src/index.ts\n+++ b/packages/ai/src/index.ts\n@@ -9,6 +9,7 @@ export * from \"./providers/openai-responses.js\";\n export * from \"./stream.js\";\n export * from \"./types.js\";\n export * from \"./utils/event-stream.js\";\n+export * from \"./utils/json-parse.js\";\n export * from \"./utils/oauth/index.js\";\n export * from \"./utils/overflow.js\";\n export * from \"./utils/typebox-helpers.js\";\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2b75948c2e15a717811a25cd0c6e597a247eb3e8",
+  "message": "fix(ai): export parseStreamingJson from main package for tsx compatibility",
+  "module": "proxy",
+  "tags": [
+    "export"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "4de46fbab360e2ce9ab2d8f1c7b3e5a4d6f0c9e8",
+  "bug_summary": "autocomplete 中 execSync 调用未将 stdio 设为 pipe，子进程 stderr 直接输出到终端污染 TUI",
+  "module": "autocomplete",
+  "action": "detect_fd_binary",
+  "fix_summary": "所有 execSync 调用增加 stdio: 'pipe' 或 stdio: ['pipe','pipe','pipe']，捕获 stderr",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "fd/fdfind 检测失败时 stderr 消息直接输出到 TUI，破坏显示",
+  "correct_behavior": "stderr 被 pipe 捕获，不影响 TUI 显示",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "系统可能未安装 fd/fdfind",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "autocomplete",
+      "method": "detectFdBinary"
+    },
+    "args": {},
+    "outputs": {
+      "stderr_captured": "bool"
+    },
+    "assertions": [
+      {
+        "what": "execSync 使用 stdio pipe 模式",
+        "type": "return_value",
+        "expected": "所有 execSync 调用包含 stdio: 'pipe'"
+      },
+      {
+        "what": "stderr 不输出到 TUI",
+        "type": "return_value",
+        "expected": "stderr_captured === true"
+      }
+    ]
+  }
+}

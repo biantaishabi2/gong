@@ -1,0 +1,16 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/editor.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/editor.ts b/packages/tui/src/components/editor.ts\nindex 3c28e1fb..ed173937 100644\n--- a/packages/tui/src/components/editor.ts\n+++ b/packages/tui/src/components/editor.ts\n@@ -1,4 +1,3 @@\n-import assert from \"node:assert\";\n import type { AutocompleteProvider, CombinedAutocompleteProvider } from \"../autocomplete.js\";\n import { getEditorKeybindings } from \"../keybindings.js\";\n import { matchesKey } from \"../keys.js\";\n@@ -1621,8 +1620,7 @@ export class Editor implements Component, Focusable {\n \t\tthis.deleteYankedText();\n \n \t\t// Rotate the ring: move end to front\n-\t\tconst lastEntry = this.killRing.pop();\n-\t\tassert(lastEntry !== undefined); // Since killRing was not empty\n+\t\tconst lastEntry = this.killRing.pop()!;\n \t\tthis.killRing.unshift(lastEntry);\n \n \t\t// Insert the new most recent entry (now at end after rotation)\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "6bde679a5f5818c6915f52794bf209300f52786e",
+  "message": "fix(tui): use the non-null assertion operator instead of assert()",
+  "module": "editor",
+  "tags": [
+    "null_safety"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/index.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/index.ts b/packages/web-ui/src/index.ts\nindex cff990b0..c65d890d 100644\n--- a/packages/web-ui/src/index.ts\n+++ b/packages/web-ui/src/index.ts\n@@ -7,6 +7,7 @@ export { ChatPanel } from \"./ChatPanel.js\";\n export { AgentInterface } from \"./components/AgentInterface.js\";\n export { AttachmentTile } from \"./components/AttachmentTile.js\";\n export { ConsoleBlock } from \"./components/ConsoleBlock.js\";\n+export { CustomProviderCard } from \"./components/CustomProviderCard.js\";\n export { ExpandableSection } from \"./components/ExpandableSection.js\";\n export { Input } from \"./components/Input.js\";\n export { MessageEditor } from \"./components/MessageEditor.js\";\n@@ -14,12 +15,14 @@ export { MessageList } from \"./components/MessageList.js\";\n // Message components\n export type { ArtifactMessage, UserMessageWithAttachments } from \"./components/Messages.js\";\n export {\n+\tAbortedMessage,\n \tAssistantMessage,\n \tconvertAttachments,\n \tdefaultConvertToLlm,\n \tisArtifactMessage,\n \tisUserMessageWithAttachments,\n \tToolMessage,\n+\tToolMessageDebugView,\n \tUserMessage,\n } from \"./components/Messages.js\";\n // Message renderer registry\n@@ -30,6 +33,7 @@ export {\n \tregisterMessageRenderer,\n \trenderMessage,\n } from \"./components/message-renderer-registry.js\";\n+export { ProviderKeyInput } from \"./components/ProviderKeyInput.js\";\n export {\n \ttype SandboxFile,\n \tSandboxIframe,\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "dd854c4a75d3d096c38e3a2fa0b51313ce5db981",
+  "message": "feat(web-ui): export CustomProviderCard, ProviderKeyInput, AbortedMessage, ToolMessageDebugView (fixes #1015)",
+  "module": "web-ui",
+  "tags": [
+    "export"
+  ]
+}

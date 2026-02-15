@@ -1,0 +1,42 @@
+{
+  "source_commit": "d97a96493cd72e1a8a552fe46ca48e207ca193b9",
+  "bug_summary": "visibleWidth 未剥离 OSC 8 超链接序列，含超链接的文本宽度计算错误",
+  "module": "utils",
+  "action": "visibleWidth",
+  "fix_summary": "在 clean 步骤中添加 \\x1b]8;;...\\x07 的正则剥离",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "含 OSC 8 超链接的文本返回过大的可见宽度",
+  "correct_behavior": "OSC 8 序列被剥离，visibleWidth 返回纯文本可见宽度",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "文本包含 OSC 8 超链接转义序列",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "utils",
+      "method": "visibleWidth"
+    },
+    "args": {
+      "text": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "width": "number"
+    },
+    "assertions": [
+      {
+        "what": "OSC 8 不计入宽度",
+        "type": "return_value",
+        "expected": "visibleWidth(osc8Text) === visibleWidth(plainText)"
+      }
+    ]
+  }
+}

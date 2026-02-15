@@ -1,0 +1,43 @@
+{
+  "source_commit": "3266cac0f1b156e63fc8d25e8b3dc5d55abb9b3a",
+  "bug_summary": "footer stats 整行包在一次 dim 中，statsLeft 内部颜色 reset 提前清除 dim，右侧信息不再变暗",
+  "module": "footer",
+  "action": "render_footer_stats",
+  "fix_summary": "拆分 dim 着色：statsLeft 和 statsRight 分别独立 dim，避免内部 color reset 影响外层",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "footer 右侧信息（模型、token）不变暗，视觉不一致",
+  "correct_behavior": "footer 左右两侧均正确应用 dim 效果",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "footer stats 包含带颜色的 context usage 百分比",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "footer",
+      "method": "render"
+    },
+    "args": {},
+    "outputs": {
+      "lines": "array"
+    },
+    "assertions": [
+      {
+        "what": "statsRight 部分有 dim 样式",
+        "type": "return_value",
+        "expected": "statsRight 被 theme.fg('dim') 包裹"
+      },
+      {
+        "what": "statsLeft 内部颜色 reset 不影响 statsRight",
+        "type": "return_value",
+        "expected": "右侧 dim 效果独立于左侧颜色"
+      }
+    ]
+  }
+}

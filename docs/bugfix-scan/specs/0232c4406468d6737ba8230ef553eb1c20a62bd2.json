@@ -1,0 +1,55 @@
+{
+  "action": "package_entry_exports",
+  "boundary": "service",
+  "bug_summary": "ai 包未导出 TypeBox 符号，导致下游扩展示例与实际 API 不一致并产生导入错误",
+  "correct_behavior": "下游代码统一从 @mariozechner/pi-ai 获取 Type、Static、TSchema，示例与公共 API 一致",
+  "data_dependencies": [
+    "file"
+  ],
+  "fix_summary": "在 packages/ai/src/index.ts 中新增导出 Static、TSchema 与 Type，并将 hello 示例改为从 @mariozechner/pi-ai 导入 Type",
+  "module": "ai",
+  "source_commit": "0232c4406468d6737ba8230ef553eb1c20a62bd2",
+  "test_spec": {
+    "args": {},
+    "assertions": [
+      {
+        "expected": "type_export_available=true",
+        "type": "return_value",
+        "what": "@mariozechner/pi-ai 可直接导出 Type"
+      },
+      {
+        "expected": "static_type_export_available=true && tschema_type_export_available=true",
+        "type": "return_value",
+        "what": "@mariozechner/pi-ai 可导出 Static 与 TSchema 类型"
+      },
+      {
+        "expected": "hello_example_import_source='@mariozechner/pi-ai' 且编译成功",
+        "type": "return_value",
+        "what": "hello 示例从 @mariozechner/pi-ai 导入 Type 后可通过类型检查/构建"
+      }
+    ],
+    "outputs": {
+      "hello_example_import_source": "string",
+      "static_type_export_available": "bool",
+      "tschema_type_export_available": "bool",
+      "type_export_available": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "file",
+        "what": "已安装并可解析本地工作区包 @mariozechner/pi-ai 与 @mariozechner/pi-coding-agent"
+      },
+      {
+        "involves": "file",
+        "what": "示例文件 packages/coding-agent/examples/extensions/hello.ts 使用 Type 构建 schema"
+      }
+    ],
+    "trigger": {
+      "method": "module_export_resolution",
+      "target": "@mariozechner/pi-ai",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "下游代码需直接依赖 @sinclair/typebox 或出现“Type 未导出/导入来源不一致”问题"
+}

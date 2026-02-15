@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/google.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/google.ts b/packages/ai/src/providers/google.ts\nindex 3c5a6c8c..659dd5b1 100644\n--- a/packages/ai/src/providers/google.ts\n+++ b/packages/ai/src/providers/google.ts\n@@ -266,9 +266,10 @@ function createClient(model: Model<\"google-generative-ai\">, apiKey?: string): Go\n \t\tapiKey = process.env.GEMINI_API_KEY;\n \t}\n \n-\tconst httpOptions: { baseUrl?: string; headers?: Record<string, string> } = {};\n+\tconst httpOptions: { baseUrl?: string; apiVersion?: string; headers?: Record<string, string> } = {};\n \tif (model.baseUrl) {\n \t\thttpOptions.baseUrl = model.baseUrl;\n+\t\thttpOptions.apiVersion = \"\"; // baseUrl already includes version path, don't append\n \t}\n \tif (model.headers) {\n \t\thttpOptions.headers = model.headers;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "6ff405a976b4a0188ef4a46ffc0a140744e4352a",
+  "message": "fix(ai): prevent double API version path in Google provider URL",
+  "module": "google",
+  "tags": []
+}

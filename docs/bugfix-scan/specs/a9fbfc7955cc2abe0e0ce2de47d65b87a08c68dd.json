@@ -1,0 +1,49 @@
+{
+  "source_commit": "a9fbfc7955cc2abe0e0ce2de47d65b87a08c68dd",
+  "bug_summary": "HTML 导出在未指定 themeName 时回退到默认主题而非使用当前激活主题",
+  "module": "theme",
+  "action": "getResolvedThemeColors",
+  "fix_summary": "将回退链从 themeName ?? getDefaultTheme() 改为 themeName ?? currentThemeName ?? getDefaultTheme()",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "未指定主题时使用 getDefaultTheme()，忽略用户当前激活的 currentThemeName",
+  "correct_behavior": "优先使用 currentThemeName，仅在都为空时才回退到 getDefaultTheme()",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "currentThemeName 为 dark，getDefaultTheme() 返回 light",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "theme",
+      "method": "getResolvedThemeColors"
+    },
+    "args": {
+      "themeName": {
+        "type": "string|null",
+        "required": false,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "resolved_theme": "string"
+    },
+    "assertions": [
+      {
+        "what": "未指定时使用当前主题",
+        "type": "return_value",
+        "expected": "resolved === currentThemeName when themeName is null"
+      },
+      {
+        "what": "指定时使用指定主题",
+        "type": "return_value",
+        "expected": "resolved === themeName when provided"
+      }
+    ]
+  }
+}

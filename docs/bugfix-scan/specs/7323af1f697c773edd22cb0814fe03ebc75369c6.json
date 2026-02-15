@@ -1,0 +1,43 @@
+{
+  "source_commit": "7323af1f697c773edd22cb0814fe03ebc75369c6",
+  "bug_summary": "非交互打印模式执行完成后未停止 theme watcher，进程被文件监听器持续占用无法退出",
+  "module": "coding-agent",
+  "action": "runPrintMode",
+  "fix_summary": "在打印模式完成后调用 stopThemeWatcher() 并 process.exit(0)，确保进程干净退出",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "打印模式完成后进程不退出，theme file watcher 保持进程存活",
+  "correct_behavior": "打印模式完成后调用 stopThemeWatcher() 并 process.exit(0)",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "CLI 以 --print 模式运行，theme watcher 已初始化",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent/main",
+      "method": "runPrintMode"
+    },
+    "args": {},
+    "outputs": {
+      "process_exited": "bool"
+    },
+    "assertions": [
+      {
+        "what": "stopThemeWatcher 被调用",
+        "type": "side_effect",
+        "expected": "stopThemeWatcher() called before exit"
+      },
+      {
+        "what": "进程以 0 退出",
+        "type": "side_effect",
+        "expected": "process.exit(0) called"
+      }
+    ]
+  }
+}

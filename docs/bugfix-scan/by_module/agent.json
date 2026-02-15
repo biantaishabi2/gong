@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "agent",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "remove_debug_file",
+      "boundary": "service",
+      "bug_summary": "agent.ts 运行时将系统提示和用户消息额外写入 last_prompt.txt 调试文件，产生非权威数据源",
+      "correct_behavior": "不再生成 last_prompt.txt，context.jsonl 作为唯一事实源",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "移除 writeFile('last_prompt.txt') 调试代码和 writeFile import",
+      "module": "agent",
+      "source_commit": "5a231abe4c93e5d2b1f0a3c4b6d7e8f9a0b1c2d3",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "debug_file_exists === false",
+            "type": "return_value",
+            "what": "不生成 last_prompt.txt"
+          },
+          {
+            "expected": "import 中无 writeFile",
+            "type": "return_value",
+            "what": "writeFile 导入已移除"
+          }
+        ],
+        "outputs": {
+          "debug_file_exists": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "agent 执行会话"
+          }
+        ],
+        "trigger": {
+          "method": "runConversation",
+          "target": "agent",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "每次运行产生 last_prompt.txt 文件，与 context.jsonl 数据源不一致"
+    },
+    {
+      "action": "lint_compliance",
+      "boundary": "service",
+      "bug_summary": "函数参数 toolName/source 未使用但未加下划线前缀，触发 Biome unused parameter 告警",
+      "correct_behavior": "参数以 _ 前缀命名，lint 通过",
+      "data_dependencies": [],
+      "fix_summary": "将未使用参数 toolName 和 source 重命名为 _toolName 和 _source",
+      "module": "agent",
+      "source_commit": "bfe7df6a491b59e220e4f58a1fcd75e4dc465b67",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "lint warnings for unused-parameters === 0",
+            "type": "return_value",
+            "what": "无 unused-parameters 告警"
+          }
+        ],
+        "outputs": {
+          "warnings": "number"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "Biome linter 已配置 unused-parameters 规则"
+          }
+        ],
+        "trigger": {
+          "method": "lint",
+          "target": "agent",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Biome lint 报 unused-parameters 告警"
+    }
+  ]
+}

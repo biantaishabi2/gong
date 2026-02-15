@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex d815c7ae..bf256818 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1575,7 +1575,7 @@ export class InteractiveMode {\n \t\t\t\tcustomEditor.onEscape = this.defaultEditor.onEscape;\n \t\t\t\tcustomEditor.onCtrlD = this.defaultEditor.onCtrlD;\n \t\t\t\tcustomEditor.onPasteImage = this.defaultEditor.onPasteImage;\n-\t\t\t\tcustomEditor.onExtensionShortcut = this.defaultEditor.onExtensionShortcut;\n+\t\t\t\tcustomEditor.onExtensionShortcut = (data: string) => this.defaultEditor.onExtensionShortcut?.(data);\n \t\t\t\t// Copy action handlers (clear, suspend, model switching, etc.)\n \t\t\t\tfor (const [action, handler] of this.defaultEditor.actionHandlers) {\n \t\t\t\t\t(customEditor.actionHandlers as Map<string, () => void>).set(action, handler);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "f1b1d54955370247d85a9528f076b29d68580d82",
+  "message": "fix(coding-agent): delegate extension shortcuts instead of copying (#947)",
+  "module": "interactive-mode",
+  "tags": []
+}

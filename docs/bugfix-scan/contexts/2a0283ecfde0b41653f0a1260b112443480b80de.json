@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/google-gemini-cli.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/google-gemini-cli.ts b/packages/ai/src/providers/google-gemini-cli.ts\nindex c95c7673..59ee332e 100644\n--- a/packages/ai/src/providers/google-gemini-cli.ts\n+++ b/packages/ai/src/providers/google-gemini-cli.ts\n@@ -335,12 +335,15 @@ export const streamGoogleGeminiCli: StreamFunction<\"google-gemini-cli\"> = (\n \t\t\t\t\t}\n \n \t\t\t\t\tif (responseData.usageMetadata) {\n+\t\t\t\t\t\t// promptTokenCount includes cachedContentTokenCount, so subtract to get fresh input\n+\t\t\t\t\t\tconst promptTokens = responseData.usageMetadata.promptTokenCount || 0;\n+\t\t\t\t\t\tconst cacheReadTokens = responseData.usageMetadata.cachedContentTokenCount || 0;\n \t\t\t\t\t\toutput.usage = {\n-\t\t\t\t\t\t\tinput: responseData.usageMetadata.promptTokenCount || 0,\n+\t\t\t\t\t\t\tinput: promptTokens - cacheReadTokens,\n \t\t\t\t\t\t\toutput:\n \t\t\t\t\t\t\t\t(responseData.usageMetadata.candidatesTokenCount || 0) +\n \t\t\t\t\t\t\t\t(responseData.usageMetadata.thoughtsTokenCount || 0),\n-\t\t\t\t\t\t\tcacheRead: responseData.usageMetadata.cachedContentTokenCount || 0,\n+\t\t\t\t\t\t\tcacheRead: cacheReadTokens,\n \t\t\t\t\t\t\tcacheWrite: 0,\n \t\t\t\t\t\t\ttotalTokens: responseData.usageMetadata.totalTokenCount || 0,\n \t\t\t\t\t\t\tcost: {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2a0283ecfde0b41653f0a1260b112443480b80de",
+  "message": "Fix token counts in google-gemini-cli.ts for anthropic models.",
+  "module": "google-gemini-cli",
+  "tags": []
+}

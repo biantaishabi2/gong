@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/tools/artifacts/artifacts-tool-renderer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/tools/artifacts/artifacts-tool-renderer.ts b/packages/web-ui/src/tools/artifacts/artifacts-tool-renderer.ts\nindex 0237662f..980d7e65 100644\n--- a/packages/web-ui/src/tools/artifacts/artifacts-tool-renderer.ts\n+++ b/packages/web-ui/src/tools/artifacts/artifacts-tool-renderer.ts\n@@ -55,7 +55,7 @@ export class ArtifactsToolRenderer implements ToolRenderer<ArtifactsParams, unde\n \t\tresult: ToolResultMessage<undefined> | undefined,\n \t\tisStreaming?: boolean,\n \t): TemplateResult {\n-\t\tconst state = result ? (result.isError ? \"error\" : \"complete\") : isStreaming ? \"inprogress\" : \"inprogress\";\n+\t\tconst state = result ? (result.isError ? \"error\" : \"complete\") : isStreaming ? \"inprogress\" : \"complete\";\n \n \t\t// Create refs for collapsible sections\n \t\tconst contentRef = createRef<HTMLDivElement>();\n"
+    },
+    {
+      "file": "packages/web-ui/src/tools/javascript-repl.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/tools/javascript-repl.ts b/packages/web-ui/src/tools/javascript-repl.ts\nindex b5329493..d423b5a6 100644\n--- a/packages/web-ui/src/tools/javascript-repl.ts\n+++ b/packages/web-ui/src/tools/javascript-repl.ts\n@@ -253,7 +253,7 @@ export const javascriptReplRenderer: ToolRenderer<JavaScriptReplParams, JavaScri\n \t\tisStreaming?: boolean,\n \t): TemplateResult {\n \t\t// Determine status\n-\t\tconst state = result ? (result.isError ? \"error\" : \"complete\") : isStreaming ? \"inprogress\" : \"inprogress\";\n+\t\tconst state = result ? (result.isError ? \"error\" : \"complete\") : isStreaming ? \"inprogress\" : \"complete\";\n \n \t\t// Create refs for collapsible code section\n \t\tconst codeContentRef = createRef<HTMLDivElement>();\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "b3cce7b400730b2143e7b1a7338f4f28db92c9fe",
+  "message": "Fix spinner showing on aborted tool calls in javascript-repl and artifacts renderers",
+  "module": "artifacts-tool-renderer",
+  "tags": []
+}

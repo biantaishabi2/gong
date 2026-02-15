@@ -1,0 +1,50 @@
+{
+  "source_commit": "d2088f7789c37b365f8faef7ec839849d4d7fcd7",
+  "bug_summary": "mapStopReason 未覆盖 IMAGE_RECITATION 和 IMAGE_OTHER FinishReason",
+  "module": "google",
+  "action": "mapStopReason",
+  "fix_summary": "在 switch case 中添加 IMAGE_RECITATION 和 IMAGE_OTHER 映射",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "IMAGE_RECITATION/IMAGE_OTHER 未匹配，映射到默认值",
+  "correct_behavior": "IMAGE_RECITATION/IMAGE_OTHER 与其他图片安全原因一样被正确映射",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Google API 返回 IMAGE_RECITATION 或 IMAGE_OTHER 结束原因",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "google",
+      "method": "mapStopReason"
+    },
+    "args": {
+      "finishReason": {
+        "type": "string",
+        "required": true,
+        "allowed": [
+          "IMAGE_RECITATION",
+          "IMAGE_OTHER"
+        ]
+      }
+    },
+    "outputs": {
+      "stopReason": "string"
+    },
+    "assertions": [
+      {
+        "what": "IMAGE_RECITATION 正确映射",
+        "type": "return_value",
+        "expected": "mapStopReason(IMAGE_RECITATION) 有有效映射"
+      },
+      {
+        "what": "IMAGE_OTHER 正确映射",
+        "type": "return_value",
+        "expected": "mapStopReason(IMAGE_OTHER) 有有效映射"
+      }
+    ]
+  }
+}

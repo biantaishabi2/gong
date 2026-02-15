@@ -1,0 +1,35 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+      "hunks": [
+        {
+          "after_function": "export function getResolvedThemeColors(themeName?: string): Record<string, string> {\n\tconst name = themeName ?? currentThemeName ?? getDefaultTheme();\n\tconst isLight = name === \"light\";\n\tconst themeJson = loadThemeJson(name);\n\tconst resolved = resolveThemeColors(themeJson.colors, themeJson.vars);\n\n\t// Default text color for empty values (terminal uses default fg color)\n\tconst defaultText = isLight ? \"#000000\" : \"#e5e5e7\";\n\n\tconst cssColors: Record<string, string> = {};\n\tfor (const [key, value] of Object.entries(resolved)) {\n\t\tif (typeof value === \"number\") {\n\t\t\tcssColors[key] = ansi256ToHex(value);\n\t\t} else if (value === \"\") {\n\t\t\t// Empty means default terminal color - use sensible fallback for HTML\n\t\t\tcssColors[key] = defaultText;\n\t\t} else {\n\t\t\tcssColors[key] = value;\n\t\t}\n\t}\n\treturn cssColors;\n}",
+          "before_function": "export function getResolvedThemeColors(themeName?: string): Record<string, string> {\n\tconst name = themeName ?? getDefaultTheme();\n\tconst isLight = name === \"light\";\n\tconst themeJson = loadThemeJson(name);\n\tconst resolved = resolveThemeColors(themeJson.colors, themeJson.vars);\n\n\t// Default text color for empty values (terminal uses default fg color)\n\tconst defaultText = isLight ? \"#000000\" : \"#e5e5e7\";\n\n\tconst cssColors: Record<string, string> = {};\n\tfor (const [key, value] of Object.entries(resolved)) {\n\t\tif (typeof value === \"number\") {\n\t\t\tcssColors[key] = ansi256ToHex(value);\n\t\t} else if (value === \"\") {\n\t\t\t// Empty means default terminal color - use sensible fallback for HTML\n\t\t\tcssColors[key] = defaultText;\n\t\t} else {\n\t\t\tcssColors[key] = value;\n\t\t}\n\t}\n\treturn cssColors;\n}",
+          "changed_lines": [
+            793
+          ],
+          "function_line": 792,
+          "function_name": "getResolvedThemeColors"
+        },
+        {
+          "after_function": "export function getThemeExportColors(themeName?: string): {\n\tpageBg?: string;\n\tcardBg?: string;\n\tinfoBg?: string;\n} {\n\tconst name = themeName ?? currentThemeName ?? getDefaultTheme();\n\ttry {\n\t\tconst themeJson = loadThemeJson(name);\n\t\tconst exportSection = themeJson.export;\n\t\tif (!exportSection) return {};\n\n\t\tconst vars = themeJson.vars ?? {};\n\t\tconst resolve = (value: string | number | undefined): string | undefined => {\n\t\t\tif (value === undefined) return undefined;\n\t\t\tif (typeof value === \"number\") return ansi256ToHex(value);\n\t\t\tif (value.startsWith(\"$\")) {\n\t\t\t\tconst resolved = vars[value];\n\t\t\t\tif (resolved === undefined) return undefined;\n\t\t\t\tif (typeof resolved === \"number\") return ansi256ToHex(resolved);\n\t\t\t\treturn resolved;\n\t\t\t}\n\t\t\treturn value;\n\t\t};\n\n\t\treturn {\n\t\t\tpageBg: resolve(exportSection.pageBg),\n\t\t\tcardBg: resolve(exportSection.cardBg),\n\t\t\tinfoBg: resolve(exportSection.infoBg),\n\t\t};\n\t} catch {\n\t\treturn {};\n\t}\n}",
+          "before_function": "export function getThemeExportColors(themeName?: string): {\n\tpageBg?: string;\n\tcardBg?: string;\n\tinfoBg?: string;\n} {\n\tconst name = themeName ?? getDefaultTheme();\n\ttry {\n\t\tconst themeJson = loadThemeJson(name);\n\t\tconst exportSection = themeJson.export;\n\t\tif (!exportSection) return {};\n\n\t\tconst vars = themeJson.vars ?? {};\n\t\tconst resolve = (value: string | number | undefined): string | undefined => {\n\t\t\tif (value === undefined) return undefined;\n\t\t\tif (typeof value === \"number\") return ansi256ToHex(value);\n\t\t\tif (value.startsWith(\"$\")) {\n\t\t\t\tconst resolved = vars[value];\n\t\t\t\tif (resolved === undefined) return undefined;\n\t\t\t\tif (typeof resolved === \"number\") return ansi256ToHex(resolved);\n\t\t\t\treturn resolved;\n\t\t\t}\n\t\t\treturn value;\n\t\t};\n\n\t\treturn {\n\t\t\tpageBg: resolve(exportSection.pageBg),\n\t\t\tcardBg: resolve(exportSection.cardBg),\n\t\t\tinfoBg: resolve(exportSection.infoBg),\n\t\t};\n\t} catch {\n\t\treturn {};\n\t}\n}",
+          "changed_lines": [
+            832
+          ],
+          "function_line": 827,
+          "function_name": "getThemeExportColors"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/theme/theme.ts b/packages/coding-agent/src/modes/interactive/theme/theme.ts\nindex ae43e14a..23823963 100644\n--- a/packages/coding-agent/src/modes/interactive/theme/theme.ts\n+++ b/packages/coding-agent/src/modes/interactive/theme/theme.ts\n@@ -790,7 +790,7 @@ function ansi256ToHex(index: number): string {\n  * Used by HTML export to generate CSS custom properties.\n  */\n export function getResolvedThemeColors(themeName?: string): Record<string, string> {\n-\tconst name = themeName ?? getDefaultTheme();\n+\tconst name = themeName ?? currentThemeName ?? getDefaultTheme();\n \tconst isLight = name === \"light\";\n \tconst themeJson = loadThemeJson(name);\n \tconst resolved = resolveThemeColors(themeJson.colors, themeJson.vars);\n@@ -829,7 +829,7 @@ export function getThemeExportColors(themeName?: string): {\n \tcardBg?: string;\n \tinfoBg?: string;\n } {\n-\tconst name = themeName ?? getDefaultTheme();\n+\tconst name = themeName ?? currentThemeName ?? getDefaultTheme();\n \ttry {\n \t\tconst themeJson = loadThemeJson(name);\n \t\tconst exportSection = themeJson.export;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "a9fbfc7955cc2abe0e0ce2de47d65b87a08c68dd",
+  "message": "fix(export): use active theme instead of default for HTML export (#870)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": [
+    "export"
+  ]
+}

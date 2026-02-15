@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/agent-session.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/agent-session.ts b/packages/coding-agent/src/core/agent-session.ts\nindex e8e9a0be..4c1bbda6 100644\n--- a/packages/coding-agent/src/core/agent-session.ts\n+++ b/packages/coding-agent/src/core/agent-session.ts\n@@ -910,8 +910,8 @@ export class AgentSession {\n \t\tif (isContextOverflow(message, contextWindow)) return false;\n \n \t\tconst err = message.errorMessage;\n-\t\t// Match: overloaded_error, rate limit, 429, 500, 502, 503, 504, service unavailable\n-\t\treturn /overloaded|rate.?limit|too many requests|429|500|502|503|504|service.?unavailable|server error|internal error/i.test(\n+\t\t// Match: overloaded_error, rate limit, 429, 500, 502, 503, 504, service unavailable, connection error\n+\t\treturn /overloaded|rate.?limit|too many requests|429|500|502|503|504|service.?unavailable|server error|internal error|connection.?error/i.test(\n \t\t\terr,\n \t\t);\n \t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "c1382818cc8469aace68b987efbcd9b506cfe0eb",
+  "message": "fix(coding-agent): add connection error to retryable errors",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

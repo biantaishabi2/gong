@@ -1,0 +1,54 @@
+{
+  "source_commit": "ecef601d195620b6b107f25db07d54bca99be4f0",
+  "bug_summary": "自定义 Hook 消息被映射为 user role 且丢失 custom 字段，TUI 重复渲染",
+  "module": "session-manager",
+  "action": "convertCustomMessage",
+  "fix_summary": "将 role 从 'user' 改为 'hookMessage'，保留 customType/display/details 字段",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Hook 消息 role=user 且丢失 customType/display/details，去重失败导致重复",
+  "correct_behavior": "Hook 消息 role=hookMessage，保留所有 custom 字段，去重正确",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话包含自定义 Hook 消息条目",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "session-manager",
+      "method": "convertCustomMessage"
+    },
+    "args": {
+      "entry": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "message": "object"
+    },
+    "assertions": [
+      {
+        "what": "role 为 hookMessage",
+        "type": "return_value",
+        "expected": "message.role === 'hookMessage'"
+      },
+      {
+        "what": "保留 customType",
+        "type": "return_value",
+        "expected": "message.customType === entry.customType"
+      },
+      {
+        "what": "保留 display",
+        "type": "return_value",
+        "expected": "message.display === entry.display"
+      }
+    ]
+  }
+}

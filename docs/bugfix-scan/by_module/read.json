@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "read",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "toolDescription",
+      "boundary": "service",
+      "bug_summary": "read 工具描述缺少完整文件读取引导，continue 提示文案末尾缺少句号",
+      "correct_behavior": "描述包含完整文件读取指引，continue 提示以句号结尾",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "补充 read 工具描述中如何读取完整文件的引导，统一 continue 提示句末句号",
+      "module": "read",
+      "source_commit": "89636cfe6ee3b992f43132a74c841abeec80c4e4",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "description 包含全文件读取说明",
+            "type": "return_value",
+            "what": "描述包含完整读取指引"
+          },
+          {
+            "expected": "continueHint.endsWith('.')",
+            "type": "return_value",
+            "what": "continue 提示以句号结尾"
+          }
+        ],
+        "outputs": {
+          "description": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "read 工具已注册"
+          }
+        ],
+        "trigger": {
+          "method": "getDescription",
+          "target": "read",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "描述不含完整读取引导，continue 提示缺少句末标点"
+    }
+  ]
+}

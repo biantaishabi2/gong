@@ -1,0 +1,47 @@
+{
+  "source_commit": "ce9ffaff9152bede4c30037e2f8137a7d76e4c50",
+  "bug_summary": "ANSI 样式在文本换行后不保留，跨行文本丢失颜色/样式",
+  "module": "utils",
+  "action": "wrapText",
+  "fix_summary": "使用 AnsiCodeTracker 跟踪跨行 ANSI 状态，每行开头预置上一行的活跃样式码",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "换行后 ANSI 样式丢失，后续行显示无样式纯文本",
+  "correct_behavior": "AnsiCodeTracker 在每行开头恢复活跃样式，跨行样式连续",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "输入文本包含 ANSI 样式码和换行",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "utils",
+      "method": "wrapText"
+    },
+    "args": {
+      "text": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "width": {
+        "type": "number",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "wrapped": "string"
+    },
+    "assertions": [
+      {
+        "what": "换行后样式保留",
+        "type": "return_value",
+        "expected": "每行开头包含前一行的活跃 ANSI 样式码"
+      }
+    ]
+  }
+}

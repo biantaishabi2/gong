@@ -1,0 +1,54 @@
+{
+  "source_commit": "c7e4c84731de8e6c3d4e983d7b0dc37004a10368",
+  "bug_summary": "页脚思考等级显示错误附加 Thinking: 前缀，不符合预期格式",
+  "module": "footer",
+  "action": "renderModelInfo",
+  "fix_summary": "移除 'Thinking: ' 前缀，直接显示 modelName • thinkingLevel",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "显示 'modelName • Thinking: high'，多余的 Thinking: 前缀",
+  "correct_behavior": "显示 'modelName • high'，无多余前缀",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "当前模型支持思考且 thinkingLevel 非 off",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "footer",
+      "method": "renderModelInfo"
+    },
+    "args": {
+      "modelName": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "thinkingLevel": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rightSide": "string"
+    },
+    "assertions": [
+      {
+        "what": "不含 Thinking: 前缀",
+        "type": "return_value",
+        "expected": "!rightSide.includes('Thinking:')"
+      },
+      {
+        "what": "格式为 model • level",
+        "type": "return_value",
+        "expected": "rightSide === `${modelName} • ${thinkingLevel}`"
+      }
+    ]
+  }
+}

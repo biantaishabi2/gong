@@ -1,0 +1,43 @@
+{
+  "source_commit": "2c03724862c82a0e8c2fbc23fe4f0b6cc3af4cb1",
+  "bug_summary": "tui-renderer 中 SlashCommand 导入未使用，tui.ts 中私有成员被 biome lint 误报",
+  "module": "tui-renderer",
+  "action": "cleanup_unused_imports",
+  "fix_summary": "移除 tui-renderer.ts 未使用的 SlashCommand 导入；为 tui.ts 误报的私有成员添加 biome-ignore 注释",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "存在未使用导入警告；biome lint 对实际使用的私有成员报 false positive",
+  "correct_behavior": "无未使用导入；biome-ignore 消除误报",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "代码已通过 biome lint 检查",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tui-renderer",
+      "method": "lint_check"
+    },
+    "args": {},
+    "outputs": {
+      "warnings": "array"
+    },
+    "assertions": [
+      {
+        "what": "无未使用导入警告",
+        "type": "return_value",
+        "expected": "无 SlashCommand unused import 警告"
+      },
+      {
+        "what": "私有成员误报被 ignore 消除",
+        "type": "return_value",
+        "expected": "biome lint 通过无误报"
+      }
+    ]
+  }
+}

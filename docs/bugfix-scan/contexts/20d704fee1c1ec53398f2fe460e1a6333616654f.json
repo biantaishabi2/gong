@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/editor.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/editor.ts b/packages/tui/src/components/editor.ts\nindex 63b006d8..507fa215 100644\n--- a/packages/tui/src/components/editor.ts\n+++ b/packages/tui/src/components/editor.ts\n@@ -622,7 +622,14 @@ export class Editor implements Component, Focusable {\n \t\t}\n \n \t\t// New line\n-\t\tif (kb.matches(data, \"newLine\")) {\n+\t\tif (\n+\t\t\tkb.matches(data, \"newLine\") ||\n+\t\t\t(data.charCodeAt(0) === 10 && data.length > 1) ||\n+\t\t\tdata === \"\\x1b\\r\" ||\n+\t\t\tdata === \"\\x1b[13;2~\" ||\n+\t\t\t(data.length > 1 && data.includes(\"\\x1b\") && data.includes(\"\\r\")) ||\n+\t\t\t(data === \"\\n\" && data.length === 1)\n+\t\t) {\n \t\t\tif (this.shouldSubmitOnBackslashEnter(data, kb)) {\n \t\t\t\tthis.handleBackspace();\n \t\t\t\tthis.submitValue();\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "20d704fee1c1ec53398f2fe460e1a6333616654f",
+  "message": "fix(tui): restore legacy newline handling",
+  "module": "editor",
+  "tags": []
+}

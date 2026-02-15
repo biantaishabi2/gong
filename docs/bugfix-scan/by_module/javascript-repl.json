@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "javascript-repl",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "execute",
+      "boundary": "service",
+      "bug_summary": "javascript-repl 执行失败时返回普通结果对象而非抛出错误，工具调用不被标记为失败",
+      "correct_behavior": "执行失败时抛出 Error，工具调用被标记为 failed",
+      "data_dependencies": [],
+      "fix_summary": "将 return { output } 改为 throw new Error(output.trim())，使失败的工具调用正确标记",
+      "module": "javascript-repl",
+      "source_commit": "c0ad46fa012dda4dd8e7ba4e0f1e1f6b5b3b7ed4",
+      "test_spec": {
+        "args": {
+          "code": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "throws Error with output.trim() message",
+            "type": "return_value",
+            "what": "执行失败时抛出 Error"
+          }
+        ],
+        "outputs": {
+          "error_thrown": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "sandbox 执行代码返回错误结果"
+          }
+        ],
+        "trigger": {
+          "method": "execute",
+          "target": "javascript-repl",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "执行失败时返回 { output }，工具调用显示为成功"
+    }
+  ]
+}

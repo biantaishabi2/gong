@@ -1,0 +1,54 @@
+{
+  "action": "expandPath",
+  "boundary": "service",
+  "bug_summary": "路径以 @ 前缀传入时未被标准化，导致后续路径解析结果错误",
+  "correct_behavior": "@ 前缀会被移除，再执行后续归一化与 ~ 扩展逻辑",
+  "data_dependencies": [
+    "config"
+  ],
+  "fix_summary": "在 expandPath 中先执行 normalizeAtPrefix，去除 @ 前缀后再做空白字符与 ~ 处理",
+  "module": "extensions",
+  "source_commit": "c9a20a3aa432132b620569fbd4e0347dea98f37b",
+  "test_spec": {
+    "args": {
+      "filePath": {
+        "allowed": null,
+        "required": true,
+        "type": "string"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "@~/work -> <homedir>/work",
+        "type": "return_value",
+        "what": "输入以 @ 开头时会先去掉 @ 再参与路径展开"
+      },
+      {
+        "expected": "@~ -> <homedir>",
+        "type": "return_value",
+        "what": "输入为 @~ 时返回 home 目录"
+      },
+      {
+        "expected": "~/work -> <homedir>/work",
+        "type": "return_value",
+        "what": "不带 @ 前缀的既有行为保持不变"
+      }
+    ],
+    "outputs": {
+      "expanded_path": "string"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "运行环境可获取当前用户 home 目录"
+      }
+    ],
+    "trigger": {
+      "method": "expandPath",
+      "target": "path-utils",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "@ 前缀被保留，导致 ~ 扩展与路径归一化不符合预期"
+}

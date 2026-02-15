@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui-renderer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui-renderer.ts b/packages/coding-agent/src/tui-renderer.ts\nindex abd77a49..66e56d5d 100644\n--- a/packages/coding-agent/src/tui-renderer.ts\n+++ b/packages/coding-agent/src/tui-renderer.ts\n@@ -21,8 +21,9 @@ class CustomEditor extends Editor {\n \tpublic onCtrlC?: () => void;\n \n \thandleInput(data: string): void {\n-\t\t// Intercept Escape key\n-\t\tif (data === \"\\x1b\" && this.onEscape) {\n+\t\t// Intercept Escape key - but only if autocomplete is NOT active\n+\t\t// (let parent handle escape for autocomplete cancellation)\n+\t\tif (data === \"\\x1b\" && this.onEscape && !this.isShowingAutocomplete()) {\n \t\t\tthis.onEscape();\n \t\t\treturn;\n \t\t}\n"
+    },
+    {
+      "file": "packages/tui/src/components/editor.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/editor.ts b/packages/tui/src/components/editor.ts\nindex 92c28f54..61437a5d 100644\n--- a/packages/tui/src/components/editor.ts\n+++ b/packages/tui/src/components/editor.ts\n@@ -749,6 +749,10 @@ export class Editor implements Component {\n \t\tthis.autocompletePrefix = \"\";\n \t}\n \n+\tpublic isShowingAutocomplete(): boolean {\n+\t\treturn this.isAutocompleting;\n+\t}\n+\n \tprivate updateAutocomplete(): void {\n \t\tif (!this.isAutocompleting || !this.autocompleteProvider) return;\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "97e00fc45d809eeeb5961e99f7c0cf34a90858bf",
+  "message": "Fix Escape key to cancel autocomplete before interrupting agent",
+  "module": "tui-renderer",
+  "tags": []
+}

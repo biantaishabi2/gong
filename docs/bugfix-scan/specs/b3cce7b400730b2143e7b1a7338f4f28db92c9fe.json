@@ -1,0 +1,54 @@
+{
+  "source_commit": "b3cce7b400730b2143e7b1a7338f4f28db92c9fe",
+  "bug_summary": "无 result 且非流式时 artifacts/REPL 渲染器将状态设为 inprogress，已中止的调用仍显示加载中",
+  "module": "artifacts-tool-renderer",
+  "action": "renderToolState",
+  "fix_summary": "将 !result && !isStreaming 的状态从 inprogress 改为 complete",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "result=undefined, isStreaming=false → state='inprogress'，spinner 不停转",
+  "correct_behavior": "result=undefined, isStreaming=false → state='complete'，无 spinner",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "工具调用已结束（中止或无结果），isStreaming=false",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "artifacts-tool-renderer",
+      "method": "renderToolState"
+    },
+    "args": {
+      "result": {
+        "type": "object|null",
+        "required": false,
+        "allowed": null
+      },
+      "isStreaming": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "state": "string"
+    },
+    "assertions": [
+      {
+        "what": "无结果非流式 → complete",
+        "type": "return_value",
+        "expected": "state === 'complete' when !result && !isStreaming"
+      },
+      {
+        "what": "流式中 → inprogress",
+        "type": "return_value",
+        "expected": "state === 'inprogress' when isStreaming"
+      }
+    ]
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "system-prompt",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "buildSystemPrompt",
+      "boundary": "service",
+      "bug_summary": "系统提示构建时直接遍历 selectedTools，为未知工具填充 Custom tool，导致非内置工具被错误展示",
+      "correct_behavior": "工具列表仅包含有内置描述的工具（read, bash 等），自定义工具不列出",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "仅列出在 toolDescriptions 中有内置描述的工具，忽略无描述的自定义工具",
+      "module": "system-prompt",
+      "source_commit": "73734a23a1cf114e6f3a7810d1aba4a3bc061e8c",
+      "test_spec": {
+        "args": {
+          "selectedTools": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "prompt 不含 myCustomTool",
+            "type": "return_value",
+            "what": "仅内置工具出现在列表中"
+          },
+          {
+            "expected": "!prompt.includes('Custom tool')",
+            "type": "return_value",
+            "what": "不含 Custom tool 回退标签"
+          }
+        ],
+        "outputs": {
+          "prompt_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "selectedTools 包含内置工具和自定义工具"
+          }
+        ],
+        "trigger": {
+          "method": "buildSystemPrompt",
+          "target": "system-prompt",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "工具列表包含 'myCustomTool: Custom tool'，非内置工具不应出现在系统提示中"
+    },
+    {
+      "action": "buildSystemPrompt",
+      "boundary": "service",
+      "bug_summary": "创建类任务的系统提示只有泛化说明，缺少按主题细化的文档和示例路径",
+      "correct_behavior": "提示包含 hooks→docs/hooks.md+examples/hooks/，custom tools→docs/custom-tools.md+docs/tui.md 等具体路径",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "为 hooks/custom tools/themes/skills 各主题补充具体文档和示例路径",
+      "module": "system-prompt",
+      "source_commit": "dbdb99c486cabc705bfe7e3c863464a60b4b9bef",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "prompt.includes('docs/hooks.md')",
+            "type": "return_value",
+            "what": "包含 hooks 具体路径"
+          },
+          {
+            "expected": "prompt.includes('docs/custom-tools.md')",
+            "type": "return_value",
+            "what": "包含 custom tools 路径"
+          }
+        ],
+        "outputs": {
+          "prompt": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "构建系统提示，无自定义 prompt"
+          }
+        ],
+        "trigger": {
+          "method": "buildSystemPrompt",
+          "target": "system-prompt",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "提示仅含 'read relevant docs AND examples'，无具体路径"
+    },
+    {
+      "action": "loadProjectContextFiles",
+      "boundary": "service",
+      "bug_summary": "全局 AGENTS.md 路径与向上遍历命中的同一路径未去重，导致上下文文件被加载两次",
+      "correct_behavior": "seenPaths 去重后每个路径仅加载一次",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "使用 seenPaths Set 对已加载路径去重，避免同一文件重复加入列表",
+      "module": "system-prompt",
+      "source_commit": "a9a1a62b14a77bd6543a01bdf8c1372a42aad2bf",
+      "test_spec": {
+        "args": {
+          "cwd": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "new Set(paths).size === paths.length",
+            "type": "return_value",
+            "what": "路径无重复"
+          },
+          {
+            "expected": "paths.filter(p => p === globalPath).length === 1",
+            "type": "return_value",
+            "what": "全局路径仅出现一次"
+          }
+        ],
+        "outputs": {
+          "contextFiles": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "全局 AGENTS.md 存在且 cwd 向上遍历会命中同一路径"
+          }
+        ],
+        "trigger": {
+          "method": "loadProjectContextFiles",
+          "target": "system-prompt",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "全局 AGENTS.md 在全局加载和遍历加载中各出现一次，上下文重复"
+    }
+  ]
+}

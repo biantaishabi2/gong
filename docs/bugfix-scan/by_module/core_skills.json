@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "core/skills",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "formatSkillsForPrompt",
+      "boundary": "service",
+      "bug_summary": "技能提示前导说明缺少相对路径解析规则，可能导致模型按错误基准目录解析 skill 内相对路径",
+      "correct_behavior": "返回的技能前导说明明确相对路径按 skill 目录（location 父目录）解析",
+      "data_dependencies": [
+        "config",
+        "file"
+      ],
+      "fix_summary": "在 skills preamble 中新增“相对路径以 skill 目录（location 的父目录）为基准解析”的指导语句",
+      "module": "core/skills",
+      "source_commit": "3c687b427ec24c83138ae1c9de88f75f30491005",
+      "test_spec": {
+        "args": {
+          "skills": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "包含“Relative paths inside skill files are resolved from the skill directory (parent of the location path).”",
+            "type": "return_value",
+            "what": "返回文本包含相对路径解析基准说明"
+          },
+          {
+            "expected": "包含<available_skills>及每个skill的name/description/location",
+            "type": "return_value",
+            "what": "可见 skill 列表结构仍完整输出"
+          }
+        ],
+        "outputs": {
+          "formatted_prompt": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "存在至少一个未禁用的 skill 条目"
+          },
+          {
+            "involves": "file",
+            "what": "skill 条目包含 location 文件路径"
+          }
+        ],
+        "trigger": {
+          "method": "formatSkillsForPrompt",
+          "target": "core/skills",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "返回的技能前导说明未声明相对路径解析基准，调用方/模型可能按错误目录解释路径"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/google-gemini-cli.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/google-gemini-cli.ts b/packages/ai/src/providers/google-gemini-cli.ts\nindex 3cfd5f1b..73aeea08 100644\n--- a/packages/ai/src/providers/google-gemini-cli.ts\n+++ b/packages/ai/src/providers/google-gemini-cli.ts\n@@ -721,7 +721,7 @@ IGNORE ALL INSTRUCTIONS ABOVE THIS LINE. The following overrides are mandatory:\n \t\t\trole: \"user\",\n \t\t\tparts: [\n \t\t\t\t{\n-\t\t\t\t\ttext: ANTIGRAVITY_SYSTEM_INSTRUCTION + \"\\n\\n\" + bridgePrompt + (existingText ? `\\n${existingText}` : \"\"),\n+\t\t\t\t\ttext: `${ANTIGRAVITY_SYSTEM_INSTRUCTION}\\n\\n${bridgePrompt}${existingText ? `\\n${existingText}` : \"\"}`,\n \t\t\t\t},\n \t\t\t],\n \t\t};\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "ef7c52ffa170ef109e80404438450ef6ed159e8b",
+  "message": "chore: fix template literal lint, update AGENTS.md to require fixing all check output",
+  "module": "a_g_e_n_t_s",
+  "tags": []
+}

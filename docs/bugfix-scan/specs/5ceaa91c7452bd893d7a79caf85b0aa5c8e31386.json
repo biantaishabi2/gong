@@ -1,0 +1,49 @@
+{
+  "source_commit": "5ceaa91c7452bd893d7a79caf85b0aa5c8e31386",
+  "bug_summary": "TUI 的 start() 方法在已有子组件时未触发初次渲染，导致初始界面不显示",
+  "module": "tui",
+  "action": "start",
+  "fix_summary": "在 start() 中检查 children.length > 0 时调用 requestRender()，确保有子组件时触发初始渲染",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "调用 start() 后即使已有子组件也不会触发渲染，界面保持空白",
+  "correct_behavior": "调用 start() 时若 children.length > 0 则自动调用 requestRender()，显示初始界面",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "TUI 实例已添加至少一个子组件",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tui",
+      "method": "start"
+    },
+    "args": {
+      "childCount": {
+        "type": "number",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "render_triggered": "bool"
+    },
+    "assertions": [
+      {
+        "what": "start() 后 requestRender 被调用一次",
+        "type": "side_effect",
+        "expected": "requestRender called once when children.length > 0"
+      },
+      {
+        "what": "无子组件时不触发渲染",
+        "type": "side_effect",
+        "expected": "requestRender not called when children.length === 0"
+      }
+    ]
+  }
+}

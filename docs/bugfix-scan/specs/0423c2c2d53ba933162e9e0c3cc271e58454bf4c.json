@@ -1,0 +1,48 @@
+{
+  "source_commit": "0423c2c2d53ba933162e9e0c3cc271e58454bf4c",
+  "bug_summary": "无可用模型时的回退提示文案缺少 /model 操作指引，用户完成认证后不知如何选模型",
+  "module": "sdk",
+  "action": "createAgentSession",
+  "fix_summary": "在 modelFallbackMessage 末尾追加 'Then use /model to select a model.' 指引",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "提示信息为 'No models available. Use /login or set an API key...'，认证后缺少后续步骤",
+  "correct_behavior": "提示信息追加 'Then use /model to select a model.'，完整引导用户从认证到选模型",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话创建时无可用模型且无 API key",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "sdk",
+      "method": "createAgentSession"
+    },
+    "args": {},
+    "outputs": {
+      "modelFallbackMessage": "string"
+    },
+    "assertions": [
+      {
+        "what": "回退消息包含 /login 指引",
+        "type": "return_value",
+        "expected": "message.includes('Use /login')"
+      },
+      {
+        "what": "回退消息包含 /model 指引",
+        "type": "return_value",
+        "expected": "message.includes('use /model to select a model')"
+      },
+      {
+        "what": "回退消息包含认证文档链接",
+        "type": "return_value",
+        "expected": "message.includes('authentication.md')"
+      }
+    ]
+  }
+}

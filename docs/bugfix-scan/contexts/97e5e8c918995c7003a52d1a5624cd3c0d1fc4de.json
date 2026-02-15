@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\nindex 9f143f8f..7be8fa18 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n@@ -365,7 +365,7 @@ class TreeList implements Component {\n \n \t\t\t// Active path marker - shown right before the entry text\n \t\t\tconst isOnActivePath = this.activePathIds.has(entry.id);\n-\t\t\tconst pathMarker = isOnActivePath ? theme.fg(\"accent\", \"●\") : \"\";\n+\t\t\tconst pathMarker = isOnActivePath ? theme.fg(\"accent\", \"• \") : \"\";\n \n \t\t\tconst label = flatNode.node.label ? theme.fg(\"warning\", `[${flatNode.node.label}] `) : \"\";\n \t\t\tconst content = this.getEntryDisplayText(flatNode.node, isSelected);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "97e5e8c918995c7003a52d1a5624cd3c0d1fc4de",
+  "message": "fix(coding-agent): use smaller bullet marker with space for active path",
+  "module": "tree-selector",
+  "tags": []
+}

@@ -1,0 +1,47 @@
+{
+  "source_commit": "9b84857b838eab0ca40160eaf9cba1acc56f6004",
+  "bug_summary": "可重试错误模式缺少 terminated 关键字，terminated 类型的连接错误不会触发自动重试",
+  "module": "agent-session",
+  "action": "isRetryableError",
+  "fix_summary": "在重试正则中添加 terminated 模式匹配",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "包含 'terminated' 的错误消息不被识别为可重试",
+  "correct_behavior": "包含 'terminated' 的错误消息被识别为可重试并自动重试",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "API 请求返回包含 terminated 的错误",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "agent-session",
+      "method": "isRetryableError"
+    },
+    "args": {
+      "errorMessage": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "retryable": "bool"
+    },
+    "assertions": [
+      {
+        "what": "terminated 错误可重试",
+        "type": "return_value",
+        "expected": "isRetryableError('connection terminated') === true"
+      },
+      {
+        "what": "其他已有模式仍可重试",
+        "type": "return_value",
+        "expected": "isRetryableError('overloaded') === true"
+      }
+    ]
+  }
+}

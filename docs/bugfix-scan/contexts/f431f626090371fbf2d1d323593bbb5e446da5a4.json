@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/terminal.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/terminal.ts b/packages/tui/src/terminal.ts\nindex cc5d925a..9c852b3e 100644\n--- a/packages/tui/src/terminal.ts\n+++ b/packages/tui/src/terminal.ts\n@@ -178,6 +178,11 @@ export class ProcessTerminal implements Terminal {\n \t\t\tthis.resizeHandler = undefined;\n \t\t}\n \n+\t\t// Pause stdin to prevent any buffered input (e.g., Ctrl+D) from being\n+\t\t// re-interpreted after raw mode is disabled. This fixes a race condition\n+\t\t// where Ctrl+D could close the parent shell over SSH.\n+\t\tprocess.stdin.pause();\n+\n \t\t// Restore raw mode state\n \t\tif (process.stdin.setRawMode) {\n \t\t\tprocess.stdin.setRawMode(this.wasRaw);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "f431f626090371fbf2d1d323593bbb5e446da5a4",
+  "message": "fix(tui): pause stdin before restoring raw mode to prevent SSH session close",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

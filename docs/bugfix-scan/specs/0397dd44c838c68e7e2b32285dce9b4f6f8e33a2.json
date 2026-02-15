@@ -1,0 +1,54 @@
+{
+  "source_commit": "0397dd44c838c68e7e2b32285dce9b4f6f8e33a2",
+  "bug_summary": "导出会话 HTML 时默认文件名缺少 pi-session- 前缀，不符合命名约定",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "exportSessionToHtml",
+  "fix_summary": "将默认导出路径从 {sessionBasename}.html 改为 pi-session-{sessionBasename}.html",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "不传 outputPath 时导出文件名为 mysession.html，缺少标准前缀",
+  "correct_behavior": "不传 outputPath 时导出文件名为 pi-session-mysession.html，符合命名约定",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "存在有效会话文件，sessionBasename 已解析",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "export-html",
+      "method": "exportSessionToHtml"
+    },
+    "args": {
+      "outputPath": {
+        "type": "string",
+        "required": false,
+        "allowed": null
+      },
+      "sessionBasename": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "outputPath": "string"
+    },
+    "assertions": [
+      {
+        "what": "未指定 outputPath 时默认使用 pi-session- 前缀",
+        "type": "return_value",
+        "expected": "outputPath === `pi-session-${sessionBasename}.html`"
+      },
+      {
+        "what": "指定 outputPath 时使用用户指定值",
+        "type": "return_value",
+        "expected": "outputPath === userSpecifiedPath"
+      }
+    ]
+  }
+}

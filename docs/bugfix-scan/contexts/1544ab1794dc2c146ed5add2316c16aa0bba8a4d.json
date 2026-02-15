@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex cdcbfd26..72bd88bd 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -394,11 +394,11 @@ export class InteractiveMode {\n \t\t\t\thint(\"exit\", \"to exit (empty)\"),\n \t\t\t\thint(\"suspend\", \"to suspend\"),\n \t\t\t\tkeyHint(\"deleteToLineEnd\", \"to delete to end\"),\n-\t\t\t\thint(\"cycleThinkingLevel\", \"to cycle thinking\"),\n+\t\t\t\thint(\"cycleThinkingLevel\", \"to cycle thinking level\"),\n \t\t\t\trawKeyHint(`${appKey(kb, \"cycleModelForward\")}/${appKey(kb, \"cycleModelBackward\")}`, \"to cycle models\"),\n \t\t\t\thint(\"selectModel\", \"to select model\"),\n \t\t\t\thint(\"expandTools\", \"to expand tools\"),\n-\t\t\t\thint(\"toggleThinking\", \"to toggle thinking\"),\n+\t\t\t\thint(\"toggleThinking\", \"to expand thinking\"),\n \t\t\t\thint(\"externalEditor\", \"for external editor\"),\n \t\t\t\trawKeyHint(\"/\", \"for commands\"),\n \t\t\t\trawKeyHint(\"!\", \"to run bash\"),\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "1544ab1794dc2c146ed5add2316c16aa0bba8a4d",
+  "message": "fix: clarify startup hints for thinking level and expand thinking",
+  "module": "interactive-mode",
+  "tags": []
+}

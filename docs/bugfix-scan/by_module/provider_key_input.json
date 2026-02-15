@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "provider_key_input",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "validateApiKey",
+      "boundary": "http",
+      "bug_summary": "API Key 校验请求 maxTokens 仅为 10，模型无法稳定返回 stop 导致误判密钥无效",
+      "correct_behavior": "maxTokens=200 给予足够空间，有效密钥校验通过",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "将 maxTokens 从 10 提高到 200，确保模型有足够 token 完成生成并返回 stop",
+      "module": "provider_key_input",
+      "source_commit": "b288cd9448de8fc944575b79e82af6d6a64cae9a",
+      "test_spec": {
+        "args": {
+          "apiKey": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "requestBody.maxTokens === 200",
+            "type": "return_value",
+            "what": "maxTokens 为 200"
+          },
+          {
+            "expected": "isValid === true",
+            "type": "return_value",
+            "what": "有效密钥校验通过"
+          }
+        ],
+        "outputs": {
+          "isValid": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "API key 有效，模型可完成短文本"
+          }
+        ],
+        "trigger": {
+          "method": "POST",
+          "target": "provider",
+          "type": "http_request"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "maxTokens=10 导致模型截断无法 stop，有效密钥被误判为无效"
+    }
+  ]
+}

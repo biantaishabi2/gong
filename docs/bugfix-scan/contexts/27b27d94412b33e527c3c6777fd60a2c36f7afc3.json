@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex dada5c42..cdcbfd26 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -3659,11 +3659,11 @@ export class InteractiveMode {\n \t\tthis.ui.setFocus(loader);\n \t\tthis.ui.requestRender();\n \n-\t\tconst restoreEditor = () => {\n+\t\tconst dismissLoader = (editor: Component) => {\n \t\t\tloader.dispose();\n \t\t\tthis.editorContainer.clear();\n-\t\t\tthis.editorContainer.addChild(previousEditor);\n-\t\t\tthis.ui.setFocus(previousEditor as Component);\n+\t\t\tthis.editorContainer.addChild(editor);\n+\t\t\tthis.ui.setFocus(editor);\n \t\t\tthis.ui.requestRender();\n \t\t};\n \n@@ -3676,7 +3676,7 @@ export class InteractiveMode {\n \t\t\t\tthis.setupExtensionShortcuts(runner);\n \t\t\t}\n \t\t\tthis.rebuildChatFromMessages();\n-\t\t\trestoreEditor();\n+\t\t\tdismissLoader(this.editor as Component);\n \t\t\tthis.showLoadedResources({ extensionPaths: runner?.getExtensionPaths() ?? [], force: true });\n \t\t\tconst modelsJsonError = this.session.modelRegistry.getError();\n \t\t\tif (modelsJsonError) {\n@@ -3684,7 +3684,7 @@ export class InteractiveMode {\n \t\t\t}\n \t\t\tthis.showStatus(\"Reloaded extensions, skills, prompts, themes\");\n \t\t} catch (error) {\n-\t\t\trestoreEditor();\n+\t\t\tdismissLoader(previousEditor as Component);\n \t\t\tthis.showError(`Reload failed: ${error instanceof Error ? error.message : String(error)}`);\n \t\t}\n \t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "27b27d94412b33e527c3c6777fd60a2c36f7afc3",
+  "message": "fix(coding-agent): restore the correct editor after /reload (#949)",
+  "module": "interactive-mode",
+  "tags": []
+}

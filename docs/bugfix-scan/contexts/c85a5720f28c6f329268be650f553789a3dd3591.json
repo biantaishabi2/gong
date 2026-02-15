@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 86b00c96..2469d9c0 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -3357,7 +3357,10 @@ export class InteractiveMode {\n \t\t\tconst content = fs.readFileSync(skillPath, \"utf-8\");\n \t\t\t// Strip YAML frontmatter if present\n \t\t\tconst body = content.replace(/^---\\n[\\s\\S]*?\\n---\\n/, \"\").trim();\n-\t\t\tconst message = args ? `${body}\\n\\n---\\n\\nUser: ${args}` : body;\n+\t\t\tconst skillDir = path.dirname(skillPath);\n+\t\t\tconst header = `Skill location: ${skillPath}\\nReferences are relative to ${skillDir}.`;\n+\t\t\tconst skillMessage = `${header}\\n\\n${body}`;\n+\t\t\tconst message = args ? `${skillMessage}\\n\\n---\\n\\nUser: ${args}` : skillMessage;\n \t\t\tawait this.session.prompt(message);\n \t\t} catch (err) {\n \t\t\tthis.showError(`Failed to load skill: ${err instanceof Error ? err.message : String(err)}`);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "c85a5720f28c6f329268be650f553789a3dd3591",
+  "message": "fix: include skill path in /skill prompts (#711)",
+  "module": "interactive-mode",
+  "tags": []
+}

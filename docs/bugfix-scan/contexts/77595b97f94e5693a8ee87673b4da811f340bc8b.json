@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/session-manager.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/session-manager.ts b/packages/coding-agent/src/core/session-manager.ts\nindex e81791b9..ad873189 100644\n--- a/packages/coding-agent/src/core/session-manager.ts\n+++ b/packages/coding-agent/src/core/session-manager.ts\n@@ -411,8 +411,11 @@ export class SessionManager {\n \t\tthis.byId.clear();\n \t\tthis.leafId = \"\";\n \t\tthis.flushed = false;\n-\t\tconst fileTimestamp = timestamp.replace(/[:.]/g, \"-\");\n-\t\tthis.sessionFile = join(this.getSessionDir(), `${fileTimestamp}_${this.sessionId}.jsonl`);\n+\t\t// Only generate filename if not already set (e.g., via --session flag)\n+\t\tif (!this.sessionFile) {\n+\t\t\tconst fileTimestamp = timestamp.replace(/[:.]/g, \"-\");\n+\t\t\tthis.sessionFile = join(this.getSessionDir(), `${fileTimestamp}_${this.sessionId}.jsonl`);\n+\t\t}\n \t}\n \n \tprivate _migrateToV2(): void {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "77595b97f94e5693a8ee87673b4da811f340bc8b",
+  "message": "Fix --session flag to use provided filename",
+  "module": "session-manager",
+  "tags": []
+}

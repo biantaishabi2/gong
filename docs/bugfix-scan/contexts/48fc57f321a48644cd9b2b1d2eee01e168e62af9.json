@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/index.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/index.ts b/packages/coding-agent/src/index.ts\nindex f6509551..5ababa02 100644\n--- a/packages/coding-agent/src/index.ts\n+++ b/packages/coding-agent/src/index.ts\n@@ -290,6 +290,8 @@ export {\n \tTheme,\n \ttype ThemeColor,\n } from \"./modes/interactive/theme/theme.js\";\n+// Clipboard utilities\n+export { copyToClipboard } from \"./utils/clipboard.js\";\n export { parseFrontmatter, stripFrontmatter } from \"./utils/frontmatter.js\";\n // Shell utilities\n export { getShellConfig } from \"./utils/shell.js\";\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "48fc57f321a48644cd9b2b1d2eee01e168e62af9",
+  "message": "feat(coding-agent): expose copyToClipboard for extensions",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

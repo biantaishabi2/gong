@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/google.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/google.ts b/packages/ai/src/providers/google.ts\nindex bd231ee1..39fb0c57 100644\n--- a/packages/ai/src/providers/google.ts\n+++ b/packages/ai/src/providers/google.ts\n@@ -99,12 +99,13 @@ export const streamGoogle: StreamFunction<\"google-generative-ai\"> = (\n \t\t\t\t\t\t\t\t}\n \t\t\t\t\t\t\t\tif (isThinking) {\n \t\t\t\t\t\t\t\t\tcurrentBlock = { type: \"thinking\", thinking: \"\", thinkingSignature: undefined };\n+\t\t\t\t\t\t\t\t\toutput.content.push(currentBlock);\n \t\t\t\t\t\t\t\t\tstream.push({ type: \"thinking_start\", contentIndex: blockIndex(), partial: output });\n \t\t\t\t\t\t\t\t} else {\n \t\t\t\t\t\t\t\t\tcurrentBlock = { type: \"text\", text: \"\" };\n+\t\t\t\t\t\t\t\t\toutput.content.push(currentBlock);\n \t\t\t\t\t\t\t\t\tstream.push({ type: \"text_start\", contentIndex: blockIndex(), partial: output });\n \t\t\t\t\t\t\t\t}\n-\t\t\t\t\t\t\t\toutput.content.push(currentBlock);\n \t\t\t\t\t\t\t}\n \t\t\t\t\t\t\tif (currentBlock.type === \"thinking\") {\n \t\t\t\t\t\t\t\tcurrentBlock.thinking += part.text;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "9e8607938690e9610aad2ec3a291a0e44a32027b",
+  "message": "Fix block indexing in Google provider impl",
+  "module": "google",
+  "tags": []
+}

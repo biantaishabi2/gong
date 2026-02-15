@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\nindex 47bce4de..9f143f8f 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n@@ -363,15 +363,15 @@ class TreeList implements Component {\n \t\t\tconst extraIndent = \"  \".repeat(Math.max(0, displayIndent - prefixLevels));\n \t\t\tconst prefix = gutterStr + connector + extraIndent;\n \n-\t\t\t// Active path marker\n+\t\t\t// Active path marker - shown right before the entry text\n \t\t\tconst isOnActivePath = this.activePathIds.has(entry.id);\n-\t\t\tconst pathMarker = isOnActivePath ? theme.fg(\"accent\", \"● \") : \"  \";\n+\t\t\tconst pathMarker = isOnActivePath ? theme.fg(\"accent\", \"●\") : \"\";\n \n \t\t\tconst label = flatNode.node.label ? theme.fg(\"warning\", `[${flatNode.node.label}] `) : \"\";\n \t\t\tconst content = this.getEntryDisplayText(flatNode.node, isSelected);\n \t\t\tconst suffix = isCurrentLeaf ? theme.fg(\"accent\", \" *\") : \"\";\n \n-\t\t\tconst line = cursor + pathMarker + theme.fg(\"dim\", prefix) + label + content + suffix;\n+\t\t\tconst line = cursor + theme.fg(\"dim\", prefix) + pathMarker + label + content + suffix;\n \t\t\tlines.push(truncateToWidth(line, width));\n \t\t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3493e47b4dbae8548eeea52859305c3b54b6c838",
+  "message": "fix(coding-agent): move active path marker to right before entry text",
+  "module": "tree-selector",
+  "tags": []
+}

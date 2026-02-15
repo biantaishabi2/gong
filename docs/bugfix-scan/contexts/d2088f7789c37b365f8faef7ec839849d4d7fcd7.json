@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/google.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/google.ts b/packages/ai/src/providers/google.ts\nindex bf9e8050..6e0546e2 100644\n--- a/packages/ai/src/providers/google.ts\n+++ b/packages/ai/src/providers/google.ts\n@@ -469,6 +469,8 @@ function mapStopReason(reason: FinishReason): StopReason {\n \t\tcase FinishReason.IMAGE_SAFETY:\n \t\tcase FinishReason.IMAGE_PROHIBITED_CONTENT:\n \t\tcase FinishReason.RECITATION:\n+\t\tcase FinishReason.IMAGE_RECITATION:\n+\t\tcase FinishReason.IMAGE_OTHER:\n \t\tcase FinishReason.FINISH_REASON_UNSPECIFIED:\n \t\tcase FinishReason.OTHER:\n \t\tcase FinishReason.LANGUAGE:\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d2088f7789c37b365f8faef7ec839849d4d7fcd7",
+  "message": "Fix: handle IMAGE_RECITATION and IMAGE_OTHER FinishReason in Google provider",
+  "module": "google",
+  "tags": []
+}

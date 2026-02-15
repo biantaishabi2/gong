@@ -1,0 +1,65 @@
+{
+  "action": "navigateToSelectedPoint",
+  "boundary": "event",
+  "bug_summary": "树导航摘要跳转时会无条件用 result.editorText 覆盖编辑器，导致用户已有内容丢失",
+  "correct_behavior": "仅在当前编辑器为空白时才写入 result.editorText，保留用户已有内容",
+  "data_dependencies": [
+    "session",
+    "file"
+  ],
+  "fix_summary": "在设置编辑器文本前新增非空校验：仅当 result.editorText 存在且当前编辑器为空白时才 setText",
+  "module": "coding-agent",
+  "source_commit": "fe1d0ae7f33cc99d7f7d1805ae3ae99e0e77fc54",
+  "test_spec": {
+    "args": {
+      "currentEditorText": {
+        "allowed": null,
+        "required": true,
+        "type": "string"
+      },
+      "editorText": {
+        "allowed": null,
+        "required": false,
+        "type": "string"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "finalEditorText==currentEditorText",
+        "type": "state",
+        "what": "当 currentEditorText 为非空时，不调用覆盖写入，finalEditorText 保持原值"
+      },
+      {
+        "expected": "finalEditorText==editorText",
+        "type": "state",
+        "what": "当 currentEditorText 为空白且 editorText 有值时，finalEditorText 被设置为 editorText"
+      },
+      {
+        "expected": "statusMessage='Navigated to selected point'",
+        "type": "ui_state",
+        "what": "状态提示仍显示导航完成"
+      }
+    ],
+    "outputs": {
+      "finalEditorText": "string",
+      "statusMessage": "string"
+    },
+    "preconditions": [
+      {
+        "involves": "session",
+        "what": "已进入交互模式会话"
+      },
+      {
+        "involves": "file",
+        "what": "编辑器中已有非空文本且导航结果包含 editorText"
+      }
+    ],
+    "trigger": {
+      "method": "navigateToSelectedPoint",
+      "target": "InteractiveMode",
+      "type": "event_handler"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "只要 result.editorText 存在就覆盖编辑器内容"
+}

@@ -1,0 +1,54 @@
+{
+  "source_commit": "32ec1fa883a5a37f6a6d8e8f7c5c7d2e9bb3f18e",
+  "bug_summary": "多根节点树选择器入栈时缩进为 0，未按虚拟分叉根处理，导致根层级缩进和分叉线错误",
+  "module": "tree-selector",
+  "action": "tree_traversal",
+  "fix_summary": "多根时入栈缩进改为 1（虚拟根的子节点），justBranched 设为 true",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "多根节点全部从缩进 0 开始，与单根展示无区别且分叉线缺失",
+  "correct_behavior": "多根节点从缩进 1 开始并标记 justBranched，正确显示虚拟根分叉结构",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "树选择器数据包含多个根节点",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tree-selector",
+      "method": "buildTreeLines"
+    },
+    "args": {
+      "roots": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "lines": "array"
+    },
+    "assertions": [
+      {
+        "what": "多根时根节点缩进为 1",
+        "type": "return_value",
+        "expected": "roots.length > 1 时 root indent === 1"
+      },
+      {
+        "what": "单根时根节点缩进为 0",
+        "type": "return_value",
+        "expected": "roots.length === 1 时 root indent === 0"
+      },
+      {
+        "what": "多根时 justBranched 为 true",
+        "type": "return_value",
+        "expected": "multipleRoots 时 justBranched === true"
+      }
+    ]
+  }
+}

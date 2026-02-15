@@ -1,0 +1,5 @@
+{
+  "reason": "refactor",
+  "skip": true,
+  "summary": "本次提交仅修复注释中的拼写错误（stauts→status，settin→setting），未涉及运行逻辑、接口行为或数据处理，非可生成回归测试规格的 bugfix。"
+}

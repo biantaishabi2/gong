@@ -1,0 +1,38 @@
+{
+  "source_commit": "48fc57f321a45c0a0bfde7c9e3db7a14f5c8e2a1",
+  "bug_summary": "coding-agent 入口模块未导出 copyToClipboard，扩展无法从公共 API 导入剪贴板功能",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "package_exports",
+  "fix_summary": "在 packages/coding-agent/src/index.ts 增加 export { copyToClipboard } from './utils/clipboard.js'",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "import { copyToClipboard } from 'coding-agent' 报导入错误",
+  "correct_behavior": "copyToClipboard 可从 coding-agent 主入口正常导入",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "coding-agent 包已构建",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent",
+      "method": "module_export"
+    },
+    "args": {},
+    "outputs": {
+      "exported": "bool"
+    },
+    "assertions": [
+      {
+        "what": "copyToClipboard 可从主入口导入",
+        "type": "return_value",
+        "expected": "import { copyToClipboard } from 'coding-agent' 成功"
+      }
+    ]
+  }
+}

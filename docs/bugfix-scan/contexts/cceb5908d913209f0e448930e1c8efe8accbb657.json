@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/openai-completions.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-completions.ts b/packages/ai/src/providers/openai-completions.ts\nindex a90ed563..3edeca45 100644\n--- a/packages/ai/src/providers/openai-completions.ts\n+++ b/packages/ai/src/providers/openai-completions.ts\n@@ -690,7 +690,8 @@ function detectCompatFromUrl(baseUrl: string): Required<OpenAICompat> {\n \t\tbaseUrl.includes(\"api.x.ai\") ||\n \t\tbaseUrl.includes(\"mistral.ai\") ||\n \t\tbaseUrl.includes(\"chutes.ai\") ||\n-\t\tisZai;\n+\t\tisZai ||\n+\t\tbaseUrl.includes(\"opencode.ai\");\n \n \tconst useMaxTokens = baseUrl.includes(\"mistral.ai\") || baseUrl.includes(\"chutes.ai\");\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "cceb5908d913209f0e448930e1c8efe8accbb657",
+  "message": "fix: opencode provider uses system role instead of developer (#755)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

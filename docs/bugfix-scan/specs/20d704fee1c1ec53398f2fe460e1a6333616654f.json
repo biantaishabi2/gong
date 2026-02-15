@@ -1,0 +1,70 @@
+{
+  "action": "handleInput",
+  "boundary": "event",
+  "bug_summary": "编辑器未兼容部分历史换行输入序列，导致回车无法按预期触发新行或提交逻辑",
+  "correct_behavior": "识别标准与遗留换行序列，统一进入正确的新行/提交处理",
+  "data_dependencies": [
+    "config"
+  ],
+  "fix_summary": "恢复遗留换行判定，除标准 newLine 外额外兼容 LF+组合输入、ESC+CR、Shift+Enter 序列及包含 ESC/CR 的复合输入",
+  "module": "editor",
+  "source_commit": "20d704fee1c1ec53398f2fe460e1a6333616654f",
+  "test_spec": {
+    "args": {
+      "data": {
+        "allowed": [
+          "\\n",
+          "\\x1b\\r",
+          "\\x1b[13;2~",
+          "<charCode=10且length>1的输入>",
+          "<包含\\x1b且包含\\r的复合输入>"
+        ],
+        "required": true,
+        "type": "string"
+      },
+      "kb": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "触发与 newLine 等价的处理路径",
+        "type": "return_value",
+        "what": "当 data 为历史兼容换行序列时进入新行分支"
+      },
+      {
+        "expected": "submitted=true",
+        "type": "return_value",
+        "what": "当 shouldSubmitOnBackslashEnter(data,kb) 为 true 时调用 submitValue"
+      },
+      {
+        "expected": "value 包含新增换行",
+        "type": "return_value",
+        "what": "当 shouldSubmitOnBackslashEnter(data,kb) 为 false 时保留换行编辑行为"
+      }
+    ],
+    "outputs": {
+      "submitted": "bool",
+      "value": "string"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "编辑器实例已初始化并进入可输入状态"
+      },
+      {
+        "involves": "config",
+        "what": "键位映射已加载且包含 newLine 行为"
+      }
+    ],
+    "trigger": {
+      "method": "handleInput",
+      "target": "Editor",
+      "type": "event_handler"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "仅识别 kb.matches(data,\"newLine\")，导致部分终端回车/Shift+Enter 序列失效"
+}

@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "models",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "supportsXhigh",
+      "boundary": "service",
+      "bug_summary": "xhigh 能力判断使用固定白名单，导致 gpt-5.2 的非精确ID变体被误判为不支持",
+      "correct_behavior": "只要 model.id 包含 gpt-5.2 即返回 true，覆盖 gpt-5.2 各变体",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将精确集合匹配改为包含 \"gpt-5.2\" 的字符串匹配",
+      "module": "models",
+      "source_commit": "2e1c5ebdee5efdc5b13fc318700e8b8caa10a2e2",
+      "test_spec": {
+        "args": {
+          "model": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "true",
+            "type": "return_value",
+            "what": "当 model.id 为 gpt-5.2 变体（如 gpt-5.2-2026-01-10）时返回 true"
+          },
+          {
+            "expected": "false",
+            "type": "return_value",
+            "what": "不包含 gpt-5.2 的模型ID返回 false"
+          }
+        ],
+        "outputs": {
+          "supported": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "模型能力规则已加载"
+          }
+        ],
+        "trigger": {
+          "method": "supportsXhigh",
+          "target": "models",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "仅当 model.id 精确等于预置集合值时才返回 true，gpt-5.2 新变体返回 false"
+    }
+  ]
+}

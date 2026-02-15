@@ -1,0 +1,49 @@
+{
+  "source_commit": "5db7cc693bf5696ac9cf334a94fc20ecdb810cb9",
+  "bug_summary": "模型选择器模糊搜索按 provider+id 顺序拼接匹配字符串，导致输入 opus anthropic 无法命中目标",
+  "module": "model-selector",
+  "action": "fuzzyFilter",
+  "fix_summary": "将模糊匹配拼接顺序从 provider id 改为 id provider，使用户按模型名在前的习惯搜索",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "fuzzyFilter 使用 `${provider} ${id}` 拼接，输入 opus anthropic 不匹配",
+  "correct_behavior": "fuzzyFilter 使用 `${id} ${provider}` 拼接，输入 opus anthropic 正确匹配到 anthropic/opus",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "模型列表包含 {id:'opus', provider:'anthropic'} 等多个模型",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "model-selector",
+      "method": "fuzzyFilter"
+    },
+    "args": {
+      "query": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "matched_models": "array"
+    },
+    "assertions": [
+      {
+        "what": "opus anthropic 能命中 anthropic/opus",
+        "type": "return_value",
+        "expected": "results.find(m => m.id === 'opus' && m.provider === 'anthropic')"
+      },
+      {
+        "what": "匹配基于 id provider 顺序",
+        "type": "return_value",
+        "expected": "matchString === `${id} ${provider}`"
+      }
+    ]
+  }
+}

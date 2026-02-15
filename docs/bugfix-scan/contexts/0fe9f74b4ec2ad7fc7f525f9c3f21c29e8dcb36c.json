@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/settings-manager.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/settings-manager.ts b/packages/coding-agent/src/core/settings-manager.ts\nindex 4d58a5c1..3a116d63 100644\n--- a/packages/coding-agent/src/core/settings-manager.ts\n+++ b/packages/coding-agent/src/core/settings-manager.ts\n@@ -314,7 +314,7 @@ export class SettingsManager {\n \t}\n \n \tgetHookPaths(): string[] {\n-\t\treturn this.settings.hooks ?? [];\n+\t\treturn [...(this.settings.hooks ?? [])];\n \t}\n \n \tsetHookPaths(paths: string[]): void {\n@@ -332,7 +332,7 @@ export class SettingsManager {\n \t}\n \n \tgetCustomToolPaths(): string[] {\n-\t\treturn this.settings.customTools ?? [];\n+\t\treturn [...(this.settings.customTools ?? [])];\n \t}\n \n \tsetCustomToolPaths(paths: string[]): void {\n@@ -360,9 +360,9 @@ export class SettingsManager {\n \t\t\tenableClaudeProject: this.settings.skills?.enableClaudeProject ?? true,\n \t\t\tenablePiUser: this.settings.skills?.enablePiUser ?? true,\n \t\t\tenablePiProject: this.settings.skills?.enablePiProject ?? true,\n-\t\t\tcustomDirectories: this.settings.skills?.customDirectories ?? [],\n-\t\t\tignoredSkills: this.settings.skills?.ignoredSkills ?? [],\n-\t\t\tincludeSkills: this.settings.skills?.includeSkills ?? [],\n+\t\t\tcustomDirectories: [...(this.settings.skills?.customDirectories ?? [])],\n+\t\t\tignoredSkills: [...(this.settings.skills?.ignoredSkills ?? [])],\n+\t\t\tincludeSkills: [...(this.settings.skills?.includeSkills ?? [])],\n \t\t};\n \t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "0fe9f74b4ec2ad7fc7f525f9c3f21c29e8dcb36c",
+  "message": "Return defensive copies from SettingsManager getters",
+  "module": "settings-manager",
+  "tags": []
+}

@@ -1,0 +1,5 @@
+{
+  "reason": "feature",
+  "skip": true,
+  "summary": "该提交为 web-ui 导出项新增（CustomProviderCard、ProviderKeyInput、AbortedMessage、ToolMessageDebugView），属于功能暴露变更而非缺陷修复。"
+}

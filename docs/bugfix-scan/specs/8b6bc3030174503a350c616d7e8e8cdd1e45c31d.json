@@ -1,0 +1,49 @@
+{
+  "source_commit": "8b6bc3030174503a350c616d7e8e8cdd1e45c31d",
+  "bug_summary": "emitContext 直接传递原始 messages 引用，hook 的原地修改会污染调用方数据",
+  "module": "runner",
+  "action": "emitContext",
+  "fix_summary": "使用 structuredClone 深拷贝 messages 后再传递给 hooks",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "hook 修改 messages 数组会影响调用方持有的原始数据",
+  "correct_behavior": "structuredClone 深拷贝后传递，hook 修改不影响原始 messages",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "已注册会修改消息的 context hook",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "runner",
+      "method": "emitContext"
+    },
+    "args": {
+      "messages": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "result": "object"
+    },
+    "assertions": [
+      {
+        "what": "原始 messages 不被修改",
+        "type": "return_value",
+        "expected": "originalMessages deep-equal before and after"
+      },
+      {
+        "what": "使用 structuredClone",
+        "type": "return_value",
+        "expected": "currentMessages = structuredClone(messages)"
+      }
+    ]
+  }
+}

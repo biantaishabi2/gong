@@ -1,0 +1,65 @@
+{
+  "action": "buildParams",
+  "boundary": "service",
+  "bug_summary": "OpenAI Responses 请求参数未显式禁用存储，导致默认可能开启服务端存储",
+  "correct_behavior": "请求参数显式设置 store=false，默认禁用存储",
+  "data_dependencies": [
+    "config",
+    "session"
+  ],
+  "fix_summary": "在 openai-responses 参数构建中新增 `store: false`，默认禁用存储",
+  "module": "ai",
+  "source_commit": "d1fce2ba1d5784e76341d44c4fdd9dcfe683e57f",
+  "test_spec": {
+    "args": {
+      "context": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      },
+      "model": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      },
+      "options": {
+        "allowed": null,
+        "required": false,
+        "type": "json"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "store=false",
+        "type": "response_field",
+        "what": "构建出的请求参数包含 store 且值为 false"
+      },
+      {
+        "expected": "stream=true",
+        "type": "response_field",
+        "what": "其余关键参数仍正常保留（如 stream=true）"
+      }
+    ],
+    "outputs": {
+      "params": "json",
+      "store": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "模型提供方为 openai-responses 且可发起 Responses 请求"
+      },
+      {
+        "involves": "session",
+        "what": "存在会话上下文可生成请求参数"
+      }
+    ],
+    "trigger": {
+      "method": "buildParams",
+      "target": "openai-responses",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "请求参数未设置 store，导致默认存储行为未被禁用"
+}

@@ -1,0 +1,44 @@
+{
+  "source_commit": "5e079e2ea81f99306092646b73f55891c9b46d58",
+  "bug_summary": "重载提示使用笼统的 resources 一词，未准确表达实际被重载的对象",
+  "module": "interactive-mode",
+  "action": "reload",
+  "fix_summary": "将 Reloading resources 改为 Reloading extensions, skills, prompts, themes 等具体名称",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "重载时显示 Reloading resources...，用户不知道具体重载了什么",
+  "correct_behavior": "重载时显示 Reloading extensions, skills, prompts, themes...，明确列出重载对象",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "交互模式已初始化，存在可重载的扩展、技能、提示和主题",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "reload"
+    },
+    "args": {},
+    "outputs": {
+      "loader_text": "string",
+      "status_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "加载提示包含具体对象名",
+        "type": "return_value",
+        "expected": "text.includes('extensions, skills, prompts, themes')"
+      },
+      {
+        "what": "不包含笼统的 resources",
+        "type": "return_value",
+        "expected": "!text.includes('resources')"
+      }
+    ]
+  }
+}

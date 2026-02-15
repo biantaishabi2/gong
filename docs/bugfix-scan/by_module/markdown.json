@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "markdown",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "renderListItem",
+      "boundary": "service",
+      "bug_summary": "嵌套列表检测仅检查是否包含青色 ANSI 码，导致普通含色文本被误判为嵌套列表",
+      "correct_behavior": "仅缩进+青色项目符开头的行被识别为嵌套列表",
+      "data_dependencies": [],
+      "fix_summary": "改为检查 ^\\s+\\x1b\\[36m[-\\d] 精确匹配缩进+青色+项目符，避免误判",
+      "module": "markdown",
+      "source_commit": "c23f1576dca2ea79b8f1368b1d1def661cc517cc",
+      "test_spec": {
+        "args": {
+          "lines": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "普通文本行不被额外缩进",
+            "type": "return_value",
+            "what": "普通青色文本不被误判"
+          },
+          {
+            "expected": "缩进+青色项目符行保持嵌套缩进",
+            "type": "return_value",
+            "what": "真正嵌套列表正确识别"
+          }
+        ],
+        "outputs": {
+          "rendered": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "列表项包含含青色 ANSI 的普通文本和真正的嵌套项目符"
+          }
+        ],
+        "trigger": {
+          "method": "renderListItem",
+          "target": "markdown",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "包含青色 ANSI 的普通文本行被误判为嵌套列表并错误缩进"
+    }
+  ]
+}

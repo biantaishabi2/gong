@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/autocomplete.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/autocomplete.ts b/packages/tui/src/autocomplete.ts\nindex 7f31c0fe..0a944468 100644\n--- a/packages/tui/src/autocomplete.ts\n+++ b/packages/tui/src/autocomplete.ts\n@@ -240,14 +240,17 @@ export class CombinedAutocompleteProvider implements AutocompleteProvider {\n \t\t// Check if we're completing a file attachment (prefix starts with \"@\")\n \t\tif (prefix.startsWith(\"@\")) {\n \t\t\t// This is a file attachment completion\n-\t\t\tconst newLine = `${beforePrefix + item.value} ${afterCursor}`;\n+\t\t\t// Don't add space after directories so user can continue autocompleting\n+\t\t\tconst isDirectory = item.value.endsWith(\"/\");\n+\t\t\tconst suffix = isDirectory ? \"\" : \" \";\n+\t\t\tconst newLine = `${beforePrefix + item.value}${suffix}${afterCursor}`;\n \t\t\tconst newLines = [...lines];\n \t\t\tnewLines[cursorLine] = newLine;\n \n \t\t\treturn {\n \t\t\t\tlines: newLines,\n \t\t\t\tcursorLine,\n-\t\t\t\tcursorCol: beforePrefix.length + item.value.length + 1, // +1 for space\n+\t\t\t\tcursorCol: beforePrefix.length + item.value.length + suffix.length,\n \t\t\t};\n \t\t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "b7cef51f3f5068f61f144bd5c5130a295a3e0c16",
+  "message": "fix(tui): don't add space after directory completion for @ file attachments",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

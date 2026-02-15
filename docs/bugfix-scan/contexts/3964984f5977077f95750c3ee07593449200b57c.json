@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 6242ef52..9f07af60 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1167,7 +1167,6 @@ export class InteractiveMode {\n \t\t\t\t\tthis.ui.requestRender();\n \t\t\t\t} else if (event.message.role === \"user\") {\n \t\t\t\t\tthis.addMessageToChat(event.message);\n-\t\t\t\t\tthis.editor.setText(\"\");\n \t\t\t\t\tthis.updatePendingMessagesDisplay();\n \t\t\t\t\tthis.ui.requestRender();\n \t\t\t\t} else if (event.message.role === \"assistant\") {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3964984f5977077f95750c3ee07593449200b57c",
+  "message": "fix(coding-agent): keep editor text on queued steering",
+  "module": "interactive-mode",
+  "tags": []
+}

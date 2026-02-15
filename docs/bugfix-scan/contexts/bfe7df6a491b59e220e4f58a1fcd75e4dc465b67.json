@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/mom/src/agent.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/mom/src/agent.ts b/packages/mom/src/agent.ts\nindex 280f75c3..b0722641 100644\n--- a/packages/mom/src/agent.ts\n+++ b/packages/mom/src/agent.ts\n@@ -278,7 +278,7 @@ function extractToolResultText(result: unknown): string {\n \treturn JSON.stringify(result);\n }\n \n-function formatToolArgsForSlack(toolName: string, args: Record<string, unknown>): string {\n+function formatToolArgsForSlack(_toolName: string, args: Record<string, unknown>): string {\n \tconst lines: string[] = [];\n \n \tfor (const [key, value] of Object.entries(args)) {\n"
+    },
+    {
+      "file": "packages/mom/src/main.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/mom/src/main.ts b/packages/mom/src/main.ts\nindex ca182a1d..05af80d3 100644\n--- a/packages/mom/src/main.ts\n+++ b/packages/mom/src/main.ts\n@@ -70,7 +70,7 @@ await validateSandbox(sandbox);\n // Track active agent runs per channel\n const activeRuns = new Map<string, AgentRunner>();\n \n-async function handleMessage(ctx: SlackContext, source: \"channel\" | \"dm\"): Promise<void> {\n+async function handleMessage(ctx: SlackContext, _source: \"channel\" | \"dm\"): Promise<void> {\n \tconst channelId = ctx.message.channel;\n \tconst messageText = ctx.message.text.toLowerCase().trim();\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "bfe7df6a491b59e220e4f58a1fcd75e4dc465b67",
+  "message": "fix: biome linter warnings (unused parameters)",
+  "module": "agent",
+  "tags": []
+}

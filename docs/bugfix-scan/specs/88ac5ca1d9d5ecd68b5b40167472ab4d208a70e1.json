@@ -1,0 +1,55 @@
+{
+  "action": "localPathDetection",
+  "boundary": "service",
+  "bug_summary": "扩展源路径以点号开头（如 .pi/...）时未被识别为本地路径，导致被错误按非本地来源处理",
+  "correct_behavior": "识别所有 . 前缀路径，.pi/extensions/agent-end.ts 被正确判定为本地路径",
+  "data_dependencies": [
+    "file",
+    "config"
+  ],
+  "fix_summary": "将本地路径判断从仅匹配 \"./\" 和 \"../\" 调整为统一匹配 \".\" 前缀，使 .pi/... 也被识别为本地路径",
+  "module": "coding-agent",
+  "source_commit": "88ac5ca1d9d5ecd68b5b40167472ab4d208a70e1",
+  "test_spec": {
+    "args": {
+      "source": {
+        "allowed": null,
+        "required": true,
+        "type": "string"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "is_local_path=true",
+        "type": "return_value",
+        "what": "source=.pi/extensions/agent-end.ts 被判定为本地路径"
+      },
+      {
+        "expected": "resolved_source=.pi/extensions/agent-end.ts",
+        "type": "return_value",
+        "what": "本地扩展路径走本地解析而非包名解析"
+      }
+    ],
+    "outputs": {
+      "is_local_path": "bool",
+      "resolved_source": "string"
+    },
+    "preconditions": [
+      {
+        "involves": "file",
+        "what": "工作区存在 .pi/extensions/agent-end.ts 文件"
+      },
+      {
+        "involves": "config",
+        "what": "扩展加载配置包含 source=.pi/extensions/agent-end.ts"
+      }
+    ],
+    "trigger": {
+      "method": "localPathDetection",
+      "target": "DefaultPackageManager",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "仅识别 ./ 或 ../，导致 .pi/extensions/agent-end.ts 被误判为非本地路径"
+}

@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tool-execution.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tool-execution.ts b/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\nindex 0df2f4d0..52bda96d 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\n@@ -368,7 +368,6 @@ export class ToolExecutionComponent extends Container {\n \t\t\t\t\tthis.contentBox.addChild(new Text(`\\n${styledOutput}`, 0, 0));\n \t\t\t\t} else {\n \t\t\t\t\t// Use visual line truncation when collapsed with width-aware caching\n-\t\t\t\t\tconst textContent = `\\n${styledOutput}`;\n \t\t\t\t\tlet cachedWidth: number | undefined;\n \t\t\t\t\tlet cachedLines: string[] | undefined;\n \t\t\t\t\tlet cachedSkipped: number | undefined;\n@@ -376,7 +375,7 @@ export class ToolExecutionComponent extends Container {\n \t\t\t\t\tthis.contentBox.addChild({\n \t\t\t\t\t\trender: (width: number) => {\n \t\t\t\t\t\t\tif (cachedLines === undefined || cachedWidth !== width) {\n-\t\t\t\t\t\t\t\tconst result = truncateToVisualLines(textContent, BASH_PREVIEW_LINES, width);\n+\t\t\t\t\t\t\t\tconst result = truncateToVisualLines(styledOutput, BASH_PREVIEW_LINES, width);\n \t\t\t\t\t\t\t\tcachedLines = result.visualLines;\n \t\t\t\t\t\t\t\tcachedSkipped = result.skippedCount;\n \t\t\t\t\t\t\t\tcachedWidth = width;\n@@ -387,7 +386,8 @@ export class ToolExecutionComponent extends Container {\n \t\t\t\t\t\t\t\t\t` ${keyHint(\"expandTools\", \"to expand\")})`;\n \t\t\t\t\t\t\t\treturn [\"\", hint, ...cachedLines];\n \t\t\t\t\t\t\t}\n-\t\t\t\t\t\t\treturn cachedLines;\n+\t\t\t\t\t\t\t// Add blank line for spacing (matches expanded case)\n+\t\t\t\t\t\t\treturn [\"\", ...cachedLines];\n \t\t\t\t\t\t},\n \t\t\t\t\t\tinvalidate: () => {\n \t\t\t\t\t\t\tcachedWidth = undefined;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3235926eedfc13c6f23e00a1ae31958aad6b4af0",
+  "message": "fix(coding-agent): off-by-one error in bash output 'earlier lines' count",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

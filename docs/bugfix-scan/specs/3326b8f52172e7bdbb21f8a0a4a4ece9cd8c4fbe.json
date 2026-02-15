@@ -1,0 +1,50 @@
+{
+  "source_commit": "3326b8f52172e7bdbb21f8a0a4a4ece9cd8c4fbe",
+  "bug_summary": "--no-extensions 返回空集合时条件检查跳过 preloadedExtensions 写入，后续代码仍会发现并加载扩展",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "handle_no_extensions",
+  "fix_summary": "移除 extensions.length > 0 条件检查，只要 extensionsResult 有值就写入 preloadedExtensions（包括空数组）",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "--no-extensions 时 preloadedExtensions 未设置，后续扩展发现逻辑正常执行，扩展仍被加载",
+  "correct_behavior": "--no-extensions 时 preloadedExtensions 设为空数组，明确禁用后续扩展发现",
+  "data_dependencies": [
+    "config",
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "启动参数包含 --no-extensions",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "main",
+      "method": "initExtensions"
+    },
+    "args": {
+      "noExtensions": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "preloadedExtensions": "array"
+    },
+    "assertions": [
+      {
+        "what": "--no-extensions 时 preloadedExtensions 为空数组（而非 undefined）",
+        "type": "return_value",
+        "expected": "preloadedExtensions !== undefined && preloadedExtensions.length === 0"
+      },
+      {
+        "what": "后续扩展发现被跳过",
+        "type": "return_value",
+        "expected": "extension discovery 不执行"
+      }
+    ]
+  }
+}

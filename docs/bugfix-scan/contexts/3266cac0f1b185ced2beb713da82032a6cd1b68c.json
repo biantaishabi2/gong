@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/footer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/footer.ts b/packages/coding-agent/src/modes/interactive/components/footer.ts\nindex 5eb3727a..6d31fd1b 100644\n--- a/packages/coding-agent/src/modes/interactive/components/footer.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/footer.ts\n@@ -276,7 +276,13 @@ export class FooterComponent implements Component {\n \t\t\t}\n \t\t}\n \n-\t\t// Return two lines: pwd and stats\n-\t\treturn [theme.fg(\"dim\", pwd), theme.fg(\"dim\", statsLine)];\n+\t\t// Apply dim to each part separately. statsLeft may contain color codes (for context %)\n+\t\t// that end with a reset, which would clear an outer dim wrapper. So we dim the parts\n+\t\t// before and after the colored section independently.\n+\t\tconst dimStatsLeft = theme.fg(\"dim\", statsLeft);\n+\t\tconst remainder = statsLine.slice(statsLeft.length); // padding + rightSide\n+\t\tconst dimRemainder = theme.fg(\"dim\", remainder);\n+\n+\t\treturn [theme.fg(\"dim\", pwd), dimStatsLeft + dimRemainder];\n \t}\n }\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3266cac0f1b185ced2beb713da82032a6cd1b68c",
+  "message": "Fix coloring in footer when context usage is colored",
+  "module": "footer",
+  "tags": []
+}

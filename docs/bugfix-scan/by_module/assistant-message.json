@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "assistant-message",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "renderThinking",
+      "boundary": "service",
+      "bug_summary": "thinking trace 按行分别应用样式再换行拼接，自动换行时样式丢失",
+      "correct_behavior": "整段应用样式，自动换行后样式保留",
+      "data_dependencies": [],
+      "fix_summary": "改为对整段 thinking 文本应用 chalk.gray.italic，而非逐行分别应用",
+      "module": "assistant-message",
+      "source_commit": "ea8b8b7f543e170d46ccbc100106f9d42be05e49",
+      "test_spec": {
+        "args": {
+          "thinking": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "chalk.gray.italic applied to full text, not per line",
+            "type": "return_value",
+            "what": "整段应用样式而非逐行"
+          }
+        ],
+        "outputs": {
+          "styledText": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "thinking 文本会在 TUI 宽度下发生换行"
+          }
+        ],
+        "trigger": {
+          "method": "renderThinking",
+          "target": "assistant-message",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "thinking 文本自动换行后样式中断，部分行无灰色斜体"
+    }
+  ]
+}

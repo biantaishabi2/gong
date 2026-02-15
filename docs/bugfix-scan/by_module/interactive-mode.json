@@ -1,0 +1,1053 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "interactive-mode",
+  "spec_count": 21,
+  "specs": [
+    {
+      "action": "setEditor",
+      "boundary": "service",
+      "bug_summary": "扩展自定义编辑器时直接复制默认回调引用，导致回调执行上下文/可调用性不稳定并中断重试流程",
+      "correct_behavior": "扩展自定义编辑器后，回调通过包装函数稳定委托给默认编辑器且不再中断重试",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 onEscape/onCtrlD/onPasteImage 从直接赋值改为箭头函数包装并使用可选调用，确保委托调用稳定",
+      "module": "interactive-mode",
+      "source_commit": "828c40cf68984ede829c6fa6adac9a697ca14d8a",
+      "test_spec": {
+        "args": {
+          "newEditor": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "onEscape_delegate_called=true",
+            "type": "runtime_behavior",
+            "what": "注册自定义编辑器后调用 customEditor.onEscape 可成功委托到 defaultEditor.onEscape"
+          },
+          {
+            "expected": "onCtrlD_delegate_called=true",
+            "type": "runtime_behavior",
+            "what": "调用 customEditor.onCtrlD 可成功委托到 defaultEditor.onCtrlD"
+          },
+          {
+            "expected": "onPasteImage_delegate_called=true",
+            "type": "runtime_behavior",
+            "what": "调用 customEditor.onPasteImage 可成功委托到 defaultEditor.onPasteImage"
+          },
+          {
+            "expected": "retry_aborted=false",
+            "type": "runtime_behavior",
+            "what": "上述委托调用过程中不会触发重试中断"
+          }
+        ],
+        "outputs": {
+          "onCtrlD_delegate_called": "bool",
+          "onEscape_delegate_called": "bool",
+          "onPasteImage_delegate_called": "bool",
+          "retry_aborted": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "已加载默认编辑器且存在重试流程"
+          },
+          {
+            "involves": "config",
+            "what": "扩展提供的自定义编辑器包含 actionHandlers(Map)"
+          }
+        ],
+        "trigger": {
+          "method": "setEditor",
+          "target": "InteractiveMode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "扩展自定义编辑器后，按键/粘贴相关回调可能失效或抛错，进而中断重试"
+    },
+    {
+      "action": "resetExtensionUI",
+      "boundary": "service",
+      "bug_summary": "resetExtensionUI 未重置终端标题和 loading 提示，界面仍显示旧的扩展状态",
+      "correct_behavior": "resetExtensionUI 更新终端标题并将 loading 消息恢复为默认工作文案+中断快捷键提示",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "在 resetExtensionUI 中添加 updateTerminalTitle() 调用和 loadingAnimation.setMessage() 恢复默认文案",
+      "module": "interactive-mode",
+      "source_commit": "7d2255ddc2a6a7cd4202a4b3aae4d29ed8271c9f",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "updateTerminalTitle() called",
+            "type": "side_effect",
+            "what": "终端标题被更新"
+          },
+          {
+            "expected": "message includes defaultWorkingMessage and interrupt key hint",
+            "type": "return_value",
+            "what": "loading 消息恢复默认"
+          }
+        ],
+        "outputs": {
+          "loading_message": "string",
+          "terminal_title": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "扩展会话已设置自定义终端标题和 loading 消息"
+          }
+        ],
+        "trigger": {
+          "method": "resetExtensionUI",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "扩展重置后终端标题和 loading 消息仍为旧扩展的状态"
+    },
+    {
+      "action": "initThemes",
+      "boundary": "service",
+      "bug_summary": "交互模式初始化时未先注册 resource loader 提供的主题，导致主题初始化无法使用会话主题",
+      "correct_behavior": "先 setRegisteredThemes 注册会话主题，再 initTheme，主题正确可用",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 initTheme 前调用 setRegisteredThemes(session.resources.themes)，先注册再初始化",
+      "module": "interactive-mode",
+      "source_commit": "75eb841bb214a8880daf8e8dd9133d2b62f7b09d",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "setRegisteredThemes called before initTheme",
+            "type": "side_effect",
+            "what": "setRegisteredThemes 在 initTheme 之前调用"
+          },
+          {
+            "expected": "theme registry contains session themes",
+            "type": "return_value",
+            "what": "注册后主题可用"
+          }
+        ],
+        "outputs": {
+          "themes_registered": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "会话 resource loader 已加载主题集合"
+          }
+        ],
+        "trigger": {
+          "method": "initThemes",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "initTheme 时主题注册表为空，resource loader 提供的主题不可用"
+    },
+    {
+      "action": "sendExtensionMessage",
+      "boundary": "service",
+      "bug_summary": "启动阶段初始消息未渲染时就重建聊天，导致扩展消息被重复渲染",
+      "correct_behavior": "hasRenderedInitialMessages 为 false 时跳过 rebuildChat，避免重复渲染",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "增加 hasRenderedInitialMessages 标志，初始渲染前不触发 rebuildChat",
+      "module": "interactive-mode",
+      "source_commit": "898a1a50eade1c815cff350f2d64358bfae0d457",
+      "test_spec": {
+        "args": {
+          "message": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "rebuildChat not called when !hasRenderedInitialMessages",
+            "type": "side_effect",
+            "what": "初始渲染前不触发 rebuildChat"
+          },
+          {
+            "expected": "rebuildChat called when hasRenderedInitialMessages",
+            "type": "side_effect",
+            "what": "初始渲染后正常触发"
+          }
+        ],
+        "outputs": {
+          "rebuild_triggered": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "交互模式启动中，初始消息尚未渲染"
+          }
+        ],
+        "trigger": {
+          "method": "sendExtensionMessage",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "初始消息渲染前就触发 rebuildChat，扩展消息在初始渲染时再次出现"
+    },
+    {
+      "action": "handleSkillCommand",
+      "boundary": "service",
+      "bug_summary": "/skill 提示仅注入正文，未包含 skill 文件路径和相对引用基准目录",
+      "correct_behavior": "提示包含 Skill location: path 和 References are relative to: dir",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "在提示内容前添加 Skill location 和 References are relative to 头信息",
+      "module": "interactive-mode",
+      "source_commit": "c85a5720f28c6f329268be650f553789a3dd3591",
+      "test_spec": {
+        "args": {
+          "args": {
+            "allowed": null,
+            "required": false,
+            "type": "string"
+          },
+          "skillPath": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "prompt.includes('Skill location: ' + skillPath)",
+            "type": "return_value",
+            "what": "包含 Skill location"
+          },
+          {
+            "expected": "prompt.includes('References are relative to ' + dirname(skillPath))",
+            "type": "return_value",
+            "what": "包含 References are relative to"
+          }
+        ],
+        "outputs": {
+          "prompt": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "已加载包含相对路径引用的 skill 文件"
+          }
+        ],
+        "trigger": {
+          "method": "handleSkillCommand",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "skill 提示缺少路径上下文，相对路径引用无法定位"
+    },
+    {
+      "action": "start",
+      "boundary": "service",
+      "bug_summary": "恢复会话时初始化顺序错误，导致消息先渲染而资源后显示",
+      "correct_behavior": "恢复会话时先显示已加载资源，再渲染初始消息",
+      "data_dependencies": [
+        "session",
+        "config"
+      ],
+      "fix_summary": "将 initExtensions() 提前到 renderInitialMessages() 之前执行，确保资源先显示再渲染初始消息",
+      "module": "interactive-mode",
+      "source_commit": "d1e33599f6cb23ae993ba17313b50ce757b410f8",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "initExtensions < renderInitialMessages",
+            "type": "event_order",
+            "what": "start 执行时先完成 initExtensions 再执行 renderInitialMessages"
+          },
+          {
+            "expected": "resources_visible=true before initial_messages_rendered=true",
+            "type": "ui_state",
+            "what": "初始消息渲染前资源区已可见"
+          }
+        ],
+        "outputs": {
+          "initial_messages_rendered": "bool",
+          "render_order": "array",
+          "resources_visible": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "session",
+            "what": "会话处于恢复模式且存在可恢复的历史消息"
+          },
+          {
+            "involves": "config",
+            "what": "至少一个扩展在初始化后会暴露资源项"
+          }
+        ],
+        "trigger": {
+          "method": "start",
+          "target": "InteractiveMode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "恢复会话时先渲染初始消息，资源随后才出现"
+    },
+    {
+      "action": "context_output_render",
+      "boundary": "service",
+      "bug_summary": "当存在 context 文件时，界面在 Context 区块前缺少空行，导致输出粘连、可读性差",
+      "correct_behavior": "Context 区块前有一个 Spacer(1)，与前文形成清晰视觉分隔",
+      "data_dependencies": [
+        "file",
+        "session"
+      ],
+      "fix_summary": "在渲染 Context 列表前新增一个 Spacer(1) 作为前置分隔",
+      "module": "interactive-mode",
+      "source_commit": "025b7bec7a5d441f67b34944a6a6f934c68b52a3",
+      "test_spec": {
+        "args": {
+          "contextFiles": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "Spacer(1) 紧邻在 Context 文本组件之前",
+            "type": "state",
+            "what": "当 contextFiles.length > 0 时，Context 标题前先插入一个 Spacer(1)"
+          },
+          {
+            "expected": "sectionHeader(\"Context\") 与格式化路径列表正常输出",
+            "type": "state",
+            "what": "Context 区块仍保留原有标题与文件列表渲染"
+          }
+        ],
+        "outputs": {
+          "chat_container_children": "array",
+          "context_block_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "会话资源加载器返回至少一个 agents 文件路径"
+          },
+          {
+            "involves": "session",
+            "what": "交互会话已初始化并可向 chatContainer 写入子组件"
+          }
+        ],
+        "trigger": {
+          "method": "context_output_render",
+          "target": "InteractiveMode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Context 区块直接跟在前一段内容后，无前置空行分隔"
+    },
+    {
+      "action": "setupEditor",
+      "boundary": "service",
+      "bug_summary": "使用自定义编辑器时未同步注入 autocomplete provider，导致补全能力只在默认编辑器生效",
+      "correct_behavior": "defaultEditor 和当前自定义 editor 都设置了同一 autocomplete provider",
+      "data_dependencies": [],
+      "fix_summary": "在为 defaultEditor 设置 autocomplete provider 后，新增分支：当当前 editor 不是 defaultEditor 时，也为当前 editor 设置同一 provider",
+      "module": "interactive-mode",
+      "source_commit": "3cf5e23c0d428895e47be3f73d0da3034b483d60",
+      "test_spec": {
+        "args": {
+          "autocomplete_provider": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          },
+          "use_custom_editor": {
+            "allowed": [
+              true,
+              false
+            ],
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "default_editor_has_autocomplete=true",
+            "type": "state",
+            "what": "defaultEditor 被设置 autocomplete provider"
+          },
+          {
+            "expected": "active_editor_has_autocomplete=true",
+            "type": "state",
+            "what": "当 editor!==defaultEditor 时，当前 editor 也被设置 autocomplete provider"
+          }
+        ],
+        "outputs": {
+          "active_editor_has_autocomplete": "bool",
+          "default_editor_has_autocomplete": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "已创建 InteractiveMode 实例并初始化 autocompleteProvider"
+          },
+          {
+            "involves": "config",
+            "what": "当前 editor 与 defaultEditor 为不同实例（启用自定义编辑器）"
+          }
+        ],
+        "trigger": {
+          "method": "setupEditor",
+          "target": "InteractiveMode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "仅 defaultEditor 设置了 autocomplete provider，自定义 editor 未设置"
+    },
+    {
+      "action": "shutdownHandler",
+      "boundary": "event",
+      "bug_summary": "扩展触发 shutdown 时，在非流式会话下未进入 clean TUI shutdown 路径，可能导致退出流程不完整",
+      "correct_behavior": "非流式会话触发 shutdown 会设置标记位并立即执行 this.shutdown()",
+      "data_dependencies": [
+        "session",
+        "config"
+      ],
+      "fix_summary": "在 shutdownHandler 中新增非流式分支：当 session.isStreaming=false 时主动调用 this.shutdown()",
+      "module": "interactive-mode",
+      "source_commit": "92fdb53c106d8424589cd2e3a5e62cda5ba3cdec",
+      "test_spec": {
+        "args": {
+          "session_is_streaming": {
+            "allowed": [
+              true,
+              false
+            ],
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "shutdownRequested=true",
+            "type": "state_change",
+            "what": "收到 shutdown 事件后应先将 shutdownRequested 置为 true"
+          },
+          {
+            "expected": "this.shutdown() called once",
+            "type": "method_call",
+            "what": "当 session_is_streaming=false 时必须调用 clean TUI shutdown 路径"
+          },
+          {
+            "expected": "this.shutdown() not called in handler",
+            "type": "method_call",
+            "what": "当 session_is_streaming=true 时不应立即调用 this.shutdown()"
+          }
+        ],
+        "outputs": {
+          "shutdown_invoked": "bool",
+          "shutdown_requested": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "session",
+            "what": "交互会话已建立"
+          },
+          {
+            "involves": "config",
+            "what": "扩展可触发 shutdown 事件"
+          }
+        ],
+        "trigger": {
+          "method": "shutdownHandler",
+          "target": "InteractiveMode",
+          "type": "event_handler"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "非流式会话触发 shutdown 仅设置标记位，未执行 this.shutdown()"
+    },
+    {
+      "action": "startup",
+      "boundary": "service",
+      "bug_summary": "交互模式启动时只确保 fd 可用，未预下载 rg，导致依赖 rg 的 grep 工具与 bash 命令在首轮使用时失败",
+      "correct_behavior": "同时确保 fd 与 rg 可用，进入交互后 grep/依赖 rg 的命令可直接执行",
+      "data_dependencies": [
+        "file",
+        "config"
+      ],
+      "fix_summary": "启动阶段将 ensureTool(\"rg\") 与 ensureTool(\"fd\") 并行执行，确保 rg 在进入交互前已可用",
+      "module": "interactive-mode",
+      "source_commit": "a6cd254471b6b0cc3a08782e9026dd14b03773fe",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "ensureTool(\"rg\") called once during startup",
+            "type": "state_change",
+            "what": "启动时会调用 ensureTool(\"rg\")"
+          },
+          {
+            "expected": "rg_available=true",
+            "type": "runtime_state",
+            "what": "启动完成后 PATH 中可解析 rg"
+          },
+          {
+            "expected": "fd_path is non-empty and initialization succeeds",
+            "type": "runtime_state",
+            "what": "fd 与 rg 的准备流程并行执行且 fdPath 正常赋值"
+          }
+        ],
+        "outputs": {
+          "fd_path": "string",
+          "rg_available": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "运行环境未预装 rg 二进制"
+          },
+          {
+            "involves": "config",
+            "what": "工具下载目录可写且可加入 PATH"
+          }
+        ],
+        "trigger": {
+          "method": "startup",
+          "target": "InteractiveMode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "仅调用 ensureTool(\"fd\")，首次执行 grep/依赖 rg 的命令可能报 rg not found"
+    },
+    {
+      "action": "reload",
+      "boundary": "service",
+      "bug_summary": "重载提示使用笼统的 resources 一词，未准确表达实际被重载的对象",
+      "correct_behavior": "重载时显示 Reloading extensions, skills, prompts, themes...，明确列出重载对象",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 Reloading resources 改为 Reloading extensions, skills, prompts, themes 等具体名称",
+      "module": "interactive-mode",
+      "source_commit": "5e079e2ea81f99306092646b73f55891c9b46d58",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "text.includes('extensions, skills, prompts, themes')",
+            "type": "return_value",
+            "what": "加载提示包含具体对象名"
+          },
+          {
+            "expected": "!text.includes('resources')",
+            "type": "return_value",
+            "what": "不包含笼统的 resources"
+          }
+        ],
+        "outputs": {
+          "loader_text": "string",
+          "status_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "交互模式已初始化，存在可重载的扩展、技能、提示和主题"
+          }
+        ],
+        "trigger": {
+          "method": "reload",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "重载时显示 Reloading resources...，用户不知道具体重载了什么"
+    },
+    {
+      "action": "startup_hints",
+      "boundary": "service",
+      "bug_summary": "启动提示中 thinking 相关文案含糊：'to cycle thinking' 缺少 'level'，'to toggle thinking' 应为 'to expand thinking'",
+      "correct_behavior": "提示显示 'to cycle thinking level' 和 'to expand thinking'，准确描述功能",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 cycleThinkingLevel 提示从 'to cycle thinking' 改为 'to cycle thinking level'，toggleThinking 从 'to toggle thinking' 改为 'to expand thinking'",
+      "module": "interactive-mode",
+      "source_commit": "1544ab1794dc8dd6ea0dccb1f6a0d0cd6a76e8ba",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "hint.text === 'to cycle thinking level'",
+            "type": "return_value",
+            "what": "cycleThinkingLevel 提示包含 'thinking level'"
+          },
+          {
+            "expected": "hint.text === 'to expand thinking'",
+            "type": "return_value",
+            "what": "toggleThinking 提示显示 'expand' 而非 'toggle'"
+          }
+        ],
+        "outputs": {
+          "hints": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "交互模式已启动并生成启动快捷键提示"
+          }
+        ],
+        "trigger": {
+          "method": "getStartupHints",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "提示显示 'to cycle thinking' 和 'to toggle thinking'，语义模糊"
+    },
+    {
+      "action": "generateShareUrl",
+      "boundary": "service",
+      "bug_summary": "分享链接将 gistId 拼到查询串而非 hash fragment，导致会话定位失败",
+      "correct_behavior": "生成 URL 为 https://buildwithpi.ai/session/#{gistId}，hash fragment 正确定位",
+      "data_dependencies": [],
+      "fix_summary": "将 URL 格式从 session?gistId 改为 session/#gistId，使用 hash fragment 定位",
+      "module": "interactive-mode",
+      "source_commit": "8b23c0a45ed3768b1e7f8dace0e45bbae52e7635",
+      "test_spec": {
+        "args": {
+          "gistId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "url === `https://buildwithpi.ai/session/#${gistId}`",
+            "type": "return_value",
+            "what": "URL 使用 hash fragment"
+          },
+          {
+            "expected": "!url.includes('?')",
+            "type": "return_value",
+            "what": "URL 不使用查询串"
+          }
+        ],
+        "outputs": {
+          "url": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "gist 已创建成功，返回 gistId"
+          }
+        ],
+        "trigger": {
+          "method": "generateShareUrl",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "生成 URL 为 https://buildwithpi.ai/session?{gistId}，查询串格式无法定位"
+    },
+    {
+      "action": "onAuth",
+      "boundary": "service",
+      "bug_summary": "OAuth 登录 URL 输出为纯文本，终端中不可点击",
+      "correct_behavior": "登录 URL 使用 OSC 8 渲染为可点击链接",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "使用 OSC 8 超链接转义序列渲染登录 URL，使其在终端中可点击",
+      "module": "interactive-mode",
+      "source_commit": "d42a3d71fe752bffcb76c9eed821e4d20ec0f137",
+      "test_spec": {
+        "args": {
+          "url": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "text contains \\x1b]8;; hyperlink escape",
+            "type": "return_value",
+            "what": "输出包含 OSC 8 超链接序列"
+          },
+          {
+            "expected": "text.includes('Click here to login')",
+            "type": "return_value",
+            "what": "包含 Click here to login 文案"
+          }
+        ],
+        "outputs": {
+          "rendered_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "OAuth 回调触发，返回 loginUrl"
+          }
+        ],
+        "trigger": {
+          "method": "onAuth",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "登录 URL 显示为纯文本，用户需手动复制"
+    },
+    {
+      "action": "bindExtensionShortcut",
+      "boundary": "service",
+      "bug_summary": "自定义编辑器直接拷贝扩展快捷键处理函数，调用上下文丢失",
+      "correct_behavior": "箭头函数委托确保 defaultEditor 上下文正确",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "改为箭头函数委托 (data) => this.defaultEditor.onExtensionShortcut?.(data)，保持上下文",
+      "module": "interactive-mode",
+      "source_commit": "f1b1d54955370247d85a9528f076b29d68580d82",
+      "test_spec": {
+        "args": {
+          "data": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "defaultEditor.onExtensionShortcut called with data",
+            "type": "side_effect",
+            "what": "快捷键正确委托到 defaultEditor"
+          }
+        ],
+        "outputs": {
+          "handled": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "customEditor 和 defaultEditor 均已初始化"
+          }
+        ],
+        "trigger": {
+          "method": "bindExtensionShortcut",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "直接赋值 customEditor.onExtensionShortcut = defaultEditor.onExtensionShortcut 丢失 this"
+    },
+    {
+      "action": "propagate_paddingX",
+      "boundary": "service",
+      "bug_summary": "切换到自定义编辑器时未同步 paddingX，修改全局 padding 设置时自定义编辑器不更新",
+      "correct_behavior": "自定义编辑器继承 defaultEditor 的 paddingX，设置变更时实时同步",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "切换编辑器时检查并同步 setPaddingX；修改 padding 设置时同步到当前非默认编辑器",
+      "module": "interactive-mode",
+      "source_commit": "2bbc255237362f0abf0e0ce8bd31fe2cc7c9a87a",
+      "test_spec": {
+        "args": {
+          "editor": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "newEditor.paddingX === defaultEditor.paddingX",
+            "type": "return_value",
+            "what": "切换编辑器时 paddingX 被同步"
+          },
+          {
+            "expected": "settings change 后 customEditor.paddingX === new value",
+            "type": "return_value",
+            "what": "修改设置时非默认编辑器也更新"
+          }
+        ],
+        "outputs": {
+          "paddingX": "int"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "存在自定义编辑器且支持 setPaddingX"
+          }
+        ],
+        "trigger": {
+          "method": "switchEditor",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "自定义编辑器的水平内边距与默认编辑器不一致"
+    },
+    {
+      "action": "handleHotkeysCommand",
+      "boundary": "service",
+      "bug_summary": "/hotkeys 输出中的扩展快捷键名称未进行 Title Case 格式化，显示不一致且可读性差",
+      "correct_behavior": "/hotkeys 表格输出 Title Case 后的 key（如 `Ctrl+K`），与其他展示风格一致",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在生成 /hotkeys 表格时将快捷键 key 做 Title Case 转换后再渲染",
+      "module": "interactive-mode",
+      "source_commit": "3ae0cbe3847813ec93632df1ca02e46d4edb3bbd",
+      "test_spec": {
+        "args": {
+          "command": {
+            "allowed": [
+              "/hotkeys"
+            ],
+            "required": true,
+            "type": "string"
+          },
+          "shortcuts": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "`ctrl+k` 显示为 `Ctrl+K`，`shift+tab` 显示为 `Shift+Tab`",
+            "type": "output",
+            "what": "渲染表格时快捷键显示为 Title Case"
+          },
+          {
+            "expected": "description 使用 shortcut.description 或 fallback 为 shortcut.extensionPath",
+            "type": "output",
+            "what": "描述字段保持原值"
+          }
+        ],
+        "outputs": {
+          "hotkeys_table": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "已加载包含 extension hotkeys 的配置"
+          }
+        ],
+        "trigger": {
+          "method": "handleHotkeysCommand",
+          "target": "InteractiveMode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "/hotkeys 表格直接输出原始 key（如 `ctrl+k`），大小写风格不统一"
+    },
+    {
+      "action": "initHooks",
+      "boundary": "service",
+      "bug_summary": "initHooks 在未配置任何 hook 路径时仍执行初始化，创建无效的 Hook UI 上下文",
+      "correct_behavior": "hookPaths 为空时直接返回，不创建任何 Hook 相关资源",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 initHooks 开头检查 hookPaths.length === 0 时直接 return，跳过初始化",
+      "module": "interactive-mode",
+      "source_commit": "86c2a33df4d47fa0cc7782b8efb52f5affb682d7",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "hookPaths.length === 0 → early return",
+            "type": "return_value",
+            "what": "无 hooks 配置时跳过初始化"
+          },
+          {
+            "expected": "no Hook UI context created",
+            "type": "side_effect",
+            "what": "不创建 Hook UI 上下文"
+          }
+        ],
+        "outputs": {
+          "initialized": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "settings 中未配置任何 hook 路径"
+          }
+        ],
+        "trigger": {
+          "method": "initHooks",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "hookPaths 为空时仍创建 Hook UI 上下文和相关资源"
+    },
+    {
+      "action": "handleReload",
+      "boundary": "service",
+      "bug_summary": "/reload 后恢复了旧编辑器实例而非重新创建的新编辑器，导致状态不一致",
+      "correct_behavior": "/reload 完成后使用正确的编辑器实例（新创建或当前活跃的）",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 restoreEditor 改为 dismissLoader(editor) 接收参数化编辑器，确保 /reload 后使用正确的编辑器实例",
+      "module": "interactive-mode",
+      "source_commit": "27b27d94412b59adf91bffd08eea9b2f735a2fbb",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "active_editor 是当前有效实例",
+            "type": "return_value",
+            "what": "reload 后 editorContainer 使用正确的编辑器实例"
+          },
+          {
+            "expected": "ui.focus === active_editor",
+            "type": "return_value",
+            "what": "焦点设置到正确的编辑器"
+          }
+        ],
+        "outputs": {
+          "active_editor": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "交互模式已运行，用户执行 /reload"
+          }
+        ],
+        "trigger": {
+          "method": "handleReload",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "/reload 完成后 editorContainer 恢复的是 reload 前的旧编辑器引用"
+    },
+    {
+      "action": "handle_queued_steering",
+      "boundary": "service",
+      "bug_summary": "处理排队中的 steering 用户消息时错误清空编辑器文本，导致用户正在编辑的草稿丢失",
+      "correct_behavior": "steering 消息处理不影响编辑器内容，用户草稿保留",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "移除 steering 消息处理中的 this.editor.setText('') 调用",
+      "module": "interactive-mode",
+      "source_commit": "3964984f5977f7e3d3bdb9a0b1c6e0d2ad3c5f88",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "editor_text === original_draft",
+            "type": "return_value",
+            "what": "处理 steering 后编辑器文本不变"
+          },
+          {
+            "expected": "message 被正确发送到 agent",
+            "type": "return_value",
+            "what": "steering 消息正常入队处理"
+          }
+        ],
+        "outputs": {
+          "editor_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "编辑器有用户输入的草稿文本"
+          },
+          {
+            "involves": "config",
+            "what": "有排队中的 steering 用户消息"
+          }
+        ],
+        "trigger": {
+          "method": "processQueuedMessage",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "steering 消息入队处理时编辑器文本被清空，用户草稿丢失"
+    },
+    {
+      "action": "changelog_display",
+      "boundary": "service",
+      "bug_summary": "/changelog 命令将 What's New 文本和 Spacer 追加到根 UI 容器（this.ui），导致内容永久固定在底部而非随聊天滚动",
+      "correct_behavior": "执行 /changelog 后，What's New 标题在 chatContainer 内显示，随聊天内容一起滚动",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 What's New 文本和 Spacer 的添加目标从 this.ui 改为 this.chatContainer，使其成为聊天内容的一部分并可滚动",
+      "module": "interactive-mode",
+      "source_commit": "019ad0ec115cda565a95f4363f973859eb3c8d35",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "chatContainer.children 包含 What's New Text 组件",
+            "type": "return_value",
+            "what": "What's New 文本添加到 chatContainer 而非根 ui"
+          },
+          {
+            "expected": "chatContainer.children 包含 Spacer 组件",
+            "type": "return_value",
+            "what": "Spacer 添加到 chatContainer"
+          }
+        ],
+        "outputs": {
+          "target_container": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "交互模式已初始化，chatContainer 和 ui 容器均可用"
+          }
+        ],
+        "trigger": {
+          "method": "handleChangelog",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "执行 /changelog 后，What's New 标题永久显示在 UI 底部 footer 区域，不随聊天滚动"
+    }
+  ]
+}

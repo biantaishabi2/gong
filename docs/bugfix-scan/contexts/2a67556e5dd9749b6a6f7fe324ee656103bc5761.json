@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/components/SandboxedIframe.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/components/SandboxedIframe.ts b/packages/web-ui/src/components/SandboxedIframe.ts\nindex c694cc8b..41278e1d 100644\n--- a/packages/web-ui/src/components/SandboxedIframe.ts\n+++ b/packages/web-ui/src/components/SandboxedIframe.ts\n@@ -495,7 +495,12 @@ export class SandboxIframe extends LitElement {\n \t\t\t})\n \t\t\t.join(\"\\n\");\n \n-\t\treturn `<script>\n+\t\treturn `<style>\n+html {\n+\tfont-size: 16px;\n+}\n+</style>\n+<script>\n window.sandboxId = ${JSON.stringify(sandboxId)};\n ${dataInjection}\n ${bridgeCode}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2a67556e5dd9749b6a6f7fe324ee656103bc5761",
+  "message": "Fix font-size inheritance in HTML artifact iframes",
+  "module": "sandboxed_iframe",
+  "tags": []
+}

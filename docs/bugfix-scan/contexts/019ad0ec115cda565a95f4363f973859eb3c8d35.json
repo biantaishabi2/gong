@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 51e11769..6bfa1c26 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -3097,8 +3097,8 @@ export class InteractiveMode {\n \n \t\tthis.chatContainer.addChild(new Spacer(1));\n \t\tthis.chatContainer.addChild(new DynamicBorder());\n-\t\tthis.ui.addChild(new Text(theme.bold(theme.fg(\"accent\", \"What's New\")), 1, 0));\n-\t\tthis.ui.addChild(new Spacer(1));\n+\t\tthis.chatContainer.addChild(new Text(theme.bold(theme.fg(\"accent\", \"What's New\")), 1, 0));\n+\t\tthis.chatContainer.addChild(new Spacer(1));\n \t\tthis.chatContainer.addChild(new Markdown(changelogMarkdown, 1, 1, getMarkdownTheme()));\n \t\tthis.chatContainer.addChild(new DynamicBorder());\n \t\tthis.ui.requestRender();\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "019ad0ec115cda565a95f4363f973859eb3c8d35",
+  "message": "Fix /changelog adding 'What's New' to footer permanently",
+  "module": "interactive-mode",
+  "tags": []
+}

@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/session-manager.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/session-manager.ts b/packages/coding-agent/src/core/session-manager.ts\nindex 93ab733a..4a5fe38d 100644\n--- a/packages/coding-agent/src/core/session-manager.ts\n+++ b/packages/coding-agent/src/core/session-manager.ts\n@@ -658,7 +658,9 @@ export class SessionManager {\n \t\t\tthis._buildIndex();\n \t\t\tthis.flushed = true;\n \t\t} else {\n+\t\t\tconst explicitPath = this.sessionFile;\n \t\t\tthis.newSession();\n+\t\t\tthis.sessionFile = explicitPath; // preserve explicit path from --session flag\n \t\t}\n \t}\n \n@@ -675,11 +677,11 @@ export class SessionManager {\n \t\t};\n \t\tthis.fileEntries = [header];\n \t\tthis.byId.clear();\n+\t\tthis.labelsById.clear();\n \t\tthis.leafId = null;\n \t\tthis.flushed = false;\n \n-\t\t// Only generate filename if persisting and not already set (e.g., via --session flag)\n-\t\tif (this.persist && !this.sessionFile) {\n+\t\tif (this.persist) {\n \t\t\tconst fileTimestamp = timestamp.replace(/[:.]/g, \"-\");\n \t\t\tthis.sessionFile = join(this.getSessionDir(), `${fileTimestamp}_${this.sessionId}.jsonl`);\n \t\t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "234f367d0ddbfb6e958e986bf962e02c21d06f4c",
+  "message": "fix(coding-agent): make /new create a new session file",
+  "module": "session-manager",
+  "tags": []
+}

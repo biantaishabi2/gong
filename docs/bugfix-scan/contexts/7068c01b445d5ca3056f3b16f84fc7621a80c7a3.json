@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/ChatPanel.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/ChatPanel.ts b/packages/web-ui/src/ChatPanel.ts\nindex 8715011a..128e7413 100644\n--- a/packages/web-ui/src/ChatPanel.ts\n+++ b/packages/web-ui/src/ChatPanel.ts\n@@ -152,15 +152,6 @@ export class ChatPanel extends LitElement {\n \n \t\tconst isMobile = this.windowWidth < BREAKPOINT;\n \n-\t\tconsole.log(\"[ChatPanel Debug]\", {\n-\t\t\twindowWidth: this.windowWidth,\n-\t\t\tbreakpoint: BREAKPOINT,\n-\t\t\tisMobile,\n-\t\t\tshowArtifactsPanel: this.showArtifactsPanel,\n-\t\t\thasArtifacts: this.hasArtifacts,\n-\t\t\tartifactCount: this.artifactCount,\n-\t\t});\n-\n \t\t// Set panel props\n \t\tif (this.artifactsPanel) {\n \t\t\tthis.artifactsPanel.collapsed = !this.showArtifactsPanel;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "7068c01b445d5ca3056f3b16f84fc7621a80c7a3",
+  "message": "Remove debug console.log from ChatPanel",
+  "module": "chat_panel",
+  "tags": []
+}

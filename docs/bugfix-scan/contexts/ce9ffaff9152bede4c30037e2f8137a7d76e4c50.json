@@ -1,0 +1,30 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/utils.ts",
+      "hunks": [
+        {
+          "after_function": "export function wrapTextWithAnsi(text: string, width: number): string[] {\n\tif (!text) {\n\t\treturn [\"\"];\n\t}\n\n\t// Handle newlines by processing each line separately\n\t// Track ANSI state across lines so styles carry over after literal newlines\n\tconst inputLines = text.split(\"\\n\");\n\tconst result: string[] = [];\n\tconst tracker = new AnsiCodeTracker();\n\n\tfor (const inputLine of inputLines) {\n\t\t// Prepend active ANSI codes from previous lines (except for first line)\n\t\tconst prefix = result.length > 0 ? tracker.getActiveCodes() : \"\";\n\t\tresult.push(...wrapSingleLine(prefix + inputLine, width));\n\t\t// Update tracker with codes from this line for next iteration\n\t\tupdateTrackerFromText(inputLine, tracker);\n\t}\n\n\treturn result.length > 0 ? result : [\"\"];\n}",
+          "before_function": "export function wrapTextWithAnsi(text: string, width: number): string[] {\n\tif (!text) {\n\t\treturn [\"\"];\n\t}\n\n\t// Handle newlines by processing each line separately\n\tconst inputLines = text.split(\"\\n\");\n\tconst result: string[] = [];\n\n\tfor (const inputLine of inputLines) {\n\t\tresult.push(...wrapSingleLine(inputLine, width));\n\t}\n\n\treturn result.length > 0 ? result : [\"\"];\n}",
+          "changed_lines": [
+            315,
+            318,
+            321,
+            322,
+            323,
+            324,
+            325
+          ],
+          "function_line": 309,
+          "function_name": "wrapTextWithAnsi"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/tui/src/utils.ts b/packages/tui/src/utils.ts\nindex a724cf7f..0603beaa 100644\n--- a/packages/tui/src/utils.ts\n+++ b/packages/tui/src/utils.ts\n@@ -312,11 +312,17 @@ export function wrapTextWithAnsi(text: string, width: number): string[] {\n \t}\n \n \t// Handle newlines by processing each line separately\n+\t// Track ANSI state across lines so styles carry over after literal newlines\n \tconst inputLines = text.split(\"\\n\");\n \tconst result: string[] = [];\n+\tconst tracker = new AnsiCodeTracker();\n \n \tfor (const inputLine of inputLines) {\n-\t\tresult.push(...wrapSingleLine(inputLine, width));\n+\t\t// Prepend active ANSI codes from previous lines (except for first line)\n+\t\tconst prefix = result.length > 0 ? tracker.getActiveCodes() : \"\";\n+\t\tresult.push(...wrapSingleLine(prefix + inputLine, width));\n+\t\t// Update tracker with codes from this line for next iteration\n+\t\tupdateTrackerFromText(inputLine, tracker);\n \t}\n \n \treturn result.length > 0 ? result : [\"\"];\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "ce9ffaff9152bede4c30037e2f8137a7d76e4c50",
+  "message": "Fix ANSI styles not preserved across newlines in text wrapping",
+  "module": "utils",
+  "tags": []
+}

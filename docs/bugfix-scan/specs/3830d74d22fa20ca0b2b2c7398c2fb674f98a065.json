@@ -1,0 +1,56 @@
+{
+  "action": "index_exports",
+  "boundary": "service",
+  "bug_summary": "coding-agent 包入口未导出 discoverAndLoadExtensions，导致外部按文档或类型声明进行命名导入时失败",
+  "correct_behavior": "从 coding-agent 包入口命名导入 discoverAndLoadExtensions 成功且可用",
+  "data_dependencies": [
+    "file"
+  ],
+  "fix_summary": "在 packages/coding-agent/src/index.ts 的导出列表中新增 discoverAndLoadExtensions",
+  "module": "coding-agent",
+  "source_commit": "3830d74d22fa20ca0b2b2c7398c2fb674f98a065",
+  "test_spec": {
+    "args": {
+      "symbol": {
+        "allowed": [
+          "discoverAndLoadExtensions"
+        ],
+        "required": true,
+        "type": "string"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "import_result=success",
+        "type": "return_value",
+        "what": "从包入口进行命名导入 discoverAndLoadExtensions 不抛出错误"
+      },
+      {
+        "expected": "is_exported=true",
+        "type": "return_value",
+        "what": "包入口导出对象包含 discoverAndLoadExtensions"
+      }
+    ],
+    "outputs": {
+      "import_result": "string",
+      "is_exported": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "file",
+        "what": "已构建或可直接解析 coding-agent 包入口文件"
+      },
+      {
+        "involves": "file",
+        "what": "存在调用方通过命名导入使用 discoverAndLoadExtensions 的场景"
+      }
+    ],
+    "trigger": {
+      "method": "index_exports",
+      "target": "coding-agent",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "从 coding-agent 包入口命名导入 discoverAndLoadExtensions 时报错或为 undefined"
+}

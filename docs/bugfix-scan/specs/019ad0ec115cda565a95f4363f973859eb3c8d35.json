@@ -1,0 +1,43 @@
+{
+  "source_commit": "019ad0ec115cda565a95f4363f973859eb3c8d35",
+  "bug_summary": "/changelog 命令将 What's New 文本和 Spacer 追加到根 UI 容器（this.ui），导致内容永久固定在底部而非随聊天滚动",
+  "module": "interactive-mode",
+  "action": "changelog_display",
+  "fix_summary": "将 What's New 文本和 Spacer 的添加目标从 this.ui 改为 this.chatContainer，使其成为聊天内容的一部分并可滚动",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "执行 /changelog 后，What's New 标题永久显示在 UI 底部 footer 区域，不随聊天滚动",
+  "correct_behavior": "执行 /changelog 后，What's New 标题在 chatContainer 内显示，随聊天内容一起滚动",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "交互模式已初始化，chatContainer 和 ui 容器均可用",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "handleChangelog"
+    },
+    "args": {},
+    "outputs": {
+      "target_container": "string"
+    },
+    "assertions": [
+      {
+        "what": "What's New 文本添加到 chatContainer 而非根 ui",
+        "type": "return_value",
+        "expected": "chatContainer.children 包含 What's New Text 组件"
+      },
+      {
+        "what": "Spacer 添加到 chatContainer",
+        "type": "return_value",
+        "expected": "chatContainer.children 包含 Spacer 组件"
+      }
+    ]
+  }
+}

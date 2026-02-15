@@ -1,0 +1,71 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "ai.providers",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "convertMessages",
+      "boundary": "service",
+      "bug_summary": "工具调用参数在缺失时被透传为 undefined，导致序列化结果异常或下游函数调用参数不合法",
+      "correct_behavior": "工具调用参数为空时统一使用 {}，保证序列化与函数调用载荷始终为对象",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 Anthropic/Google provider 的工具调用路径中，将 block.arguments/event.content_block.input 为空时统一回退为 {}",
+      "module": "ai.providers",
+      "source_commit": "af813f904816c776bbcfa8b9f29d79bcae998f5b",
+      "test_spec": {
+        "args": {
+          "context": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          },
+          "model": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "argsStr contains {}",
+            "type": "output",
+            "what": "当 block.arguments 为 undefined 时，历史文本中的 arguments 被序列化为 {} 而非 undefined"
+          },
+          {
+            "expected": "functionCall.args={}",
+            "type": "output",
+            "what": "当 block.arguments 为空时，functionCall.args 输出为 {}"
+          },
+          {
+            "expected": "toolCall.arguments={}",
+            "type": "output",
+            "what": "Anthropic 流式 tool_use 事件在 input 缺失时输出 arguments={}"
+          }
+        ],
+        "outputs": {
+          "contents": "array",
+          "function_call_args": "json"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "存在 assistant/toolCall 消息且 arguments 可能为空或未定义"
+          },
+          {
+            "involves": "config",
+            "what": "模型配置可进入工具调用转换分支（含 gemini-3 与非 gemini-3 场景）"
+          }
+        ],
+        "trigger": {
+          "method": "convertMessages",
+          "target": "GoogleSharedProvider",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "工具调用参数为空时透传 undefined，导致历史上下文与函数调用载荷不稳定"
+    }
+  ]
+}

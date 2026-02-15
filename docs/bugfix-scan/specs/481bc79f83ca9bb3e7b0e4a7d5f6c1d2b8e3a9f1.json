@@ -1,0 +1,49 @@
+{
+  "source_commit": "481bc79f83ca9bb3e7b0e4a7d5f6c1d2b8e3a9f1",
+  "bug_summary": "github-copilot OAuth 模块使用 Buffer.from 做 base64 解码，在不提供 Buffer 的运行时崩溃",
+  "module": "github-copilot",
+  "action": "decode_base64",
+  "fix_summary": "将 Buffer.from(s, 'base64').toString() 替换为标准 atob(s)",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "浏览器或 edge runtime 中 Buffer 不可用，base64 解码崩溃",
+  "correct_behavior": "使用 atob 标准 API，所有运行时均可正常解码",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "运行时环境可能不提供 Node.js Buffer（如浏览器、edge runtime）",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "github-copilot",
+      "method": "decode"
+    },
+    "args": {
+      "s": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "decoded": "string"
+    },
+    "assertions": [
+      {
+        "what": "base64 字符串正确解码",
+        "type": "return_value",
+        "expected": "decode('aGVsbG8=') === 'hello'"
+      },
+      {
+        "what": "不依赖 Node.js Buffer",
+        "type": "return_value",
+        "expected": "代码中无 Buffer 引用"
+      }
+    ]
+  }
+}

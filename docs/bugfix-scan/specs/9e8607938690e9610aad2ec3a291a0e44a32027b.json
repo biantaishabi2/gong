@@ -1,0 +1,44 @@
+{
+  "source_commit": "9e8607938690e9610aad2ec3a291a0e44a32027b",
+  "bug_summary": "Google provider 发送 text/thinking 块起始事件前未先将 currentBlock push 到 output.content，导致 contentIndex 错误",
+  "module": "google",
+  "action": "handleStreamPart",
+  "fix_summary": "在发出 text/thinking_start 事件前先执行 output.content.push(currentBlock)，确保 contentIndex 正确",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "contentIndex 指向尚未 push 的块，后续事件引用错误的索引",
+  "correct_behavior": "先 push currentBlock 再发送 start 事件，contentIndex 与实际位置一致",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Google 流式响应进入新内容块",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "google",
+      "method": "handleStreamPart"
+    },
+    "args": {
+      "parts": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "contentIndex": "number"
+    },
+    "assertions": [
+      {
+        "what": "start 事件的 contentIndex 等于 push 后的实际索引",
+        "type": "return_value",
+        "expected": "event.contentIndex === output.content.length - 1"
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/config.ts",
+      "hunks": [
+        {
+          "after_function": "export function getThemesDir(): string {\n\tif (isBunBinary) {\n\t\tconst execDir = dirname(process.execPath);\n\t\tconst themeDir = join(execDir, \"theme\");\n\t\t// Fall back to root if theme/ doesn't exist (mise flattens directory structure)\n\t\tif (existsSync(themeDir)) {\n\t\t\treturn themeDir;\n\t\t}\n\t\treturn execDir;\n\t}\n\t// Theme is in modes/interactive/theme/ relative to src/ or dist/\n\tconst packageDir = getPackageDir();\n\tconst srcOrDist = existsSync(join(packageDir, \"src\")) ? \"src\" : \"dist\";\n\treturn join(packageDir, srcOrDist, \"modes\", \"interactive\", \"theme\");\n}",
+          "before_function": "export function getThemesDir(): string {\n\tif (isBunBinary) {\n\t\treturn join(dirname(process.execPath), \"theme\");\n\t}\n\t// Theme is in modes/interactive/theme/ relative to src/ or dist/\n\tconst packageDir = getPackageDir();\n\tconst srcOrDist = existsSync(join(packageDir, \"src\")) ? \"src\" : \"dist\";\n\treturn join(packageDir, srcOrDist, \"modes\", \"interactive\", \"theme\");\n}",
+          "changed_lines": [
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61
+          ],
+          "function_line": 53,
+          "function_name": "getThemesDir"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/config.ts b/packages/coding-agent/src/config.ts\nindex b865350e..d192da4e 100644\n--- a/packages/coding-agent/src/config.ts\n+++ b/packages/coding-agent/src/config.ts\n@@ -52,7 +52,13 @@ export function getPackageDir(): string {\n  */\n export function getThemesDir(): string {\n \tif (isBunBinary) {\n-\t\treturn join(dirname(process.execPath), \"theme\");\n+\t\tconst execDir = dirname(process.execPath);\n+\t\tconst themeDir = join(execDir, \"theme\");\n+\t\t// Fall back to root if theme/ doesn't exist (mise flattens directory structure)\n+\t\tif (existsSync(themeDir)) {\n+\t\t\treturn themeDir;\n+\t\t}\n+\t\treturn execDir;\n \t}\n \t// Theme is in modes/interactive/theme/ relative to src/ or dist/\n \tconst packageDir = getPackageDir();\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d2f15f9ebb8df93ba6f5bba0ecf114a758e9f8cd",
+  "message": "fix: theme loading when installed via mise (fixes #681)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

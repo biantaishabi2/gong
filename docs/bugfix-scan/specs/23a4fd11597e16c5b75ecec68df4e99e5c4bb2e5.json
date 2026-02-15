@@ -1,0 +1,54 @@
+{
+  "source_commit": "23a4fd11597e16c5b75ecec68df4e99e5c4bb2e5",
+  "bug_summary": "--resume 分支在打开会话选择器前未初始化 KeybindingsManager，用户自定义快捷键在会话选择器中不生效",
+  "module": "r_e_a_d_m_e",
+  "action": "main_resume_flow",
+  "fix_summary": "在 --resume 分支进入会话选择器前增加 KeybindingsManager.create() 调用",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "--resume 模式下会话选择器使用默认键位，用户配置的自定义快捷键被忽略",
+  "correct_behavior": "--resume 模式下先初始化 KeybindingsManager，会话选择器尊重用户自定义键位",
+  "data_dependencies": [
+    "config",
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "用户有自定义键位配置文件",
+        "involves": "file"
+      },
+      {
+        "what": "存在可恢复的会话列表",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "main",
+      "method": "handleResume"
+    },
+    "args": {
+      "resume": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "keybindings_initialized": "bool"
+    },
+    "assertions": [
+      {
+        "what": "KeybindingsManager 在会话选择器前被创建",
+        "type": "return_value",
+        "expected": "keybindings_initialized === true"
+      },
+      {
+        "what": "会话选择器使用用户自定义键位",
+        "type": "return_value",
+        "expected": "session picker keybindings === user config"
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "tool-execution",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "tool_execution_render",
+      "boundary": "service",
+      "bug_summary": "edit 工具成功执行后 TUI 仍显示缓存的旧 diff 预览（可能含过期错误），真实变更 diff 未展示",
+      "correct_behavior": "edit 工具执行成功后优先渲染 result.details.diff 的实际变更，忽略过期缓存",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "增加 result.details.diff 优先级检查：工具成功执行后优先使用 result diff，仅在执行前使用缓存预览",
+      "module": "tool-execution",
+      "source_commit": "0f81b096252601e2b9e7e6bd26dfed7a3e20e3e2",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "rendered_diff 来自 result.details.diff",
+            "type": "return_value",
+            "what": "执行成功时使用 result.details.diff 渲染"
+          },
+          {
+            "expected": "rendered_diff 不包含 stale error",
+            "type": "return_value",
+            "what": "缓存预览的过期错误不被显示"
+          },
+          {
+            "expected": "result 为空时使用 editDiffPreview",
+            "type": "return_value",
+            "what": "执行前仍可使用缓存预览"
+          }
+        ],
+        "outputs": {
+          "rendered_diff": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "edit 工具已成功执行，result.details.diff 有值"
+          },
+          {
+            "involves": "config",
+            "what": "editDiffPreview 缓存存在但含过期错误（竞态条件）"
+          }
+        ],
+        "trigger": {
+          "method": "render",
+          "target": "tool-execution",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "edit 工具执行成功后渲染面板显示过期的 editDiffPreview（含竞态条件导致的错误信息）"
+    }
+  ]
+}

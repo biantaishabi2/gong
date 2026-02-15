@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/pods/src/cli.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/pods/src/cli.ts b/packages/pods/src/cli.ts\nindex 150e5dd2..e6a25f55 100644\n--- a/packages/pods/src/cli.ts\n+++ b/packages/pods/src/cli.ts\n@@ -4,7 +4,7 @@ import { spawn } from \"child_process\";\n import { readFileSync } from \"fs\";\n import { dirname, join } from \"path\";\n import { fileURLToPath } from \"url\";\n-import { listModels, startModel, stopModel, viewLogs } from \"./commands/models.js\";\n+import { listModels, showKnownModels, startModel, stopAllModels, stopModel, viewLogs } from \"./commands/models.js\";\n import { listPods, removePodCommand, setupPod, switchActivePod } from \"./commands/pods.js\";\n import { promptModel } from \"./commands/prompt.js\";\n import { getActivePod, loadConfig } from \"./config.js\";\n@@ -241,7 +241,6 @@ try {\n \t\t\t\tconst modelId = args[1];\n \t\t\t\tif (!modelId) {\n \t\t\t\t\t// Show available models\n-\t\t\t\t\tconst { showKnownModels } = await import(\"./commands/models.js\");\n \t\t\t\t\tawait showKnownModels();\n \t\t\t\t\tprocess.exit(0);\n \t\t\t\t}\n@@ -306,7 +305,6 @@ try {\n \t\t\t\tconst name = args[1];\n \t\t\t\tif (!name) {\n \t\t\t\t\t// Stop all models on the active pod\n-\t\t\t\t\tconst { stopAllModels } = await import(\"./commands/models.js\");\n \t\t\t\t\tawait stopAllModels({ pod: podOverride });\n \t\t\t\t} else {\n \t\t\t\t\tawait stopModel(name, { pod: podOverride });\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "8ed6f6dd85991ded5e724c94f346026cbf5c8afa",
+  "message": "Fix pods CLI: remove reference to non-existent stopAllModels",
+  "module": "cli",
+  "tags": []
+}

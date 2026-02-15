@@ -1,0 +1,29 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/azure-openai-responses.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/azure-openai-responses.ts b/packages/ai/src/providers/azure-openai-responses.ts\nindex 1c7ffaff..1b82c4e4 100644\n--- a/packages/ai/src/providers/azure-openai-responses.ts\n+++ b/packages/ai/src/providers/azure-openai-responses.ts\n@@ -100,7 +100,7 @@ export const streamAzureOpenAIResponses: StreamFunction<\"azure-openai-responses\"\n \t\t\t}\n \n \t\t\tif (output.stopReason === \"aborted\" || output.stopReason === \"error\") {\n-\t\t\t\tthrow new Error(\"An unkown error ocurred\");\n+\t\t\t\tthrow new Error(\"An unknown error occurred\");\n \t\t\t}\n \n \t\t\tstream.push({ type: \"done\", reason: output.stopReason, message: output });\n"
+    },
+    {
+      "file": "packages/ai/src/providers/google.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/google.ts b/packages/ai/src/providers/google.ts\nindex 3d0ff796..e3abdc20 100644\n--- a/packages/ai/src/providers/google.ts\n+++ b/packages/ai/src/providers/google.ts\n@@ -246,7 +246,7 @@ export const streamGoogle: StreamFunction<\"google-generative-ai\", GoogleOptions>\n \t\t\t}\n \n \t\t\tif (output.stopReason === \"aborted\" || output.stopReason === \"error\") {\n-\t\t\t\tthrow new Error(\"An unkown error ocurred\");\n+\t\t\t\tthrow new Error(\"An unknown error occurred\");\n \t\t\t}\n \n \t\t\tstream.push({ type: \"done\", reason: output.stopReason, message: output });\n"
+    },
+    {
+      "file": "packages/ai/src/providers/openai-completions.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-completions.ts b/packages/ai/src/providers/openai-completions.ts\nindex 8c64cd28..8e80723f 100644\n--- a/packages/ai/src/providers/openai-completions.ts\n+++ b/packages/ai/src/providers/openai-completions.ts\n@@ -301,7 +301,7 @@ export const streamOpenAICompletions: StreamFunction<\"openai-completions\", OpenA\n \t\t\t}\n \n \t\t\tif (output.stopReason === \"aborted\" || output.stopReason === \"error\") {\n-\t\t\t\tthrow new Error(\"An unkown error ocurred\");\n+\t\t\t\tthrow new Error(\"An unknown error occurred\");\n \t\t\t}\n \n \t\t\tstream.push({ type: \"done\", reason: output.stopReason, message: output });\n"
+    },
+    {
+      "file": "packages/ai/src/providers/openai-responses.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-responses.ts b/packages/ai/src/providers/openai-responses.ts\nindex ba93e834..dbe9a4b1 100644\n--- a/packages/ai/src/providers/openai-responses.ts\n+++ b/packages/ai/src/providers/openai-responses.ts\n@@ -77,7 +77,7 @@ export const streamOpenAIResponses: StreamFunction<\"openai-responses\", OpenAIRes\n \t\t\t}\n \n \t\t\tif (output.stopReason === \"aborted\" || output.stopReason === \"error\") {\n-\t\t\t\tthrow new Error(\"An unkown error ocurred\");\n+\t\t\t\tthrow new Error(\"An unknown error occurred\");\n \t\t\t}\n \n \t\t\tstream.push({ type: \"done\", reason: output.stopReason, message: output });\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "9b903656aea9b0646244d295e578933bd0c888a8",
+  "message": "fix(ai): correct provider error message typo (closes #958)",
+  "module": "azure-openai-responses",
+  "tags": []
+}

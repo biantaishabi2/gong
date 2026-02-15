@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "openai-responses",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "streamOpenAIResponses",
+      "boundary": "service",
+      "bug_summary": "调用 OpenAI responses.create 时固定传入 timeout: undefined，在某些客户端版本中触发参数校验错误",
+      "correct_behavior": "仅在有 signal 时构建选项对象，不传入无效的 timeout 字段",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "仅在 options.signal 存在时才传入 signal 选项，避免传入无效的 timeout: undefined",
+      "module": "openai-responses",
+      "source_commit": "653025e6ca981cdeb4370cbfbda348246b05fe83",
+      "test_spec": {
+        "args": {
+          "signal": {
+            "allowed": null,
+            "required": false,
+            "type": "AbortSignal|undefined"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "create 调用第二参数不含 timeout 字段",
+            "type": "return_value",
+            "what": "无 signal 时不传 timeout 选项"
+          },
+          {
+            "expected": "create 调用第二参数含 signal 字段",
+            "type": "return_value",
+            "what": "有 signal 时正确传入"
+          }
+        ],
+        "outputs": {
+          "stream": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "OpenAI 客户端已初始化，无 signal 的调用选项"
+          }
+        ],
+        "trigger": {
+          "method": "streamOpenAIResponses",
+          "target": "openai-responses",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "始终传入 { signal: options?.signal, timeout: undefined }，undefined timeout 导致请求失败"
+    },
+    {
+      "action": "handleCompletion",
+      "boundary": "service",
+      "bug_summary": "OpenAI Responses provider 未执行成本计算，usage 返回后未累计费用",
+      "correct_behavior": "请求完成后调用 calculateCost(modelInfo, usage) 正确累计费用",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "导入 calculateCost 并在收到 usage 数据后调用 calculateCost(modelInfo, usage)",
+      "module": "openai-responses",
+      "source_commit": "7db3068ceeb16f6cc66abab3f25483169eb86a3f",
+      "test_spec": {
+        "args": {
+          "modelInfo": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          },
+          "usage": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "calculateCost(modelInfo, usage) called",
+            "type": "side_effect",
+            "what": "calculateCost 被调用"
+          }
+        ],
+        "outputs": {
+          "cost_calculated": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "OpenAI Responses 请求完成并返回 usage 数据"
+          }
+        ],
+        "trigger": {
+          "method": "handleCompletion",
+          "target": "openai-responses",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "请求完成后 usage 数据被忽略，成本未累计"
+    }
+  ]
+}

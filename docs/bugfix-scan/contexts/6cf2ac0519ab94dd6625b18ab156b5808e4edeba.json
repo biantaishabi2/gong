@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/footer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/footer.ts b/packages/coding-agent/src/tui/footer.ts\nindex 7ff04c15..a53a8d14 100644\n--- a/packages/coding-agent/src/tui/footer.ts\n+++ b/packages/coding-agent/src/tui/footer.ts\n@@ -50,8 +50,7 @@ export class FooterComponent {\n \t\t\t\tlastAssistantMessage.usage.cacheWrite\n \t\t\t: 0;\n \t\tconst contextWindow = this.state.model.contextWindow;\n-\t\tconst contextPercent =\n-\t\t\tcontextWindow > 0 ? `${((contextTokens / contextWindow) * 100).toFixed(1)}% (${contextWindow})` : \"0.0%\";\n+\t\tconst contextPercent = contextWindow > 0 ? ((contextTokens / contextWindow) * 100).toFixed(1) : \"0.0\";\n \n \t\t// Format token counts (similar to web-ui)\n \t\tconst formatTokens = (count: number): string => {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "6cf2ac0519ab94dd6625b18ab156b5808e4edeba",
+  "message": "fix: remove debug context window size from footer",
+  "module": "footer",
+  "tags": []
+}

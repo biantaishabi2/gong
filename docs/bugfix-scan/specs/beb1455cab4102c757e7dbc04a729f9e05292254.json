@@ -1,0 +1,49 @@
+{
+  "source_commit": "beb1455cab4102c757e7dbc04a729f9e05292254",
+  "bug_summary": "setTextInternal 清空 lastAction，导致历史导航等内部更新错误打断 kill ring 动作链",
+  "module": "editor",
+  "action": "setTextInternal",
+  "fix_summary": "将 lastAction 重置从 setTextInternal 移到外部 setText，内部调用不影响动作链",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "历史导航调用 setTextInternal 时清空 lastAction，kill ring 积累中断",
+  "correct_behavior": "setTextInternal 不重置 lastAction，仅 setText（外部调用）才重置",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器存在连续 kill 操作，lastAction=kill",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "editor",
+      "method": "setTextInternal"
+    },
+    "args": {
+      "text": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "lastAction": "string|null"
+    },
+    "assertions": [
+      {
+        "what": "setTextInternal 不重置 lastAction",
+        "type": "return_value",
+        "expected": "lastAction remains unchanged after setTextInternal"
+      },
+      {
+        "what": "setText 才重置 lastAction",
+        "type": "return_value",
+        "expected": "lastAction = null after setText"
+      }
+    ]
+  }
+}

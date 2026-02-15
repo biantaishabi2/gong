@@ -1,0 +1,154 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "session-selector",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "session_picker_render",
+      "boundary": "service",
+      "bug_summary": "会话选择器的 No sessions found 空状态文案未按终端宽度截断，导致窄终端下文本溢出",
+      "correct_behavior": "'No sessions found' 文本按终端宽度截断并以 '…' 结尾",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将空状态文案包裹 truncateToWidth 调用，按 width 截断并添加省略号",
+      "module": "session-selector",
+      "source_commit": "05d78ea2de8a7316207b7e504f5c900a45dce36b",
+      "test_spec": {
+        "args": {
+          "filter": {
+            "allowed": null,
+            "required": false,
+            "type": "string"
+          },
+          "width": {
+            "allowed": null,
+            "required": true,
+            "type": "int"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "rendered_line.length <= width",
+            "type": "return_value",
+            "what": "空状态文案不超过终端宽度"
+          },
+          {
+            "expected": "width < 20 时 rendered_line.endsWith('…')",
+            "type": "return_value",
+            "what": "宽度不足时以省略号截断"
+          }
+        ],
+        "outputs": {
+          "rendered_line": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "会话选择器筛选结果为空"
+          }
+        ],
+        "trigger": {
+          "method": "render",
+          "target": "session-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "终端宽度不足时 'No sessions found' 文本溢出破坏布局"
+    },
+    {
+      "action": "render_hint",
+      "boundary": "service",
+      "bug_summary": "会话选择器底部提示文案未按终端宽度截断，窄终端下溢出",
+      "correct_behavior": "提示文案按终端宽度截断，以 … 结尾",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "提示文案先 truncateToWidth 截断再 theme.fg 着色",
+      "module": "session-selector",
+      "source_commit": "588399594c368d2a1e0b3c5f7a4d6e8f9b2c1a0d",
+      "test_spec": {
+        "args": {
+          "width": {
+            "allowed": null,
+            "required": true,
+            "type": "int"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "visibleWidth(hint) <= width",
+            "type": "return_value",
+            "what": "提示文案不超过终端宽度"
+          }
+        ],
+        "outputs": {
+          "hint": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "会话选择器已打开，终端宽度较窄"
+          }
+        ],
+        "trigger": {
+          "method": "renderHint",
+          "target": "session-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "窄终端下提示文案溢出破坏布局"
+    },
+    {
+      "action": "render_empty_state",
+      "boundary": "service",
+      "bug_summary": "当前目录无会话时的空状态提示未按终端宽度截断，窄终端下文本溢出",
+      "correct_behavior": "提示文案按终端宽度截断并以省略号结尾",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 'No sessions in current folder. Press Tab to view all.' 包裹 truncateToWidth 按 width 截断",
+      "module": "session-selector",
+      "source_commit": "2836d97735dcc0b0b7fd2ab75df97e2a7f5c8e8a",
+      "test_spec": {
+        "args": {
+          "width": {
+            "allowed": null,
+            "required": true,
+            "type": "int"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "rendered_line.length <= width",
+            "type": "return_value",
+            "what": "空状态文案不超过终端宽度"
+          },
+          {
+            "expected": "width 不足时 rendered_line.endsWith('…')",
+            "type": "return_value",
+            "what": "宽度不足时以 … 截断"
+          }
+        ],
+        "outputs": {
+          "rendered_line": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "会话选择器过滤到当前目录，无匹配会话"
+          }
+        ],
+        "trigger": {
+          "method": "render",
+          "target": "session-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "窄终端下 'No sessions in current folder...' 文本溢出"
+    }
+  ]
+}

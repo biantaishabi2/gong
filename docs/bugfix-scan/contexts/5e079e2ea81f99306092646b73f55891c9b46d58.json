@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex bf95009b..ab4455d8 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -3270,7 +3270,9 @@ export class InteractiveMode {\n \n \t\tthis.resetExtensionUI();\n \n-\t\tconst loader = new BorderedLoader(this.ui, theme, \"Reloading resources...\", { cancellable: false });\n+\t\tconst loader = new BorderedLoader(this.ui, theme, \"Reloading extensions, skills, prompts, themes...\", {\n+\t\t\tcancellable: false,\n+\t\t});\n \t\tconst previousEditor = this.editor;\n \t\tthis.editorContainer.clear();\n \t\tthis.editorContainer.addChild(loader);\n@@ -3298,7 +3300,7 @@ export class InteractiveMode {\n \t\t\tif (modelsJsonError) {\n \t\t\t\tthis.showError(`models.json error: ${modelsJsonError}`);\n \t\t\t}\n-\t\t\tthis.showStatus(\"Reloaded resources\");\n+\t\t\tthis.showStatus(\"Reloaded extensions, skills, prompts, themes\");\n \t\t} catch (error) {\n \t\t\trestoreEditor();\n \t\t\tthis.showError(`Reload failed: ${error instanceof Error ? error.message : String(error)}`);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "5e079e2ea81f99306092646b73f55891c9b46d58",
+  "message": "fix(coding-agent): use specific terminology in reload messages instead of 'resources'",
+  "module": "interactive-mode",
+  "tags": []
+}

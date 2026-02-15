@@ -1,0 +1,43 @@
+{
+  "source_commit": "0f0c54b812046f80e1e71e4f19e1e499fba3f898",
+  "bug_summary": "follow-up 队列处理使用 getText() 读取编辑器内容，粘贴标记未被展开就直接入队",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "follow_up_queue",
+  "fix_summary": "将 getText() 调用改为 getExpandedText?.() ?? getText()，优先使用展开后的文本",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "用户粘贴含标记的文本后提交 follow-up，队列收到的是未展开的原始标记文本",
+  "correct_behavior": "follow-up 入队前通过 getExpandedText 展开粘贴标记，队列收到完整文本内容",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器含有粘贴标记的文本，getExpandedText 可用",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "handleFollowUp"
+    },
+    "args": {},
+    "outputs": {
+      "queued_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "getExpandedText 可用时优先使用展开文本",
+        "type": "return_value",
+        "expected": "queued_text === getExpandedText() 而非 getText()"
+      },
+      {
+        "what": "getExpandedText 不可用时降级到 getText",
+        "type": "return_value",
+        "expected": "getExpandedText 为 undefined 时 queued_text === getText()"
+      }
+    ]
+  }
+}

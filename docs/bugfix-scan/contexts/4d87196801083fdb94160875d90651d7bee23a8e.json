@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/keybindings.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/keybindings.ts b/packages/tui/src/keybindings.ts\nindex 0e3ad244..0252c909 100644\n--- a/packages/tui/src/keybindings.ts\n+++ b/packages/tui/src/keybindings.ts\n@@ -61,7 +61,7 @@ export const DEFAULT_EDITOR_KEYBINDINGS: Required<EditorKeybindingsConfig> = {\n \tdeleteToLineStart: \"ctrl+u\",\n \tdeleteToLineEnd: \"ctrl+k\",\n \t// Text input\n-\tnewLine: [\"shift+enter\", \"alt+enter\"],\n+\tnewLine: \"shift+enter\",\n \tsubmit: \"enter\",\n \ttab: \"tab\",\n \t// Selection/autocomplete\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "4d87196801083fdb94160875d90651d7bee23a8e",
+  "message": "fix(tui): remove alt+enter from newLine default keybinding",
+  "module": "r_e_a_d_m_e",
+  "tags": []
+}

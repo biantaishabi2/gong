@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "utils",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "visibleWidth",
+      "boundary": "service",
+      "bug_summary": "visibleWidth 函数仅替换制表符但未移除 Unicode Cf（格式控制）字符，导致 string-width 库崩溃",
+      "correct_behavior": "输入含 Unicode Cf 字符时正常计算可见宽度，Cf 字符被静默移除",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 normalized 处理中增加 .replace(/\\p{Cf}/gu, '') 移除 Unicode 格式控制字符",
+      "module": "utils",
+      "source_commit": "1d9fa13d5843b9b8e06b6b53faa3e8830d1cdd6e",
+      "test_spec": {
+        "args": {
+          "str": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "visibleWidth('A\\t\\u200EB') 返回数字而非抛异常",
+            "type": "return_value",
+            "what": "含 Cf 字符的字符串不崩溃"
+          },
+          {
+            "expected": "visibleWidth('A\\u200EB') === visibleWidth('AB')",
+            "type": "return_value",
+            "what": "Cf 字符不计入可见宽度"
+          },
+          {
+            "expected": "visibleWidth('\\t') === 3",
+            "type": "return_value",
+            "what": "制表符仍正常替换为 3 空格"
+          }
+        ],
+        "outputs": {
+          "width": "int"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "tui utils 模块已加载"
+          }
+        ],
+        "trigger": {
+          "method": "visibleWidth",
+          "target": "utils",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "输入含 Unicode Cf 字符（如 U+200E LRM）时 visibleWidth 抛异常崩溃"
+    },
+    {
+      "action": "wrapText",
+      "boundary": "service",
+      "bug_summary": "ANSI 样式在文本换行后不保留，跨行文本丢失颜色/样式",
+      "correct_behavior": "AnsiCodeTracker 在每行开头恢复活跃样式，跨行样式连续",
+      "data_dependencies": [],
+      "fix_summary": "使用 AnsiCodeTracker 跟踪跨行 ANSI 状态，每行开头预置上一行的活跃样式码",
+      "module": "utils",
+      "source_commit": "ce9ffaff9152bede4c30037e2f8137a7d76e4c50",
+      "test_spec": {
+        "args": {
+          "text": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "width": {
+            "allowed": null,
+            "required": true,
+            "type": "number"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "每行开头包含前一行的活跃 ANSI 样式码",
+            "type": "return_value",
+            "what": "换行后样式保留"
+          }
+        ],
+        "outputs": {
+          "wrapped": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "输入文本包含 ANSI 样式码和换行"
+          }
+        ],
+        "trigger": {
+          "method": "wrapText",
+          "target": "utils",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "换行后 ANSI 样式丢失，后续行显示无样式纯文本"
+    },
+    {
+      "action": "visibleWidth",
+      "boundary": "service",
+      "bug_summary": "visibleWidth 未剥离 OSC 8 超链接序列，含超链接的文本宽度计算错误",
+      "correct_behavior": "OSC 8 序列被剥离，visibleWidth 返回纯文本可见宽度",
+      "data_dependencies": [],
+      "fix_summary": "在 clean 步骤中添加 \\x1b]8;;...\\x07 的正则剥离",
+      "module": "utils",
+      "source_commit": "d97a96493cd72e1a8a552fe46ca48e207ca193b9",
+      "test_spec": {
+        "args": {
+          "text": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "visibleWidth(osc8Text) === visibleWidth(plainText)",
+            "type": "return_value",
+            "what": "OSC 8 不计入宽度"
+          }
+        ],
+        "outputs": {
+          "width": "number"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "文本包含 OSC 8 超链接转义序列"
+          }
+        ],
+        "trigger": {
+          "method": "visibleWidth",
+          "target": "utils",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "含 OSC 8 超链接的文本返回过大的可见宽度"
+    }
+  ]
+}

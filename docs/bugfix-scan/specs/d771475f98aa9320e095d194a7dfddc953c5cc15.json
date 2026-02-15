@@ -1,0 +1,36 @@
+{
+  "source_commit": "d771475f98aa9320e095d194a7dfddc953c5cc15",
+  "bug_summary": "更新通知渲染中错误插入 Spacer(1)，内容与边框间出现多余换行",
+  "module": "tui-renderer",
+  "action": "renderUpdateNotification",
+  "fix_summary": "移除更新通知区块中的 Spacer(1) 添加",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "更新通知内容与边框间有多余空行",
+  "correct_behavior": "更新通知内容紧贴边框，无额外间距",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "showUpdateNotification 为 true",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tui-renderer",
+      "method": "renderUpdateNotification"
+    },
+    "args": {},
+    "outputs": {
+      "ui_tree": "object"
+    },
+    "assertions": [
+      {
+        "what": "通知区块无多余 Spacer",
+        "type": "return_value",
+        "expected": "no Spacer(1) in update notification block"
+      }
+    ]
+  }
+}

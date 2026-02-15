@@ -1,0 +1,60 @@
+{
+  "action": "setupEditor",
+  "boundary": "service",
+  "bug_summary": "使用自定义编辑器时未同步注入 autocomplete provider，导致补全能力只在默认编辑器生效",
+  "correct_behavior": "defaultEditor 和当前自定义 editor 都设置了同一 autocomplete provider",
+  "data_dependencies": [],
+  "fix_summary": "在为 defaultEditor 设置 autocomplete provider 后，新增分支：当当前 editor 不是 defaultEditor 时，也为当前 editor 设置同一 provider",
+  "module": "interactive-mode",
+  "source_commit": "3cf5e23c0d428895e47be3f73d0da3034b483d60",
+  "test_spec": {
+    "args": {
+      "autocomplete_provider": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      },
+      "use_custom_editor": {
+        "allowed": [
+          true,
+          false
+        ],
+        "required": true,
+        "type": "bool"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "default_editor_has_autocomplete=true",
+        "type": "state",
+        "what": "defaultEditor 被设置 autocomplete provider"
+      },
+      {
+        "expected": "active_editor_has_autocomplete=true",
+        "type": "state",
+        "what": "当 editor!==defaultEditor 时，当前 editor 也被设置 autocomplete provider"
+      }
+    ],
+    "outputs": {
+      "active_editor_has_autocomplete": "bool",
+      "default_editor_has_autocomplete": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "已创建 InteractiveMode 实例并初始化 autocompleteProvider"
+      },
+      {
+        "involves": "config",
+        "what": "当前 editor 与 defaultEditor 为不同实例（启用自定义编辑器）"
+      }
+    ],
+    "trigger": {
+      "method": "setupEditor",
+      "target": "InteractiveMode",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "仅 defaultEditor 设置了 autocomplete provider，自定义 editor 未设置"
+}

@@ -1,0 +1,55 @@
+{
+  "source_commit": "0fe9f74b4ec2cf7b62eb98a7e1dc9ea42bdf54c4",
+  "bug_summary": "SettingsManager 的 getter 直接返回内部数组引用，外部修改会污染内部状态",
+  "module": "settings-manager",
+  "action": "settings_getters",
+  "fix_summary": "所有返回数组/对象的 getter 改为返回展开副本（[...arr]），防止外部引用污染内部状态",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "调用 getHooks() 后对返回数组 push 新元素，内部 settings.hooks 也被修改",
+  "correct_behavior": "调用 getHooks() 返回的是副本，外部修改不影响内部 settings 状态",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "SettingsManager 已初始化并加载了 hooks/customTools/skills 配置",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "settings-manager",
+      "method": "getHooks"
+    },
+    "args": {},
+    "outputs": {
+      "hooks": "array",
+      "customTools": "array",
+      "skills": "object"
+    },
+    "assertions": [
+      {
+        "what": "getHooks 返回副本而非引用",
+        "type": "return_value",
+        "expected": "getHooks() !== settings.hooks（不同引用）"
+      },
+      {
+        "what": "修改返回值不影响内部状态",
+        "type": "db_state",
+        "expected": "修改返回数组后再次 getHooks() 内容不变"
+      },
+      {
+        "what": "getCustomTools 同理返回副本",
+        "type": "return_value",
+        "expected": "getCustomTools() !== settings.customTools"
+      },
+      {
+        "what": "getSkills 的子数组也是副本",
+        "type": "return_value",
+        "expected": "getSkills().customDirectories !== settings.skills.customDirectories"
+      }
+    ]
+  }
+}

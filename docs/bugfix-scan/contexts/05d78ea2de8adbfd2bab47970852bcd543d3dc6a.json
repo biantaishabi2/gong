@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/session-selector.ts b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\nindex c63ea6d8..e06998b9 100644\n--- a/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n@@ -165,7 +165,7 @@ class SessionList implements Component {\n \t\tif (this.filteredSessions.length === 0) {\n \t\t\tif (this.showCwd) {\n \t\t\t\t// \"All\" scope - no sessions anywhere that match filter\n-\t\t\t\tlines.push(theme.fg(\"muted\", \"  No sessions found\"));\n+\t\t\t\tlines.push(theme.fg(\"muted\", truncateToWidth(\"  No sessions found\", width, \"…\")));\n \t\t\t} else {\n \t\t\t\t// \"Current folder\" scope - hint to try \"all\"\n \t\t\t\tlines.push(\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "05d78ea2de8adbfd2bab47970852bcd543d3dc6a",
+  "message": "Fix session picker 'No sessions found' overflow",
+  "module": "session-selector",
+  "tags": []
+}

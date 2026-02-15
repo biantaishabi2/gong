@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/editor.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/editor.ts b/packages/tui/src/components/editor.ts\nindex 452fd308..2c7e5b1f 100644\n--- a/packages/tui/src/components/editor.ts\n+++ b/packages/tui/src/components/editor.ts\n@@ -8,6 +8,7 @@ import {\n \tisArrowLeft,\n \tisArrowRight,\n \tisArrowUp,\n+\tisBackspace,\n \tisCtrlA,\n \tisCtrlC,\n \tisCtrlE,\n@@ -421,8 +422,8 @@ export class Editor implements Component {\n \t\t\t// Modifier + Enter = new line\n \t\t\tthis.addNewLine();\n \t\t}\n-\t\t// Plain Enter (char code 13 for CR) - only CR submits, LF adds new line\n-\t\telse if (data.charCodeAt(0) === 13 && data.length === 1) {\n+\t\t// Plain Enter - submit (handles both legacy \\r and Kitty protocol with lock bits)\n+\t\telse if (isEnter(data)) {\n \t\t\t// If submit is disabled, do nothing\n \t\t\tif (this.disableSubmit) {\n \t\t\t\treturn;\n@@ -458,7 +459,7 @@ export class Editor implements Component {\n \t\t\t}\n \t\t}\n \t\t// Backspace\n-\t\telse if (data.charCodeAt(0) === 127 || data.charCodeAt(0) === 8) {\n+\t\telse if (isBackspace(data)) {\n \t\t\tthis.handleBackspace();\n \t\t}\n \t\t// Line navigation shortcuts (Home/End keys)\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "84eaad8029aef9478d3c5264a432ff9ffe04267d",
+  "message": "fix(tui): use isBackspace and isEnter helpers in Editor",
+  "module": "editor",
+  "tags": []
+}

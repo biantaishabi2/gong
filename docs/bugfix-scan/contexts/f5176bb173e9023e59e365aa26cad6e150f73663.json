@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/tui-renderer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/tui-renderer.ts b/packages/coding-agent/src/tui/tui-renderer.ts\nindex d6819fa4..59300528 100644\n--- a/packages/coding-agent/src/tui/tui-renderer.ts\n+++ b/packages/coding-agent/src/tui/tui-renderer.ts\n@@ -308,7 +308,8 @@ export class TuiRenderer {\n \t\t\tfor (const content of assistantMsg.content) {\n \t\t\t\tif (content.type === \"text\" && content.text.trim()) {\n \t\t\t\t\t// Assistant text messages with no background - trim the text\n-\t\t\t\t\tthis.chatContainer.addChild(new Markdown(content.text.trim()));\n+\t\t\t\t\t// Set paddingY=0 to avoid extra spacing before tool executions\n+\t\t\t\t\tthis.chatContainer.addChild(new Markdown(content.text.trim(), undefined, undefined, undefined, 1, 0));\n \t\t\t\t} else if (content.type === \"thinking\" && content.thinking.trim()) {\n \t\t\t\t\t// Thinking traces in dark gray italic\n \t\t\t\t\tconst thinkingText = content.thinking\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "f5176bb173e9023e59e365aa26cad6e150f73663",
+  "message": "Fix double spacing before tool executions by removing bottom padding from assistant Markdown",
+  "module": "tui-renderer",
+  "tags": []
+}

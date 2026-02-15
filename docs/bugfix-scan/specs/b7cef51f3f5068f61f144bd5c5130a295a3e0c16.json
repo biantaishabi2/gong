@@ -1,0 +1,48 @@
+{
+  "source_commit": "b7cef51f3f5068f61f144bd5c5130a295a3e0c16",
+  "bug_summary": "@ 文件补全对目录候选也追加空格，导致无法继续路径补全且光标多偏移 1 位",
+  "module": "autocomplete",
+  "action": "applyFileCompletion",
+  "fix_summary": "检测 item.value.endsWith('/') 时不追加空格，允许继续子路径补全",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "@docs/ 补全后变为 'docs/ '（带空格），无法继续补全子目录",
+  "correct_behavior": "@docs/ 补全后为 'docs/'（无空格），可继续补全",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "自动补全激活，候选项为目录路径",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "autocomplete",
+      "method": "applyFileCompletion"
+    },
+    "args": {
+      "itemValue": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "newLine": "string",
+      "cursorCol": "number"
+    },
+    "assertions": [
+      {
+        "what": "目录不追加空格",
+        "type": "return_value",
+        "expected": "newLine.endsWith('/') when itemValue.endsWith('/')"
+      },
+      {
+        "what": "文件追加空格",
+        "type": "return_value",
+        "expected": "newLine.includes(itemValue + ' ') when !itemValue.endsWith('/')"
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "source_commit": "029a04c43b8308c3c9c1fc9138db4afd34bfb5bb",
+  "bug_summary": "attach 工具描述未说明仅 /workspace/ 下的文件可被附加，用户误用路径后才发现限制",
+  "module": "attach",
+  "action": "attach_tool_definition",
+  "fix_summary": "在 attach 工具的 description 中追加 'Only files from /workspace/ can be attached.' 限制说明",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "attach 工具描述仅说 'share files, images, or documents'，未提及路径限制",
+  "correct_behavior": "attach 工具描述包含 'Only files from /workspace/ can be attached.' 路径约束说明",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "mom 包的 attach 工具已注册",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "attach",
+      "method": "getToolDefinition"
+    },
+    "args": {},
+    "outputs": {
+      "description": "string"
+    },
+    "assertions": [
+      {
+        "what": "工具描述包含 /workspace/ 路径限制说明",
+        "type": "return_value",
+        "expected": "description.includes('Only files from /workspace/ can be attached')"
+      }
+    ]
+  }
+}

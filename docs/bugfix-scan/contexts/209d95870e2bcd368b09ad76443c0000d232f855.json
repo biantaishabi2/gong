@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/model-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/model-selector.ts b/packages/coding-agent/src/modes/interactive/components/model-selector.ts\nindex bbf77f2a..0d1ad239 100644\n--- a/packages/coding-agent/src/modes/interactive/components/model-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/model-selector.ts\n@@ -152,6 +152,7 @@ export class ModelSelectorComponent extends Container {\n \n \t\tthis.allModels = models;\n \t\tthis.filteredModels = models;\n+\t\tthis.selectedIndex = Math.min(this.selectedIndex, Math.max(0, models.length - 1));\n \t}\n \n \tprivate filterModels(query: string): void {\n@@ -216,11 +217,13 @@ export class ModelSelectorComponent extends Container {\n \thandleInput(keyData: string): void {\n \t\t// Up arrow - wrap to bottom when at top\n \t\tif (isArrowUp(keyData)) {\n+\t\t\tif (this.filteredModels.length === 0) return;\n \t\t\tthis.selectedIndex = this.selectedIndex === 0 ? this.filteredModels.length - 1 : this.selectedIndex - 1;\n \t\t\tthis.updateList();\n \t\t}\n \t\t// Down arrow - wrap to top when at bottom\n \t\telse if (isArrowDown(keyData)) {\n+\t\t\tif (this.filteredModels.length === 0) return;\n \t\t\tthis.selectedIndex = this.selectedIndex === this.filteredModels.length - 1 ? 0 : this.selectedIndex + 1;\n \t\t\tthis.updateList();\n \t\t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "209d95870e2bcd368b09ad76443c0000d232f855",
+  "message": "Fix arrow key in model selector prior to model loading (#398)",
+  "module": "model-selector",
+  "tags": []
+}

@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/mom/src/tools/attach.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/mom/src/tools/attach.ts b/packages/mom/src/tools/attach.ts\nindex 073fc9c5..174faf02 100644\n--- a/packages/mom/src/tools/attach.ts\n+++ b/packages/mom/src/tools/attach.ts\n@@ -18,7 +18,8 @@ const attachSchema = Type.Object({\n export const attachTool: AgentTool<typeof attachSchema> = {\n \tname: \"attach\",\n \tlabel: \"attach\",\n-\tdescription: \"Attach a file to your response. Use this to share files, images, or documents with the user.\",\n+\tdescription:\n+\t\t\"Attach a file to your response. Use this to share files, images, or documents with the user. Only files from /workspace/ can be attached.\",\n \tparameters: attachSchema,\n \texecute: async (\n \t\t_toolCallId: string,\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "029a04c43b8308c3c9c1fc9138db4afd34bfb5bb",
+  "message": "fix(mom): clarify attach tool only works with /workspace/ files",
+  "module": "attach",
+  "tags": []
+}

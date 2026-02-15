@@ -1,0 +1,250 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "anthropic",
+  "spec_count": 5,
+  "specs": [
+    {
+      "action": "createClient",
+      "boundary": "service",
+      "bug_summary": "Anthropic 客户端初始化未传 dangerouslyAllowBrowser，浏览器环境下行为异常",
+      "correct_behavior": "客户端配置包含 dangerouslyAllowBrowser: true，浏览器环境正常工作",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "为所有 Anthropic 客户端实例添加 dangerouslyAllowBrowser: true 参数",
+      "module": "anthropic",
+      "source_commit": "da43e625f805a287bab553b9bfcc1114ecbddd7f",
+      "test_spec": {
+        "args": {
+          "apiKey": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "client config includes dangerouslyAllowBrowser: true",
+            "type": "return_value",
+            "what": "包含 dangerouslyAllowBrowser"
+          }
+        ],
+        "outputs": {
+          "client": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "在浏览器环境初始化 Anthropic 客户端"
+          }
+        ],
+        "trigger": {
+          "method": "createClient",
+          "target": "anthropic",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "浏览器环境下客户端因缺少 dangerouslyAllowBrowser 标志而异常"
+    },
+    {
+      "action": "createClient",
+      "boundary": "service",
+      "bug_summary": "createClient 删除 process.env.ANTHROPIC_API_KEY，污染进程级环境变量",
+      "correct_behavior": "创建客户端不修改 process.env，环境变量保持不变",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "移除 delete process.env.ANTHROPIC_API_KEY 逻辑，不再修改全局环境变量",
+      "module": "anthropic",
+      "source_commit": "a248e2547ab50c5e4dea33281aa3fc6fdd7950a3",
+      "test_spec": {
+        "args": {
+          "apiKey": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "process.env.ANTHROPIC_API_KEY 创建前后不变",
+            "type": "return_value",
+            "what": "环境变量不被删除"
+          },
+          {
+            "expected": "client uses provided apiKey",
+            "type": "return_value",
+            "what": "客户端使用传入的 apiKey"
+          }
+        ],
+        "outputs": {
+          "client": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "process.env.ANTHROPIC_API_KEY 已设置"
+          }
+        ],
+        "trigger": {
+          "method": "createClient",
+          "target": "anthropic",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "创建客户端后 process.env.ANTHROPIC_API_KEY 被删除，影响同进程其他代码"
+    },
+    {
+      "action": "createClient",
+      "boundary": "http",
+      "bug_summary": "非 OAuth 分支未设置 Anthropic 默认请求头，缺少 anthropic-dangerous-direct-browser-access",
+      "correct_behavior": "非 OAuth 客户端携带完整默认请求头，浏览器直连正常工作",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "为非 OAuth 客户端设置 defaultHeaders，包含 accept、anthropic-dangerous-direct-browser-access 和 anthropic-beta",
+      "module": "anthropic",
+      "source_commit": "a62231987c3c522b787dbd6cd6bf4d3afa9316a4",
+      "test_spec": {
+        "args": {
+          "apiKey": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "headers['anthropic-dangerous-direct-browser-access'] === 'true'",
+            "type": "return_value",
+            "what": "包含 browser-access 头"
+          },
+          {
+            "expected": "headers['accept'] === 'application/json'",
+            "type": "return_value",
+            "what": "包含 accept 头"
+          }
+        ],
+        "outputs": {
+          "client": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "使用非 OAuth API key 初始化 Anthropic 客户端"
+          }
+        ],
+        "trigger": {
+          "method": "createClient",
+          "target": "anthropic",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "非 OAuth 客户端缺少 anthropic-dangerous-direct-browser-access 头，浏览器直连失败"
+    },
+    {
+      "action": "tool_name_mapping",
+      "boundary": "service",
+      "bug_summary": "ls 工具被错误映射为 Glob，导致 Anthropic 侧接收到错误的工具名，ls 操作实际执行的是 Glob 语义",
+      "correct_behavior": "toClaudeCodeName('ls') 返回 'Ls'，ls 工具调用被正确路由",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 claudeCodeToolNames 中 ls 的映射从 Glob 修正为 Ls，使 Anthropic provider 正确转发工具调用",
+      "module": "anthropic",
+      "source_commit": "0138eee6f761791b3a45028904864faa7625f070",
+      "test_spec": {
+        "args": {
+          "name": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "toClaudeCodeName('ls') === 'Ls'",
+            "type": "return_value",
+            "what": "ls 映射到 Ls 而非 Glob"
+          },
+          {
+            "expected": "toClaudeCodeName('bash') === 'Bash'",
+            "type": "return_value",
+            "what": "其他工具映射不受影响（bash→Bash, grep→Grep, find→Glob）"
+          }
+        ],
+        "outputs": {
+          "mapped_name": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "Anthropic provider 已加载 claudeCodeToolNames 映射表"
+          }
+        ],
+        "trigger": {
+          "method": "toClaudeCodeName",
+          "target": "anthropic",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "toClaudeCodeName('ls') 返回 'Glob'，导致 Anthropic 侧将 ls 请求路由到 Glob 工具"
+    },
+    {
+      "action": "create_anthropic_client",
+      "boundary": "service",
+      "bug_summary": "Anthropic provider 将 SDK 重试次数硬编码为 0，禁用了默认的自动重试策略，导致瞬时网络错误直接失败",
+      "correct_behavior": "Anthropic 客户端使用 SDK 默认重试策略，瞬时错误自动重试后恢复",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "移除两处 maxRetries: 0 配置，恢复 SDK 默认重试策略以自动处理瞬时可恢复错误",
+      "module": "anthropic",
+      "source_commit": "0fc6689dfbed1b36b68f40dd0f4ac4aa2d3d1d27",
+      "test_spec": {
+        "args": {
+          "authMode": {
+            "allowed": [
+              "api_key",
+              "oauth"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "client.maxRetries !== 0",
+            "type": "return_value",
+            "what": "客户端配置不包含 maxRetries: 0"
+          },
+          {
+            "expected": "transient 5xx 后请求被重试并成功",
+            "type": "return_value",
+            "what": "瞬时错误时 SDK 自动重试"
+          }
+        ],
+        "outputs": {
+          "client_config": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "Anthropic API 认证已配置（API key 或 OAuth）"
+          }
+        ],
+        "trigger": {
+          "method": "createClient",
+          "target": "anthropic",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Anthropic 客户端 maxRetries=0，瞬时 5xx/网络错误直接抛异常无重试"
+    }
+  ]
+}

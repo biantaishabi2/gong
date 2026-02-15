@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/footer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/footer.ts b/packages/coding-agent/src/tui/footer.ts\nindex a53a8d14..1dc227bb 100644\n--- a/packages/coding-agent/src/tui/footer.ts\n+++ b/packages/coding-agent/src/tui/footer.ts\n@@ -36,11 +36,11 @@ export class FooterComponent {\n \t\t\t}\n \t\t}\n \n-\t\t// Get last assistant message for context percentage calculation\n+\t\t// Get last assistant message for context percentage calculation (skip aborted messages)\n \t\tconst lastAssistantMessage = this.state.messages\n \t\t\t.slice()\n \t\t\t.reverse()\n-\t\t\t.find((m) => m.role === \"assistant\") as AssistantMessage | undefined;\n+\t\t\t.find((m) => m.role === \"assistant\" && m.stopReason !== \"aborted\") as AssistantMessage | undefined;\n \n \t\t// Calculate context percentage from last message (input + output + cacheRead + cacheWrite)\n \t\tconst contextTokens = lastAssistantMessage\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "4ff9c826d8ca238bb5c5e10fa729674f4a4ab817",
+  "message": "Fix context percentage showing 0% when last message was aborted",
+  "module": "footer",
+  "tags": []
+}

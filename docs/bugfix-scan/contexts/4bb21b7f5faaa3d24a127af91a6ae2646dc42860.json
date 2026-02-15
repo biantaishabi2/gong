@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/session-selector.ts b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\nindex 41ee1ba7..9a6d85ab 100644\n--- a/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n@@ -153,7 +153,7 @@ class SessionSelectorHeader implements Component {\n \t\t\tconst sep = theme.fg(\"muted\", \" · \");\n \t\t\tconst hint1 = keyHint(\"tab\", \"scope\") + sep + theme.fg(\"muted\", 're:<pattern> regex · \"phrase\" exact');\n \t\t\tconst hint2Parts = [\n-\t\t\t\trawKeyHint(\"ctrl+n\", \"sort\"),\n+\t\t\t\trawKeyHint(\"ctrl+s\", \"sort\"),\n \t\t\t\trawKeyHint(\"ctrl+d\", \"delete\"),\n \t\t\t\trawKeyHint(\"ctrl+p\", `path ${pathState}`),\n \t\t\t];\n@@ -383,7 +383,7 @@ class SessionList implements Component, Focusable {\n \t\t\treturn;\n \t\t}\n \n-\t\tif (matchesKey(keyData, \"ctrl+n\")) {\n+\t\tif (matchesKey(keyData, \"ctrl+s\")) {\n \t\t\tthis.onToggleSort?.();\n \t\t\treturn;\n \t\t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "4bb21b7f5faaa3d24a127af91a6ae2646dc42860",
+  "message": "fix(coding-agent): change sort keybinding from Ctrl+N to Ctrl+S in /resume picker",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

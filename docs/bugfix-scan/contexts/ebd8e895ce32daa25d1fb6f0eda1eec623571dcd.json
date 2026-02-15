@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/test/stream.test.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/test/stream.test.ts b/packages/ai/test/stream.test.ts\nindex 7a302a13..2434db06 100644\n--- a/packages/ai/test/stream.test.ts\n+++ b/packages/ai/test/stream.test.ts\n@@ -783,7 +783,7 @@ describe(\"Generate E2E Tests\", () => {\n \t\t\t});\n \n \t\t\tit(\"should handle thinking mode\", { retry: 3 }, async () => {\n-\t\t\t\t// FIXME Skip for now, getting a 422 stauts code, need to test with official SDK\n+\t\t\t\t// FIXME Skip for now, getting a 422 status code, need to test with official SDK\n \t\t\t\t// const llm = getModel(\"mistral\", \"magistral-medium-latest\");\n \t\t\t\t// await handleThinking(llm, { reasoningEffort: \"medium\" });\n \t\t\t});\n"
+    },
+    {
+      "file": "packages/web-ui/src/components/SandboxedIframe.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/components/SandboxedIframe.ts b/packages/web-ui/src/components/SandboxedIframe.ts\nindex f1e8cb1f..dd8f15ec 100644\n--- a/packages/web-ui/src/components/SandboxedIframe.ts\n+++ b/packages/web-ui/src/components/SandboxedIframe.ts\n@@ -562,7 +562,7 @@ export class SandboxIframe extends LitElement {\n \t\t\t.join(\"\\n\");\n \n \t\t// TODO the font-size is needed, as chrome seems to inject a stylesheet into iframes\n-\t\t// found in an extension context like sidepanel, settin body { font-size: 75% }. It's\n+\t\t// found in an extension context like sidepanel, setting body { font-size: 75% }. It's\n \t\t// definitely not our code doing that.\n \t\t// See  https://stackoverflow.com/questions/71480433/chrome-is-injecting-some-stylesheet-in-popup-ui-which-reduces-the-font-size-to-7\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "ebd8e895ce32daa25d1fb6f0eda1eec623571dcd",
+  "message": "fix: typos in comments (fixes #1016)",
+  "module": "stream",
+  "tags": []
+}

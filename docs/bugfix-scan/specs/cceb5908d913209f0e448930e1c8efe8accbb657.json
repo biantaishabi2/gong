@@ -1,0 +1,44 @@
+{
+  "source_commit": "cceb5908d913209f0e448930e1c8efe8accbb657",
+  "bug_summary": "兼容性检测遗漏 opencode.ai，导致 OpenCode 提供方错误使用 developer role 而非 system role",
+  "module": "openai-completions",
+  "action": "detectCompat",
+  "fix_summary": "在兼容性 URL 检测中添加 opencode.ai 匹配",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "baseUrl 含 opencode.ai 时不识别为 system role 兼容",
+  "correct_behavior": "baseUrl 含 opencode.ai 时启用 useSystemRole",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "OpenAI completions 使用 opencode.ai baseUrl",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "openai-completions",
+      "method": "detectCompat"
+    },
+    "args": {
+      "baseUrl": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "useSystemRole": "bool"
+    },
+    "assertions": [
+      {
+        "what": "opencode.ai 使用 system role",
+        "type": "return_value",
+        "expected": "useSystemRole === true when baseUrl includes 'opencode.ai'"
+      }
+    ]
+  }
+}

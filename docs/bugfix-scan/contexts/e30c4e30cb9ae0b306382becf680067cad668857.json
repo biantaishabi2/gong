@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/agent-session.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/agent-session.ts b/packages/coding-agent/src/core/agent-session.ts\nindex 3087ca4f..44a700db 100644\n--- a/packages/coding-agent/src/core/agent-session.ts\n+++ b/packages/coding-agent/src/core/agent-session.ts\n@@ -1525,7 +1525,13 @@ export class AgentSession {\n \t\tconst lastAssistant = this.messages\n \t\t\t.slice()\n \t\t\t.reverse()\n-\t\t\t.find((m) => m.role === \"assistant\");\n+\t\t\t.find((m) => {\n+\t\t\t\tif (m.role !== \"assistant\") return false;\n+\t\t\t\tconst msg = m as AssistantMessage;\n+\t\t\t\t// Skip aborted messages with no content\n+\t\t\t\tif (msg.stopReason === \"aborted\" && msg.content.length === 0) return false;\n+\t\t\t\treturn true;\n+\t\t\t});\n \n \t\tif (!lastAssistant) return null;\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "e30c4e30cb9ae0b306382becf680067cad668857",
+  "message": "Fix /copy after aborts",
+  "module": "agent-session",
+  "tags": []
+}

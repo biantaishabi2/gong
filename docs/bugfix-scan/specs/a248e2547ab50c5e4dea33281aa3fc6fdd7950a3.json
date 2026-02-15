@@ -1,0 +1,49 @@
+{
+  "source_commit": "a248e2547ab50c5e4dea33281aa3fc6fdd7950a3",
+  "bug_summary": "createClient 删除 process.env.ANTHROPIC_API_KEY，污染进程级环境变量",
+  "module": "anthropic",
+  "action": "createClient",
+  "fix_summary": "移除 delete process.env.ANTHROPIC_API_KEY 逻辑，不再修改全局环境变量",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "创建客户端后 process.env.ANTHROPIC_API_KEY 被删除，影响同进程其他代码",
+  "correct_behavior": "创建客户端不修改 process.env，环境变量保持不变",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "process.env.ANTHROPIC_API_KEY 已设置",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "anthropic",
+      "method": "createClient"
+    },
+    "args": {
+      "apiKey": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "client": "object"
+    },
+    "assertions": [
+      {
+        "what": "环境变量不被删除",
+        "type": "return_value",
+        "expected": "process.env.ANTHROPIC_API_KEY 创建前后不变"
+      },
+      {
+        "what": "客户端使用传入的 apiKey",
+        "type": "return_value",
+        "expected": "client uses provided apiKey"
+      }
+    ]
+  }
+}

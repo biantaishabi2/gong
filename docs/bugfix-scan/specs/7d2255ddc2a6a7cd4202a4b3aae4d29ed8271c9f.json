@@ -1,0 +1,44 @@
+{
+  "source_commit": "7d2255ddc2a6a7cd4202a4b3aae4d29ed8271c9f",
+  "bug_summary": "resetExtensionUI 未重置终端标题和 loading 提示，界面仍显示旧的扩展状态",
+  "module": "interactive-mode",
+  "action": "resetExtensionUI",
+  "fix_summary": "在 resetExtensionUI 中添加 updateTerminalTitle() 调用和 loadingAnimation.setMessage() 恢复默认文案",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "扩展重置后终端标题和 loading 消息仍为旧扩展的状态",
+  "correct_behavior": "resetExtensionUI 更新终端标题并将 loading 消息恢复为默认工作文案+中断快捷键提示",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "扩展会话已设置自定义终端标题和 loading 消息",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "resetExtensionUI"
+    },
+    "args": {},
+    "outputs": {
+      "terminal_title": "string",
+      "loading_message": "string"
+    },
+    "assertions": [
+      {
+        "what": "终端标题被更新",
+        "type": "side_effect",
+        "expected": "updateTerminalTitle() called"
+      },
+      {
+        "what": "loading 消息恢复默认",
+        "type": "return_value",
+        "expected": "message includes defaultWorkingMessage and interrupt key hint"
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "action": "interactive_command_processing",
+  "boundary": "service",
+  "bug_summary": "交互命令处理不一致：/quit 未出现在补全列表，且 /exit 仍会触发退出",
+  "correct_behavior": "/quit 可被补全且仅 /quit 触发退出",
+  "data_dependencies": [
+    "config"
+  ],
+  "fix_summary": "在内置斜杠命令中新增 /quit 补全，并移除 /exit 触发 shutdown 的分支",
+  "module": "coding-agent",
+  "source_commit": "8792ee2a6622974dce63baaee218d5eca70c38e5",
+  "test_spec": {
+    "args": {
+      "text": {
+        "allowed": null,
+        "required": true,
+        "type": "string"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "autocomplete_commands includes '/quit'",
+        "type": "state",
+        "what": "补全列表包含 /quit"
+      },
+      {
+        "expected": "shutdown_called=true when text='/quit'",
+        "type": "behavior",
+        "what": "输入 /quit 时触发退出"
+      },
+      {
+        "expected": "shutdown_called=false when text='/exit'",
+        "type": "behavior",
+        "what": "输入 /exit 时不触发退出"
+      }
+    ],
+    "outputs": {
+      "autocomplete_commands": "array",
+      "shutdown_called": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "已加载内置斜杠命令列表"
+      },
+      {
+        "involves": "session",
+        "what": "交互模式会话已启动"
+      }
+    ],
+    "trigger": {
+      "method": "processInputText",
+      "target": "InteractiveMode",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "/quit 不在补全中且 /exit 仍可退出"
+}

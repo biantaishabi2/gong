@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/tui.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/tui.ts b/packages/tui/src/tui.ts\nindex 3a44efbd..92ecd46a 100644\n--- a/packages/tui/src/tui.ts\n+++ b/packages/tui/src/tui.ts\n@@ -212,6 +212,7 @@ export class TUI extends Container {\n \tprivate maxLinesRendered = 0; // Track terminal's working area (max lines ever rendered)\n \tprivate previousViewportTop = 0; // Track previous viewport top for resize-aware cursor moves\n \tprivate fullRedrawCount = 0;\n+\tprivate stopped = false;\n \n \t// Overlay stack for modal components rendered on top of base content\n \tprivate overlayStack: {\n@@ -352,6 +353,7 @@ export class TUI extends Container {\n \t}\n \n \tstart(): void {\n+\t\tthis.stopped = false;\n \t\tthis.terminal.start(\n \t\t\t(data) => this.handleInput(data),\n \t\t\t() => this.requestRender(),\n@@ -373,6 +375,7 @@ export class TUI extends Container {\n \t}\n \n \tstop(): void {\n+\t\tthis.stopped = true;\n \t\t// Move cursor to the end of the content to prevent overwriting/artifacts on exit\n \t\tif (this.previousLines.length > 0) {\n \t\t\tconst targetRow = this.previousLines.length; // Line after the last content\n@@ -797,6 +800,7 @@ export class TUI extends Container {\n \t}\n \n \tprivate doRender(): void {\n+\t\tif (this.stopped) return;\n \t\tconst width = this.terminal.columns;\n \t\tconst height = this.terminal.rows;\n \t\tlet viewportTop = Math.max(0, this.maxLinesRendered - height);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "836e852af178a6f6b49fffea8ce4e6440f2c60cb",
+  "message": "Fixes #1099",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "login-dialog",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "showPrompt",
+      "boundary": "service",
+      "bug_summary": "showPrompt 清空 contentContainer，导致 showAuth 已显示的登录 URL 被擦除",
+      "correct_behavior": "showPrompt 追加内容，不清空已有的 URL 显示",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "移除 showPrompt 中的 contentContainer.clear()，改为追加内容保留已有 URL",
+      "module": "login-dialog",
+      "source_commit": "9c87eeb8053bb153197b81fc519b06ca5bc20f63",
+      "test_spec": {
+        "args": {
+          "message": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "contentContainer still contains authUrl",
+            "type": "return_value",
+            "what": "授权 URL 仍然显示"
+          },
+          {
+            "expected": "contentContainer contains promptMessage",
+            "type": "return_value",
+            "what": "提示消息被追加"
+          }
+        ],
+        "outputs": {
+          "content_preserved": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "showAuth 已显示授权 URL"
+          }
+        ],
+        "trigger": {
+          "method": "showPrompt",
+          "target": "login-dialog",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "showPrompt 调用 contentContainer.clear()，擦除 showAuth 显示的 URL"
+    }
+  ]
+}

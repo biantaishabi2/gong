@@ -1,0 +1,98 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "autocomplete",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "applyFileCompletion",
+      "boundary": "service",
+      "bug_summary": "@ 文件补全对目录候选也追加空格，导致无法继续路径补全且光标多偏移 1 位",
+      "correct_behavior": "@docs/ 补全后为 'docs/'（无空格），可继续补全",
+      "data_dependencies": [],
+      "fix_summary": "检测 item.value.endsWith('/') 时不追加空格，允许继续子路径补全",
+      "module": "autocomplete",
+      "source_commit": "b7cef51f3f5068f61f144bd5c5130a295a3e0c16",
+      "test_spec": {
+        "args": {
+          "itemValue": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "newLine.endsWith('/') when itemValue.endsWith('/')",
+            "type": "return_value",
+            "what": "目录不追加空格"
+          },
+          {
+            "expected": "newLine.includes(itemValue + ' ') when !itemValue.endsWith('/')",
+            "type": "return_value",
+            "what": "文件追加空格"
+          }
+        ],
+        "outputs": {
+          "cursorCol": "number",
+          "newLine": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "自动补全激活，候选项为目录路径"
+          }
+        ],
+        "trigger": {
+          "method": "applyFileCompletion",
+          "target": "autocomplete",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "@docs/ 补全后变为 'docs/ '（带空格），无法继续补全子目录"
+    },
+    {
+      "action": "detect_fd_binary",
+      "boundary": "service",
+      "bug_summary": "autocomplete 中 execSync 调用未将 stdio 设为 pipe，子进程 stderr 直接输出到终端污染 TUI",
+      "correct_behavior": "stderr 被 pipe 捕获，不影响 TUI 显示",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "所有 execSync 调用增加 stdio: 'pipe' 或 stdio: ['pipe','pipe','pipe']，捕获 stderr",
+      "module": "autocomplete",
+      "source_commit": "4de46fbab360e2ce9ab2d8f1c7b3e5a4d6f0c9e8",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "所有 execSync 调用包含 stdio: 'pipe'",
+            "type": "return_value",
+            "what": "execSync 使用 stdio pipe 模式"
+          },
+          {
+            "expected": "stderr_captured === true",
+            "type": "return_value",
+            "what": "stderr 不输出到 TUI"
+          }
+        ],
+        "outputs": {
+          "stderr_captured": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "系统可能未安装 fd/fdfind"
+          }
+        ],
+        "trigger": {
+          "method": "detectFdBinary",
+          "target": "autocomplete",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "fd/fdfind 检测失败时 stderr 消息直接输出到 TUI，破坏显示"
+    }
+  ]
+}

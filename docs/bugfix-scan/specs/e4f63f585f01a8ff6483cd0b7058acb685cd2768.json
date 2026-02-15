@@ -1,0 +1,44 @@
+{
+  "source_commit": "e4f63f585f01a8ff6483cd0b7058acb685cd2768",
+  "bug_summary": "扩展路径仅来自 CLI --extension 参数，未合并 settings.json 中配置的扩展",
+  "module": "coding-agent",
+  "action": "loadExtensions",
+  "fix_summary": "创建 SettingsManager 读取 settings.json extensions，与 CLI 参数合并",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "settings.json 中的 extensions 被忽略",
+  "correct_behavior": "CLI --extension 和 settings.json extensions 合并加载",
+  "data_dependencies": [
+    "config",
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "settings.json 包含 extensions 配置",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent/main",
+      "method": "main"
+    },
+    "args": {},
+    "outputs": {
+      "extensionPaths": "array"
+    },
+    "assertions": [
+      {
+        "what": "包含 settings.json 扩展",
+        "type": "return_value",
+        "expected": "extensionPaths includes settings.json extensions"
+      },
+      {
+        "what": "包含 CLI 扩展",
+        "type": "return_value",
+        "expected": "extensionPaths includes CLI extensions"
+      }
+    ]
+  }
+}

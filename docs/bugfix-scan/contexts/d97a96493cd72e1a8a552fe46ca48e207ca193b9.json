@@ -1,0 +1,26 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/utils.ts",
+      "hunks": [
+        {
+          "after_function": "export function visibleWidth(str: string): number {\n\tif (str.length === 0) {\n\t\treturn 0;\n\t}\n\n\t// Fast path: pure ASCII printable\n\tlet isPureAscii = true;\n\tfor (let i = 0; i < str.length; i++) {\n\t\tconst code = str.charCodeAt(i);\n\t\tif (code < 0x20 || code > 0x7e) {\n\t\t\tisPureAscii = false;\n\t\t\tbreak;\n\t\t}\n\t}\n\tif (isPureAscii) {\n\t\treturn str.length;\n\t}\n\n\t// Check cache\n\tconst cached = widthCache.get(str);\n\tif (cached !== undefined) {\n\t\treturn cached;\n\t}\n\n\t// Normalize: tabs to 3 spaces, strip ANSI escape codes\n\tlet clean = str;\n\tif (str.includes(\"\\t\")) {\n\t\tclean = clean.replace(/\\t/g, \"   \");\n\t}\n\tif (clean.includes(\"\\x1b\")) {\n\t\t// Strip SGR codes (\\x1b[...m) and cursor codes (\\x1b[...G/K/H/J)\n\t\tclean = clean.replace(/\\x1b\\[[0-9;]*[mGKHJ]/g, \"\");\n\t\t// Strip OSC 8 hyperlinks: \\x1b]8;;URL\\x07 and \\x1b]8;;\\x07\n\t\tclean = clean.replace(/\\x1b\\]8;;[^\\x07]*\\x07/g, \"\");\n\t}\n\n\t// Calculate width\n\tlet width = 0;\n\tfor (const { segment } of segmenter.segment(clean)) {\n\t\twidth += graphemeWidth(segment);\n\t}\n\n\t// Cache result\n\tif (widthCache.size >= WIDTH_CACHE_SIZE) {\n\t\tconst firstKey = widthCache.keys().next().value;\n\t\tif (firstKey !== undefined) {\n\t\t\twidthCache.delete(firstKey);\n\t\t}\n\t}\n\twidthCache.set(str, width);\n\n\treturn width;\n}",
+          "before_function": "export function visibleWidth(str: string): number {\n\tif (str.length === 0) {\n\t\treturn 0;\n\t}\n\n\t// Fast path: pure ASCII printable\n\tlet isPureAscii = true;\n\tfor (let i = 0; i < str.length; i++) {\n\t\tconst code = str.charCodeAt(i);\n\t\tif (code < 0x20 || code > 0x7e) {\n\t\t\tisPureAscii = false;\n\t\t\tbreak;\n\t\t}\n\t}\n\tif (isPureAscii) {\n\t\treturn str.length;\n\t}\n\n\t// Check cache\n\tconst cached = widthCache.get(str);\n\tif (cached !== undefined) {\n\t\treturn cached;\n\t}\n\n\t// Normalize: tabs to 3 spaces, strip ANSI escape codes\n\tlet clean = str;\n\tif (str.includes(\"\\t\")) {\n\t\tclean = clean.replace(/\\t/g, \"   \");\n\t}\n\tif (clean.includes(\"\\x1b\")) {\n\t\tclean = clean.replace(/\\x1b\\[[0-9;]*[mGKHJ]/g, \"\");\n\t}\n\n\t// Calculate width\n\tlet width = 0;\n\tfor (const { segment } of segmenter.segment(clean)) {\n\t\twidth += graphemeWidth(segment);\n\t}\n\n\t// Cache result\n\tif (widthCache.size >= WIDTH_CACHE_SIZE) {\n\t\tconst firstKey = widthCache.keys().next().value;\n\t\tif (firstKey !== undefined) {\n\t\t\twidthCache.delete(firstKey);\n\t\t}\n\t}\n\twidthCache.set(str, width);\n\n\treturn width;\n}",
+          "changed_lines": [
+            111,
+            113,
+            114
+          ],
+          "function_line": 81,
+          "function_name": "visibleWidth"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/tui/src/utils.ts b/packages/tui/src/utils.ts\nindex 1e87722b..1a7b7767 100644\n--- a/packages/tui/src/utils.ts\n+++ b/packages/tui/src/utils.ts\n@@ -108,7 +108,10 @@ export function visibleWidth(str: string): number {\n \t\tclean = clean.replace(/\\t/g, \"   \");\n \t}\n \tif (clean.includes(\"\\x1b\")) {\n+\t\t// Strip SGR codes (\\x1b[...m) and cursor codes (\\x1b[...G/K/H/J)\n \t\tclean = clean.replace(/\\x1b\\[[0-9;]*[mGKHJ]/g, \"\");\n+\t\t// Strip OSC 8 hyperlinks: \\x1b]8;;URL\\x07 and \\x1b]8;;\\x07\n+\t\tclean = clean.replace(/\\x1b\\]8;;[^\\x07]*\\x07/g, \"\");\n \t}\n \n \t// Calculate width\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d97a96493cd72e1a8a552fe46ca48e207ca193b9",
+  "message": "fix(tui): Strip OSC 8 hyperlink sequences in visibleWidth (#396)",
+  "module": "utils",
+  "tags": []
+}

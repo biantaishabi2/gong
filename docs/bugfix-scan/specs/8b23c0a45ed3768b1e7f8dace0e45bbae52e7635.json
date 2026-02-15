@@ -1,0 +1,47 @@
+{
+  "source_commit": "8b23c0a45ed3768b1e7f8dace0e45bbae52e7635",
+  "bug_summary": "分享链接将 gistId 拼到查询串而非 hash fragment，导致会话定位失败",
+  "module": "interactive-mode",
+  "action": "generateShareUrl",
+  "fix_summary": "将 URL 格式从 session?gistId 改为 session/#gistId，使用 hash fragment 定位",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "生成 URL 为 https://buildwithpi.ai/session?{gistId}，查询串格式无法定位",
+  "correct_behavior": "生成 URL 为 https://buildwithpi.ai/session/#{gistId}，hash fragment 正确定位",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "gist 已创建成功，返回 gistId",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "generateShareUrl"
+    },
+    "args": {
+      "gistId": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "url": "string"
+    },
+    "assertions": [
+      {
+        "what": "URL 使用 hash fragment",
+        "type": "return_value",
+        "expected": "url === `https://buildwithpi.ai/session/#${gistId}`"
+      },
+      {
+        "what": "URL 不使用查询串",
+        "type": "return_value",
+        "expected": "!url.includes('?')"
+      }
+    ]
+  }
+}

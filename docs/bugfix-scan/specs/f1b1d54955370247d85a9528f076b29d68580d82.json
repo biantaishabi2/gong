@@ -1,0 +1,44 @@
+{
+  "source_commit": "f1b1d54955370247d85a9528f076b29d68580d82",
+  "bug_summary": "自定义编辑器直接拷贝扩展快捷键处理函数，调用上下文丢失",
+  "module": "interactive-mode",
+  "action": "bindExtensionShortcut",
+  "fix_summary": "改为箭头函数委托 (data) => this.defaultEditor.onExtensionShortcut?.(data)，保持上下文",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "直接赋值 customEditor.onExtensionShortcut = defaultEditor.onExtensionShortcut 丢失 this",
+  "correct_behavior": "箭头函数委托确保 defaultEditor 上下文正确",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "customEditor 和 defaultEditor 均已初始化",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "bindExtensionShortcut"
+    },
+    "args": {
+      "data": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "handled": "bool"
+    },
+    "assertions": [
+      {
+        "what": "快捷键正确委托到 defaultEditor",
+        "type": "side_effect",
+        "expected": "defaultEditor.onExtensionShortcut called with data"
+      }
+    ]
+  }
+}

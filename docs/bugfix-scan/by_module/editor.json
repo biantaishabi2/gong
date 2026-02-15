@@ -1,0 +1,266 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "editor",
+  "spec_count": 5,
+  "specs": [
+    {
+      "action": "handleInput",
+      "boundary": "service",
+      "bug_summary": "Editor 通过 charCode 精确匹配回车和退格，无法识别 Kitty 协议编码的按键",
+      "correct_behavior": "使用 isBackspace/isEnter 函数统一识别传统和 Kitty 协议的回车/退格",
+      "data_dependencies": [],
+      "fix_summary": "使用 isBackspace/isEnter 辅助函数替代 charCodeAt 精确匹配，支持多终端编码",
+      "module": "editor",
+      "source_commit": "84eaad8029aef9478d3c5264a432ff9ffe04267d",
+      "test_spec": {
+        "args": {
+          "data": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "isEnter(kittyEnterSeq) === true",
+            "type": "return_value",
+            "what": "Kitty 回车序列被识别为提交"
+          },
+          {
+            "expected": "isBackspace(kittyBackspaceSeq) === true",
+            "type": "return_value",
+            "what": "Kitty 退格序列被识别为退格"
+          }
+        ],
+        "outputs": {
+          "action": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "编辑器已启用，终端可能使用 Kitty 协议"
+          }
+        ],
+        "trigger": {
+          "method": "handleInput",
+          "target": "editor",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Kitty 协议的回车和退格序列不被识别，导致编辑器无响应"
+    },
+    {
+      "action": "yank_pop",
+      "boundary": "service",
+      "bug_summary": "yank-pop 旋转 kill ring 时使用运行时 assert 做非空校验，造成不必要的 assert 依赖",
+      "correct_behavior": "使用 killRing.pop()! 非空断言，编译时保证类型安全，无运行时开销",
+      "data_dependencies": [],
+      "fix_summary": "将 assert(lastEntry !== undefined) 替换为 TypeScript 非空断言操作符 (!)，移除 assert 导入",
+      "module": "editor",
+      "source_commit": "6bde679a5f5818c6915f52794bf209300f52786e",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "insertedText === lastKillRingEntry",
+            "type": "return_value",
+            "what": "yank-pop 正确旋转并插入文本"
+          },
+          {
+            "expected": "no import of node:assert",
+            "type": "return_value",
+            "what": "不使用 assert 模块"
+          }
+        ],
+        "outputs": {
+          "inserted_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "编辑器 killRing 非空，存在已粘贴文本可被替换"
+          }
+        ],
+        "trigger": {
+          "method": "yankPop",
+          "target": "editor",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "使用 import assert + assert(lastEntry !== undefined) 做运行时校验，引入不必要的 assert 依赖"
+    },
+    {
+      "action": "handleInput",
+      "boundary": "event",
+      "bug_summary": "编辑器未兼容部分历史换行输入序列，导致回车无法按预期触发新行或提交逻辑",
+      "correct_behavior": "识别标准与遗留换行序列，统一进入正确的新行/提交处理",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "恢复遗留换行判定，除标准 newLine 外额外兼容 LF+组合输入、ESC+CR、Shift+Enter 序列及包含 ESC/CR 的复合输入",
+      "module": "editor",
+      "source_commit": "20d704fee1c1ec53398f2fe460e1a6333616654f",
+      "test_spec": {
+        "args": {
+          "data": {
+            "allowed": [
+              "\\n",
+              "\\x1b\\r",
+              "\\x1b[13;2~",
+              "<charCode=10且length>1的输入>",
+              "<包含\\x1b且包含\\r的复合输入>"
+            ],
+            "required": true,
+            "type": "string"
+          },
+          "kb": {
+            "allowed": null,
+            "required": true,
+            "type": "json"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "触发与 newLine 等价的处理路径",
+            "type": "return_value",
+            "what": "当 data 为历史兼容换行序列时进入新行分支"
+          },
+          {
+            "expected": "submitted=true",
+            "type": "return_value",
+            "what": "当 shouldSubmitOnBackslashEnter(data,kb) 为 true 时调用 submitValue"
+          },
+          {
+            "expected": "value 包含新增换行",
+            "type": "return_value",
+            "what": "当 shouldSubmitOnBackslashEnter(data,kb) 为 false 时保留换行编辑行为"
+          }
+        ],
+        "outputs": {
+          "submitted": "bool",
+          "value": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "编辑器实例已初始化并进入可输入状态"
+          },
+          {
+            "involves": "config",
+            "what": "键位映射已加载且包含 newLine 行为"
+          }
+        ],
+        "trigger": {
+          "method": "handleInput",
+          "target": "Editor",
+          "type": "event_handler"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "仅识别 kb.matches(data,\"newLine\")，导致部分终端回车/Shift+Enter 序列失效"
+    },
+    {
+      "action": "setTextInternal",
+      "boundary": "service",
+      "bug_summary": "setTextInternal 清空 lastAction，导致历史导航等内部更新错误打断 kill ring 动作链",
+      "correct_behavior": "setTextInternal 不重置 lastAction，仅 setText（外部调用）才重置",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "将 lastAction 重置从 setTextInternal 移到外部 setText，内部调用不影响动作链",
+      "module": "editor",
+      "source_commit": "beb1455cab4102c757e7dbc04a729f9e05292254",
+      "test_spec": {
+        "args": {
+          "text": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "lastAction remains unchanged after setTextInternal",
+            "type": "return_value",
+            "what": "setTextInternal 不重置 lastAction"
+          },
+          {
+            "expected": "lastAction = null after setText",
+            "type": "return_value",
+            "what": "setText 才重置 lastAction"
+          }
+        ],
+        "outputs": {
+          "lastAction": "string|null"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "编辑器存在连续 kill 操作，lastAction=kill"
+          }
+        ],
+        "trigger": {
+          "method": "setTextInternal",
+          "target": "editor",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "历史导航调用 setTextInternal 时清空 lastAction，kill ring 积累中断"
+    },
+    {
+      "action": "autocomplete_trigger",
+      "boundary": "service",
+      "bug_summary": "斜杠命令自动补全只识别字母数字字符作为前缀，不支持 . - _ 前缀的命令",
+      "correct_behavior": "输入包含 . - _ 的命令名时自动补全继续工作",
+      "data_dependencies": [],
+      "fix_summary": "将自动补全字符正则从 /[a-zA-Z0-9]/ 扩展为 /[a-zA-Z0-9.\\-_]/，支持点、横杠、下划线前缀",
+      "module": "editor",
+      "source_commit": "69a8ecd5b37fdde6eb2b93b78a3c7feefb54bec0",
+      "test_spec": {
+        "args": {
+          "char": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "/[a-zA-Z0-9.\\-_]/.test('.')",
+            "type": "return_value",
+            "what": ". 字符保持补全激活"
+          },
+          {
+            "expected": "/[a-zA-Z0-9.\\-_]/.test('-')",
+            "type": "return_value",
+            "what": "- 字符保持补全激活"
+          },
+          {
+            "expected": "/[a-zA-Z0-9.\\-_]/.test('_')",
+            "type": "return_value",
+            "what": "_ 字符保持补全激活"
+          }
+        ],
+        "outputs": {
+          "autocomplete_active": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "编辑器已注册包含特殊字符的斜杠命令"
+          }
+        ],
+        "trigger": {
+          "method": "handleKeyInput",
+          "target": "editor",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "输入 /my-command 或 /my.cmd 时自动补全中断，因为 - 和 . 不被识别为合法前缀字符"
+    }
+  ]
+}

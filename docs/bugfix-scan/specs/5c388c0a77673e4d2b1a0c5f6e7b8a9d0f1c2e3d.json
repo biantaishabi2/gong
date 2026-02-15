@@ -1,0 +1,59 @@
+{
+  "source_commit": "5c388c0a77673e4d2b1a0c5f6e7b8a9d0f1c2e3d",
+  "bug_summary": "footer token 数大于百万时仍按 k 显示（如 1234k），且上下文占比用冗长的 '% of' 格式",
+  "module": "footer",
+  "action": "formatTokens",
+  "fix_summary": "增加百万级格式化（< 10M 显示一位小数如 1.2M，>= 10M 显示整数如 12M）；'% of' 改为 '%/'",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "1234000 显示为 '1234k'；上下文显示为 '50% of 128k'",
+  "correct_behavior": "1234000 显示为 '1.2M'；上下文显示为 '50%/128k'",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "footer 需显示 token 统计",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "footer",
+      "method": "formatTokens"
+    },
+    "args": {
+      "count": {
+        "type": "int",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "formatted": "string"
+    },
+    "assertions": [
+      {
+        "what": "< 1M 显示为 k",
+        "type": "return_value",
+        "expected": "formatTokens(50000) === '50k'"
+      },
+      {
+        "what": "1M-10M 显示一位小数 M",
+        "type": "return_value",
+        "expected": "formatTokens(1234000) === '1.2M'"
+      },
+      {
+        "what": ">= 10M 显示整数 M",
+        "type": "return_value",
+        "expected": "formatTokens(12000000) === '12M'"
+      },
+      {
+        "what": "上下文格式用 %/ 而非 % of",
+        "type": "return_value",
+        "expected": "contextPercentDisplay 包含 '%/' 而非 '% of'"
+      }
+    ]
+  }
+}

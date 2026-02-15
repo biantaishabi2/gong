@@ -1,0 +1,43 @@
+{
+  "source_commit": "175a137d006a87de10b7f07a1040f70e7e6dfd4c",
+  "bug_summary": "交互界面初始化时未调用 renderWidgets()，导致默认 spacer 未创建，assistant 消息与编辑器之间没有间隔",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "interactive_mode_init",
+  "fix_summary": "在 UI 构建完成后立即调用 this.renderWidgets() 初始化默认 spacer",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "初始化后 assistant 消息和编辑器紧贴，无间隔",
+  "correct_behavior": "初始化后 renderWidgets 创建默认 spacer，assistant 消息和编辑器之间有可见间隔",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "交互模式正在初始化，assistant 消息和编辑器均已挂载",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "init"
+    },
+    "args": {},
+    "outputs": {
+      "spacer_present": "bool"
+    },
+    "assertions": [
+      {
+        "what": "初始化后 renderWidgets 被调用",
+        "type": "return_value",
+        "expected": "renderWidgets 在 init 完成前被调用"
+      },
+      {
+        "what": "默认 spacer 存在于 widget 列表中",
+        "type": "return_value",
+        "expected": "spacer_present === true"
+      }
+    ]
+  }
+}

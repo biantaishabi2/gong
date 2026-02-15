@@ -1,0 +1,54 @@
+{
+  "action": "setAutocompleteMaxVisible",
+  "boundary": "service",
+  "bug_summary": "设置 autocompleteMaxVisible 后未标记为已修改，导致 save() 未持久化该配置",
+  "correct_behavior": "先 markModified(\"autocompleteMaxVisible\")，再 save()，使该字段稳定持久化",
+  "data_dependencies": [
+    "file",
+    "config"
+  ],
+  "fix_summary": "在 setAutocompleteMaxVisible() 中新增 markModified(\"autocompleteMaxVisible\") 后再保存",
+  "module": "settings-manager",
+  "source_commit": "2ad48256535ddd768d49fd92da4cd5dc57edcc23",
+  "test_spec": {
+    "args": {
+      "maxVisible": {
+        "allowed": null,
+        "required": true,
+        "type": "int"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "配置文件中的 autocompleteMaxVisible=12",
+        "type": "file_state",
+        "what": "调用 setAutocompleteMaxVisible(12) 后配置被标记为已修改并写入持久化存储"
+      },
+      {
+        "expected": "setAutocompleteMaxVisible(100) 后持久化为 20，setAutocompleteMaxVisible(2.9) 后持久化为 3",
+        "type": "file_state",
+        "what": "当入参超出范围时仍按 3~20 及 floor 规则持久化"
+      }
+    ],
+    "outputs": {
+      "persisted_autocompleteMaxVisible": "int"
+    },
+    "preconditions": [
+      {
+        "involves": "file",
+        "what": "SettingsManager 已初始化并加载可写配置文件"
+      },
+      {
+        "involves": "config",
+        "what": "初始配置中 autocompleteMaxVisible 不等于本次将设置的目标值"
+      }
+    ],
+    "trigger": {
+      "method": "setAutocompleteMaxVisible",
+      "target": "SettingsManager",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "仅更新内存中的 globalSettings.autocompleteMaxVisible 并调用 save()，但因未 markModified 导致该字段不落盘"
+}

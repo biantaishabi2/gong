@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/session-manager.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/session-manager.ts b/packages/coding-agent/src/core/session-manager.ts\nindex b8b16f36..68a8e338 100644\n--- a/packages/coding-agent/src/core/session-manager.ts\n+++ b/packages/coding-agent/src/core/session-manager.ts\n@@ -165,10 +165,13 @@ export function createSummaryMessage(summary: string, timestamp: string): AgentM\n /** Convert CustomMessageEntry to AgentMessage format */\n function createCustomMessage(entry: CustomMessageEntry): AgentMessage {\n \treturn {\n-\t\trole: \"user\",\n+\t\trole: \"hookMessage\",\n+\t\tcustomType: entry.customType,\n \t\tcontent: entry.content,\n+\t\tdisplay: entry.display,\n+\t\tdetails: entry.details,\n \t\ttimestamp: new Date(entry.timestamp).getTime(),\n-\t};\n+\t} as AgentMessage;\n }\n \n /** Generate a unique short ID (8 hex chars, collision-checked) */\n"
+    },
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex c1a824e3..5b6e6844 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1208,6 +1208,7 @@ export class InteractiveMode {\n \t}\n \n \tprivate rebuildChatFromMessages(): void {\n+\t\tthis.chatContainer.clear();\n \t\tconst context = this.sessionManager.buildSessionContext();\n \t\tthis.renderSessionContext(context);\n \t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "ecef601d195620b6b107f25db07d54bca99be4f0",
+  "message": "Fix hook message duplication in TUI",
+  "module": "session-manager",
+  "tags": []
+}

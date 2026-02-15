@@ -1,0 +1,57 @@
+{
+  "source_commit": "4bb21b7f5faa2d3a0e7c9b1f5d4c3b2a1e0f9d8c",
+  "bug_summary": "会话选择器排序快捷键绑定为 Ctrl+N 而非 Ctrl+S，与 UI 提示不一致",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "session_sort_keybinding",
+  "fix_summary": "将排序快捷键从 ctrl+n 改为 ctrl+s，hint 和 matchesKey 同步更新",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "按 Ctrl+S 无反应，Ctrl+N 触发排序但 UI 未提示",
+  "correct_behavior": "按 Ctrl+S 触发排序，与 UI hint 显示一致",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话选择器已打开",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "session-selector",
+      "method": "handleKey"
+    },
+    "args": {
+      "key": {
+        "type": "string",
+        "required": true,
+        "allowed": [
+          "ctrl+s",
+          "ctrl+n"
+        ]
+      }
+    },
+    "outputs": {
+      "sort_triggered": "bool"
+    },
+    "assertions": [
+      {
+        "what": "Ctrl+S 触发排序",
+        "type": "return_value",
+        "expected": "key='ctrl+s' → sort_triggered === true"
+      },
+      {
+        "what": "Ctrl+N 不再触发排序",
+        "type": "return_value",
+        "expected": "key='ctrl+n' → sort_triggered === false"
+      },
+      {
+        "what": "UI hint 显示 ctrl+s",
+        "type": "return_value",
+        "expected": "hint 文本包含 'ctrl+s'"
+      }
+    ]
+  }
+}

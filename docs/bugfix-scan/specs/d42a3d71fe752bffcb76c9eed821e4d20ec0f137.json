@@ -1,0 +1,49 @@
+{
+  "source_commit": "d42a3d71fe752bffcb76c9eed821e4d20ec0f137",
+  "bug_summary": "OAuth 登录 URL 输出为纯文本，终端中不可点击",
+  "module": "interactive-mode",
+  "action": "onAuth",
+  "fix_summary": "使用 OSC 8 超链接转义序列渲染登录 URL，使其在终端中可点击",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "登录 URL 显示为纯文本，用户需手动复制",
+  "correct_behavior": "登录 URL 使用 OSC 8 渲染为可点击链接",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "OAuth 回调触发，返回 loginUrl",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "onAuth"
+    },
+    "args": {
+      "url": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rendered_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "输出包含 OSC 8 超链接序列",
+        "type": "return_value",
+        "expected": "text contains \\x1b]8;; hyperlink escape"
+      },
+      {
+        "what": "包含 Click here to login 文案",
+        "type": "return_value",
+        "expected": "text.includes('Click here to login')"
+      }
+    ]
+  }
+}

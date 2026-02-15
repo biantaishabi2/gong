@@ -1,0 +1,42 @@
+{
+  "source_commit": "fb6d464edc0763e943ea41da918a0480e8b04b08",
+  "bug_summary": "可重试错误正则未包含 fetch failed，该网络失败不触发自动重试",
+  "module": "agent-session",
+  "action": "isRetryableError",
+  "fix_summary": "在重试正则中添加 fetch failed 模式",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "'fetch failed' 错误不被识别为可重试",
+  "correct_behavior": "'fetch failed' 被识别为可重试并自动重试",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "API 请求返回 fetch failed 错误",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "agent-session",
+      "method": "isRetryableError"
+    },
+    "args": {
+      "errorMessage": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "retryable": "bool"
+    },
+    "assertions": [
+      {
+        "what": "fetch failed 可重试",
+        "type": "return_value",
+        "expected": "isRetryableError('fetch failed') === true"
+      }
+    ]
+  }
+}

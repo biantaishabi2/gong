@@ -1,0 +1,50 @@
+{
+  "source_commit": "97e00fc45d809eeeb5961e99f7c0cf34a90858bf",
+  "bug_summary": "自动补全激活时 Escape 被编辑器拦截触发中断，未先取消自动补全",
+  "module": "tui-renderer",
+  "action": "handleEscape",
+  "fix_summary": "在 Escape 拦截前检查 isShowingAutocomplete()，激活时让父层处理取消补全",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "自动补全时按 Escape 直接中断 agent，补全弹窗残留",
+  "correct_behavior": "自动补全时按 Escape 先取消补全，不中断 agent",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器自动补全正在显示",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tui-renderer",
+      "method": "handleEscape"
+    },
+    "args": {
+      "isAutocompleting": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "autocomplete_canceled": "bool",
+      "agent_interrupted": "bool"
+    },
+    "assertions": [
+      {
+        "what": "补全激活时取消补全不中断",
+        "type": "return_value",
+        "expected": "autocomplete_canceled && !agent_interrupted"
+      },
+      {
+        "what": "无补全时正常中断",
+        "type": "return_value",
+        "expected": "!isAutocompleting → agent_interrupted"
+      }
+    ]
+  }
+}

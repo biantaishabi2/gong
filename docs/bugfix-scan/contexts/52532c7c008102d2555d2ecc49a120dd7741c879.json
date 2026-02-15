@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/google-gemini-cli.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/google-gemini-cli.ts b/packages/ai/src/providers/google-gemini-cli.ts\nindex 2ddc98b9..5e6f5d58 100644\n--- a/packages/ai/src/providers/google-gemini-cli.ts\n+++ b/packages/ai/src/providers/google-gemini-cli.ts\n@@ -73,7 +73,7 @@ const GEMINI_CLI_HEADERS = {\n \n // Headers for Antigravity (sandbox endpoint) - requires specific User-Agent\n const ANTIGRAVITY_HEADERS = {\n-\t\"User-Agent\": \"antigravity/1.11.5 darwin/arm64\",\n+\t\"User-Agent\": \"antigravity/1.15.8 darwin/arm64\",\n \t\"X-Goog-Api-Client\": \"google-cloud-sdk vscode_cloudshelleditor/0.1\",\n \t\"Client-Metadata\": JSON.stringify({\n \t\tideType: \"IDE_UNSPECIFIED\",\n"
+    },
+    {
+      "file": "packages/coding-agent/examples/extensions/antigravity-image-gen.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/examples/extensions/antigravity-image-gen.ts b/packages/coding-agent/examples/extensions/antigravity-image-gen.ts\nindex e138178b..f561d126 100644\n--- a/packages/coding-agent/examples/extensions/antigravity-image-gen.ts\n+++ b/packages/coding-agent/examples/extensions/antigravity-image-gen.ts\n@@ -50,7 +50,7 @@ type SaveMode = (typeof SAVE_MODES)[number];\n const ANTIGRAVITY_ENDPOINT = \"https://daily-cloudcode-pa.sandbox.googleapis.com\";\n \n const ANTIGRAVITY_HEADERS = {\n-\t\"User-Agent\": \"antigravity/1.11.5 darwin/arm64\",\n+\t\"User-Agent\": \"antigravity/1.15.8 darwin/arm64\",\n \t\"X-Goog-Api-Client\": \"google-cloud-sdk vscode_cloudshelleditor/0.1\",\n \t\"Client-Metadata\": JSON.stringify({\n \t\tideType: \"IDE_UNSPECIFIED\",\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "52532c7c008102d2555d2ecc49a120dd7741c879",
+  "message": "fix(ai): update Antigravity User-Agent to 1.15.8",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

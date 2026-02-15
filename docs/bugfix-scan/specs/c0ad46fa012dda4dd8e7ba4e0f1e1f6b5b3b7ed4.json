@@ -1,0 +1,42 @@
+{
+  "source_commit": "c0ad46fa012dda4dd8e7ba4e0f1e1f6b5b3b7ed4",
+  "bug_summary": "javascript-repl 执行失败时返回普通结果对象而非抛出错误，工具调用不被标记为失败",
+  "module": "javascript-repl",
+  "action": "execute",
+  "fix_summary": "将 return { output } 改为 throw new Error(output.trim())，使失败的工具调用正确标记",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "执行失败时返回 { output }，工具调用显示为成功",
+  "correct_behavior": "执行失败时抛出 Error，工具调用被标记为 failed",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "sandbox 执行代码返回错误结果",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "javascript-repl",
+      "method": "execute"
+    },
+    "args": {
+      "code": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "error_thrown": "bool"
+    },
+    "assertions": [
+      {
+        "what": "执行失败时抛出 Error",
+        "type": "return_value",
+        "expected": "throws Error with output.trim() message"
+      }
+    ]
+  }
+}

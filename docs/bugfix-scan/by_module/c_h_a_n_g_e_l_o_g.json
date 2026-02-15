@@ -1,0 +1,493 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "spec_count": 10,
+  "specs": [
+    {
+      "action": "bash_preview_truncate",
+      "boundary": "service",
+      "bug_summary": "折叠态 bash 预览在截断前注入前导空行，导致 'earlier lines' 跳过行数 off-by-one",
+      "correct_behavior": "折叠态正确显示跳过行数，与实际一致",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "truncateToVisualLines 输入改为 styledOutput（不含前导换行），折叠态手动添加空行分隔",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "3235926eedfca6d62c4cec0d7a0e64edf78e5614",
+      "test_spec": {
+        "args": {
+          "width": {
+            "allowed": null,
+            "required": true,
+            "type": "int"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "skipped_count === actual_hidden_lines",
+            "type": "return_value",
+            "what": "跳过行数不含前导空行"
+          },
+          {
+            "expected": "lines[0] === ''",
+            "type": "return_value",
+            "what": "折叠态第一行是空行分隔"
+          }
+        ],
+        "outputs": {
+          "lines": "array",
+          "skipped_count": "int"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "bash 工具输出超过 BASH_PREVIEW_LINES 行"
+          }
+        ],
+        "trigger": {
+          "method": "renderBashPreview",
+          "target": "tool-execution",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "折叠态显示 '23 earlier lines' 但实际只有 22 行被跳过"
+    },
+    {
+      "action": "follow_up_queue",
+      "boundary": "service",
+      "bug_summary": "follow-up 队列处理使用 getText() 读取编辑器内容，粘贴标记未被展开就直接入队",
+      "correct_behavior": "follow-up 入队前通过 getExpandedText 展开粘贴标记，队列收到完整文本内容",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 getText() 调用改为 getExpandedText?.() ?? getText()，优先使用展开后的文本",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "0f0c54b812046f80e1e71e4f19e1e499fba3f898",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "queued_text === getExpandedText() 而非 getText()",
+            "type": "return_value",
+            "what": "getExpandedText 可用时优先使用展开文本"
+          },
+          {
+            "expected": "getExpandedText 为 undefined 时 queued_text === getText()",
+            "type": "return_value",
+            "what": "getExpandedText 不可用时降级到 getText"
+          }
+        ],
+        "outputs": {
+          "queued_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "编辑器含有粘贴标记的文本，getExpandedText 可用"
+          }
+        ],
+        "trigger": {
+          "method": "handleFollowUp",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "用户粘贴含标记的文本后提交 follow-up，队列收到的是未展开的原始标记文本"
+    },
+    {
+      "action": "getAgentDir",
+      "boundary": "service",
+      "bug_summary": "PI_CODING_AGENT_DIR 环境变量不支持 ~ 展开，设置 ~/custom-dir 时路径解析错误",
+      "correct_behavior": "设置 PI_CODING_AGENT_DIR=~/custom-dir 时返回 '/home/user/custom-dir'（tilde 被展开）",
+      "data_dependencies": [
+        "config",
+        "file"
+      ],
+      "fix_summary": "在读取 PI_CODING_AGENT_DIR 后增加 tilde 展开逻辑：~ 映射为 homedir()，~/ 前缀替换为 homedir()",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "09d9107d7fb059862a14b2eee7e1b3b3b17c8a70",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "PI_CODING_AGENT_DIR='~' → agentDir === homedir()",
+            "type": "return_value",
+            "what": "~ 单独使用时展开为 homedir()"
+          },
+          {
+            "expected": "PI_CODING_AGENT_DIR='~/foo' → agentDir === homedir() + '/foo'",
+            "type": "return_value",
+            "what": "~/ 前缀展开为 homedir() + 后续路径"
+          },
+          {
+            "expected": "PI_CODING_AGENT_DIR='/abs/path' → agentDir === '/abs/path'",
+            "type": "return_value",
+            "what": "非 ~ 开头的路径原样返回"
+          }
+        ],
+        "outputs": {
+          "agentDir": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "PI_CODING_AGENT_DIR 环境变量已设置"
+          }
+        ],
+        "trigger": {
+          "method": "getAgentDir",
+          "target": "config",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "设置 PI_CODING_AGENT_DIR=~/custom-dir 时返回字面量 '~/custom-dir' 而非展开路径"
+    },
+    {
+      "action": "session_sort_keybinding",
+      "boundary": "service",
+      "bug_summary": "会话选择器排序快捷键绑定为 Ctrl+N 而非 Ctrl+S，与 UI 提示不一致",
+      "correct_behavior": "按 Ctrl+S 触发排序，与 UI hint 显示一致",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将排序快捷键从 ctrl+n 改为 ctrl+s，hint 和 matchesKey 同步更新",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "4bb21b7f5faa2d3a0e7c9b1f5d4c3b2a1e0f9d8c",
+      "test_spec": {
+        "args": {
+          "key": {
+            "allowed": [
+              "ctrl+s",
+              "ctrl+n"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "key='ctrl+s' → sort_triggered === true",
+            "type": "return_value",
+            "what": "Ctrl+S 触发排序"
+          },
+          {
+            "expected": "key='ctrl+n' → sort_triggered === false",
+            "type": "return_value",
+            "what": "Ctrl+N 不再触发排序"
+          },
+          {
+            "expected": "hint 文本包含 'ctrl+s'",
+            "type": "return_value",
+            "what": "UI hint 显示 ctrl+s"
+          }
+        ],
+        "outputs": {
+          "sort_triggered": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "会话选择器已打开"
+          }
+        ],
+        "trigger": {
+          "method": "handleKey",
+          "target": "session-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "按 Ctrl+S 无反应，Ctrl+N 触发排序但 UI 未提示"
+    },
+    {
+      "action": "handle_no_extensions",
+      "boundary": "service",
+      "bug_summary": "--no-extensions 返回空集合时条件检查跳过 preloadedExtensions 写入，后续代码仍会发现并加载扩展",
+      "correct_behavior": "--no-extensions 时 preloadedExtensions 设为空数组，明确禁用后续扩展发现",
+      "data_dependencies": [
+        "config",
+        "file"
+      ],
+      "fix_summary": "移除 extensions.length > 0 条件检查，只要 extensionsResult 有值就写入 preloadedExtensions（包括空数组）",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "3326b8f52172e7bdbb21f8a0a4a4ece9cd8c4fbe",
+      "test_spec": {
+        "args": {
+          "noExtensions": {
+            "allowed": null,
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "preloadedExtensions !== undefined && preloadedExtensions.length === 0",
+            "type": "return_value",
+            "what": "--no-extensions 时 preloadedExtensions 为空数组（而非 undefined）"
+          },
+          {
+            "expected": "extension discovery 不执行",
+            "type": "return_value",
+            "what": "后续扩展发现被跳过"
+          }
+        ],
+        "outputs": {
+          "preloadedExtensions": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "启动参数包含 --no-extensions"
+          }
+        ],
+        "trigger": {
+          "method": "initExtensions",
+          "target": "main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "--no-extensions 时 preloadedExtensions 未设置，后续扩展发现逻辑正常执行，扩展仍被加载"
+    },
+    {
+      "action": "package_exports",
+      "boundary": "service",
+      "bug_summary": "coding-agent 入口模块未导出 copyToClipboard，扩展无法从公共 API 导入剪贴板功能",
+      "correct_behavior": "copyToClipboard 可从 coding-agent 主入口正常导入",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "在 packages/coding-agent/src/index.ts 增加 export { copyToClipboard } from './utils/clipboard.js'",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "48fc57f321a45c0a0bfde7c9e3db7a14f5c8e2a1",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "import { copyToClipboard } from 'coding-agent' 成功",
+            "type": "return_value",
+            "what": "copyToClipboard 可从主入口导入"
+          }
+        ],
+        "outputs": {
+          "exported": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "coding-agent 包已构建"
+          }
+        ],
+        "trigger": {
+          "method": "module_export",
+          "target": "coding-agent",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "import { copyToClipboard } from 'coding-agent' 报导入错误"
+    },
+    {
+      "action": "insertYankedText",
+      "boundary": "service",
+      "bug_summary": "yank 插入文本时未重置 historyIndex，编辑器错误地停留在历史浏览模式",
+      "correct_behavior": "yank 后 historyIndex 重置为 -1，编辑器回到正常编辑模式",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 yank 插入操作中增加 this.historyIndex = -1 重置，退出历史浏览模式",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "18d9d9d7048d7de39523840b9e1a2bbeb0b777c0",
+      "test_spec": {
+        "args": {
+          "text": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "historyIndex === -1",
+            "type": "return_value",
+            "what": "yank 后 historyIndex 重置为 -1"
+          },
+          {
+            "expected": "editor.getText() 包含 yanked text",
+            "type": "return_value",
+            "what": "yanked 文本正确插入到光标位置"
+          }
+        ],
+        "outputs": {
+          "historyIndex": "int"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "编辑器处于历史浏览模式（historyIndex >= 0）"
+          },
+          {
+            "involves": "config",
+            "what": "kill ring 中有可 yank 的文本"
+          }
+        ],
+        "trigger": {
+          "method": "insertYankedText",
+          "target": "editor",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "yank 后 historyIndex 保持非 -1 值，后续按上下键继续浏览历史而非正常编辑"
+    },
+    {
+      "action": "render_markdown_link",
+      "boundary": "service",
+      "bug_summary": "markdown 链接渲染时用带 ANSI 样式的 linkText 与 href 比较，相同文本被误判为不同导致链接重复显示",
+      "correct_behavior": "文本与 href 相同时只渲染一次",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "比较时改用原始 token.text 而非样式化的 linkText，避免 ANSI code 干扰",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "59af0fd53a610c4b8e2d3a1f5c6b7d8e9f0a2b3c",
+      "test_spec": {
+        "args": {
+          "token": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "token.text === token.href 时输出不含重复 URL",
+            "type": "return_value",
+            "what": "text === href 时不重复渲染"
+          },
+          {
+            "expected": "token.text !== token.href 时输出 [text](href) 格式",
+            "type": "return_value",
+            "what": "text !== href 时正常显示"
+          }
+        ],
+        "outputs": {
+          "rendered": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "markdown 文本包含链接"
+          }
+        ],
+        "trigger": {
+          "method": "renderLink",
+          "target": "markdown",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "文本与 href 相同的链接被重复渲染（如 [https://x](https://x) 显示两次）"
+    },
+    {
+      "action": "exportSessionToHtml",
+      "boundary": "service",
+      "bug_summary": "导出会话 HTML 时默认文件名缺少 pi-session- 前缀，不符合命名约定",
+      "correct_behavior": "不传 outputPath 时导出文件名为 pi-session-mysession.html，符合命名约定",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "将默认导出路径从 {sessionBasename}.html 改为 pi-session-{sessionBasename}.html",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "0397dd44c838c68e7e2b32285dce9b4f6f8e33a2",
+      "test_spec": {
+        "args": {
+          "outputPath": {
+            "allowed": null,
+            "required": false,
+            "type": "string"
+          },
+          "sessionBasename": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "outputPath === `pi-session-${sessionBasename}.html`",
+            "type": "return_value",
+            "what": "未指定 outputPath 时默认使用 pi-session- 前缀"
+          },
+          {
+            "expected": "outputPath === userSpecifiedPath",
+            "type": "return_value",
+            "what": "指定 outputPath 时使用用户指定值"
+          }
+        ],
+        "outputs": {
+          "outputPath": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "存在有效会话文件，sessionBasename 已解析"
+          }
+        ],
+        "trigger": {
+          "method": "exportSessionToHtml",
+          "target": "export-html",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "不传 outputPath 时导出文件名为 mysession.html，缺少标准前缀"
+    },
+    {
+      "action": "interactive_mode_init",
+      "boundary": "service",
+      "bug_summary": "交互界面初始化时未调用 renderWidgets()，导致默认 spacer 未创建，assistant 消息与编辑器之间没有间隔",
+      "correct_behavior": "初始化后 renderWidgets 创建默认 spacer，assistant 消息和编辑器之间有可见间隔",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 UI 构建完成后立即调用 this.renderWidgets() 初始化默认 spacer",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "source_commit": "175a137d006a87de10b7f07a1040f70e7e6dfd4c",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "renderWidgets 在 init 完成前被调用",
+            "type": "return_value",
+            "what": "初始化后 renderWidgets 被调用"
+          },
+          {
+            "expected": "spacer_present === true",
+            "type": "return_value",
+            "what": "默认 spacer 存在于 widget 列表中"
+          }
+        ],
+        "outputs": {
+          "spacer_present": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "交互模式正在初始化，assistant 消息和编辑器均已挂载"
+          }
+        ],
+        "trigger": {
+          "method": "init",
+          "target": "interactive-mode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "初始化后 assistant 消息和编辑器紧贴，无间隔"
+    }
+  ]
+}

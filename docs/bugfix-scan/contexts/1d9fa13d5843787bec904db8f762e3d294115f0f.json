@@ -1,0 +1,25 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/utils.ts",
+      "hunks": [
+        {
+          "after_function": "export function visibleWidth(str: string): number {\n\tif (!str) return 0;\n\t// Replace tabs and strip Unicode format characters (Cf) that crash string-width\n\tconst normalized = str.replace(/\\t/g, \"   \").replace(/\\p{Cf}/gu, \"\");\n\treturn stringWidth(normalized);\n}",
+          "before_function": "export function visibleWidth(str: string): number {\n\tif (!str) return 0;\n\tconst normalized = str.replace(/\\t/g, \"   \");\n\treturn stringWidth(normalized);\n}",
+          "changed_lines": [
+            8,
+            9
+          ],
+          "function_line": 6,
+          "function_name": "visibleWidth"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/tui/src/utils.ts b/packages/tui/src/utils.ts\nindex dace78c1..3c4f80bf 100644\n--- a/packages/tui/src/utils.ts\n+++ b/packages/tui/src/utils.ts\n@@ -5,7 +5,8 @@ import stringWidth from \"string-width\";\n  */\n export function visibleWidth(str: string): number {\n \tif (!str) return 0;\n-\tconst normalized = str.replace(/\\t/g, \"   \");\n+\t// Replace tabs and strip Unicode format characters (Cf) that crash string-width\n+\tconst normalized = str.replace(/\\t/g, \"   \").replace(/\\p{Cf}/gu, \"\");\n \treturn stringWidth(normalized);\n }\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "1d9fa13d5843787bec904db8f762e3d294115f0f",
+  "message": "Fix crash on Unicode format characters in visibleWidth",
+  "module": "utils",
+  "tags": []
+}

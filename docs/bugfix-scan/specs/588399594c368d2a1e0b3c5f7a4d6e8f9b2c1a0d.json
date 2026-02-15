@@ -1,0 +1,44 @@
+{
+  "source_commit": "588399594c368d2a1e0b3c5f7a4d6e8f9b2c1a0d",
+  "bug_summary": "会话选择器底部提示文案未按终端宽度截断，窄终端下溢出",
+  "module": "session-selector",
+  "action": "render_hint",
+  "fix_summary": "提示文案先 truncateToWidth 截断再 theme.fg 着色",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "窄终端下提示文案溢出破坏布局",
+  "correct_behavior": "提示文案按终端宽度截断，以 … 结尾",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话选择器已打开，终端宽度较窄",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "session-selector",
+      "method": "renderHint"
+    },
+    "args": {
+      "width": {
+        "type": "int",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "hint": "string"
+    },
+    "assertions": [
+      {
+        "what": "提示文案不超过终端宽度",
+        "type": "return_value",
+        "expected": "visibleWidth(hint) <= width"
+      }
+    ]
+  }
+}

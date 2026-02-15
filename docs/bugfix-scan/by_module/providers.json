@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "providers",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "handleStopReason",
+      "boundary": "service",
+      "bug_summary": "多个 provider 的 aborted/error 分支错误消息存在拼写错误 'unkown' 和 'ocurred'",
+      "correct_behavior": "抛出 'An unknown error occurred'，拼写正确",
+      "data_dependencies": [],
+      "fix_summary": "将 'An unkown error ocurred' 统一修正为 'An unknown error occurred'，涉及 4 个 provider 文件",
+      "module": "providers",
+      "source_commit": "9b903656aea9b0646244d295e578933bd0c888a8",
+      "test_spec": {
+        "args": {
+          "stopReason": {
+            "allowed": [
+              "aborted",
+              "error"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "error.message === 'An unknown error occurred'",
+            "type": "return_value",
+            "what": "错误消息拼写正确"
+          },
+          {
+            "expected": "!error.message.includes('unkown') && !error.message.includes('ocurred')",
+            "type": "return_value",
+            "what": "不含旧拼写"
+          }
+        ],
+        "outputs": {
+          "error_message": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "provider 处理 aborted 或 error stop reason"
+          }
+        ],
+        "trigger": {
+          "method": "handleStopReason",
+          "target": "providers",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "抛出 'An unkown error ocurred'，拼写错误导致依赖精确文案的处理失败"
+    }
+  ]
+}

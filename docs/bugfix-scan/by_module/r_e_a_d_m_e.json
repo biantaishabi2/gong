@@ -1,0 +1,112 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "r_e_a_d_m_e",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "main_resume_flow",
+      "boundary": "service",
+      "bug_summary": "--resume 分支在打开会话选择器前未初始化 KeybindingsManager，用户自定义快捷键在会话选择器中不生效",
+      "correct_behavior": "--resume 模式下先初始化 KeybindingsManager，会话选择器尊重用户自定义键位",
+      "data_dependencies": [
+        "config",
+        "file"
+      ],
+      "fix_summary": "在 --resume 分支进入会话选择器前增加 KeybindingsManager.create() 调用",
+      "module": "r_e_a_d_m_e",
+      "source_commit": "23a4fd11597e16c5b75ecec68df4e99e5c4bb2e5",
+      "test_spec": {
+        "args": {
+          "resume": {
+            "allowed": null,
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "keybindings_initialized === true",
+            "type": "return_value",
+            "what": "KeybindingsManager 在会话选择器前被创建"
+          },
+          {
+            "expected": "session picker keybindings === user config",
+            "type": "return_value",
+            "what": "会话选择器使用用户自定义键位"
+          }
+        ],
+        "outputs": {
+          "keybindings_initialized": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "用户有自定义键位配置文件"
+          },
+          {
+            "involves": "file",
+            "what": "存在可恢复的会话列表"
+          }
+        ],
+        "trigger": {
+          "method": "handleResume",
+          "target": "main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "--resume 模式下会话选择器使用默认键位，用户配置的自定义快捷键被忽略"
+    },
+    {
+      "action": "newLine_keybinding",
+      "boundary": "service",
+      "bug_summary": "默认 newLine 键位包含 alt+enter，导致 alt+enter 被误判为换行而非其原本用途",
+      "correct_behavior": "仅 shift+enter 触发换行，alt+enter 可用于其他绑定",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 newLine 从 ['shift+enter', 'alt+enter'] 改为 'shift+enter'，移除 alt+enter",
+      "module": "r_e_a_d_m_e",
+      "source_commit": "4d8719680108e51e0b8c3a4d2f9e7b6a5c4d3e2f",
+      "test_spec": {
+        "args": {
+          "action": {
+            "allowed": [
+              "newLine"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "keys === 'shift+enter'",
+            "type": "return_value",
+            "what": "newLine 绑定为 shift+enter"
+          },
+          {
+            "expected": "keys 不包含 'alt+enter'",
+            "type": "return_value",
+            "what": "alt+enter 不在 newLine 绑定中"
+          }
+        ],
+        "outputs": {
+          "keys": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "tui 编辑器使用默认键位配置"
+          }
+        ],
+        "trigger": {
+          "method": "getBinding",
+          "target": "keybindings",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "按 alt+enter 触发换行，与用户期望的其他功能冲突"
+    }
+  ]
+}

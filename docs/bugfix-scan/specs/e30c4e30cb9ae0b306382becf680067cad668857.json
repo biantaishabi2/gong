@@ -1,0 +1,43 @@
+{
+  "source_commit": "e30c4e30cb9ae0b306382becf680067cad668857",
+  "bug_summary": "/copy 查找最后 assistant 消息时未跳过 aborted 且空内容的消息，复制到空回复",
+  "module": "agent-session",
+  "action": "getLastAssistantMessage",
+  "fix_summary": "在 find 中过滤掉 stopReason=aborted 且 content 为空的 assistant 消息",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "/copy 命中 aborted 空消息，复制内容为空",
+  "correct_behavior": "/copy 跳过 aborted 空消息，复制到有内容的 assistant 回复",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "消息序列末尾有 aborted 空消息，之前有正常 assistant 消息",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "agent-session",
+      "method": "getLastAssistantMessage"
+    },
+    "args": {},
+    "outputs": {
+      "message": "object"
+    },
+    "assertions": [
+      {
+        "what": "跳过 aborted 空消息",
+        "type": "return_value",
+        "expected": "message.content.length > 0"
+      },
+      {
+        "what": "返回有内容的消息",
+        "type": "return_value",
+        "expected": "message.stopReason !== 'aborted' || message.content.length > 0"
+      }
+    ]
+  }
+}

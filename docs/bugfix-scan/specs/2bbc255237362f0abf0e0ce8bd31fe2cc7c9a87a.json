@@ -1,0 +1,49 @@
+{
+  "source_commit": "2bbc255237362f0abf0e0ce8bd31fe2cc7c9a87a",
+  "bug_summary": "切换到自定义编辑器时未同步 paddingX，修改全局 padding 设置时自定义编辑器不更新",
+  "module": "interactive-mode",
+  "action": "propagate_paddingX",
+  "fix_summary": "切换编辑器时检查并同步 setPaddingX；修改 padding 设置时同步到当前非默认编辑器",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "自定义编辑器的水平内边距与默认编辑器不一致",
+  "correct_behavior": "自定义编辑器继承 defaultEditor 的 paddingX，设置变更时实时同步",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "存在自定义编辑器且支持 setPaddingX",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "switchEditor"
+    },
+    "args": {
+      "editor": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "paddingX": "int"
+    },
+    "assertions": [
+      {
+        "what": "切换编辑器时 paddingX 被同步",
+        "type": "return_value",
+        "expected": "newEditor.paddingX === defaultEditor.paddingX"
+      },
+      {
+        "what": "修改设置时非默认编辑器也更新",
+        "type": "return_value",
+        "expected": "settings change 后 customEditor.paddingX === new value"
+      }
+    ]
+  }
+}

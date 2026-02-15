@@ -1,0 +1,49 @@
+{
+  "source_commit": "7293d7cb8213cdbe3f4ebefcdbff9251a50fc8b5",
+  "bug_summary": "远程 Bash 执行流式读取时按 chunk 直接 toString('utf-8')，跨 chunk 的 UTF-8 多字节字符产生乱码",
+  "module": "bash-executor",
+  "action": "executeRemoteBash",
+  "fix_summary": "为远程执行添加 TextDecoder 流式解码替代逐块 toString('utf-8')",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "远程 Bash 输出中的跨 chunk UTF-8 字符被截断为替换字符",
+  "correct_behavior": "TextDecoder 流式解码正确处理跨 chunk 的多字节字符",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "远程 Bash 命令输出包含跨分片的 UTF-8 多字节字符",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "bash-executor",
+      "method": "executeRemoteBash"
+    },
+    "args": {
+      "command": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "stdout": "string"
+    },
+    "assertions": [
+      {
+        "what": "远程输出不含 UTF-8 替换字符",
+        "type": "return_value",
+        "expected": "!output.includes('\\uFFFD')"
+      },
+      {
+        "what": "使用 TextDecoder 实例解码",
+        "type": "return_value",
+        "expected": "decoder instanceof TextDecoder"
+      }
+    ]
+  }
+}

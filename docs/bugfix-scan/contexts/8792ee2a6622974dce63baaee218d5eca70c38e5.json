@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/slash-commands.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/slash-commands.ts b/packages/coding-agent/src/core/slash-commands.ts\nindex 48845cb9..0f814a6b 100644\n--- a/packages/coding-agent/src/core/slash-commands.ts\n+++ b/packages/coding-agent/src/core/slash-commands.ts\n@@ -34,4 +34,5 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [\n \t{ name: \"compact\", description: \"Manually compact the session context\" },\n \t{ name: \"resume\", description: \"Resume a different session\" },\n \t{ name: \"reload\", description: \"Reload extensions, skills, prompts, and themes\" },\n+\t{ name: \"quit\", description: \"Quit pi\" },\n ];\n"
+    },
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 23285e0c..1af4af0a 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1925,7 +1925,7 @@ export class InteractiveMode {\n \t\t\t\tthis.editor.setText(\"\");\n \t\t\t\treturn;\n \t\t\t}\n-\t\t\tif (text === \"/quit\" || text === \"/exit\") {\n+\t\t\tif (text === \"/quit\") {\n \t\t\t\tthis.editor.setText(\"\");\n \t\t\t\tawait this.shutdown();\n \t\t\t\treturn;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "8792ee2a6622974dce63baaee218d5eca70c38e5",
+  "message": "fix(coding-agent): add /quit autocomplete and remove /exit fixes #1303",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,33 @@
+{
+  "diffs": [
+    {
+      "file": ".pi/extensions/agent-end.ts",
+      "hunks": [
+        {
+          "after_function": "export default function agentEndExtension(pi: ExtensionAPI): void {\n\tpi.on(\"agent_end\", async (_event, ctx) => {\n\t\tctx.ui.notify(\"agent_end received\");\n\t});\n}",
+          "before_function": "",
+          "changed_lines": [
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "function_line": 3,
+          "function_name": "agentEndExtension"
+        }
+      ],
+      "raw_diff": "diff --git a/.pi/extensions/agent-end.ts b/.pi/extensions/agent-end.ts\nnew file mode 100644\nindex 00000000..998b54e9\n--- /dev/null\n+++ b/.pi/extensions/agent-end.ts\n@@ -0,0 +1,7 @@\n+import type { ExtensionAPI } from \"@mariozechner/pi-coding-agent\";\n+\n+export default function agentEndExtension(pi: ExtensionAPI): void {\n+\tpi.on(\"agent_end\", async (_event, ctx) => {\n+\t\tctx.ui.notify(\"agent_end received\");\n+\t});\n+}\n"
+    },
+    {
+      "file": "packages/coding-agent/src/core/package-manager.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/package-manager.ts b/packages/coding-agent/src/core/package-manager.ts\nindex a5fd60c8..82efb53b 100644\n--- a/packages/coding-agent/src/core/package-manager.ts\n+++ b/packages/coding-agent/src/core/package-manager.ts\n@@ -980,8 +980,7 @@ export class DefaultPackageManager implements PackageManager {\n \t\tconst trimmed = source.trim();\n \t\tconst isWindowsAbsolutePath = /^[A-Za-z]:[\\\\/]|^\\\\\\\\/.test(trimmed);\n \t\tconst isLocalPathLike =\n-\t\t\ttrimmed.startsWith(\"./\") ||\n-\t\t\ttrimmed.startsWith(\"../\") ||\n+\t\t\ttrimmed.startsWith(\".\") ||\n \t\t\ttrimmed.startsWith(\"/\") ||\n \t\t\ttrimmed === \"~\" ||\n \t\t\ttrimmed.startsWith(\"~/\") ||\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "88ac5ca1d9d5ecd68b5b40167472ab4d208a70e1",
+  "message": "fix(coding-agent): treat dot-prefixed extension paths as local",
+  "module": "agent-end",
+  "tags": []
+}

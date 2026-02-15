@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/editor.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/editor.ts b/packages/tui/src/components/editor.ts\nindex 96d43e12..32829367 100644\n--- a/packages/tui/src/components/editor.ts\n+++ b/packages/tui/src/components/editor.ts\n@@ -282,9 +282,6 @@ export class Editor implements Component, Focusable {\n \n \t/** Internal setText that doesn't reset history state - used by navigateHistory */\n \tprivate setTextInternal(text: string): void {\n-\t\t// Reset kill ring state - external text changes break accumulation/yank chains\n-\t\tthis.lastAction = null;\n-\n \t\tconst lines = text.replace(/\\r\\n/g, \"\\n\").replace(/\\r/g, \"\\n\").split(\"\\n\");\n \t\tthis.state.lines = lines.length === 0 ? [\"\"] : lines;\n \t\tthis.state.cursorLine = this.state.lines.length - 1;\n@@ -805,13 +802,13 @@ export class Editor implements Component, Focusable {\n \t}\n \n \tsetText(text: string): void {\n+\t\tthis.lastAction = null;\n \t\tthis.historyIndex = -1; // Exit history browsing mode\n \t\t// Push undo snapshot if content differs (makes programmatic changes undoable)\n \t\tif (this.getText() !== text) {\n \t\t\tthis.pushUndoSnapshot();\n \t\t}\n \t\tthis.setTextInternal(text);\n-\t\tthis.lastAction = null;\n \t}\n \n \t/**\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "beb1455cab4102c757e7dbc04a729f9e05292254",
+  "message": "fix(tui): move lastAction handling out of setTextInternal()",
+  "module": "editor",
+  "tags": []
+}

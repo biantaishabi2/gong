@@ -1,0 +1,43 @@
+{
+  "source_commit": "dbdb99c486cabc705bfe7e3c863464a60b4b9bef",
+  "bug_summary": "创建类任务的系统提示只有泛化说明，缺少按主题细化的文档和示例路径",
+  "module": "system-prompt",
+  "action": "buildSystemPrompt",
+  "fix_summary": "为 hooks/custom tools/themes/skills 各主题补充具体文档和示例路径",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "提示仅含 'read relevant docs AND examples'，无具体路径",
+  "correct_behavior": "提示包含 hooks→docs/hooks.md+examples/hooks/，custom tools→docs/custom-tools.md+docs/tui.md 等具体路径",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "构建系统提示，无自定义 prompt",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "system-prompt",
+      "method": "buildSystemPrompt"
+    },
+    "args": {},
+    "outputs": {
+      "prompt": "string"
+    },
+    "assertions": [
+      {
+        "what": "包含 hooks 具体路径",
+        "type": "return_value",
+        "expected": "prompt.includes('docs/hooks.md')"
+      },
+      {
+        "what": "包含 custom tools 路径",
+        "type": "return_value",
+        "expected": "prompt.includes('docs/custom-tools.md')"
+      }
+    ]
+  }
+}

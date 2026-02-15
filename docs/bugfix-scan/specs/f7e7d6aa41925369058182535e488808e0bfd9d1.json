@@ -1,0 +1,47 @@
+{
+  "source_commit": "f7e7d6aa41925369058182535e488808e0bfd9d1",
+  "bug_summary": "shift+letter 快捷键不兼容旧终端大写输入（与 e3c261 相同修复，不同 commit）",
+  "module": "keys",
+  "action": "matchesKey",
+  "fix_summary": "仅 shift 修饰时追加大写字符匹配和 Kitty shift 序列匹配",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "旧终端 shift+a 发送 'A' 不被匹配",
+  "correct_behavior": "matchesKey('A', 'shift+a') 返回 true",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "旧终端 shift+letter 产生大写字符",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "keys",
+      "method": "matchesKey"
+    },
+    "args": {
+      "data": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "keyId": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "matched": "bool"
+    },
+    "assertions": [
+      {
+        "what": "大写字母匹配 shift+letter",
+        "type": "return_value",
+        "expected": "matchesKey('A', 'shift+a') === true"
+      }
+    ]
+  }
+}

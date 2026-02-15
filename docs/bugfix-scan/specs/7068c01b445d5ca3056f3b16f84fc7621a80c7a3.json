@@ -1,0 +1,36 @@
+{
+  "source_commit": "7068c01b445d5ca3056f3b16f84fc7621a80c7a3",
+  "bug_summary": "ChatPanel 渲染时残留调试 console.log 将内部状态打印到控制台",
+  "module": "chat_panel",
+  "action": "render",
+  "fix_summary": "移除 ChatPanel 中 [ChatPanel Debug] 相关的 console.log 调用",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "每次渲染 ChatPanel 时控制台输出 [ChatPanel Debug] 及内部状态",
+  "correct_behavior": "ChatPanel 渲染时不输出调试日志",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "ChatPanel 已初始化并触发渲染",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "chat_panel",
+      "method": "render"
+    },
+    "args": {},
+    "outputs": {
+      "console_output": "string"
+    },
+    "assertions": [
+      {
+        "what": "控制台无 [ChatPanel Debug] 输出",
+        "type": "side_effect",
+        "expected": "console.log not called with '[ChatPanel Debug]'"
+      }
+    ]
+  }
+}

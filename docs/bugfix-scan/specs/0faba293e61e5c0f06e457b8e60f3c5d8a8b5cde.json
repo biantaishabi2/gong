@@ -1,0 +1,53 @@
+{
+  "source_commit": "0faba293e61e5c0f06e457b8e60f3c5d8a8b5cde",
+  "bug_summary": "折叠态工具执行面板的 bash 提示行未按终端宽度截断，超宽文本破坏输出布局",
+  "module": "a_g_e_n_t_s",
+  "action": "bash_hint_render",
+  "fix_summary": "将 hint 字符串包裹 truncateToWidth(hint, width, '...') 调用，按终端宽度截断",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "折叠态提示行长度超过终端宽度时文本溢出，破坏工具输出面板布局",
+  "correct_behavior": "折叠态提示行按终端宽度截断并以 '...' 省略符结尾",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "工具执行面板处于折叠态",
+        "involves": "config"
+      },
+      {
+        "what": "存在被跳过的历史行 cachedSkipped",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tool-execution",
+      "method": "renderCollapsed"
+    },
+    "args": {
+      "width": {
+        "type": "int",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "hint_line": "string"
+    },
+    "assertions": [
+      {
+        "what": "提示行不超过终端宽度",
+        "type": "return_value",
+        "expected": "hint_line.length <= width"
+      },
+      {
+        "what": "超宽时以省略符截断",
+        "type": "return_value",
+        "expected": "原始 hint 超宽时 hint_line.endsWith('...')"
+      }
+    ]
+  }
+}

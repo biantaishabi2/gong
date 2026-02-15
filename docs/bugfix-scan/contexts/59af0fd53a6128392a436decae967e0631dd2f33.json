@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/markdown.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/markdown.ts b/packages/tui/src/components/markdown.ts\nindex 79b03ddb..fa59d48c 100644\n--- a/packages/tui/src/components/markdown.ts\n+++ b/packages/tui/src/components/markdown.ts\n@@ -321,7 +321,8 @@ export class Markdown implements Component {\n \t\t\t\tcase \"link\": {\n \t\t\t\t\tconst linkText = this.renderInlineTokens(token.tokens || []);\n \t\t\t\t\t// If link text matches href, only show the link once\n-\t\t\t\t\tif (linkText === token.href) {\n+\t\t\t\t\t// Compare raw text (token.text) not styled text (linkText) since linkText has ANSI codes\n+\t\t\t\t\tif (token.text === token.href) {\n \t\t\t\t\t\tresult += this.theme.link(this.theme.underline(linkText)) + this.applyDefaultStyle(\"\");\n \t\t\t\t\t} else {\n \t\t\t\t\t\tresult +=\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "59af0fd53a6128392a436decae967e0631dd2f33",
+  "message": "fix: markdown link rendering for links with identical text and href",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,52 @@
+{
+  "source_commit": "0fc6689dfbed1b36b68f40dd0f4ac4aa2d3d1d27",
+  "bug_summary": "Anthropic provider 将 SDK 重试次数硬编码为 0，禁用了默认的自动重试策略，导致瞬时网络错误直接失败",
+  "module": "anthropic",
+  "action": "create_anthropic_client",
+  "fix_summary": "移除两处 maxRetries: 0 配置，恢复 SDK 默认重试策略以自动处理瞬时可恢复错误",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Anthropic 客户端 maxRetries=0，瞬时 5xx/网络错误直接抛异常无重试",
+  "correct_behavior": "Anthropic 客户端使用 SDK 默认重试策略，瞬时错误自动重试后恢复",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Anthropic API 认证已配置（API key 或 OAuth）",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "anthropic",
+      "method": "createClient"
+    },
+    "args": {
+      "authMode": {
+        "type": "string",
+        "required": true,
+        "allowed": [
+          "api_key",
+          "oauth"
+        ]
+      }
+    },
+    "outputs": {
+      "client_config": "object"
+    },
+    "assertions": [
+      {
+        "what": "客户端配置不包含 maxRetries: 0",
+        "type": "return_value",
+        "expected": "client.maxRetries !== 0"
+      },
+      {
+        "what": "瞬时错误时 SDK 自动重试",
+        "type": "return_value",
+        "expected": "transient 5xx 后请求被重试并成功"
+      }
+    ]
+  }
+}

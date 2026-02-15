@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/dynamic-border.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/dynamic-border.ts b/packages/coding-agent/src/modes/interactive/components/dynamic-border.ts\nindex b835ae0a..76e5c7b7 100644\n--- a/packages/coding-agent/src/modes/interactive/components/dynamic-border.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/dynamic-border.ts\n@@ -7,8 +7,10 @@ import { theme } from \"../theme/theme.js\";\n export class DynamicBorder implements Component {\n \tprivate color: (str: string) => string;\n \n-\tconstructor(color: (str: string) => string = (str) => theme.fg(\"border\", str)) {\n-\t\tthis.color = color;\n+\tconstructor(color?: (str: string) => string) {\n+\t\t// Use provided color function, or default to theme border color\n+\t\t// Theme may not be initialized at construction time, so we check at render time\n+\t\tthis.color = color ?? ((str) => (theme ? theme.fg(\"border\", str) : str));\n \t}\n \n \tinvalidate(): void {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3ad5a168e7499ea4d9c87b5012875dd63dac7fa9",
+  "message": "Fix DynamicBorder crash when theme not initialized",
+  "module": "dynamic-border",
+  "tags": []
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "b74a3658f370068bc159908a553f9892be89791f",
+  "bug_summary": "扩展加载失败后未遍历输出 errors，用户看不到具体失败扩展和原因",
+  "module": "coding-agent",
+  "action": "logExtensionErrors",
+  "fix_summary": "加载扩展后遍历 extensionsResult.errors 并 console.error 输出每个失败记录",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "扩展加载失败时无错误输出，用户不知道哪个扩展失败",
+  "correct_behavior": "每个失败扩展输出 Failed to load extension \"path\": error 到 stderr",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "扩展目录中存在无法加载的扩展",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent/main",
+      "method": "main"
+    },
+    "args": {},
+    "outputs": {
+      "error_output": "string"
+    },
+    "assertions": [
+      {
+        "what": "stderr 包含失败扩展路径",
+        "type": "side_effect",
+        "expected": "console.error called with 'Failed to load extension'"
+      },
+      {
+        "what": "输出具体错误原因",
+        "type": "side_effect",
+        "expected": "error message includes extension path and error"
+      }
+    ]
+  }
+}

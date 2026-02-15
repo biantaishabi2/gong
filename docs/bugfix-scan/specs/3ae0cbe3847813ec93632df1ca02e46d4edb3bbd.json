@@ -1,0 +1,56 @@
+{
+  "action": "handleHotkeysCommand",
+  "boundary": "service",
+  "bug_summary": "/hotkeys 输出中的扩展快捷键名称未进行 Title Case 格式化，显示不一致且可读性差",
+  "correct_behavior": "/hotkeys 表格输出 Title Case 后的 key（如 `Ctrl+K`），与其他展示风格一致",
+  "data_dependencies": [
+    "config"
+  ],
+  "fix_summary": "在生成 /hotkeys 表格时将快捷键 key 做 Title Case 转换后再渲染",
+  "module": "interactive-mode",
+  "source_commit": "3ae0cbe3847813ec93632df1ca02e46d4edb3bbd",
+  "test_spec": {
+    "args": {
+      "command": {
+        "allowed": [
+          "/hotkeys"
+        ],
+        "required": true,
+        "type": "string"
+      },
+      "shortcuts": {
+        "allowed": null,
+        "required": true,
+        "type": "array"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "`ctrl+k` 显示为 `Ctrl+K`，`shift+tab` 显示为 `Shift+Tab`",
+        "type": "output",
+        "what": "渲染表格时快捷键显示为 Title Case"
+      },
+      {
+        "expected": "description 使用 shortcut.description 或 fallback 为 shortcut.extensionPath",
+        "type": "output",
+        "what": "描述字段保持原值"
+      }
+    ],
+    "outputs": {
+      "hotkeys_table": "string"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "已加载包含 extension hotkeys 的配置"
+      }
+    ],
+    "trigger": {
+      "method": "handleHotkeysCommand",
+      "target": "InteractiveMode",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "/hotkeys 表格直接输出原始 key（如 `ctrl+k`），大小写风格不统一"
+}

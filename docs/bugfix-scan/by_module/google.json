@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "google",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "mapStopReason",
+      "boundary": "service",
+      "bug_summary": "mapStopReason 未覆盖 IMAGE_RECITATION 和 IMAGE_OTHER FinishReason",
+      "correct_behavior": "IMAGE_RECITATION/IMAGE_OTHER 与其他图片安全原因一样被正确映射",
+      "data_dependencies": [],
+      "fix_summary": "在 switch case 中添加 IMAGE_RECITATION 和 IMAGE_OTHER 映射",
+      "module": "google",
+      "source_commit": "d2088f7789c37b365f8faef7ec839849d4d7fcd7",
+      "test_spec": {
+        "args": {
+          "finishReason": {
+            "allowed": [
+              "IMAGE_RECITATION",
+              "IMAGE_OTHER"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "mapStopReason(IMAGE_RECITATION) 有有效映射",
+            "type": "return_value",
+            "what": "IMAGE_RECITATION 正确映射"
+          },
+          {
+            "expected": "mapStopReason(IMAGE_OTHER) 有有效映射",
+            "type": "return_value",
+            "what": "IMAGE_OTHER 正确映射"
+          }
+        ],
+        "outputs": {
+          "stopReason": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "Google API 返回 IMAGE_RECITATION 或 IMAGE_OTHER 结束原因"
+          }
+        ],
+        "trigger": {
+          "method": "mapStopReason",
+          "target": "google",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "IMAGE_RECITATION/IMAGE_OTHER 未匹配，映射到默认值"
+    },
+    {
+      "action": "createGoogleClient",
+      "boundary": "service",
+      "bug_summary": "自定义 baseUrl 已包含版本路径时，Google provider 仍追加 apiVersion，导致 URL 出现双重版本路径",
+      "correct_behavior": "检测到 baseUrl 含版本路径后禁用 apiVersion 追加，URL 仅含一个版本路径",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "检测 baseUrl 是否包含版本路径，若包含则设置 apiVersion 为空字符串禁用追加",
+      "module": "google",
+      "source_commit": "6ff405a976b4a0188ef4a46ffc0a140744e4352a",
+      "test_spec": {
+        "args": {
+          "baseUrl": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "httpOptions.apiVersion === '' when baseUrl contains version",
+            "type": "return_value",
+            "what": "含版本路径的 baseUrl 设置 apiVersion 为空"
+          },
+          {
+            "expected": "httpOptions.apiVersion undefined when baseUrl has no version",
+            "type": "return_value",
+            "what": "普通 baseUrl 不影响 apiVersion"
+          }
+        ],
+        "outputs": {
+          "httpOptions": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "Google 模型配置了包含版本路径的自定义 baseUrl"
+          }
+        ],
+        "trigger": {
+          "method": "createGoogleClient",
+          "target": "google",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "baseUrl='https://api.example.com/v1beta' 请求时 URL 变为 .../v1beta/v1beta/..."
+    },
+    {
+      "action": "handleStreamPart",
+      "boundary": "service",
+      "bug_summary": "Google provider 发送 text/thinking 块起始事件前未先将 currentBlock push 到 output.content，导致 contentIndex 错误",
+      "correct_behavior": "先 push currentBlock 再发送 start 事件，contentIndex 与实际位置一致",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "在发出 text/thinking_start 事件前先执行 output.content.push(currentBlock)，确保 contentIndex 正确",
+      "module": "google",
+      "source_commit": "9e8607938690e9610aad2ec3a291a0e44a32027b",
+      "test_spec": {
+        "args": {
+          "parts": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "event.contentIndex === output.content.length - 1",
+            "type": "return_value",
+            "what": "start 事件的 contentIndex 等于 push 后的实际索引"
+          }
+        ],
+        "outputs": {
+          "contentIndex": "number"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "Google 流式响应进入新内容块"
+          }
+        ],
+        "trigger": {
+          "method": "handleStreamPart",
+          "target": "google",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "contentIndex 指向尚未 push 的块，后续事件引用错误的索引"
+    }
+  ]
+}

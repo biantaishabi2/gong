@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 506dc772..1a4a1697 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -276,6 +276,11 @@ export class InteractiveMode {\n \t * Initialize the hook system with TUI-based UI context.\n \t */\n \tprivate async initHooks(): Promise<void> {\n+\t\tconst hookPaths = this.settingsManager.getHookPaths();\n+\t\tif (hookPaths.length === 0) {\n+\t\t\treturn; // No hooks configured\n+\t\t}\n+\n \t\t// Create hook UI context\n \t\tconst hookUIContext = this.createHookUIContext();\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "86c2a33df4d47fa0cc7782b8efb52f5affb682d7",
+  "message": "fix(coding-agent): skip hook init when no hooks configured",
+  "module": "interactive-mode",
+  "tags": []
+}

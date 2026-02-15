@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex ecd1708b..d325e4fb 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -2246,7 +2246,7 @@ export class InteractiveMode {\n \t}\n \n \tprivate async handleFollowUp(): Promise<void> {\n-\t\tconst text = this.editor.getText().trim();\n+\t\tconst text = (this.editor.getExpandedText?.() ?? this.editor.getText()).trim();\n \t\tif (!text) return;\n \n \t\t// Queue input during compaction (extension commands execute immediately)\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "0f0c54b812042f1c138479553d11a77e32d07f36",
+  "message": "fix(coding-agent): expand paste markers in follow-up queue",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

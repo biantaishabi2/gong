@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/utils/oauth/github-copilot.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/utils/oauth/github-copilot.ts b/packages/ai/src/utils/oauth/github-copilot.ts\nindex e74901d0..744d9f18 100644\n--- a/packages/ai/src/utils/oauth/github-copilot.ts\n+++ b/packages/ai/src/utils/oauth/github-copilot.ts\n@@ -5,7 +5,7 @@\n import { getModels } from \"../../models.js\";\n import type { OAuthCredentials } from \"./types.js\";\n \n-const decode = (s: string) => Buffer.from(s, \"base64\").toString();\n+const decode = (s: string) => atob(s);\n const CLIENT_ID = decode(\"SXYxLmI1MDdhMDhjODdlY2ZlOTg=\");\n \n const COPILOT_HEADERS = {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "481bc79f83cadbdf765146853bdf66d895ae0ea6",
+  "message": "Fix Buffer usage in github-copilot.ts - use atob()",
+  "module": "github-copilot",
+  "tags": []
+}

@@ -1,0 +1,24 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/tools/path-utils.ts",
+      "hunks": [
+        {
+          "after_function": "export function expandPath(filePath: string): string {\n\tconst normalized = normalizeUnicodeSpaces(normalizeAtPrefix(filePath));\n\tif (normalized === \"~\") {\n\t\treturn os.homedir();\n\t}\n\tif (normalized.startsWith(\"~/\")) {\n\t\treturn os.homedir() + normalized.slice(1);\n\t}\n\treturn normalized;\n}",
+          "before_function": "export function expandPath(filePath: string): string {\n\tconst normalized = normalizeUnicodeSpaces(filePath);\n\tif (normalized === \"~\") {\n\t\treturn os.homedir();\n\t}\n\tif (normalized.startsWith(\"~/\")) {\n\t\treturn os.homedir() + normalized.slice(1);\n\t}\n\treturn normalized;\n}",
+          "changed_lines": [
+            40
+          ],
+          "function_line": 39,
+          "function_name": "expandPath"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/tools/path-utils.ts b/packages/coding-agent/src/core/tools/path-utils.ts\nindex 051c1bf5..3b5b8e2f 100644\n--- a/packages/coding-agent/src/core/tools/path-utils.ts\n+++ b/packages/coding-agent/src/core/tools/path-utils.ts\n@@ -32,8 +32,12 @@ function fileExists(filePath: string): boolean {\n \t}\n }\n \n+function normalizeAtPrefix(filePath: string): string {\n+\treturn filePath.startsWith(\"@\") ? filePath.slice(1) : filePath;\n+}\n+\n export function expandPath(filePath: string): string {\n-\tconst normalized = normalizeUnicodeSpaces(filePath);\n+\tconst normalized = normalizeUnicodeSpaces(normalizeAtPrefix(filePath));\n \tif (normalized === \"~\") {\n \t\treturn os.homedir();\n \t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "c9a20a3aa432132b620569fbd4e0347dea98f37b",
+  "message": "fix(coding-agent): normalize @ path prefixes closes #1206",
+  "module": "extensions",
+  "tags": []
+}

@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/agent/src/renderers/tui-renderer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/agent/src/renderers/tui-renderer.ts b/packages/agent/src/renderers/tui-renderer.ts\nindex e7d31100..5a4fc59d 100644\n--- a/packages/agent/src/renderers/tui-renderer.ts\n+++ b/packages/agent/src/renderers/tui-renderer.ts\n@@ -2,7 +2,6 @@ import {\n \tCombinedAutocompleteProvider,\n \tContainer,\n \tMarkdownComponent,\n-\tSlashCommand,\n \tTextComponent,\n \tTextEditor,\n \tTUI,\n"
+    },
+    {
+      "file": "packages/tui/src/tui.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/tui.ts b/packages/tui/src/tui.ts\nindex 6db25e47..0261012f 100644\n--- a/packages/tui/src/tui.ts\n+++ b/packages/tui/src/tui.ts\n@@ -145,8 +145,7 @@ export class TUI extends Container {\n \tprivate isStarted = false;\n \tpublic onGlobalKeyPress?: (data: string) => boolean;\n \tprivate terminal: Terminal;\n-\n-\t// Tracking for differential rendering\n+\t// biome-ignore lint/correctness/noUnusedPrivateClassMembers: Used in renderToScreen method on lines 260 and 276\n \tprivate previousRenderCommands: RenderCommand[] = [];\n \tprivate previousLines: string[] = []; // What we rendered last time\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2c03724862c82670ee34da9060f5fc03e23bfba8",
+  "message": "fix: Remove unused imports and add biome-ignore for false positive",
+  "module": "tui-renderer",
+  "tags": []
+}

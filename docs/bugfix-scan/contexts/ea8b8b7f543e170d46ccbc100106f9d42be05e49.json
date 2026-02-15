@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/assistant-message.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/assistant-message.ts b/packages/coding-agent/src/tui/assistant-message.ts\nindex a25198b4..4a4af2b4 100644\n--- a/packages/coding-agent/src/tui/assistant-message.ts\n+++ b/packages/coding-agent/src/tui/assistant-message.ts\n@@ -42,11 +42,10 @@ export class AssistantMessageComponent extends Container {\n \t\t\t\tthis.contentContainer.addChild(new Markdown(content.text.trim(), undefined, undefined, undefined, 1, 0));\n \t\t\t} else if (content.type === \"thinking\" && content.thinking.trim()) {\n \t\t\t\t// Thinking traces in dark gray italic\n-\t\t\t\tconst thinkingText = content.thinking\n-\t\t\t\t\t.split(\"\\n\")\n-\t\t\t\t\t.map((line) => chalk.gray.italic(line))\n-\t\t\t\t\t.join(\"\\n\");\n+\t\t\t\t// Apply styling to entire block so wrapping preserves it\n+\t\t\t\tconst thinkingText = chalk.gray.italic(content.thinking);\n \t\t\t\tthis.contentContainer.addChild(new Text(thinkingText, 1, 0));\n+\t\t\t\tthis.contentContainer.addChild(new Spacer(1));\n \t\t\t}\n \t\t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "ea8b8b7f543e170d46ccbc100106f9d42be05e49",
+  "message": "Fix thinking trace styling when text wraps",
+  "module": "assistant-message",
+  "tags": []
+}

@@ -1,0 +1,49 @@
+{
+  "source_commit": "75c2eea15130cd3ba79dca4380f75daa465bdb24",
+  "bug_summary": "会话恢复条件未包含 --session 标志，导致仅使用 --session 时不加载历史消息和模型设置",
+  "module": "coding-agent",
+  "action": "sessionRestore",
+  "fix_summary": "在恢复条件中增加 parsed.session 检查，使 --session 与 --continue/--resume 一样触发恢复逻辑",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "--session=file 启动时不加载历史消息、不恢复模型和思考级别",
+  "correct_behavior": "--session=file 启动时完整恢复会话：加载历史消息、恢复 savedModel 和 savedThinkingLevel",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "存在有效的会话文件，包含保存的模型、思考级别和消息历史",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent/main",
+      "method": "main"
+    },
+    "args": {
+      "session": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "restored": "bool"
+    },
+    "assertions": [
+      {
+        "what": "--session 触发会话恢复",
+        "type": "return_value",
+        "expected": "parsed.session 被纳入恢复条件判断"
+      },
+      {
+        "what": "历史消息被加载",
+        "type": "side_effect",
+        "expected": "messages 被 savedMessages 替换"
+      }
+    ]
+  }
+}

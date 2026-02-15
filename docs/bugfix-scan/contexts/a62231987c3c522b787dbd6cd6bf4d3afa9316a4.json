@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/anthropic.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/anthropic.ts b/packages/ai/src/providers/anthropic.ts\nindex 4aed5a51..2a1d9348 100644\n--- a/packages/ai/src/providers/anthropic.ts\n+++ b/packages/ai/src/providers/anthropic.ts\n@@ -45,6 +45,7 @@ export class AnthropicLLM implements LLM<AnthropicLLMOptions> {\n \t\tif (apiKey.includes(\"sk-ant-oat\")) {\n \t\t\tconst defaultHeaders = {\n \t\t\t\taccept: \"application/json\",\n+\t\t\t\t\"anthropic-dangerous-direct-browser-access\": \"true\",\n \t\t\t\t\"anthropic-beta\": \"oauth-2025-04-20,fine-grained-tool-streaming-2025-05-14\",\n \t\t\t};\n \n@@ -61,7 +62,12 @@ export class AnthropicLLM implements LLM<AnthropicLLMOptions> {\n \t\t\t});\n \t\t\tthis.isOAuthToken = true;\n \t\t} else {\n-\t\t\tthis.client = new Anthropic({ apiKey, baseURL: model.baseUrl, dangerouslyAllowBrowser: true });\n+\t\t\tconst defaultHeaders = {\n+\t\t\t\taccept: \"application/json\",\n+\t\t\t\t\"anthropic-dangerous-direct-browser-access\": \"true\",\n+\t\t\t\t\"anthropic-beta\": \"fine-grained-tool-streaming-2025-05-14\",\n+\t\t\t};\n+\t\t\tthis.client = new Anthropic({ apiKey, baseURL: model.baseUrl, dangerouslyAllowBrowser: true, defaultHeaders });\n \t\t\tthis.isOAuthToken = false;\n \t\t}\n \t\tthis.modelInfo = model;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "a62231987c3c522b787dbd6cd6bf4d3afa9316a4",
+  "message": "fix(ai): Add anthropic-dangerous-direct-browser-access header",
+  "module": "anthropic",
+  "tags": []
+}

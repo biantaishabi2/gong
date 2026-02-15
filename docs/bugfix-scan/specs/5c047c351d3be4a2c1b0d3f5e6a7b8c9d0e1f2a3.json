@@ -1,0 +1,44 @@
+{
+  "source_commit": "5c047c351d3be4a2c1b0d3f5e6a7b8c9d0e1f2a3",
+  "bug_summary": "检测到扩展冲突后仅记录错误但未从已加载列表移除冲突扩展，冲突扩展仍被加载",
+  "module": "resource-loader",
+  "action": "filter_conflicting_extensions",
+  "fix_summary": "增加按 conflictingPaths 过滤 extensionsResult.extensions 的逻辑，冲突扩展被移除",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "冲突扩展仍在 extensions 列表中，后续被加载导致行为不可预测",
+  "correct_behavior": "冲突扩展从 extensions 列表中移除，仅保留非冲突扩展",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "extensionsResult 包含冲突的扩展（同名不同路径）",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "resource-loader",
+      "method": "resolveConflicts"
+    },
+    "args": {},
+    "outputs": {
+      "extensions": "array",
+      "errors": "array"
+    },
+    "assertions": [
+      {
+        "what": "冲突扩展从列表移除",
+        "type": "return_value",
+        "expected": "extensions 不包含冲突路径的扩展"
+      },
+      {
+        "what": "冲突记录在 errors 中",
+        "type": "return_value",
+        "expected": "errors 包含冲突信息"
+      }
+    ]
+  }
+}

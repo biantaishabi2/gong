@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/agent-session.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/agent-session.ts b/packages/coding-agent/src/core/agent-session.ts\nindex 9b3ce297..94368f50 100644\n--- a/packages/coding-agent/src/core/agent-session.ts\n+++ b/packages/coding-agent/src/core/agent-session.ts\n@@ -1520,8 +1520,8 @@ export class AgentSession {\n \t\tif (isContextOverflow(message, contextWindow)) return false;\n \n \t\tconst err = message.errorMessage;\n-\t\t// Match: overloaded_error, rate limit, 429, 500, 502, 503, 504, service unavailable, connection error, other side closed\n-\t\treturn /overloaded|rate.?limit|too many requests|429|500|502|503|504|service.?unavailable|server error|internal error|connection.?error|other side closed/i.test(\n+\t\t// Match: overloaded_error, rate limit, 429, 500, 502, 503, 504, service unavailable, connection error, other side closed, fetch failed\n+\t\treturn /overloaded|rate.?limit|too many requests|429|500|502|503|504|service.?unavailable|server error|internal error|connection.?error|other side closed|fetch failed/i.test(\n \t\t\terr,\n \t\t);\n \t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "fb6d464edc0763e943ea41da918a0480e8b04b08",
+  "message": "Fix auto-retry for fetch failed errors",
+  "module": "agent-session",
+  "tags": []
+}

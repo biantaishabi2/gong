@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 1041b931..f0e1c01c 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1587,8 +1587,9 @@ export class InteractiveMode {\n \t\t\t\t\t\t\tawait this.session.modelRegistry.authStorage.login(providerId as OAuthProvider, {\n \t\t\t\t\t\t\t\tonAuth: (info: { url: string; instructions?: string }) => {\n \t\t\t\t\t\t\t\t\tthis.chatContainer.addChild(new Spacer(1));\n-\t\t\t\t\t\t\t\t\tthis.chatContainer.addChild(new Text(theme.fg(\"accent\", \"Opening browser to:\"), 1, 0));\n-\t\t\t\t\t\t\t\t\tthis.chatContainer.addChild(new Text(theme.fg(\"accent\", info.url), 1, 0));\n+\t\t\t\t\t\t\t\t\t// Use OSC 8 hyperlink escape sequence for clickable link\n+\t\t\t\t\t\t\t\t\tconst hyperlink = `\\x1b]8;;${info.url}\\x07Click here to login\\x1b]8;;\\x07`;\n+\t\t\t\t\t\t\t\t\tthis.chatContainer.addChild(new Text(theme.fg(\"accent\", hyperlink), 1, 0));\n \t\t\t\t\t\t\t\t\tif (info.instructions) {\n \t\t\t\t\t\t\t\t\t\tthis.chatContainer.addChild(new Spacer(1));\n \t\t\t\t\t\t\t\t\t\tthis.chatContainer.addChild(new Text(theme.fg(\"warning\", info.instructions), 1, 0));\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d42a3d71fe752bffcb76c9eed821e4d20ec0f137",
+  "message": "fix: make OAuth login URL clickable in terminal",
+  "module": "interactive-mode",
+  "tags": []
+}

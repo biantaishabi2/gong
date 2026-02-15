@@ -1,0 +1,47 @@
+{
+  "source_commit": "946efe4b4561b7ae8c0818d9f83d2434c0c24d17",
+  "bug_summary": "context_length_exceeded 检测正则不匹配下划线和空格混用的变体格式",
+  "module": "overflow",
+  "action": "detectOverflow",
+  "fix_summary": "将正则从 /context length exceeded/ 改为 /context[_ ]length[_ ]exceeded/，同时匹配空格和下划线分隔",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "context_length_exceeded（下划线分隔）不被检测为溢出",
+  "correct_behavior": "context_length_exceeded 和 context length exceeded 两种格式都被检测",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "API 返回错误消息",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "overflow",
+      "method": "detectOverflow"
+    },
+    "args": {
+      "errorMessage": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "isOverflow": "bool"
+    },
+    "assertions": [
+      {
+        "what": "下划线格式被检测",
+        "type": "return_value",
+        "expected": "detectOverflow('context_length_exceeded') === true"
+      },
+      {
+        "what": "空格格式被检测",
+        "type": "return_value",
+        "expected": "detectOverflow('context length exceeded') === true"
+      }
+    ]
+  }
+}

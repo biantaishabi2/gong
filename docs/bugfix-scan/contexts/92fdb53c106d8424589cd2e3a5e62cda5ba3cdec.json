@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex cea184d2..a49fb757 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1068,6 +1068,9 @@ export class InteractiveMode {\n \t\t\t},\n \t\t\tshutdownHandler: () => {\n \t\t\t\tthis.shutdownRequested = true;\n+\t\t\t\tif (!this.session.isStreaming) {\n+\t\t\t\t\tvoid this.shutdown();\n+\t\t\t\t}\n \t\t\t},\n \t\t\tonError: (error) => {\n \t\t\t\tthis.showExtensionError(error.extensionPath, error.error, error.stack);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "92fdb53c106d8424589cd2e3a5e62cda5ba3cdec",
+  "message": "fix(coding-agent): run extension shutdown via clean TUI shutdown path",
+  "module": "interactive-mode",
+  "tags": []
+}

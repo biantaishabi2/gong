@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/markdown.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/markdown.ts b/packages/tui/src/components/markdown.ts\nindex 685f760c..5795a469 100644\n--- a/packages/tui/src/components/markdown.ts\n+++ b/packages/tui/src/components/markdown.ts\n@@ -459,9 +459,10 @@ export class Markdown implements Component {\n \t\t\tconst itemLines = this.renderListItem(item.tokens || [], depth);\n \n \t\t\tif (itemLines.length > 0) {\n-\t\t\t\t// First line - check if it's a nested list (contains cyan ANSI code for bullets)\n+\t\t\t\t// First line - check if it's a nested list\n+\t\t\t\t// A nested list will start with indent (spaces) followed by cyan bullet\n \t\t\t\tconst firstLine = itemLines[0];\n-\t\t\t\tconst isNestedList = firstLine.includes(\"\\x1b[36m\"); // cyan color code\n+\t\t\t\tconst isNestedList = /^\\s+\\x1b\\[36m[-\\d]/.test(firstLine); // starts with spaces + cyan + bullet char\n \n \t\t\t\tif (isNestedList) {\n \t\t\t\t\t// This is a nested list, just add it as-is (already has full indent)\n@@ -474,7 +475,7 @@ export class Markdown implements Component {\n \t\t\t\t// Rest of the lines\n \t\t\t\tfor (let j = 1; j < itemLines.length; j++) {\n \t\t\t\t\tconst line = itemLines[j];\n-\t\t\t\t\tconst isNestedListLine = line.includes(\"\\x1b[36m\"); // cyan bullet color\n+\t\t\t\t\tconst isNestedListLine = /^\\s+\\x1b\\[36m[-\\d]/.test(line); // starts with spaces + cyan + bullet char\n \n \t\t\t\t\tif (isNestedListLine) {\n \t\t\t\t\t\t// Nested list line - already has full indent\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "c23f1576dca2ea79b8f1368b1d1def661cc517cc",
+  "message": "Fix markdown component nested list rendering.",
+  "module": "markdown",
+  "tags": []
+}

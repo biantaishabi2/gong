@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/anthropic.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/anthropic.ts b/packages/ai/src/providers/anthropic.ts\nindex ff6e60e2..a1791b8a 100644\n--- a/packages/ai/src/providers/anthropic.ts\n+++ b/packages/ai/src/providers/anthropic.ts\n@@ -289,11 +289,6 @@ function createClient(\n \t\t\t...(model.headers || {}),\n \t\t};\n \n-\t\t// Clear the env var if we're in Node.js to prevent SDK from using it\n-\t\tif (typeof process !== \"undefined\" && process.env) {\n-\t\t\tdelete process.env.ANTHROPIC_API_KEY;\n-\t\t}\n-\n \t\tconst client = new Anthropic({\n \t\t\tapiKey: null,\n \t\t\tauthToken: apiKey,\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "a248e2547ab50c5e4dea33281aa3fc6fdd7950a3",
+  "message": "fix(ai): remove global process.env.ANTHROPIC_API_KEY deletion (#164)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,42 @@
+{
+  "source_commit": "c1382818cc8469aace68b987efbcd9b506cfe0eb",
+  "bug_summary": "可重试错误正则遗漏 connection error，连接错误不触发自动重试",
+  "module": "agent-session",
+  "action": "isRetryableError",
+  "fix_summary": "在重试正则中添加 connection error 模式",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "'connection error' 消息不匹配可重试模式",
+  "correct_behavior": "'connection error' 被识别为可重试",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "API 请求返回 connection error",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "agent-session",
+      "method": "isRetryableError"
+    },
+    "args": {
+      "errorMessage": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "retryable": "bool"
+    },
+    "assertions": [
+      {
+        "what": "connection error 可重试",
+        "type": "return_value",
+        "expected": "isRetryableError('connection error') === true"
+      }
+    ]
+  }
+}

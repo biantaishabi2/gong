@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/main.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/main.ts b/packages/coding-agent/src/main.ts\nindex 7182d92b..61244988 100644\n--- a/packages/coding-agent/src/main.ts\n+++ b/packages/coding-agent/src/main.ts\n@@ -88,7 +88,12 @@ function normalizeExtensionSource(source: string): { type: \"npm\" | \"git\" | \"loca\n \t}\n \tif (source.startsWith(\"git:\")) {\n \t\tconst repo = source.slice(\"git:\".length).trim().split(\"@\")[0] ?? \"\";\n-\t\treturn { type: \"git\", key: repo.replace(/^https?:\\/\\//, \"\") };\n+\t\treturn { type: \"git\", key: repo.replace(/^https?:\\/\\//, \"\").replace(/\\.git$/, \"\") };\n+\t}\n+\t// Raw git URLs\n+\tif (source.startsWith(\"https://\") || source.startsWith(\"http://\")) {\n+\t\tconst repo = source.split(\"@\")[0] ?? \"\";\n+\t\treturn { type: \"git\", key: repo.replace(/^https?:\\/\\//, \"\").replace(/\\.git$/, \"\") };\n \t}\n \treturn { type: \"local\", key: source };\n }\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d89f6e08ce58d4c38189b1787363269d91147dcc",
+  "message": "fix(coding-agent): normalize raw git URLs in extension source matching",
+  "module": "coding-agent",
+  "tags": []
+}

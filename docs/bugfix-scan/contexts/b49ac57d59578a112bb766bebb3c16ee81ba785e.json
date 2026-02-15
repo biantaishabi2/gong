@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/tui/tui-renderer.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/tui/tui-renderer.ts b/packages/coding-agent/src/tui/tui-renderer.ts\nindex ec90d1db..d824de7e 100644\n--- a/packages/coding-agent/src/tui/tui-renderer.ts\n+++ b/packages/coding-agent/src/tui/tui-renderer.ts\n@@ -138,7 +138,6 @@ export class TuiRenderer {\n \t\t\tthis.ui.addChild(new Markdown(this.changelogMarkdown.trim(), undefined, undefined, undefined, 1, 0));\n \t\t\tthis.ui.addChild(new Spacer(1));\n \t\t\tthis.ui.addChild(new DynamicBorder(chalk.cyan));\n-\t\t\tthis.ui.addChild(new Spacer(1));\n \t\t}\n \n \t\tthis.ui.addChild(this.chatContainer);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "b49ac57d59578a112bb766bebb3c16ee81ba785e",
+  "message": "Fix changelog spacing.",
+  "module": "tui-renderer",
+  "tags": []
+}

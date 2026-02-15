@@ -1,0 +1,49 @@
+{
+  "source_commit": "7a8ea9020f80e5a7c40db7636a2edb4467a6a777",
+  "bug_summary": "Bash 输出展开后仍显示 ctrl+o to expand 提示，未根据展开状态切换为折叠提示",
+  "module": "bash-execution",
+  "action": "renderStatus",
+  "fix_summary": "根据 this.expanded 状态选择显示 collapse 或 expand 提示文案",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "展开状态下仍显示 '... N more lines (ctrl+o to expand)'",
+  "correct_behavior": "展开状态显示 '(ctrl+o to collapse)'，折叠状态显示 '... N more lines (ctrl+o to expand)'",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Bash 输出有隐藏行且已展开",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "bash-execution",
+      "method": "renderStatus"
+    },
+    "args": {
+      "expanded": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "status_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "展开时显示 collapse 提示",
+        "type": "return_value",
+        "expected": "text.includes('ctrl+o to collapse') when expanded"
+      },
+      {
+        "what": "折叠时显示 expand 提示",
+        "type": "return_value",
+        "expected": "text.includes('ctrl+o to expand') when !expanded"
+      }
+    ]
+  }
+}

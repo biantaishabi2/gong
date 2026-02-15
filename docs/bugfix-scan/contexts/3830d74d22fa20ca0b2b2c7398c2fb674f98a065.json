@@ -1,0 +1,16 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/index.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/index.ts b/packages/coding-agent/src/index.ts\nindex 01795663..4e3ed05f 100644\n--- a/packages/coding-agent/src/index.ts\n+++ b/packages/coding-agent/src/index.ts\n@@ -103,6 +103,7 @@ export type {\n } from \"./core/extensions/index.js\";\n export {\n \tcreateExtensionRuntime,\n+\tdiscoverAndLoadExtensions,\n \tExtensionRunner,\n \tisBashToolResult,\n \tisEditToolResult,\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3830d74d22fa20ca0b2b2c7398c2fb674f98a065",
+  "message": "fix(coding-agent): export discoverAndLoadExtensions from package",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": [
+    "export"
+  ]
+}

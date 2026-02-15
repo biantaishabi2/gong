@@ -1,0 +1,57 @@
+{
+  "source_commit": "209d95870e2b08bf0e5f0cabb3f2847498d73acf",
+  "bug_summary": "模型选择器在模型未加载或列表缩小时方向键使用旧索引，selectedIndex 越界导致错误",
+  "module": "model-selector",
+  "action": "arrow_key_navigation",
+  "fix_summary": "在读取 filteredModels 后 clamp selectedIndex 到有效范围，空列表时提前返回不处理方向键",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "模型列表缩小后 selectedIndex 超过列表长度，方向键操作触发越界访问",
+  "correct_behavior": "selectedIndex 被 clamp 到 [0, models.length-1]，空列表时忽略方向键",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "模型选择器已打开",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "model-selector",
+      "method": "handleArrowKey"
+    },
+    "args": {
+      "key": {
+        "type": "string",
+        "required": true,
+        "allowed": [
+          "ArrowUp",
+          "ArrowDown"
+        ]
+      }
+    },
+    "outputs": {
+      "selectedIndex": "int"
+    },
+    "assertions": [
+      {
+        "what": "列表缩小后 selectedIndex 不越界",
+        "type": "return_value",
+        "expected": "selectedIndex <= filteredModels.length - 1"
+      },
+      {
+        "what": "空列表时方向键无操作",
+        "type": "return_value",
+        "expected": "filteredModels.length === 0 时 selectedIndex 不变"
+      },
+      {
+        "what": "selectedIndex 最小为 0",
+        "type": "return_value",
+        "expected": "selectedIndex >= 0"
+      }
+    ]
+  }
+}

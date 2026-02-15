@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/tui.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/tui.ts b/packages/tui/src/tui.ts\nindex 837857f6..f08d45aa 100644\n--- a/packages/tui/src/tui.ts\n+++ b/packages/tui/src/tui.ts\n@@ -238,6 +238,11 @@ export class TUI extends Container {\n \t\t} catch (error) {\n \t\t\tconsole.error(\"Error starting terminal:\", error);\n \t\t}\n+\n+\t\t// Trigger initial render if we have components\n+\t\tif (this.children.length > 0) {\n+\t\t\tthis.requestRender();\n+\t\t}\n \t}\n \n \tstop(): void {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "5ceaa91c7452bd893d7a79caf85b0aa5c8e31386",
+  "message": "fix(tui): Trigger initial render when start() is called",
+  "module": "tui",
+  "tags": []
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "75eb841bb214a8880daf8e8dd9133d2b62f7b09d",
+  "bug_summary": "交互模式初始化时未先注册 resource loader 提供的主题，导致主题初始化无法使用会话主题",
+  "module": "interactive-mode",
+  "action": "initThemes",
+  "fix_summary": "在 initTheme 前调用 setRegisteredThemes(session.resources.themes)，先注册再初始化",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "initTheme 时主题注册表为空，resource loader 提供的主题不可用",
+  "correct_behavior": "先 setRegisteredThemes 注册会话主题，再 initTheme，主题正确可用",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话 resource loader 已加载主题集合",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "initThemes"
+    },
+    "args": {},
+    "outputs": {
+      "themes_registered": "bool"
+    },
+    "assertions": [
+      {
+        "what": "setRegisteredThemes 在 initTheme 之前调用",
+        "type": "side_effect",
+        "expected": "setRegisteredThemes called before initTheme"
+      },
+      {
+        "what": "注册后主题可用",
+        "type": "return_value",
+        "expected": "theme registry contains session themes"
+      }
+    ]
+  }
+}

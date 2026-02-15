@@ -1,0 +1,49 @@
+{
+  "source_commit": "73734a23a1cf114e6f3a7810d1aba4a3bc061e8c",
+  "bug_summary": "系统提示构建时直接遍历 selectedTools，为未知工具填充 Custom tool，导致非内置工具被错误展示",
+  "module": "system-prompt",
+  "action": "buildSystemPrompt",
+  "fix_summary": "仅列出在 toolDescriptions 中有内置描述的工具，忽略无描述的自定义工具",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "工具列表包含 'myCustomTool: Custom tool'，非内置工具不应出现在系统提示中",
+  "correct_behavior": "工具列表仅包含有内置描述的工具（read, bash 等），自定义工具不列出",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "selectedTools 包含内置工具和自定义工具",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "system-prompt",
+      "method": "buildSystemPrompt"
+    },
+    "args": {
+      "selectedTools": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "prompt_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "仅内置工具出现在列表中",
+        "type": "return_value",
+        "expected": "prompt 不含 myCustomTool"
+      },
+      {
+        "what": "不含 Custom tool 回退标签",
+        "type": "return_value",
+        "expected": "!prompt.includes('Custom tool')"
+      }
+    ]
+  }
+}

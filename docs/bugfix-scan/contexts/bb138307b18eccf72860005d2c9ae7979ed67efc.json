@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts b/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts\nindex 00ebeac2..94a49404 100644\n--- a/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts\n+++ b/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts\n@@ -146,7 +146,7 @@ export class ConsoleRuntimeProvider implements SandboxRuntimeProvider {\n \t\t};\n \t}\n \n-\tasync handleMessage(message: any, _respond: (response: any) => void): Promise<boolean> {\n+\tasync handleMessage(message: any, respond: (response: any) => void): Promise<boolean> {\n \t\tif (message.type === \"console\") {\n \t\t\t// Collect console output\n \t\t\tthis.logs.push({\n@@ -161,17 +161,21 @@ export class ConsoleRuntimeProvider implements SandboxRuntimeProvider {\n \t\t\t\ttext: message.text,\n \t\t\t\targs: message.args,\n \t\t\t});\n+\t\t\t// Acknowledge receipt\n+\t\t\trespond({ success: true });\n \t\t\treturn true;\n \t\t}\n \n \t\tif (message.type === \"execution-complete\") {\n \t\t\tthis.completed = true;\n+\t\t\trespond({ success: true });\n \t\t\treturn true;\n \t\t}\n \n \t\tif (message.type === \"execution-error\") {\n \t\t\tthis.completed = true;\n \t\t\tthis.completionError = message.error;\n+\t\t\trespond({ success: true });\n \t\t\treturn true;\n \t\t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "bb138307b18eccf72860005d2c9ae7979ed67efc",
+  "message": "Fix ConsoleRuntimeProvider hanging by calling respond()",
+  "module": "console_runtime_provider",
+  "tags": []
+}

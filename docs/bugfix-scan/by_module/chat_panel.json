@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "chat_panel",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "setAgent",
+      "boundary": "service",
+      "bug_summary": "ChatPanel 设置 agent 后残留调试 console.log 输出工具信息",
+      "correct_behavior": "setAgent 不输出调试日志",
+      "data_dependencies": [],
+      "fix_summary": "移除 console.log('ChatPanel: Agent set with tools:', tools) 调试语句",
+      "module": "chat_panel",
+      "source_commit": "bcd109f2e9a52e58fe9ec54229caec2bb7596dbf",
+      "test_spec": {
+        "args": {
+          "tools": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "console.log not called with 'ChatPanel: Agent set with tools:'",
+            "type": "side_effect",
+            "what": "控制台无 Agent set with tools 输出"
+          }
+        ],
+        "outputs": {
+          "console_output": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "ChatPanel 已初始化"
+          }
+        ],
+        "trigger": {
+          "method": "setAgent",
+          "target": "chat_panel",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "每次 setAgent 时控制台输出 'ChatPanel: Agent set with tools:' 加工具列表"
+    },
+    {
+      "action": "render",
+      "boundary": "service",
+      "bug_summary": "ChatPanel 渲染时残留调试 console.log 将内部状态打印到控制台",
+      "correct_behavior": "ChatPanel 渲染时不输出调试日志",
+      "data_dependencies": [],
+      "fix_summary": "移除 ChatPanel 中 [ChatPanel Debug] 相关的 console.log 调用",
+      "module": "chat_panel",
+      "source_commit": "7068c01b445d5ca3056f3b16f84fc7621a80c7a3",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "console.log not called with '[ChatPanel Debug]'",
+            "type": "side_effect",
+            "what": "控制台无 [ChatPanel Debug] 输出"
+          }
+        ],
+        "outputs": {
+          "console_output": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "ChatPanel 已初始化并触发渲染"
+          }
+        ],
+        "trigger": {
+          "method": "render",
+          "target": "chat_panel",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "每次渲染 ChatPanel 时控制台输出 [ChatPanel Debug] 及内部状态"
+    }
+  ]
+}

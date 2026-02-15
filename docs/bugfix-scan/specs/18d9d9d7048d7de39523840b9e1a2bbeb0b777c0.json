@@ -1,0 +1,53 @@
+{
+  "source_commit": "18d9d9d7048d7de39523840b9e1a2bbeb0b777c0",
+  "bug_summary": "yank 插入文本时未重置 historyIndex，编辑器错误地停留在历史浏览模式",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "insertYankedText",
+  "fix_summary": "在 yank 插入操作中增加 this.historyIndex = -1 重置，退出历史浏览模式",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "yank 后 historyIndex 保持非 -1 值，后续按上下键继续浏览历史而非正常编辑",
+  "correct_behavior": "yank 后 historyIndex 重置为 -1，编辑器回到正常编辑模式",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器处于历史浏览模式（historyIndex >= 0）",
+        "involves": "config"
+      },
+      {
+        "what": "kill ring 中有可 yank 的文本",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "editor",
+      "method": "insertYankedText"
+    },
+    "args": {
+      "text": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "historyIndex": "int"
+    },
+    "assertions": [
+      {
+        "what": "yank 后 historyIndex 重置为 -1",
+        "type": "return_value",
+        "expected": "historyIndex === -1"
+      },
+      {
+        "what": "yanked 文本正确插入到光标位置",
+        "type": "return_value",
+        "expected": "editor.getText() 包含 yanked text"
+      }
+    ]
+  }
+}

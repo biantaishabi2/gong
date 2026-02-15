@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex cc5b9863..2d7207f1 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1609,9 +1609,9 @@ export class InteractiveMode {\n \t\t\t// Use duck typing since instanceof fails across jiti module boundaries\n \t\t\tconst customEditor = newEditor as unknown as Record<string, unknown>;\n \t\t\tif (\"actionHandlers\" in customEditor && customEditor.actionHandlers instanceof Map) {\n-\t\t\t\tcustomEditor.onEscape = this.defaultEditor.onEscape;\n-\t\t\t\tcustomEditor.onCtrlD = this.defaultEditor.onCtrlD;\n-\t\t\t\tcustomEditor.onPasteImage = this.defaultEditor.onPasteImage;\n+\t\t\t\tcustomEditor.onEscape = () => this.defaultEditor.onEscape?.();\n+\t\t\t\tcustomEditor.onCtrlD = () => this.defaultEditor.onCtrlD?.();\n+\t\t\t\tcustomEditor.onPasteImage = () => this.defaultEditor.onPasteImage?.();\n \t\t\t\tcustomEditor.onExtensionShortcut = (data: string) => this.defaultEditor.onExtensionShortcut?.(data);\n \t\t\t\t// Copy action handlers (clear, suspend, model switching, etc.)\n \t\t\t\tfor (const [action, handler] of this.defaultEditor.actionHandlers) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "828c40cf68984ede829c6fa6adac9a697ca14d8a",
+  "message": "Fix the issue of aborting retries when an extension customizes the editor (#1364)",
+  "module": "interactive-mode",
+  "tags": []
+}

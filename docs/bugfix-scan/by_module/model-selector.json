@@ -1,0 +1,162 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "model-selector",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "fuzzy_search",
+      "boundary": "service",
+      "bug_summary": "模型模糊搜索只匹配 id 字段，输入 provider 名称（如 'anthropic opus'）无法命中",
+      "correct_behavior": "输入 'anthropic opus' 可匹配 provider=anthropic, id=opus 的模型",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "fuzzyFilter 的匹配键从 id 改为 provider + ' ' + id，支持 provider+id 组合搜索",
+      "module": "model-selector",
+      "source_commit": "3592f9b7c98714c0df1b0e5ae8f1bccae8c5d2f1",
+      "test_spec": {
+        "args": {
+          "query": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "query='anthropic' 返回所有 Anthropic 模型",
+            "type": "return_value",
+            "what": "按 provider 名搜索能命中"
+          },
+          {
+            "expected": "query='anthropic opus' 精确命中目标模型",
+            "type": "return_value",
+            "what": "provider+id 组合搜索能命中"
+          }
+        ],
+        "outputs": {
+          "filteredModels": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "模型列表包含多个 provider 的模型"
+          }
+        ],
+        "trigger": {
+          "method": "filterModels",
+          "target": "model-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "输入 'anthropic' 无法过滤出 Anthropic 的模型"
+    },
+    {
+      "action": "fuzzyFilter",
+      "boundary": "service",
+      "bug_summary": "模型选择器模糊搜索按 provider+id 顺序拼接匹配字符串，导致输入 opus anthropic 无法命中目标",
+      "correct_behavior": "fuzzyFilter 使用 `${id} ${provider}` 拼接，输入 opus anthropic 正确匹配到 anthropic/opus",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将模糊匹配拼接顺序从 provider id 改为 id provider，使用户按模型名在前的习惯搜索",
+      "module": "model-selector",
+      "source_commit": "5db7cc693bf5696ac9cf334a94fc20ecdb810cb9",
+      "test_spec": {
+        "args": {
+          "query": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "results.find(m => m.id === 'opus' && m.provider === 'anthropic')",
+            "type": "return_value",
+            "what": "opus anthropic 能命中 anthropic/opus"
+          },
+          {
+            "expected": "matchString === `${id} ${provider}`",
+            "type": "return_value",
+            "what": "匹配基于 id provider 顺序"
+          }
+        ],
+        "outputs": {
+          "matched_models": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "模型列表包含 {id:'opus', provider:'anthropic'} 等多个模型"
+          }
+        ],
+        "trigger": {
+          "method": "fuzzyFilter",
+          "target": "model-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "fuzzyFilter 使用 `${provider} ${id}` 拼接，输入 opus anthropic 不匹配"
+    },
+    {
+      "action": "arrow_key_navigation",
+      "boundary": "service",
+      "bug_summary": "模型选择器在模型未加载或列表缩小时方向键使用旧索引，selectedIndex 越界导致错误",
+      "correct_behavior": "selectedIndex 被 clamp 到 [0, models.length-1]，空列表时忽略方向键",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在读取 filteredModels 后 clamp selectedIndex 到有效范围，空列表时提前返回不处理方向键",
+      "module": "model-selector",
+      "source_commit": "209d95870e2b08bf0e5f0cabb3f2847498d73acf",
+      "test_spec": {
+        "args": {
+          "key": {
+            "allowed": [
+              "ArrowUp",
+              "ArrowDown"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "selectedIndex <= filteredModels.length - 1",
+            "type": "return_value",
+            "what": "列表缩小后 selectedIndex 不越界"
+          },
+          {
+            "expected": "filteredModels.length === 0 时 selectedIndex 不变",
+            "type": "return_value",
+            "what": "空列表时方向键无操作"
+          },
+          {
+            "expected": "selectedIndex >= 0",
+            "type": "return_value",
+            "what": "selectedIndex 最小为 0"
+          }
+        ],
+        "outputs": {
+          "selectedIndex": "int"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "模型选择器已打开"
+          }
+        ],
+        "trigger": {
+          "method": "handleArrowKey",
+          "target": "model-selector",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "模型列表缩小后 selectedIndex 超过列表长度，方向键操作触发越界访问"
+    }
+  ]
+}

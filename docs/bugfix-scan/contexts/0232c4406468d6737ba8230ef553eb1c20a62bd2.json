@@ -1,0 +1,22 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/index.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/index.ts b/packages/ai/src/index.ts\nindex 46e1c470..48c74953 100644\n--- a/packages/ai/src/index.ts\n+++ b/packages/ai/src/index.ts\n@@ -1,3 +1,6 @@\n+export type { Static, TSchema } from \"@sinclair/typebox\";\n+export { Type } from \"@sinclair/typebox\";\n+\n export * from \"./api-registry.js\";\n export * from \"./env-api-keys.js\";\n export * from \"./models.js\";\n"
+    },
+    {
+      "file": "packages/coding-agent/examples/extensions/hello.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/examples/extensions/hello.ts b/packages/coding-agent/examples/extensions/hello.ts\nindex 39ecf3f6..16f27b81 100644\n--- a/packages/coding-agent/examples/extensions/hello.ts\n+++ b/packages/coding-agent/examples/extensions/hello.ts\n@@ -2,8 +2,8 @@\n  * Hello Tool - Minimal custom tool example\n  */\n \n+import { Type } from \"@mariozechner/pi-ai\";\n import type { ExtensionAPI } from \"@mariozechner/pi-coding-agent\";\n-import { Type } from \"@sinclair/typebox\";\n \n export default function (pi: ExtensionAPI) {\n \tpi.registerTool({\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "0232c4406468d6737ba8230ef553eb1c20a62bd2",
+  "message": "fix(ai,coding-agent): re-export typebox symbols and align docs closes #1338",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": [
+    "export",
+    "null_safety"
+  ]
+}

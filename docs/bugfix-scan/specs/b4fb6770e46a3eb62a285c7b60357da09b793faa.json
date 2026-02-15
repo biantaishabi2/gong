@@ -1,0 +1,54 @@
+{
+  "source_commit": "b4fb6770e46a3eb62a285c7b60357da09b793faa",
+  "bug_summary": "颜色模式检测对大多数终端回退为 256color，SSH 等现代终端被误判为低色彩",
+  "module": "theme",
+  "action": "detectColorMode",
+  "fix_summary": "仅对 dumb/空/linux 等真正受限终端回退 256color，其他终端默认 truecolor",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "TERM=xterm-256color 时回退为 256color，SSH 终端颜色显示降级",
+  "correct_behavior": "仅 dumb/空/linux 回退 256color，其他（含 xterm-256color）默认 truecolor",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "COLORTERM 未设置，TERM 为 xterm-256color",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "theme",
+      "method": "detectColorMode"
+    },
+    "args": {
+      "COLORTERM": {
+        "type": "string",
+        "required": false,
+        "allowed": null
+      },
+      "TERM": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "mode": "string"
+    },
+    "assertions": [
+      {
+        "what": "xterm-256color → truecolor",
+        "type": "return_value",
+        "expected": "detectColorMode({TERM:'xterm-256color'}) === 'truecolor'"
+      },
+      {
+        "what": "dumb → 256color",
+        "type": "return_value",
+        "expected": "detectColorMode({TERM:'dumb'}) === '256color'"
+      }
+    ]
+  }
+}

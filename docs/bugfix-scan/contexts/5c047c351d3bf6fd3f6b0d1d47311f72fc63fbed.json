@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/resource-loader.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/resource-loader.ts b/packages/coding-agent/src/core/resource-loader.ts\nindex 11764621..346dc696 100644\n--- a/packages/coding-agent/src/core/resource-loader.ts\n+++ b/packages/coding-agent/src/core/resource-loader.ts\n@@ -283,8 +283,12 @@ export class DefaultResourceLoader implements ResourceLoader {\n \n \t\t// Detect extension conflicts (tools, commands, flags with same names from different extensions)\n \t\tconst conflicts = this.detectExtensionConflicts(extensionsResult.extensions);\n-\t\tfor (const conflict of conflicts) {\n-\t\t\textensionsResult.errors.push({ path: conflict.path, error: conflict.message });\n+\t\tif (conflicts.length > 0) {\n+\t\t\tconst conflictingPaths = new Set(conflicts.map((c) => c.path));\n+\t\t\textensionsResult.extensions = extensionsResult.extensions.filter((ext) => !conflictingPaths.has(ext.path));\n+\t\t\tfor (const conflict of conflicts) {\n+\t\t\t\textensionsResult.errors.push({ path: conflict.path, error: conflict.message });\n+\t\t\t}\n \t\t}\n \n \t\tthis.extensionsResult = this.extensionsOverride ? this.extensionsOverride(extensionsResult) : extensionsResult;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "5c047c351d3bf6fd3f6b0d1d47311f72fc63fbed",
+  "message": "fix(coding-agent): filter out conflicting extensions from loaded list",
+  "module": "resource-loader",
+  "tags": []
+}

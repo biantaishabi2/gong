@@ -1,0 +1,257 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "tui-renderer",
+  "spec_count": 6,
+  "specs": [
+    {
+      "action": "renderAssistantText",
+      "boundary": "service",
+      "bug_summary": "Assistant Markdown 默认底部 padding 导致工具执行前出现双倍间距",
+      "correct_behavior": "paddingY=0 消除额外间距，紧凑显示",
+      "data_dependencies": [],
+      "fix_summary": "创建 Markdown 时传入 paddingY=0，消除额外间距",
+      "module": "tui-renderer",
+      "source_commit": "f5176bb173e9023e59e365aa26cad6e150f73663",
+      "test_spec": {
+        "args": {
+          "text": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "new Markdown(text, undefined, undefined, 0)",
+            "type": "return_value",
+            "what": "paddingY 为 0"
+          }
+        ],
+        "outputs": {
+          "markdown_component": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "Assistant 输出文本后紧接工具执行"
+          }
+        ],
+        "trigger": {
+          "method": "renderAssistantText",
+          "target": "tui-renderer",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Assistant 文本与下方工具执行间有多余空行"
+    },
+    {
+      "action": "renderChangelog",
+      "boundary": "service",
+      "bug_summary": "changelog 渲染在 DynamicBorder 后额外插入 Spacer(1)，界面出现多余空行",
+      "correct_behavior": "changelog DynamicBorder 后直接是聊天容器，无额外间距",
+      "data_dependencies": [],
+      "fix_summary": "移除 changelog DynamicBorder 后的 Spacer(1) 添加",
+      "module": "tui-renderer",
+      "source_commit": "b49ac57d59578a112bb766bebb3c16ee81ba785e",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "no Spacer(1) after DynamicBorder in changelog branch",
+            "type": "return_value",
+            "what": "DynamicBorder 后无 Spacer"
+          }
+        ],
+        "outputs": {
+          "ui_tree": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "渲染器有非空 changelog 内容"
+          }
+        ],
+        "trigger": {
+          "method": "renderChangelog",
+          "target": "tui-renderer",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "changelog 与聊天容器之间有多余的一行空白"
+    },
+    {
+      "action": "handleEscape",
+      "boundary": "service",
+      "bug_summary": "自动补全激活时 Escape 被编辑器拦截触发中断，未先取消自动补全",
+      "correct_behavior": "自动补全时按 Escape 先取消补全，不中断 agent",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "在 Escape 拦截前检查 isShowingAutocomplete()，激活时让父层处理取消补全",
+      "module": "tui-renderer",
+      "source_commit": "97e00fc45d809eeeb5961e99f7c0cf34a90858bf",
+      "test_spec": {
+        "args": {
+          "isAutocompleting": {
+            "allowed": null,
+            "required": true,
+            "type": "bool"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "autocomplete_canceled && !agent_interrupted",
+            "type": "return_value",
+            "what": "补全激活时取消补全不中断"
+          },
+          {
+            "expected": "!isAutocompleting → agent_interrupted",
+            "type": "return_value",
+            "what": "无补全时正常中断"
+          }
+        ],
+        "outputs": {
+          "agent_interrupted": "bool",
+          "autocomplete_canceled": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "编辑器自动补全正在显示"
+          }
+        ],
+        "trigger": {
+          "method": "handleEscape",
+          "target": "tui-renderer",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "自动补全时按 Escape 直接中断 agent，补全弹窗残留"
+    },
+    {
+      "action": "renderUpdateNotification",
+      "boundary": "service",
+      "bug_summary": "更新通知渲染中错误插入 Spacer(1)，内容与边框间出现多余换行",
+      "correct_behavior": "更新通知内容紧贴边框，无额外间距",
+      "data_dependencies": [],
+      "fix_summary": "移除更新通知区块中的 Spacer(1) 添加",
+      "module": "tui-renderer",
+      "source_commit": "d771475f98aa9320e095d194a7dfddc953c5cc15",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "no Spacer(1) in update notification block",
+            "type": "return_value",
+            "what": "通知区块无多余 Spacer"
+          }
+        ],
+        "outputs": {
+          "ui_tree": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "showUpdateNotification 为 true"
+          }
+        ],
+        "trigger": {
+          "method": "renderUpdateNotification",
+          "target": "tui-renderer",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "更新通知内容与边框间有多余空行"
+    },
+    {
+      "action": "cleanup_unused_imports",
+      "boundary": "service",
+      "bug_summary": "tui-renderer 中 SlashCommand 导入未使用，tui.ts 中私有成员被 biome lint 误报",
+      "correct_behavior": "无未使用导入；biome-ignore 消除误报",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "移除 tui-renderer.ts 未使用的 SlashCommand 导入；为 tui.ts 误报的私有成员添加 biome-ignore 注释",
+      "module": "tui-renderer",
+      "source_commit": "2c03724862c82a0e8c2fbc23fe4f0b6cc3af4cb1",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "无 SlashCommand unused import 警告",
+            "type": "return_value",
+            "what": "无未使用导入警告"
+          },
+          {
+            "expected": "biome lint 通过无误报",
+            "type": "return_value",
+            "what": "私有成员误报被 ignore 消除"
+          }
+        ],
+        "outputs": {
+          "warnings": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "代码已通过 biome lint 检查"
+          }
+        ],
+        "trigger": {
+          "method": "lint_check",
+          "target": "tui-renderer",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "存在未使用导入警告；biome lint 对实际使用的私有成员报 false positive"
+    },
+    {
+      "action": "clearEditor",
+      "boundary": "service",
+      "bug_summary": "clearEditor 错误清空 statusContainer，Ctrl+C 清空编辑器时加载动画被一并移除",
+      "correct_behavior": "Ctrl+C 仅清空编辑器文本，加载动画继续显示",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "移除 clearEditor 中对 statusContainer.clear() 的调用，使 Ctrl+C 仅清空编辑器内容",
+      "module": "tui-renderer",
+      "source_commit": "2509add9bfba2a8a0c5a9c8dd6fbb48a62d7e5f0",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "status_animation_visible === true",
+            "type": "return_value",
+            "what": "清空编辑器后加载动画仍在显示"
+          },
+          {
+            "expected": "editor.getText() === ''",
+            "type": "return_value",
+            "what": "编辑器内容被清空"
+          }
+        ],
+        "outputs": {
+          "status_animation_visible": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "编辑器有内容且状态栏正在显示加载动画"
+          }
+        ],
+        "trigger": {
+          "method": "clearEditor",
+          "target": "tui-renderer",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Ctrl+C 清空编辑器时加载动画消失"
+    }
+  ]
+}

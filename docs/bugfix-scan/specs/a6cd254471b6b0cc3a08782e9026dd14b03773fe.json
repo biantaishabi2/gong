@@ -1,0 +1,54 @@
+{
+  "action": "startup",
+  "boundary": "service",
+  "bug_summary": "交互模式启动时只确保 fd 可用，未预下载 rg，导致依赖 rg 的 grep 工具与 bash 命令在首轮使用时失败",
+  "correct_behavior": "同时确保 fd 与 rg 可用，进入交互后 grep/依赖 rg 的命令可直接执行",
+  "data_dependencies": [
+    "file",
+    "config"
+  ],
+  "fix_summary": "启动阶段将 ensureTool(\"rg\") 与 ensureTool(\"fd\") 并行执行，确保 rg 在进入交互前已可用",
+  "module": "interactive-mode",
+  "source_commit": "a6cd254471b6b0cc3a08782e9026dd14b03773fe",
+  "test_spec": {
+    "args": {},
+    "assertions": [
+      {
+        "expected": "ensureTool(\"rg\") called once during startup",
+        "type": "state_change",
+        "what": "启动时会调用 ensureTool(\"rg\")"
+      },
+      {
+        "expected": "rg_available=true",
+        "type": "runtime_state",
+        "what": "启动完成后 PATH 中可解析 rg"
+      },
+      {
+        "expected": "fd_path is non-empty and initialization succeeds",
+        "type": "runtime_state",
+        "what": "fd 与 rg 的准备流程并行执行且 fdPath 正常赋值"
+      }
+    ],
+    "outputs": {
+      "fd_path": "string",
+      "rg_available": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "file",
+        "what": "运行环境未预装 rg 二进制"
+      },
+      {
+        "involves": "config",
+        "what": "工具下载目录可写且可加入 PATH"
+      }
+    ],
+    "trigger": {
+      "method": "startup",
+      "target": "InteractiveMode",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "仅调用 ensureTool(\"fd\")，首次执行 grep/依赖 rg 的命令可能报 rg not found"
+}

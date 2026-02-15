@@ -1,0 +1,49 @@
+{
+  "source_commit": "898a1a50eade1c815cff350f2d64358bfae0d457",
+  "bug_summary": "启动阶段初始消息未渲染时就重建聊天，导致扩展消息被重复渲染",
+  "module": "interactive-mode",
+  "action": "sendExtensionMessage",
+  "fix_summary": "增加 hasRenderedInitialMessages 标志，初始渲染前不触发 rebuildChat",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "初始消息渲染前就触发 rebuildChat，扩展消息在初始渲染时再次出现",
+  "correct_behavior": "hasRenderedInitialMessages 为 false 时跳过 rebuildChat，避免重复渲染",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "交互模式启动中，初始消息尚未渲染",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "sendExtensionMessage"
+    },
+    "args": {
+      "message": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rebuild_triggered": "bool"
+    },
+    "assertions": [
+      {
+        "what": "初始渲染前不触发 rebuildChat",
+        "type": "side_effect",
+        "expected": "rebuildChat not called when !hasRenderedInitialMessages"
+      },
+      {
+        "what": "初始渲染后正常触发",
+        "type": "side_effect",
+        "expected": "rebuildChat called when hasRenderedInitialMessages"
+      }
+    ]
+  }
+}

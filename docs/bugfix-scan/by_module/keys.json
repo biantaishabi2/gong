@@ -1,0 +1,153 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "keys",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "matchesKey",
+      "boundary": "service",
+      "bug_summary": "shift+letter 快捷键不兼容旧终端产生的大写字符输入",
+      "correct_behavior": "matchesKey('A', 'shift+a') 返回 true",
+      "data_dependencies": [],
+      "fix_summary": "在仅 shift 修饰时追加 data === key.toUpperCase() 和 Kitty shift 序列匹配",
+      "module": "keys",
+      "source_commit": "e3c261671354fed3d3848f66bd11bab2898cc36a",
+      "test_spec": {
+        "args": {
+          "data": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "keyId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "matchesKey('A', 'shift+a') === true",
+            "type": "return_value",
+            "what": "大写 A 匹配 shift+a"
+          }
+        ],
+        "outputs": {
+          "matched": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "终端为旧终端，shift+letter 产生大写字符"
+          }
+        ],
+        "trigger": {
+          "method": "matchesKey",
+          "target": "keys",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "旧终端 shift+a 发送 'A'，matchesKey('A', 'shift+a') 返回 false"
+    },
+    {
+      "action": "matchesKey",
+      "boundary": "service",
+      "bug_summary": "matchesKey 仅比较原始字符，忽略 Kitty 协议无修饰序列，导致 release 事件不匹配",
+      "correct_behavior": "matchesKey 同时检查原始字符和 Kitty 序列，两种格式均能匹配",
+      "data_dependencies": [],
+      "fix_summary": "在原始字符匹配失败后追加 matchesKittySequence 检查，支持 Kitty 无修饰字母键序列",
+      "module": "keys",
+      "source_commit": "7a44cf0db0939351818bb4bd598116ec5fdd02ac",
+      "test_spec": {
+        "args": {
+          "data": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "keyId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "matchesKey('a', 'a') === true",
+            "type": "return_value",
+            "what": "原始字符 'a' 匹配 keyId 'a'"
+          },
+          {
+            "expected": "matchesKey(kittySeq, 'a') === true",
+            "type": "return_value",
+            "what": "Kitty 无修饰序列匹配 keyId 'a'"
+          }
+        ],
+        "outputs": {
+          "matched": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "终端使用 Kitty 键盘协议"
+          }
+        ],
+        "trigger": {
+          "method": "matchesKey",
+          "target": "keys",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Kitty 协议的无修饰字母键 release 事件不被 matchesKey 识别"
+    },
+    {
+      "action": "matchesKey",
+      "boundary": "service",
+      "bug_summary": "shift+letter 快捷键不兼容旧终端大写输入（与 e3c261 相同修复，不同 commit）",
+      "correct_behavior": "matchesKey('A', 'shift+a') 返回 true",
+      "data_dependencies": [],
+      "fix_summary": "仅 shift 修饰时追加大写字符匹配和 Kitty shift 序列匹配",
+      "module": "keys",
+      "source_commit": "f7e7d6aa41925369058182535e488808e0bfd9d1",
+      "test_spec": {
+        "args": {
+          "data": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "keyId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "matchesKey('A', 'shift+a') === true",
+            "type": "return_value",
+            "what": "大写字母匹配 shift+letter"
+          }
+        ],
+        "outputs": {
+          "matched": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "旧终端 shift+letter 产生大写字符"
+          }
+        ],
+        "trigger": {
+          "method": "matchesKey",
+          "target": "keys",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "旧终端 shift+a 发送 'A' 不被匹配"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/config.ts",
+      "hunks": [
+        {
+          "after_function": "export function getAgentDir(): string {\n\tconst envDir = process.env[ENV_AGENT_DIR];\n\tif (envDir) {\n\t\t// Expand tilde to home directory\n\t\tif (envDir === \"~\") return homedir();\n\t\tif (envDir.startsWith(\"~/\")) return homedir() + envDir.slice(1);\n\t\treturn envDir;\n\t}\n\treturn join(homedir(), CONFIG_DIR_NAME, \"agent\");\n}",
+          "before_function": "export function getAgentDir(): string {\n\treturn process.env[ENV_AGENT_DIR] || join(homedir(), CONFIG_DIR_NAME, \"agent\");\n}",
+          "changed_lines": [
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132
+          ],
+          "function_line": 124,
+          "function_name": "getAgentDir"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/config.ts b/packages/coding-agent/src/config.ts\nindex 9d9af583..48c3d7a4 100644\n--- a/packages/coding-agent/src/config.ts\n+++ b/packages/coding-agent/src/config.ts\n@@ -122,7 +122,14 @@ export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;\n \n /** Get the agent config directory (e.g., ~/.pi/agent/) */\n export function getAgentDir(): string {\n-\treturn process.env[ENV_AGENT_DIR] || join(homedir(), CONFIG_DIR_NAME, \"agent\");\n+\tconst envDir = process.env[ENV_AGENT_DIR];\n+\tif (envDir) {\n+\t\t// Expand tilde to home directory\n+\t\tif (envDir === \"~\") return homedir();\n+\t\tif (envDir.startsWith(\"~/\")) return homedir() + envDir.slice(1);\n+\t\treturn envDir;\n+\t}\n+\treturn join(homedir(), CONFIG_DIR_NAME, \"agent\");\n }\n \n /** Get path to user's custom themes directory */\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "09d9107d7fb0c3a74a2fe6f5b4ff57b78b9de442",
+  "message": "fix(coding-agent): expand tilde in PI_CODING_AGENT_DIR env var (#778)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "proxy",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "package_exports",
+      "boundary": "service",
+      "bug_summary": "parseStreamingJson 未从 ai 包主入口导出，proxy 模块通过 dist 内部路径导入导致 tsx 运行报错",
+      "correct_behavior": "proxy.ts 从 @mariozechner/pi-ai 主入口导入 parseStreamingJson，路径统一",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "在 packages/ai/src/index.ts 增加 export * from './utils/json-parse.js'，proxy 改为从主入口导入",
+      "module": "proxy",
+      "source_commit": "2b75948c2e15e5cc3e8dd0f7c0e0d0e8a1e6b1c2",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "import {parseStreamingJson} from '@mariozechner/pi-ai' 成功",
+            "type": "return_value",
+            "what": "parseStreamingJson 可从主入口导入"
+          },
+          {
+            "expected": "proxy.ts 无 /dist/ 路径导入",
+            "type": "return_value",
+            "what": "proxy 不再依赖 dist 内部路径"
+          }
+        ],
+        "outputs": {
+          "exported": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "ai 包和 agent 包均已构建"
+          }
+        ],
+        "trigger": {
+          "method": "module_export",
+          "target": "@mariozechner/pi-ai",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "proxy.ts 通过 @mariozechner/pi-ai/dist/utils/json-parse.js 内部路径导入，tsx 下路径解析失败"
+    }
+  ]
+}

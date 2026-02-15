@@ -1,0 +1,263 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "session-manager",
+  "spec_count": 5,
+  "specs": [
+    {
+      "action": "convertCustomMessage",
+      "boundary": "service",
+      "bug_summary": "自定义 Hook 消息被映射为 user role 且丢失 custom 字段，TUI 重复渲染",
+      "correct_behavior": "Hook 消息 role=hookMessage，保留所有 custom 字段，去重正确",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "将 role 从 'user' 改为 'hookMessage'，保留 customType/display/details 字段",
+      "module": "session-manager",
+      "source_commit": "ecef601d195620b6b107f25db07d54bca99be4f0",
+      "test_spec": {
+        "args": {
+          "entry": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "message.role === 'hookMessage'",
+            "type": "return_value",
+            "what": "role 为 hookMessage"
+          },
+          {
+            "expected": "message.customType === entry.customType",
+            "type": "return_value",
+            "what": "保留 customType"
+          },
+          {
+            "expected": "message.display === entry.display",
+            "type": "return_value",
+            "what": "保留 display"
+          }
+        ],
+        "outputs": {
+          "message": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "会话包含自定义 Hook 消息条目"
+          }
+        ],
+        "trigger": {
+          "method": "convertCustomMessage",
+          "target": "session-manager",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Hook 消息 role=user 且丢失 customType/display/details，去重失败导致重复"
+    },
+    {
+      "action": "resetState",
+      "boundary": "service",
+      "bug_summary": "会话管理器重置时总是重新生成 sessionFile 路径，覆盖了 --session 标志指定的文件名",
+      "correct_behavior": "resetState 检查 sessionFile 已设置则跳过重新生成，保留用户指定的文件名",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "仅在 sessionFile 未预设时生成新文件名，保留 --session 指定的路径",
+      "module": "session-manager",
+      "source_commit": "77595b97f94e5693a8ee87673b4da811f340bc8b",
+      "test_spec": {
+        "args": {
+          "timestamp": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "this.sessionFile === presetFile",
+            "type": "return_value",
+            "what": "预设的 sessionFile 不被覆盖"
+          },
+          {
+            "expected": "this.sessionFile 基于 timestamp 生成",
+            "type": "return_value",
+            "what": "未预设时正常生成"
+          }
+        ],
+        "outputs": {
+          "sessionFile": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "sessionFile 已通过 --session 标志预设"
+          }
+        ],
+        "trigger": {
+          "method": "resetState",
+          "target": "session-manager",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "resetState 总是覆盖 sessionFile，--session=myfile.jsonl 指定的文件名被丢弃"
+    },
+    {
+      "action": "buildSessionContext",
+      "boundary": "service",
+      "bug_summary": "compaction 前的 kept 区间未处理 branch_summary 类型条目，导致上下文缺失分支摘要",
+      "correct_behavior": "branch_summary 条目通过 createSummaryMessage 转换并包含在 messages 和 contextEntries 中",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "在 kept 区间遍历中增加 branch_summary 分支处理，将其转换为摘要消息并加入 contextEntries",
+      "module": "session-manager",
+      "source_commit": "754f55e3f6ce4cbf5b60ccd28f5674eedb6339e2",
+      "test_spec": {
+        "args": {
+          "entries": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          },
+          "leafId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "messages 含 summary message from branch_summary",
+            "type": "return_value",
+            "what": "返回的 messages 包含 branch_summary 对应的摘要消息"
+          },
+          {
+            "expected": "contextEntries 含 branch_summary entry",
+            "type": "return_value",
+            "what": "contextEntries 包含 branch_summary 条目"
+          }
+        ],
+        "outputs": {
+          "contextEntries": "array",
+          "messages": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "会话条目中包含 compaction 和 branch_summary 条目"
+          }
+        ],
+        "trigger": {
+          "method": "buildSessionContext",
+          "target": "session-manager",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "branch_summary 条目被跳过，compaction 后的上下文缺失分支摘要信息"
+    },
+    {
+      "action": "newSession",
+      "boundary": "service",
+      "bug_summary": "/new 命令仅在 sessionFile 为空时生成新文件，通过 --session 指定文件后 /new 继续复用旧文件",
+      "correct_behavior": "/new 后生成新 sessionFile 路径，旧文件保留，新会话写入新文件",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "移除 !this.sessionFile 条件检查，改为始终生成新文件；保留 --session 指定的路径在初始化时使用；清空 labelsById 缓存",
+      "module": "session-manager",
+      "source_commit": "234f367d0ddb2c3b98f5e4c7ccc2c45e2f5e1b8b",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "newSessionFile !== oldSessionFile",
+            "type": "return_value",
+            "what": "/new 后 sessionFile 路径改变"
+          },
+          {
+            "expected": "labelsById.size === 0",
+            "type": "db_state",
+            "what": "labelsById 缓存被清空"
+          },
+          {
+            "expected": "初始 sessionFile === explicitPath",
+            "type": "return_value",
+            "what": "--session 指定的路径仅用于初始加载"
+          }
+        ],
+        "outputs": {
+          "newSessionFile": "string",
+          "oldSessionFile": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "会话持久化开启（persist=true），当前有活跃会话文件"
+          }
+        ],
+        "trigger": {
+          "method": "newSession",
+          "target": "session-manager",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "/new 后 sessionFile 不变，新会话数据写入旧文件覆盖已有内容"
+    },
+    {
+      "action": "flushSessionToFile",
+      "boundary": "service",
+      "bug_summary": "会话分叉后仅有 user 消息时提前返回且未重置 flushed，导致后续 assistant 到来时历史 user 消息未落盘",
+      "correct_behavior": "仅有 user 消息时返回前设置 flushed=false，后续 assistant 到来时执行全量补写",
+      "data_dependencies": [
+        "file",
+        "session"
+      ],
+      "fix_summary": "在无 assistant 消息时将 this.flushed 显式设为 false，再返回，确保后续可完整写入",
+      "module": "session-manager",
+      "source_commit": "b5be54b8efe2b594cd1dce7a9a76bc5321f37462",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "flushed=false",
+            "type": "state",
+            "what": "当仅有 user 消息时本次不写文件但 flushed 被置为 false"
+          },
+          {
+            "expected": "persisted_entry_count>=2 且包含 fork 后 user 消息",
+            "type": "file_state",
+            "what": "assistant 消息到达后再次触发会将此前 user+assistant 消息一起写入 session 文件"
+          }
+        ],
+        "outputs": {
+          "flushed": "bool",
+          "persisted_entry_count": "int"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "开启会话持久化且存在可写 session 文件路径"
+          },
+          {
+            "involves": "session",
+            "what": "内存 fileEntries 中存在 user 消息且暂不存在 assistant 消息"
+          }
+        ],
+        "trigger": {
+          "method": "flushSessionToFile",
+          "target": "SessionManager",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "仅有 user 消息时直接返回且保持 flushed=true，后续写入跳过历史 user 消息"
+    }
+  ]
+}

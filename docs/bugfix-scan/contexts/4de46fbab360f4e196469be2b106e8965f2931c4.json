@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/autocomplete.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/autocomplete.ts b/packages/tui/src/autocomplete.ts\nindex 97f11586..d4065282 100644\n--- a/packages/tui/src/autocomplete.ts\n+++ b/packages/tui/src/autocomplete.ts\n@@ -536,6 +536,7 @@ export class CombinedAutocompleteProvider implements AutocompleteProvider {\n \t\t\t\t\tencoding: \"utf-8\",\n \t\t\t\t\ttimeout: 2000,\n \t\t\t\t\tmaxBuffer: 1024 * 1024,\n+\t\t\t\t\tstdio: [\"pipe\", \"pipe\", \"pipe\"],\n \t\t\t\t});\n \t\t\t} else {\n \t\t\t\t// Fallback to find\n@@ -576,6 +577,7 @@ export class CombinedAutocompleteProvider implements AutocompleteProvider {\n \t\t\t\t\ttimeout: 3000,\n \t\t\t\t\tmaxBuffer: 1024 * 1024,\n \t\t\t\t\tshell: \"/bin/bash\",\n+\t\t\t\t\tstdio: [\"pipe\", \"pipe\", \"pipe\"],\n \t\t\t\t});\n \t\t\t}\n \n@@ -642,12 +644,12 @@ export class CombinedAutocompleteProvider implements AutocompleteProvider {\n \t\t}\n \n \t\ttry {\n-\t\t\texecSync(\"fdfind --version\", { encoding: \"utf-8\", timeout: 1000 });\n+\t\t\texecSync(\"fdfind --version\", { encoding: \"utf-8\", timeout: 1000, stdio: \"pipe\" });\n \t\t\tthis.fdCommand = \"fdfind\";\n \t\t\treturn this.fdCommand;\n \t\t} catch {\n \t\t\ttry {\n-\t\t\t\texecSync(\"fd --version\", { encoding: \"utf-8\", timeout: 1000 });\n+\t\t\t\texecSync(\"fd --version\", { encoding: \"utf-8\", timeout: 1000, stdio: \"pipe\" });\n \t\t\t\tthis.fdCommand = \"fd\";\n \t\t\t\treturn this.fdCommand;\n \t\t\t} catch {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "4de46fbab360f4e196469be2b106e8965f2931c4",
+  "message": "fix: suppress stderr in execSync calls to prevent TUI corruption",
+  "module": "autocomplete",
+  "tags": []
+}

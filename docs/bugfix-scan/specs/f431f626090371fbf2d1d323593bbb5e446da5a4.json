@@ -1,0 +1,55 @@
+{
+  "action": "ProcessTerminal.cleanup",
+  "boundary": "service",
+  "bug_summary": "终端退出时在关闭 raw mode 前未暂停 stdin，导致缓冲的 Ctrl+D 被重新解释并可能关闭 SSH 父 shell。",
+  "correct_behavior": "先暂停 stdin，再恢复 raw mode，缓冲 Ctrl+D 不会导致 SSH 会话被意外关闭。",
+  "data_dependencies": [
+    "session",
+    "config"
+  ],
+  "fix_summary": "在恢复 stdin raw mode 前调用 process.stdin.pause()，避免输入竞态。",
+  "module": "tui",
+  "source_commit": "f431f626090371fbf2d1d323593bbb5e446da5a4",
+  "test_spec": {
+    "args": {},
+    "assertions": [
+      {
+        "expected": "pause_before_restore_raw_mode",
+        "type": "state_transition",
+        "what": "在 setRawMode(this.wasRaw) 之前执行 process.stdin.pause()"
+      },
+      {
+        "expected": "ssh_session_alive=true",
+        "type": "session_state",
+        "what": "存在缓冲 Ctrl+D 时不会触发父 shell 退出"
+      },
+      {
+        "expected": "stdin_raw_mode==wasRaw",
+        "type": "io_state",
+        "what": "退出后 raw mode 恢复为 this.wasRaw"
+      }
+    ],
+    "outputs": {
+      "raw_mode_restored": "bool",
+      "ssh_session_alive": "bool",
+      "stdin_paused": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "session",
+        "what": "运行于交互式 SSH 会话，stdin 可读且支持 raw mode"
+      },
+      {
+        "involves": "config",
+        "what": "终端组件已注册输入监听并可能存在缓冲输入（如 Ctrl+D）"
+      }
+    ],
+    "trigger": {
+      "method": "cleanup",
+      "target": "ProcessTerminal",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "恢复 raw mode 时未先暂停 stdin，缓冲 Ctrl+D 可能被 shell 消费并关闭 SSH 会话。"
+}

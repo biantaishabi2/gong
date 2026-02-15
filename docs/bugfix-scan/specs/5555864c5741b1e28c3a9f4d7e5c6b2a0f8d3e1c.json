@@ -1,0 +1,49 @@
+{
+  "source_commit": "5555864c5741b1e28c3a9f4d7e5c6b2a0f8d3e1c",
+  "bug_summary": "导出主题时仅搜索内置/自定义目录，未查找已注册分发主题的 sourcePath，导致 /export 失败",
+  "module": "theme",
+  "action": "loadThemeForExport",
+  "fix_summary": "增加从 registeredThemes 的 sourcePath 直接读取主题文件的逻辑，优先于目录搜索",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "/export 分发主题时找不到文件，导出失败",
+  "correct_behavior": "通过 registeredTheme.sourcePath 直接读取分发主题文件，/export 成功",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "存在通过分发方式注册的主题（有 sourcePath）",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "theme",
+      "method": "loadTheme"
+    },
+    "args": {
+      "name": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "theme": "object"
+    },
+    "assertions": [
+      {
+        "what": "分发主题通过 sourcePath 加载",
+        "type": "return_value",
+        "expected": "theme !== null 且数据来自 sourcePath"
+      },
+      {
+        "what": "内置主题仍从目录加载",
+        "type": "return_value",
+        "expected": "无 sourcePath 时降级到目录搜索"
+      }
+    ]
+  }
+}

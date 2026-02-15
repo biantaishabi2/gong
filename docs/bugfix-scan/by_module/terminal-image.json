@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "terminal-image",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "detectCapabilities",
+      "boundary": "service",
+      "bug_summary": "Ghostty 检测未覆盖 GHOSTTY_RESOURCES_DIR 环境变量，tmux 内无法识别为支持 kitty inline images",
+      "correct_behavior": "GHOSTTY_RESOURCES_DIR 存在时识别为 Ghostty，启用 kitty 图片支持",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 Ghostty 检测条件中增加 process.env.GHOSTTY_RESOURCES_DIR 判断",
+      "module": "terminal-image",
+      "source_commit": "e904b11e7b4fb97105712a951ffb72b2572df69f",
+      "test_spec": {
+        "args": {
+          "env": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "capabilities.images === 'kitty'",
+            "type": "return_value",
+            "what": "GHOSTTY_RESOURCES_DIR 触发 kitty 图片"
+          },
+          {
+            "expected": "capabilities.trueColor === true",
+            "type": "return_value",
+            "what": "trueColor 启用"
+          }
+        ],
+        "outputs": {
+          "capabilities": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "tmux 环境，GHOSTTY_RESOURCES_DIR 已设置"
+          }
+        ],
+        "trigger": {
+          "method": "detectCapabilities",
+          "target": "terminal-image",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "tmux 内 TERM_PROGRAM 非 ghostty 时不识别 Ghostty，图片能力缺失"
+    }
+  ]
+}

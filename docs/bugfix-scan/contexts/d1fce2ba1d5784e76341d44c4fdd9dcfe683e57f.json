@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/openai-responses.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-responses.ts b/packages/ai/src/providers/openai-responses.ts\nindex f96215a1..2d4b114d 100644\n--- a/packages/ai/src/providers/openai-responses.ts\n+++ b/packages/ai/src/providers/openai-responses.ts\n@@ -206,6 +206,7 @@ function buildParams(model: Model<\"openai-responses\">, context: Context, options\n \t\tstream: true,\n \t\tprompt_cache_key: cacheRetention === \"none\" ? undefined : options?.sessionId,\n \t\tprompt_cache_retention: getPromptCacheRetention(model.baseUrl, cacheRetention),\n+\t\tstore: false,\n \t};\n \n \tif (options?.maxTokens) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d1fce2ba1d5784e76341d44c4fdd9dcfe683e57f",
+  "message": "fix(ai): disable OpenAI Responses storage by default (closes #1308)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "5a231abe4c93e5d2b1f0a3c4b6d7e8f9a0b1c2d3",
+  "bug_summary": "agent.ts 运行时将系统提示和用户消息额外写入 last_prompt.txt 调试文件，产生非权威数据源",
+  "module": "agent",
+  "action": "remove_debug_file",
+  "fix_summary": "移除 writeFile('last_prompt.txt') 调试代码和 writeFile import",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "每次运行产生 last_prompt.txt 文件，与 context.jsonl 数据源不一致",
+  "correct_behavior": "不再生成 last_prompt.txt，context.jsonl 作为唯一事实源",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "agent 执行会话",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "agent",
+      "method": "runConversation"
+    },
+    "args": {},
+    "outputs": {
+      "debug_file_exists": "bool"
+    },
+    "assertions": [
+      {
+        "what": "不生成 last_prompt.txt",
+        "type": "return_value",
+        "expected": "debug_file_exists === false"
+      },
+      {
+        "what": "writeFile 导入已移除",
+        "type": "return_value",
+        "expected": "import 中无 writeFile"
+      }
+    ]
+  }
+}

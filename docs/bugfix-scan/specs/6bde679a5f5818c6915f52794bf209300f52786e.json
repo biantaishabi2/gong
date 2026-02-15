@@ -1,0 +1,41 @@
+{
+  "source_commit": "6bde679a5f5818c6915f52794bf209300f52786e",
+  "bug_summary": "yank-pop 旋转 kill ring 时使用运行时 assert 做非空校验，造成不必要的 assert 依赖",
+  "module": "editor",
+  "action": "yank_pop",
+  "fix_summary": "将 assert(lastEntry !== undefined) 替换为 TypeScript 非空断言操作符 (!)，移除 assert 导入",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "使用 import assert + assert(lastEntry !== undefined) 做运行时校验，引入不必要的 assert 依赖",
+  "correct_behavior": "使用 killRing.pop()! 非空断言，编译时保证类型安全，无运行时开销",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器 killRing 非空，存在已粘贴文本可被替换",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "editor",
+      "method": "yankPop"
+    },
+    "args": {},
+    "outputs": {
+      "inserted_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "yank-pop 正确旋转并插入文本",
+        "type": "return_value",
+        "expected": "insertedText === lastKillRingEntry"
+      },
+      {
+        "what": "不使用 assert 模块",
+        "type": "return_value",
+        "expected": "no import of node:assert"
+      }
+    ]
+  }
+}

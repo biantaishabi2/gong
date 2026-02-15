@@ -1,0 +1,24 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/skills.ts",
+      "hunks": [
+        {
+          "after_function": "export function formatSkillsForPrompt(skills: Skill[]): string {\n\tconst visibleSkills = skills.filter((s) => !s.disableModelInvocation);\n\n\tif (visibleSkills.length === 0) {\n\t\treturn \"\";\n\t}\n\n\tconst lines = [\n\t\t\"\\n\\nThe following skills provide specialized instructions for specific tasks.\",\n\t\t\"Use the read tool to load a skill's file when the task matches its description.\",\n\t\t\"Relative paths inside skill files are resolved from the skill directory (parent of the location path).\",\n\t\t\"\",\n\t\t\"<available_skills>\",\n\t];\n\n\tfor (const skill of visibleSkills) {\n\t\tlines.push(\"  <skill>\");\n\t\tlines.push(`    <name>${escapeXml(skill.name)}</name>`);\n\t\tlines.push(`    <description>${escapeXml(skill.description)}</description>`);\n\t\tlines.push(`    <location>${escapeXml(skill.filePath)}</location>`);\n\t\tlines.push(\"  </skill>\");\n\t}\n\n\tlines.push(\"</available_skills>\");\n\n\treturn lines.join(\"\\n\");\n}",
+          "before_function": "export function formatSkillsForPrompt(skills: Skill[]): string {\n\tconst visibleSkills = skills.filter((s) => !s.disableModelInvocation);\n\n\tif (visibleSkills.length === 0) {\n\t\treturn \"\";\n\t}\n\n\tconst lines = [\n\t\t\"\\n\\nThe following skills provide specialized instructions for specific tasks.\",\n\t\t\"Use the read tool to load a skill's file when the task matches its description.\",\n\t\t\"\",\n\t\t\"<available_skills>\",\n\t];\n\n\tfor (const skill of visibleSkills) {\n\t\tlines.push(\"  <skill>\");\n\t\tlines.push(`    <name>${escapeXml(skill.name)}</name>`);\n\t\tlines.push(`    <description>${escapeXml(skill.description)}</description>`);\n\t\tlines.push(`    <location>${escapeXml(skill.filePath)}</location>`);\n\t\tlines.push(\"  </skill>\");\n\t}\n\n\tlines.push(\"</available_skills>\");\n\n\treturn lines.join(\"\\n\");\n}",
+          "changed_lines": [
+            266
+          ],
+          "function_line": 256,
+          "function_name": "formatSkillsForPrompt"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/skills.ts b/packages/coding-agent/src/core/skills.ts\nindex f0dc8d45..1e9747a0 100644\n--- a/packages/coding-agent/src/core/skills.ts\n+++ b/packages/coding-agent/src/core/skills.ts\n@@ -263,6 +263,7 @@ export function formatSkillsForPrompt(skills: Skill[]): string {\n \tconst lines = [\n \t\t\"\\n\\nThe following skills provide specialized instructions for specific tasks.\",\n \t\t\"Use the read tool to load a skill's file when the task matches its description.\",\n+\t\t\"Relative paths inside skill files are resolved from the skill directory (parent of the location path).\",\n \t\t\"\",\n \t\t\"<available_skills>\",\n \t];\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "3c687b427ec24c83138ae1c9de88f75f30491005",
+  "message": "fix(skills): add path resolution guidance to skills preamble",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

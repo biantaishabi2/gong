@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "branch-summarization",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "collectEntriesForBranchSummary",
+      "boundary": "service",
+      "bug_summary": "正向遍历 targetPath 找公共祖先，错误选中最浅而非最深的公共祖先",
+      "correct_behavior": "反向遍历从叶开始，找到的第一个公共节点是最深祖先，汇总条目精确",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "改为反向遍历 targetPath（从叶到根），找到的第一个公共节点即为最深公共祖先",
+      "module": "branch-summarization",
+      "source_commit": "92947a3dc450e1f8bd1eded4682bfe6766a1cbcc",
+      "test_spec": {
+        "args": {
+          "oldLeafId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "targetId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "commonAncestorId 为两路径最深交点",
+            "type": "return_value",
+            "what": "返回最深公共祖先"
+          },
+          {
+            "expected": "entries 起于 commonAncestor 后，止于 oldLeafId",
+            "type": "return_value",
+            "what": "entries 仅含祖先后到 oldLeafId 的条目"
+          }
+        ],
+        "outputs": {
+          "commonAncestorId": "string",
+          "entries": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "会话存在分支，oldLeafId 和 targetId 共享多层祖先"
+          }
+        ],
+        "trigger": {
+          "method": "collectEntriesForBranchSummary",
+          "target": "branch-summarization",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "正向遍历从根开始，找到的第一个公共节点是最浅祖先，汇总条目过多"
+    }
+  ]
+}

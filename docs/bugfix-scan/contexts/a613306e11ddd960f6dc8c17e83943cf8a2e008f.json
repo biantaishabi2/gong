@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/openai-completions.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-completions.ts b/packages/ai/src/providers/openai-completions.ts\nindex 66e324fd..e37f46a1 100644\n--- a/packages/ai/src/providers/openai-completions.ts\n+++ b/packages/ai/src/providers/openai-completions.ts\n@@ -612,6 +612,7 @@ function convertTools(tools: Tool[]): OpenAI.Chat.Completions.ChatCompletionTool\n \t\t\tname: tool.name,\n \t\t\tdescription: tool.description,\n \t\t\tparameters: tool.parameters as any, // TypeBox already generates JSON Schema\n+\t\t\tstrict: false, // Disable strict mode to allow optional parameters without null unions\n \t\t},\n \t}));\n }\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "a613306e11ddd960f6dc8c17e83943cf8a2e008f",
+  "message": "fix(ai): disable strict mode for OpenAI completions tool schemas",
+  "module": "openai-completions",
+  "tags": []
+}

@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "bash-executor",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "executeCommand",
+      "boundary": "service",
+      "bug_summary": "Bash 执行器逐块使用 data.toString() 解码 UTF-8，多字节字符跨 chunk 时被错误切分产生乱码",
+      "correct_behavior": "TextDecoder 流式解码保持 UTF-8 多字节字符完整性，无乱码",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "使用 TextDecoder 流式解码替代逐块 toString()，正确处理跨 chunk 的 UTF-8 多字节字符",
+      "module": "bash-executor",
+      "source_commit": "6ddfd1be13c36d12bd8744a8cd7281f698e67993",
+      "test_spec": {
+        "args": {
+          "command": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "output 不含替换字符 U+FFFD",
+            "type": "return_value",
+            "what": "UTF-8 多字节字符不乱码"
+          },
+          {
+            "expected": "使用 new TextDecoder() 实例解码",
+            "type": "return_value",
+            "what": "使用 TextDecoder 解码"
+          }
+        ],
+        "outputs": {
+          "stdout": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "Bash 命令输出包含 UTF-8 多字节字符且被分片传输"
+          }
+        ],
+        "trigger": {
+          "method": "executeCommand",
+          "target": "bash-executor",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "跨 chunk 的 UTF-8 字符（如中文）被切分为乱码或替换字符"
+    },
+    {
+      "action": "executeRemoteBash",
+      "boundary": "service",
+      "bug_summary": "远程 Bash 执行流式读取时按 chunk 直接 toString('utf-8')，跨 chunk 的 UTF-8 多字节字符产生乱码",
+      "correct_behavior": "TextDecoder 流式解码正确处理跨 chunk 的多字节字符",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "为远程执行添加 TextDecoder 流式解码替代逐块 toString('utf-8')",
+      "module": "bash-executor",
+      "source_commit": "7293d7cb8213cdbe3f4ebefcdbff9251a50fc8b5",
+      "test_spec": {
+        "args": {
+          "command": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "!output.includes('\\uFFFD')",
+            "type": "return_value",
+            "what": "远程输出不含 UTF-8 替换字符"
+          },
+          {
+            "expected": "decoder instanceof TextDecoder",
+            "type": "return_value",
+            "what": "使用 TextDecoder 实例解码"
+          }
+        ],
+        "outputs": {
+          "stdout": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "远程 Bash 命令输出包含跨分片的 UTF-8 多字节字符"
+          }
+        ],
+        "trigger": {
+          "method": "executeRemoteBash",
+          "target": "bash-executor",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "远程 Bash 输出中的跨 chunk UTF-8 字符被截断为替换字符"
+    }
+  ]
+}

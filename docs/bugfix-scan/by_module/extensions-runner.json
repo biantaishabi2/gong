@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "extensions-runner",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "createContext",
+      "boundary": "service",
+      "bug_summary": "createContext 创建时固化 model 快照，扩展后续读取不到模型变更",
+      "correct_behavior": "model 通过 getter 动态读取，始终返回当前活跃模型",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "将 model 属性改为 getter，通过 getModel() 动态读取当前模型",
+      "module": "extensions-runner",
+      "source_commit": "e68058cc4f0b686e486157ce530a941b3e639a21",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "ctx.model === newModel after switch",
+            "type": "return_value",
+            "what": "模型切换后 ctx.model 返回新模型"
+          },
+          {
+            "expected": "Object.getOwnPropertyDescriptor(ctx, 'model').get exists",
+            "type": "return_value",
+            "what": "使用 getter 而非固化值"
+          }
+        ],
+        "outputs": {
+          "model": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "扩展上下文已创建，初始模型为 A"
+          }
+        ],
+        "trigger": {
+          "method": "createContext",
+          "target": "extensions-runner",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "扩展上下文的 model 始终是创建时的快照，模型切换后不更新"
+    }
+  ]
+}

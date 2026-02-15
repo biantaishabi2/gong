@@ -1,0 +1,50 @@
+{
+  "source_commit": "3235926eedfca6d62c4cec0d7a0e64edf78e5614",
+  "bug_summary": "折叠态 bash 预览在截断前注入前导空行，导致 'earlier lines' 跳过行数 off-by-one",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "bash_preview_truncate",
+  "fix_summary": "truncateToVisualLines 输入改为 styledOutput（不含前导换行），折叠态手动添加空行分隔",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "折叠态显示 '23 earlier lines' 但实际只有 22 行被跳过",
+  "correct_behavior": "折叠态正确显示跳过行数，与实际一致",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "bash 工具输出超过 BASH_PREVIEW_LINES 行",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tool-execution",
+      "method": "renderBashPreview"
+    },
+    "args": {
+      "width": {
+        "type": "int",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "skipped_count": "int",
+      "lines": "array"
+    },
+    "assertions": [
+      {
+        "what": "跳过行数不含前导空行",
+        "type": "return_value",
+        "expected": "skipped_count === actual_hidden_lines"
+      },
+      {
+        "what": "折叠态第一行是空行分隔",
+        "type": "return_value",
+        "expected": "lines[0] === ''"
+      }
+    ]
+  }
+}

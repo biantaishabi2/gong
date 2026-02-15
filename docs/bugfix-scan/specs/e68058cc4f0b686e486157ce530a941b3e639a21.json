@@ -1,0 +1,43 @@
+{
+  "source_commit": "e68058cc4f0b686e486157ce530a941b3e639a21",
+  "bug_summary": "createContext 创建时固化 model 快照，扩展后续读取不到模型变更",
+  "module": "extensions-runner",
+  "action": "createContext",
+  "fix_summary": "将 model 属性改为 getter，通过 getModel() 动态读取当前模型",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "扩展上下文的 model 始终是创建时的快照，模型切换后不更新",
+  "correct_behavior": "model 通过 getter 动态读取，始终返回当前活跃模型",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "扩展上下文已创建，初始模型为 A",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "extensions-runner",
+      "method": "createContext"
+    },
+    "args": {},
+    "outputs": {
+      "model": "object"
+    },
+    "assertions": [
+      {
+        "what": "模型切换后 ctx.model 返回新模型",
+        "type": "return_value",
+        "expected": "ctx.model === newModel after switch"
+      },
+      {
+        "what": "使用 getter 而非固化值",
+        "type": "return_value",
+        "expected": "Object.getOwnPropertyDescriptor(ctx, 'model').get exists"
+      }
+    ]
+  }
+}

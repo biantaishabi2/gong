@@ -1,0 +1,42 @@
+{
+  "source_commit": "bcd109f2e9a52e58fe9ec54229caec2bb7596dbf",
+  "bug_summary": "ChatPanel 设置 agent 后残留调试 console.log 输出工具信息",
+  "module": "chat_panel",
+  "action": "setAgent",
+  "fix_summary": "移除 console.log('ChatPanel: Agent set with tools:', tools) 调试语句",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "每次 setAgent 时控制台输出 'ChatPanel: Agent set with tools:' 加工具列表",
+  "correct_behavior": "setAgent 不输出调试日志",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "ChatPanel 已初始化",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "chat_panel",
+      "method": "setAgent"
+    },
+    "args": {
+      "tools": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "console_output": "string"
+    },
+    "assertions": [
+      {
+        "what": "控制台无 Agent set with tools 输出",
+        "type": "side_effect",
+        "expected": "console.log not called with 'ChatPanel: Agent set with tools:'"
+      }
+    ]
+  }
+}

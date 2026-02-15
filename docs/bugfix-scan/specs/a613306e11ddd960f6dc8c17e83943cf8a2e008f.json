@@ -1,0 +1,44 @@
+{
+  "source_commit": "a613306e11ddd960f6dc8c17e83943cf8a2e008f",
+  "bug_summary": "OpenAI completions 工具 schema 未关闭 strict 模式，含可选参数的 schema 被严格校验拒绝",
+  "module": "openai-completions",
+  "action": "convertTools",
+  "fix_summary": "在工具 schema 中添加 strict: false 禁用严格模式",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "含可选参数无 null union 的 schema 被 strict 模式拒绝",
+  "correct_behavior": "strict: false 允许可选参数通过校验",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "工具 schema 包含可选参数但无 null union",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "openai-completions",
+      "method": "convertTools"
+    },
+    "args": {
+      "schema": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "tool_config": "object"
+    },
+    "assertions": [
+      {
+        "what": "strict 设为 false",
+        "type": "return_value",
+        "expected": "tool_config.strict === false"
+      }
+    ]
+  }
+}

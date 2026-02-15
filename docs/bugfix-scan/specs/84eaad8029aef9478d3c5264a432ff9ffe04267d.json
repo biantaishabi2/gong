@@ -1,0 +1,47 @@
+{
+  "source_commit": "84eaad8029aef9478d3c5264a432ff9ffe04267d",
+  "bug_summary": "Editor 通过 charCode 精确匹配回车和退格，无法识别 Kitty 协议编码的按键",
+  "module": "editor",
+  "action": "handleInput",
+  "fix_summary": "使用 isBackspace/isEnter 辅助函数替代 charCodeAt 精确匹配，支持多终端编码",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Kitty 协议的回车和退格序列不被识别，导致编辑器无响应",
+  "correct_behavior": "使用 isBackspace/isEnter 函数统一识别传统和 Kitty 协议的回车/退格",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器已启用，终端可能使用 Kitty 协议",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "editor",
+      "method": "handleInput"
+    },
+    "args": {
+      "data": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "action": "string"
+    },
+    "assertions": [
+      {
+        "what": "Kitty 回车序列被识别为提交",
+        "type": "return_value",
+        "expected": "isEnter(kittyEnterSeq) === true"
+      },
+      {
+        "what": "Kitty 退格序列被识别为退格",
+        "type": "return_value",
+        "expected": "isBackspace(kittyBackspaceSeq) === true"
+      }
+    ]
+  }
+}

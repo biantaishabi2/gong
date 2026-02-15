@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/theme/theme.ts b/packages/coding-agent/src/modes/interactive/theme/theme.ts\nindex 69b3db7a..ae291813 100644\n--- a/packages/coding-agent/src/modes/interactive/theme/theme.ts\n+++ b/packages/coding-agent/src/modes/interactive/theme/theme.ts\n@@ -166,10 +166,12 @@ function detectColorMode(): ColorMode {\n \t\treturn \"truecolor\";\n \t}\n \tconst term = process.env.TERM || \"\";\n-\tif (term.includes(\"256color\")) {\n+\t// Only fall back to 256color for truly limited terminals\n+\tif (term === \"dumb\" || term === \"\" || term === \"linux\") {\n \t\treturn \"256color\";\n \t}\n-\treturn \"256color\";\n+\t// Assume truecolor for everything else - virtually all modern terminals support it\n+\treturn \"truecolor\";\n }\n \n function hexToRgb(hex: string): { r: number; g: number; b: number } {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "b4fb6770e46a3eb62a285c7b60357da09b793faa",
+  "message": "Assume truecolor for most terminals (fixes SSH color detection)",
+  "module": "theme",
+  "tags": []
+}

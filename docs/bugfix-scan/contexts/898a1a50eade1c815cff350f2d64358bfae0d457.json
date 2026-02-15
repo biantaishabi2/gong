@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 268bfccb..7677e116 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -145,6 +145,7 @@ export class InteractiveMode {\n \tprivate keybindings: KeybindingsManager;\n \tprivate version: string;\n \tprivate isInitialized = false;\n+\tprivate hasRenderedInitialMessages = false;\n \tprivate onInputCallback?: (text: string) => void;\n \tprivate loadingAnimation: Loader | undefined = undefined;\n \tprivate readonly defaultWorkingMessage = \"Working...\";\n@@ -619,7 +620,9 @@ export class InteractiveMode {\n \t\t\t\t\tthis.session\n \t\t\t\t\t\t.sendCustomMessage(message, options)\n \t\t\t\t\t\t.then(() => {\n-\t\t\t\t\t\t\tif (!wasStreaming && message.display) {\n+\t\t\t\t\t\t\t// Don't rebuild if initial render hasn't happened yet\n+\t\t\t\t\t\t\t// (renderInitialMessages will handle it)\n+\t\t\t\t\t\t\tif (!wasStreaming && message.display && this.hasRenderedInitialMessages) {\n \t\t\t\t\t\t\t\tthis.rebuildChatFromMessages();\n \t\t\t\t\t\t\t}\n \t\t\t\t\t\t})\n@@ -2007,6 +2010,7 @@ export class InteractiveMode {\n \t}\n \n \trenderInitialMessages(): void {\n+\t\tthis.hasRenderedInitialMessages = true;\n \t\t// Get aligned messages and entries from session context\n \t\tconst context = this.sessionManager.buildSessionContext();\n \t\tthis.renderSessionContext(context, {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "898a1a50eade1c815cff350f2d64358bfae0d457",
+  "message": "fix(coding-agent): prevent duplicate rendering of extension messages on startup",
+  "module": "interactive-mode",
+  "tags": []
+}

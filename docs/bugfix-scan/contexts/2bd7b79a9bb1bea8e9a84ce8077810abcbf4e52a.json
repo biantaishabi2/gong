@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/keybindings.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/keybindings.ts b/packages/tui/src/keybindings.ts\nindex f426b394..168c354d 100644\n--- a/packages/tui/src/keybindings.ts\n+++ b/packages/tui/src/keybindings.ts\n@@ -70,7 +70,7 @@ export const DEFAULT_EDITOR_KEYBINDINGS: Required<EditorKeybindingsConfig> = {\n \tselectUp: \"up\",\n \tselectDown: \"down\",\n \tselectConfirm: \"enter\",\n-\tselectCancel: \"escape\",\n+\tselectCancel: [\"escape\", \"ctrl+c\"],\n \t// Clipboard\n \tcopy: \"ctrl+c\",\n };\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2bd7b79a9bb1bea8e9a84ce8077810abcbf4e52a",
+  "message": "fix: selectCancel should include both escape and ctrl+c",
+  "module": "keybindings",
+  "tags": []
+}

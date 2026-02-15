@@ -1,0 +1,24 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/simple-options.ts",
+      "hunks": [
+        {
+          "after_function": "export function buildBaseOptions(model: Model<Api>, options?: SimpleStreamOptions, apiKey?: string): StreamOptions {\n\treturn {\n\t\ttemperature: options?.temperature,\n\t\tmaxTokens: options?.maxTokens || Math.min(model.maxTokens, 32000),\n\t\tsignal: options?.signal,\n\t\tapiKey: apiKey || options?.apiKey,\n\t\tcacheRetention: options?.cacheRetention,\n\t\tsessionId: options?.sessionId,\n\t\theaders: options?.headers,\n\t\tonPayload: options?.onPayload,\n\t\tmaxRetryDelayMs: options?.maxRetryDelayMs,\n\t};\n}",
+          "before_function": "export function buildBaseOptions(model: Model<Api>, options?: SimpleStreamOptions, apiKey?: string): StreamOptions {\n\treturn {\n\t\ttemperature: options?.temperature,\n\t\tmaxTokens: options?.maxTokens || Math.min(model.maxTokens, 32000),\n\t\tsignal: options?.signal,\n\t\tapiKey: apiKey || options?.apiKey,\n\t\tsessionId: options?.sessionId,\n\t\theaders: options?.headers,\n\t\tonPayload: options?.onPayload,\n\t\tmaxRetryDelayMs: options?.maxRetryDelayMs,\n\t};\n}",
+          "changed_lines": [
+            9
+          ],
+          "function_line": 3,
+          "function_name": "buildBaseOptions"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/ai/src/providers/simple-options.ts b/packages/ai/src/providers/simple-options.ts\nindex f6cbfa65..a1a298aa 100644\n--- a/packages/ai/src/providers/simple-options.ts\n+++ b/packages/ai/src/providers/simple-options.ts\n@@ -6,6 +6,7 @@ export function buildBaseOptions(model: Model<Api>, options?: SimpleStreamOption\n \t\tmaxTokens: options?.maxTokens || Math.min(model.maxTokens, 32000),\n \t\tsignal: options?.signal,\n \t\tapiKey: apiKey || options?.apiKey,\n+\t\tcacheRetention: options?.cacheRetention,\n \t\tsessionId: options?.sessionId,\n \t\theaders: options?.headers,\n \t\tonPayload: options?.onPayload,\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "8f7ef85833c3e590ed862e76a25f209fd9b28623",
+  "message": "fix(ai): pass through cacheRetention in buildBaseOptions",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

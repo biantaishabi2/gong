@@ -1,0 +1,43 @@
+{
+  "source_commit": "3493e47b4dba16a5ef3bae4e8d2e1f0c3e9d0a7b",
+  "bug_summary": "激活路径标记●被拼接在树形前缀之前且非激活项强制占位空格，导致标记位置与文本对齐错误",
+  "module": "tree-selector",
+  "action": "render_tree_line",
+  "fix_summary": "将 pathMarker 从前缀前移到前缀后（紧贴标签文本前），非激活项不再占位",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "● 标记在树形连接线之前显示，非激活项有多余空格",
+  "correct_behavior": "● 标记紧贴在标签文本之前，非激活项无多余占位",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "树选择器包含激活路径和非激活路径节点",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tree-selector",
+      "method": "renderLine"
+    },
+    "args": {},
+    "outputs": {
+      "line": "string"
+    },
+    "assertions": [
+      {
+        "what": "激活路径标记在前缀之后、标签之前",
+        "type": "return_value",
+        "expected": "line 格式为 cursor + prefix + ● + label"
+      },
+      {
+        "what": "非激活项无多余空格占位",
+        "type": "return_value",
+        "expected": "非激活项 pathMarker 为空字符串"
+      }
+    ]
+  }
+}

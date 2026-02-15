@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/utils/overflow.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/utils/overflow.ts b/packages/ai/src/utils/overflow.ts\nindex 8a84e4a3..15c3c6cc 100644\n--- a/packages/ai/src/utils/overflow.ts\n+++ b/packages/ai/src/utils/overflow.ts\n@@ -32,7 +32,7 @@ const OVERFLOW_PATTERNS = [\n \t/exceeds the limit of \\d+/i, // GitHub Copilot\n \t/exceeds the available context size/i, // llama.cpp server\n \t/greater than the context length/i, // LM Studio\n-\t/context length exceeded/i, // Generic fallback\n+\t/context[_ ]length[_ ]exceeded/i, // Generic fallback\n \t/too many tokens/i, // Generic fallback\n \t/token limit exceeded/i, // Generic fallback\n ];\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "946efe4b4561b7ae8c0818d9f83d2434c0c24d17",
+  "message": "fix(ai): detect context_length_exceeded overflow",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

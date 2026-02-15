@@ -1,0 +1,49 @@
+{
+  "source_commit": "653025e6ca981cdeb4370cbfbda348246b05fe83",
+  "bug_summary": "调用 OpenAI responses.create 时固定传入 timeout: undefined，在某些客户端版本中触发参数校验错误",
+  "module": "openai-responses",
+  "action": "streamOpenAIResponses",
+  "fix_summary": "仅在 options.signal 存在时才传入 signal 选项，避免传入无效的 timeout: undefined",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "始终传入 { signal: options?.signal, timeout: undefined }，undefined timeout 导致请求失败",
+  "correct_behavior": "仅在有 signal 时构建选项对象，不传入无效的 timeout 字段",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "OpenAI 客户端已初始化，无 signal 的调用选项",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "openai-responses",
+      "method": "streamOpenAIResponses"
+    },
+    "args": {
+      "signal": {
+        "type": "AbortSignal|undefined",
+        "required": false,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "stream": "object"
+    },
+    "assertions": [
+      {
+        "what": "无 signal 时不传 timeout 选项",
+        "type": "return_value",
+        "expected": "create 调用第二参数不含 timeout 字段"
+      },
+      {
+        "what": "有 signal 时正确传入",
+        "type": "return_value",
+        "expected": "create 调用第二参数含 signal 字段"
+      }
+    ]
+  }
+}

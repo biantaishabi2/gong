@@ -1,0 +1,43 @@
+{
+  "source_commit": "38aaaee9680e3f2ae3d0bd42abff8bc6e2e48b3e",
+  "bug_summary": "ConsoleRuntimeProvider 中残留的 console.log 调试语句导致执行错误被重复输出到控制台",
+  "module": "console_runtime_provider",
+  "action": "remove_debug_logs",
+  "fix_summary": "移除三处 console.log 调试语句（'Reporting execution error'、'Execution completed'、'Reporting execution complete'）",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "执行错误和完成事件被 console.log 重复输出，干扰正常日志",
+  "correct_behavior": "无多余 console.log 输出，错误通过正常通道报告",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "ConsoleRuntimeProvider 已初始化",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "ConsoleRuntimeProvider",
+      "method": "reportExecution"
+    },
+    "args": {},
+    "outputs": {
+      "console_output": "array"
+    },
+    "assertions": [
+      {
+        "what": "无 'Reporting execution error' 调试日志",
+        "type": "return_value",
+        "expected": "console.log 不含调试语句"
+      },
+      {
+        "what": "错误通过正常通道报告",
+        "type": "return_value",
+        "expected": "error 通过 callback 而非 console.log 传递"
+      }
+    ]
+  }
+}

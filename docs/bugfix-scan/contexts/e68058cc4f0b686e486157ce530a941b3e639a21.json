@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/extensions/runner.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/extensions/runner.ts b/packages/coding-agent/src/core/extensions/runner.ts\nindex bd7db904..bb75daac 100644\n--- a/packages/coding-agent/src/core/extensions/runner.ts\n+++ b/packages/coding-agent/src/core/extensions/runner.ts\n@@ -307,13 +307,16 @@ export class ExtensionRunner {\n \t * Context values are resolved at call time, so changes via initialize() are reflected.\n \t */\n \tcreateContext(): ExtensionContext {\n+\t\tconst getModel = this.getModel;\n \t\treturn {\n \t\t\tui: this.uiContext,\n \t\t\thasUI: this.hasUI(),\n \t\t\tcwd: this.cwd,\n \t\t\tsessionManager: this.sessionManager,\n \t\t\tmodelRegistry: this.modelRegistry,\n-\t\t\tmodel: this.getModel(),\n+\t\t\tget model() {\n+\t\t\t\treturn getModel();\n+\t\t\t},\n \t\t\tisIdle: () => this.isIdleFn(),\n \t\t\tabort: () => this.abortFn(),\n \t\t\thasPendingMessages: () => this.hasPendingMessagesFn(),\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "e68058cc4f0b686e486157ce530a941b3e639a21",
+  "message": "fix: custom footer extensions now see model changes",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

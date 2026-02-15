@@ -1,0 +1,202 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "theme",
+  "spec_count": 4,
+  "specs": [
+    {
+      "action": "getResolvedThemeColors",
+      "boundary": "service",
+      "bug_summary": "HTML 导出在未指定 themeName 时回退到默认主题而非使用当前激活主题",
+      "correct_behavior": "优先使用 currentThemeName，仅在都为空时才回退到 getDefaultTheme()",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将回退链从 themeName ?? getDefaultTheme() 改为 themeName ?? currentThemeName ?? getDefaultTheme()",
+      "module": "theme",
+      "source_commit": "a9fbfc7955cc2abe0e0ce2de47d65b87a08c68dd",
+      "test_spec": {
+        "args": {
+          "themeName": {
+            "allowed": null,
+            "required": false,
+            "type": "string|null"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "resolved === currentThemeName when themeName is null",
+            "type": "return_value",
+            "what": "未指定时使用当前主题"
+          },
+          {
+            "expected": "resolved === themeName when provided",
+            "type": "return_value",
+            "what": "指定时使用指定主题"
+          }
+        ],
+        "outputs": {
+          "resolved_theme": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "currentThemeName 为 dark，getDefaultTheme() 返回 light"
+          }
+        ],
+        "trigger": {
+          "method": "getResolvedThemeColors",
+          "target": "theme",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "未指定主题时使用 getDefaultTheme()，忽略用户当前激活的 currentThemeName"
+    },
+    {
+      "action": "detectColorMode",
+      "boundary": "service",
+      "bug_summary": "颜色模式检测对大多数终端回退为 256color，SSH 等现代终端被误判为低色彩",
+      "correct_behavior": "仅 dumb/空/linux 回退 256color，其他（含 xterm-256color）默认 truecolor",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "仅对 dumb/空/linux 等真正受限终端回退 256color，其他终端默认 truecolor",
+      "module": "theme",
+      "source_commit": "b4fb6770e46a3eb62a285c7b60357da09b793faa",
+      "test_spec": {
+        "args": {
+          "COLORTERM": {
+            "allowed": null,
+            "required": false,
+            "type": "string"
+          },
+          "TERM": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "detectColorMode({TERM:'xterm-256color'}) === 'truecolor'",
+            "type": "return_value",
+            "what": "xterm-256color → truecolor"
+          },
+          {
+            "expected": "detectColorMode({TERM:'dumb'}) === '256color'",
+            "type": "return_value",
+            "what": "dumb → 256color"
+          }
+        ],
+        "outputs": {
+          "mode": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "COLORTERM 未设置，TERM 为 xterm-256color"
+          }
+        ],
+        "trigger": {
+          "method": "detectColorMode",
+          "target": "theme",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "TERM=xterm-256color 时回退为 256color，SSH 终端颜色显示降级"
+    },
+    {
+      "action": "detectColorSupport",
+      "boundary": "service",
+      "bug_summary": "Terminal.app 不支持 truecolor 但未被检测为受限终端，导致颜色渲染异常",
+      "correct_behavior": "Terminal.app 被识别并自动降级到 256color，颜色正常显示",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "增加 TERM_PROGRAM === 'Apple_Terminal' 检测，Terminal.app 强制降级到 256color 模式",
+      "module": "theme",
+      "source_commit": "236285b3909b7e8f7a08eff3dffa7f6c2f0c49c8",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "TERM_PROGRAM='Apple_Terminal' → colorMode === '256color'",
+            "type": "return_value",
+            "what": "Terminal.app 返回 256color"
+          },
+          {
+            "expected": "TERM_PROGRAM='iTerm.app' → 不强制降级",
+            "type": "return_value",
+            "what": "其他终端不受影响"
+          }
+        ],
+        "outputs": {
+          "colorMode": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "运行环境的 TERM_PROGRAM 环境变量已设置"
+          }
+        ],
+        "trigger": {
+          "method": "detectColorSupport",
+          "target": "theme",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Terminal.app 中使用 truecolor 导致颜色渲染错误或乱码"
+    },
+    {
+      "action": "loadThemeForExport",
+      "boundary": "service",
+      "bug_summary": "导出主题时仅搜索内置/自定义目录，未查找已注册分发主题的 sourcePath，导致 /export 失败",
+      "correct_behavior": "通过 registeredTheme.sourcePath 直接读取分发主题文件，/export 成功",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "增加从 registeredThemes 的 sourcePath 直接读取主题文件的逻辑，优先于目录搜索",
+      "module": "theme",
+      "source_commit": "5555864c5741b1e28c3a9f4d7e5c6b2a0f8d3e1c",
+      "test_spec": {
+        "args": {
+          "name": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "theme !== null 且数据来自 sourcePath",
+            "type": "return_value",
+            "what": "分发主题通过 sourcePath 加载"
+          },
+          {
+            "expected": "无 sourcePath 时降级到目录搜索",
+            "type": "return_value",
+            "what": "内置主题仍从目录加载"
+          }
+        ],
+        "outputs": {
+          "theme": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "存在通过分发方式注册的主题（有 sourcePath）"
+          }
+        ],
+        "trigger": {
+          "method": "loadTheme",
+          "target": "theme",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "/export 分发主题时找不到文件，导出失败"
+    }
+  ]
+}

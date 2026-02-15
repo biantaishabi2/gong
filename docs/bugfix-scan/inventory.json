@@ -1,0 +1,3668 @@
+{
+  "meta": {
+    "repo": "/home/wangbo/document/pi-mono",
+    "scanned_at": "2026-02-15T02:20:13+0800",
+    "total_commits": 2930,
+    "bugfix_commits": 177,
+    "by_grade": {
+      "A": 177
+    }
+  },
+  "commits": [
+    {
+      "hash": "88ac5ca1d9d5ecd68b5b40167472ab4d208a70e1",
+      "message": "fix(coding-agent): treat dot-prefixed extension paths as local",
+      "author": "Mario Zechner",
+      "date": "2026-02-08",
+      "grade": "A",
+      "module": "agent-end",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": ".pi/extensions/agent-end.ts",
+          "add": 7,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/package-manager.ts",
+          "add": 1,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "a6cd254471b6b0cc3a08782e9026dd14b03773fe",
+      "message": "fix(coding-agent): ensure rg is downloaded at startup alongside fd",
+      "author": "Mario Zechner",
+      "date": "2026-02-08",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "3cf5e23c0d428895e47be3f73d0da3034b483d60",
+      "message": "fix(coding-agent): propagate autocomplete to custom editors (#1372)",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-02-07",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "828c40cf68984ede829c6fa6adac9a697ca14d8a",
+      "message": "Fix the issue of aborting retries when an extension customizes the editor (#1364)",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-02-07",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 3,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "d1fce2ba1d5784e76341d44c4fdd9dcfe683e57f",
+      "message": "fix(ai): disable OpenAI Responses storage by default (closes #1308)",
+      "author": "Mario Zechner",
+      "date": "2026-02-06",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/openai-responses.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "92fdb53c106d8424589cd2e3a5e62cda5ba3cdec",
+      "message": "fix(coding-agent): run extension shutdown via clean TUI shutdown path",
+      "author": "Mario Zechner",
+      "date": "2026-02-06",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "8792ee2a6622974dce63baaee218d5eca70c38e5",
+      "message": "fix(coding-agent): add /quit autocomplete and remove /exit fixes #1303",
+      "author": "Mario Zechner",
+      "date": "2026-02-06",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/slash-commands.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "0232c4406468d6737ba8230ef553eb1c20a62bd2",
+      "message": "fix(ai,coding-agent): re-export typebox symbols and align docs closes #1338",
+      "author": "Mario Zechner",
+      "date": "2026-02-06",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [
+        "export",
+        "null_safety"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/README.md",
+          "add": 2,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/index.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/examples/extensions/hello.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "b5be54b8efe2b594cd1dce7a9a76bc5321f37462",
+      "message": "fix(coding-agent): persist user message after fork",
+      "author": "Mario Zechner",
+      "date": "2026-02-04",
+      "grade": "A",
+      "module": "session-manager",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/session-manager.ts",
+          "add": 5,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "20d704fee1c1ec53398f2fe460e1a6333616654f",
+      "message": "fix(tui): restore legacy newline handling",
+      "author": "Mario Zechner",
+      "date": "2026-02-03",
+      "grade": "A",
+      "module": "editor",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/components/editor.ts",
+          "add": 8,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "2e1c5ebdee5efdc5b13fc318700e8b8caa10a2e2",
+      "message": "fix(ai): relax xhigh model check",
+      "author": "Mario Zechner",
+      "date": "2026-02-03",
+      "grade": "A",
+      "module": "models",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/models.ts",
+          "add": 1,
+          "del": 4,
+          "kind": "model"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "fe534b22003a19beb4174d780e1b566671e63c3c",
+      "message": "fix(tui): handle emojis in input cursor (#1183)",
+      "author": "xu0o0",
+      "date": "2026-02-03",
+      "grade": "A",
+      "module": "input",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/components/input.ts",
+          "add": 5,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "f431f626090371fbf2d1d323593bbb5e446da5a4",
+      "message": "fix(tui): pause stdin before restoring raw mode to prevent SSH session close",
+      "author": "Mario Zechner",
+      "date": "2026-02-02",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/terminal.ts",
+          "add": 5,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "c9a20a3aa432132b620569fbd4e0347dea98f37b",
+      "message": "fix(coding-agent): normalize @ path prefixes closes #1206",
+      "author": "Mario Zechner",
+      "date": "2026-02-02",
+      "grade": "A",
+      "module": "extensions",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/docs/extensions.md",
+          "add": 2,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/tools/path-utils.ts",
+          "add": 5,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "fe1d0ae7f33cc99d7f7d1805ae3ae99e0e77fc54",
+      "message": "fix(coding-agent): preserve editor content during tree navigation summarization (#1169)",
+      "author": "Aliou Diallo",
+      "date": "2026-02-01",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "8f7ef85833c3e590ed862e76a25f209fd9b28623",
+      "message": "fix(ai): pass through cacheRetention in buildBaseOptions",
+      "author": "Mario Zechner",
+      "date": "2026-02-01",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/simple-options.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "3830d74d22fa20ca0b2b2c7398c2fb674f98a065",
+      "message": "fix(coding-agent): export discoverAndLoadExtensions from package",
+      "author": "Mario Zechner",
+      "date": "2026-02-01",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/index.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "025b7bec7a5d441f67b34944a6a6f934c68b52a3",
+      "message": "fix(coding-agent): add spacer before context output",
+      "author": "Mario Zechner",
+      "date": "2026-02-01",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 1
+    },
+    {
+      "hash": "1bd68327f37c95c8edd6c8e9008e4bb570262a4f",
+      "message": "fix: make pre-commit hook fail on lint warnings, fix template literal warnings",
+      "author": "Mario Zechner",
+      "date": "2026-02-01",
+      "grade": "A",
+      "module": "package",
+      "tags": [
+        "transaction"
+      ],
+      "changed_files": [
+        {
+          "path": "package.json",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/daxnuts.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/test/bug-regression-isimageline-startswith-bug.test.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        },
+        {
+          "path": "packages/web-ui/package.json",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "3c687b427ec24c83138ae1c9de88f75f30491005",
+      "message": "fix(skills): add path resolution guidance to skills preamble",
+      "author": "Mario Zechner",
+      "date": "2026-02-01",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/skills.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "836e852af178a6f6b49fffea8ce4e6440f2c60cb",
+      "message": "Fixes #1099",
+      "author": "Mario Zechner",
+      "date": "2026-01-30",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/tui.ts",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "af813f904816c776bbcfa8b9f29d79bcae998f5b",
+      "message": "fix(ai): default tool call arguments",
+      "author": "Mario Zechner",
+      "date": "2026-01-30",
+      "grade": "A",
+      "module": "anthropic",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/anthropic.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/google-shared.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "52532c7c008102d2555d2ecc49a120dd7741c879",
+      "message": "fix(ai): update Antigravity User-Agent to 1.15.8",
+      "author": "Mario Zechner",
+      "date": "2026-01-29",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/google-gemini-cli.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/examples/extensions/antigravity-image-gen.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "d1e33599f6cb23ae993ba17313b50ce757b410f8",
+      "message": "fix(coding-agent): show resources before messages when resuming session",
+      "author": "Mario Zechner",
+      "date": "2026-01-29",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 4,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "2ad48256535ddd768d49fd92da4cd5dc57edcc23",
+      "message": "fix: autocompleteMaxVisible setting not persisting",
+      "author": "Mario Zechner",
+      "date": "2026-01-29",
+      "grade": "A",
+      "module": "settings-manager",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/settings-manager.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 1
+    },
+    {
+      "hash": "ebd8e895ce32daa25d1fb6f0eda1eec623571dcd",
+      "message": "fix: typos in comments (fixes #1016)",
+      "author": "mom",
+      "date": "2026-01-28",
+      "grade": "A",
+      "module": "stream",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/test/stream.test.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/web-ui/src/components/SandboxedIframe.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "ec0aa5c30e2e747bac63820a6d8ce6a00407104f",
+      "message": "feat(web-ui): export CustomProviderCard, ProviderKeyInput, AbortedMessage, ToolMessageDebugView (fixes #1015)",
+      "author": "mom",
+      "date": "2026-01-28",
+      "grade": "A",
+      "module": "web-ui",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/index.ts",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "4f9deddd477dfbcb39d6274751cd1b44b7507aff",
+      "message": "fix(ai): detect DeepSeek URLs and disable unsupported developer role",
+      "author": "Mario Zechner",
+      "date": "2026-01-28",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/openai-completions.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "dd854c4a75d3d096c38e3a2fa0b51313ce5db981",
+      "message": "feat(web-ui): export CustomProviderCard, ProviderKeyInput, AbortedMessage, ToolMessageDebugView (fixes #1015)",
+      "author": "mom",
+      "date": "2026-01-28",
+      "grade": "A",
+      "module": "web-ui",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/index.ts",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "7347d755e40f1d3b219dcf0cb45d9e9a5bc2e270",
+      "message": "Revert \"feat(web-ui): export CustomProviderCard, ProviderKeyInput, AbortedMessage, ToolMessageDebugView (fixes #1015)\"",
+      "author": "mom",
+      "date": "2026-01-28",
+      "grade": "A",
+      "module": "web-ui",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/index.ts",
+          "add": 0,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "3ae0cbe3847813ec93632df1ca02e46d4edb3bbd",
+      "message": "fix(coding-agent): Title Case extension hotkeys in /hotkeys output (#969)",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-01-27",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "9b903656aea9b0646244d295e578933bd0c888a8",
+      "message": "fix(ai): correct provider error message typo (closes #958)",
+      "author": "Mario Zechner",
+      "date": "2026-01-26",
+      "grade": "A",
+      "module": "azure-openai-responses",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/azure-openai-responses.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/google.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/openai-completions.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/openai-responses.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "1544ab1794dc2c146ed5add2316c16aa0bba8a4d",
+      "message": "fix: clarify startup hints for thinking level and expand thinking",
+      "author": "Mario Zechner",
+      "date": "2026-01-26",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "f1b1d54955370247d85a9528f076b29d68580d82",
+      "message": "fix(coding-agent): delegate extension shortcuts instead of copying (#947)",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-01-25",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "0423c2c2d53ba933162e9e0c3cc271e58454bf4c",
+      "message": "fix: add /model instruction to no models warning",
+      "author": "Mario Zechner",
+      "date": "2026-01-25",
+      "grade": "A",
+      "module": "sdk",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/sdk.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "27b27d94412b33e527c3c6777fd60a2c36f7afc3",
+      "message": "fix(coding-agent): restore the correct editor after /reload (#949)",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-01-25",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 5,
+          "del": 5,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "5555864c5741b474a5dc9bcd762405d8869d6f87",
+      "message": "Fixes distributed themes breaking /export (#946)",
+      "author": "Armin Ronacher",
+      "date": "2026-01-25",
+      "grade": "A",
+      "module": "theme",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+          "add": 8,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "0faba293e61ebf451a0a238f16bc437d3a2cbcf4",
+      "message": "fix(coding-agent): truncate bash hint line to terminal width",
+      "author": "Mario Zechner",
+      "date": "2026-01-25",
+      "grade": "A",
+      "module": "a_g_e_n_t_s",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "AGENTS.md",
+          "add": 0,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tool-execution.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "4bb21b7f5faaa3d24a127af91a6ae2646dc42860",
+      "message": "fix(coding-agent): change sort keybinding from Ctrl+N to Ctrl+S in /resume picker",
+      "author": "Mario Zechner",
+      "date": "2026-01-25",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "beb1455cab4102c757e7dbc04a729f9e05292254",
+      "message": "fix(tui): move lastAction handling out of setTextInternal()",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-01-25",
+      "grade": "A",
+      "module": "editor",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/components/editor.ts",
+          "add": 1,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "3235926eedfc13c6f23e00a1ae31958aad6b4af0",
+      "message": "fix(coding-agent): off-by-one error in bash output 'earlier lines' count",
+      "author": "Mario Zechner",
+      "date": "2026-01-24",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tool-execution.ts",
+          "add": 3,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "48fc57f321a48644cd9b2b1d2eee01e168e62af9",
+      "message": "feat(coding-agent): expose copyToClipboard for extensions",
+      "author": "Mario Zechner",
+      "date": "2026-01-24",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/index.ts",
+          "add": 2,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "2bbc25523736419d8b041460d8c462f6c7130d60",
+      "message": "fix(coding-agent): propagate paddingX to custom editors",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-01-24",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/editor-component.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "89636cfe6ee3b992f43132a74c841abeec80c4e4",
+      "message": "fix(coding-agent): improve read tool description for full file reads",
+      "author": "Mario Zechner",
+      "date": "2026-01-24",
+      "grade": "A",
+      "module": "read",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/tools/read.ts",
+          "add": 4,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "73734a23a1cf114e6f3a7810d1aba4a3bc061e8c",
+      "message": "fix(coding-agent): only list built-in tools in system prompt",
+      "author": "Mario Zechner",
+      "date": "2026-01-23",
+      "grade": "A",
+      "module": "system-prompt",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/system-prompt.ts",
+          "add": 3,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "75eb841bb214a8880daf8e8dd9133d2b62f7b09d",
+      "message": "fix(coding-agent): register themes from resource loader",
+      "author": "Mario Zechner",
+      "date": "2026-01-23",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "0f0c54b812042f1c138479553d11a77e32d07f36",
+      "message": "fix(coding-agent): expand paste markers in follow-up queue",
+      "author": "Mario Zechner",
+      "date": "2026-01-22",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "5e079e2ea81f99306092646b73f55891c9b46d58",
+      "message": "fix(coding-agent): use specific terminology in reload messages instead of 'resources'",
+      "author": "Mario Zechner",
+      "date": "2026-01-22",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "d89f6e08ce58d4c38189b1787363269d91147dcc",
+      "message": "fix(coding-agent): normalize raw git URLs in extension source matching",
+      "author": "Mario Zechner",
+      "date": "2026-01-22",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": ".gitignore",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 6,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "7d2255ddc2a6a7cd4202a4b3aae4d29ed8271c9f",
+      "message": "fix(coding-agent): reset terminal title and working message in resetExtensionUI",
+      "author": "Mario Zechner",
+      "date": "2026-01-22",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "9b84857b838eab0ca40160eaf9cba1acc56f6004",
+      "message": "fix(coding-agent): add 'terminated' to retryable error patterns",
+      "author": "Mario Zechner",
+      "date": "2026-01-22",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/agent-session.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "b7cef51f3f5068f61f144bd5c5130a295a3e0c16",
+      "message": "fix(tui): don't add space after directory completion for @ file attachments",
+      "author": "Mario Zechner",
+      "date": "2026-01-21",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/autocomplete.ts",
+          "add": 5,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "5c047c351d3bf6fd3f6b0d1d47311f72fc63fbed",
+      "message": "fix(coding-agent): filter out conflicting extensions from loaded list",
+      "author": "Mario Zechner",
+      "date": "2026-01-21",
+      "grade": "A",
+      "module": "resource-loader",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/resource-loader.ts",
+          "add": 6,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "69d02b8a5fce07041f77aba64c6ebbc8589827ab",
+      "message": "fix(coding-agent): use dynamic paths in error messages (#887)",
+      "author": "Aliou Diallo",
+      "date": "2026-01-21",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/sdk.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/utils/shell.ts",
+          "add": 3,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "a9fbfc7955cc2abe0e0ce2de47d65b87a08c68dd",
+      "message": "fix(export): use active theme instead of default for HTML export (#870)",
+      "author": "scutifer",
+      "date": "2026-01-20",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "236285b3909bc1bc7f16f74d1e337576ffbb18e2",
+      "message": "fix(coding-agent): fall back to 256color in Terminal.app (#869)",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-01-20",
+      "grade": "A",
+      "module": "theme",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+          "add": 5,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "4cc1c96495f7b250191f568c8e871f71ab2fdc11",
+      "message": "fix(coding-agent): exit on resume cancel",
+      "author": "Mario Zechner",
+      "date": "2026-01-19",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "8b23c0a45ed3768b1e7f8dace0e45bbae52e7635",
+      "message": "feat(coding-agent): use hash fragments for share URLs (#829)",
+      "author": "Michael Renner",
+      "date": "2026-01-18",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "6bde679a5f5818c6915f52794bf209300f52786e",
+      "message": "fix(tui): use the non-null assertion operator instead of assert()",
+      "author": "Sviatoslav Abakumov",
+      "date": "2026-01-18",
+      "grade": "A",
+      "module": "editor",
+      "tags": [
+        "null_safety"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/components/editor.ts",
+          "add": 1,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "18d9d9d7048d397bce21cac4dc72b0d4d6f2f72e",
+      "message": "fix(tui): document kill ring and reset history",
+      "author": "Mario Zechner",
+      "date": "2026-01-17",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/README.md",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/CHANGELOG.md",
+          "add": 2,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/components/editor.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "09d9107d7fb0c3a74a2fe6f5b4ff57b78b9de442",
+      "message": "fix(coding-agent): expand tilde in PI_CODING_AGENT_DIR env var (#778)",
+      "author": "Aliou Diallo",
+      "date": "2026-01-16",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/config.ts",
+          "add": 8,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "5d3e7d5aaa8a5301fa5937bcd1bd7d3557c60c6f",
+      "message": "fix(ai): preserve unsigned tool call context for Gemini 3 with anti-mimicry note",
+      "author": "Mario Zechner",
+      "date": "2026-01-16",
+      "grade": "A",
+      "module": "google-shared",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/google-shared.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/test/google-shared-gemini3-unsigned-tool-call.test.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "898a1a50eade1c815cff350f2d64358bfae0d457",
+      "message": "fix(coding-agent): prevent duplicate rendering of extension messages on startup",
+      "author": "Danila Poyarkov",
+      "date": "2026-01-16",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 5,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "05d78ea2de8adbfd2bab47970852bcd543d3dc6a",
+      "message": "Fix session picker 'No sessions found' overflow",
+      "author": "Mario Zechner",
+      "date": "2026-01-16",
+      "grade": "A",
+      "module": "session-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "2836d97735dc7105f28b662f272ab75bb844f607",
+      "message": "Fix session picker empty state overflow",
+      "author": "Mario Zechner",
+      "date": "2026-01-16",
+      "grade": "A",
+      "module": "session-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+          "add": 6,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "3326b8f521725d6360862a248ff97127975b26d6",
+      "message": "Fix --no-extensions flag not preventing extension discovery",
+      "author": "Mario Zechner",
+      "date": "2026-01-16",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "588399594c36cf4ee5bb04d4ab9e8220adc66b5f",
+      "message": "Fix session picker hint overflow (closes #764)",
+      "author": "Mario Zechner",
+      "date": "2026-01-16",
+      "grade": "A",
+      "module": "session-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+          "add": 3,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "cceb5908d913209f0e448930e1c8efe8accbb657",
+      "message": "fix: opencode provider uses system role instead of developer (#755)",
+      "author": "Melih Mucuk",
+      "date": "2026-01-15",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/openai-completions.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "c85a5720f28c6f329268be650f553789a3dd3591",
+      "message": "fix: include skill path in /skill prompts (#711)",
+      "author": "Justin Williams",
+      "date": "2026-01-14",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "fb6d464edc0763e943ea41da918a0480e8b04b08",
+      "message": "Fix auto-retry for fetch failed errors",
+      "author": "Mario Zechner",
+      "date": "2026-01-14",
+      "grade": "A",
+      "module": "agent-session",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/agent-session.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "653025e6ca981cdeb4370cbfbda348246b05fe83",
+      "message": "Fix OpenAI responses timeout option (#706)",
+      "author": "Markus Ylisiurunen",
+      "date": "2026-01-14",
+      "grade": "A",
+      "module": "openai-responses",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/openai-responses.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "2b75948c2e15a717811a25cd0c6e597a247eb3e8",
+      "message": "fix(ai): export parseStreamingJson from main package for tsx compatibility",
+      "author": "Mario Zechner",
+      "date": "2026-01-13",
+      "grade": "A",
+      "module": "proxy",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/agent/src/proxy.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/index.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "d2f15f9ebb8df93ba6f5bba0ecf114a758e9f8cd",
+      "message": "fix: theme loading when installed via mise (fixes #681)",
+      "author": "Mario Zechner",
+      "date": "2026-01-13",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/config.ts",
+          "add": 7,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "0138eee6f761791b3a45028904864faa7625f070",
+      "message": "Fix tool mapping",
+      "author": "Mario Zechner",
+      "date": "2026-01-12",
+      "grade": "A",
+      "module": "anthropic",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/anthropic.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "175a137d006a498ba5e1b0541b4fed79ef00738c",
+      "message": "Fix missing spacer between assistant message and text editor",
+      "author": "Mario Zechner",
+      "date": "2026-01-12",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "234f367d0ddbfb6e958e986bf962e02c21d06f4c",
+      "message": "fix(coding-agent): make /new create a new session file",
+      "author": "Mario Zechner",
+      "date": "2026-01-12",
+      "grade": "A",
+      "module": "session-manager",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/session-manager.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "7a41975e9ec07acd3992cfef9867c30e728f4238",
+      "message": "Fix Claude via Google APIs requiring tool call IDs (#653)",
+      "author": "Danila Poyarkov",
+      "date": "2026-01-12",
+      "grade": "A",
+      "module": "google-shared",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/google-shared.ts",
+          "add": 10,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "e68058cc4f0b686e486157ce530a941b3e639a21",
+      "message": "fix: custom footer extensions now see model changes",
+      "author": "Ogulcan Celik",
+      "date": "2026-01-11",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/extensions/runner.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "019ad0ec115cda565a95f4363f973859eb3c8d35",
+      "message": "Fix /changelog adding 'What's New' to footer permanently",
+      "author": "Mario Zechner",
+      "date": "2026-01-11",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "b74a3658f370068bc159908a553f9892be89791f",
+      "message": "fix(coding-agent): display extension loading errors to user",
+      "author": "Aliou Diallo",
+      "date": "2026-01-11",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 5,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "23a4fd11597e7ea717c6436924b7b09613fef79a",
+      "message": "fix: load keybindings before --resume session picker",
+      "author": "Aos Dabbagh",
+      "date": "2026-01-11",
+      "grade": "A",
+      "module": "r_e_a_d_m_e",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/README.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "3592f9b7c98769c3866e281b72e12f9f9b295b1f",
+      "message": "fix: Model selector fuzzy search matches provider + id",
+      "author": "Mario Zechner",
+      "date": "2026-01-11",
+      "grade": "A",
+      "module": "model-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/model-selector.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "model"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "5db7cc693bf5696ac9cf334a94fc20ecdb810cb9",
+      "message": "fix: Model selector fuzzy search matches id + provider",
+      "author": "Mario Zechner",
+      "date": "2026-01-11",
+      "grade": "A",
+      "module": "model-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/model-selector.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "model"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "7293d7cb8213cdbe3f4ebefcdbff9251a50fc8b5",
+      "message": "fix(coding-agent): UTF-8 corruption in remote bash execution",
+      "author": "Mario Zechner",
+      "date": "2026-01-10",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/bash-executor.ts",
+          "add": 3,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "a613306e11ddd960f6dc8c17e83943cf8a2e008f",
+      "message": "fix(ai): disable strict mode for OpenAI completions tool schemas",
+      "author": "Mario Zechner",
+      "date": "2026-01-10",
+      "grade": "A",
+      "module": "openai-completions",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/openai-completions.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 1
+    },
+    {
+      "hash": "7a8ea9020f80e5a7c40db7636a2edb4467a6a777",
+      "message": "fix(coding-agent): show '(ctrl+o to collapse)' hint for bash output when expanded",
+      "author": "Jian Zhang",
+      "date": "2026-01-10",
+      "grade": "A",
+      "module": "bash-execution",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/bash-execution.ts",
+          "add": 5,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "ef7c52ffa170ef109e80404438450ef6ed159e8b",
+      "message": "chore: fix template literal lint, update AGENTS.md to require fixing all check output",
+      "author": "Mario Zechner",
+      "date": "2026-01-08",
+      "grade": "A",
+      "module": "a_g_e_n_t_s",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "AGENTS.md",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/google-gemini-cli.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "946efe4b4561b7ae8c0818d9f83d2434c0c24d17",
+      "message": "fix(ai): detect context_length_exceeded overflow",
+      "author": "Mario Zechner",
+      "date": "2026-01-08",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 2,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/utils/overflow.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "7a44cf0db0939351818bb4bd598116ec5fdd02ac",
+      "message": "fix(tui): matchesKey now matches Kitty sequences for unmodified letter keys",
+      "author": "Mario Zechner",
+      "date": "2026-01-07",
+      "grade": "A",
+      "module": "keys",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/keys.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "3964984f5977077f95750c3ee07593449200b57c",
+      "message": "fix(coding-agent): keep editor text on queued steering",
+      "author": "Thomas Mustier",
+      "date": "2026-01-06",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 0,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 1
+    },
+    {
+      "hash": "4d87196801083fdb94160875d90651d7bee23a8e",
+      "message": "fix(tui): remove alt+enter from newLine default keybinding",
+      "author": "Mario Zechner",
+      "date": "2026-01-05",
+      "grade": "A",
+      "module": "r_e_a_d_m_e",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/README.md",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/keybindings.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "e4f63f585f01a8ff6483cd0b7058acb685cd2768",
+      "message": "fix(coding-agent): load extensions from settings.json",
+      "author": "Melih Mucuk",
+      "date": "2026-01-05",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 4,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "b4fb6770e46a3eb62a285c7b60357da09b793faa",
+      "message": "Assume truecolor for most terminals (fixes SSH color detection)",
+      "author": "Mario Zechner",
+      "date": "2026-01-05",
+      "grade": "A",
+      "module": "theme",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/theme/theme.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "9c87eeb8053bb153197b81fc519b06ca5bc20f63",
+      "message": "Fix Anthropic login not showing URL (showPrompt should not clear content)",
+      "author": "Mario Zechner",
+      "date": "2026-01-05",
+      "grade": "A",
+      "module": "login-dialog",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/login-dialog.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "8b6bc3030174503a350c616d7e8e8cdd1e45c31d",
+      "message": "fix(hooks): deep copy messages in context event before passing to hooks",
+      "author": "Mario Zechner",
+      "date": "2026-01-04",
+      "grade": "A",
+      "module": "runner",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/hooks/runner.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "31438fdf2af8bdc72e041f375afc0fd896be17a4",
+      "message": "fix(tools): wrap ALL registry tools with hooks, not just active ones",
+      "author": "Mario Zechner",
+      "date": "2026-01-04",
+      "grade": "A",
+      "module": "sdk",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/sdk.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "6ddfd1be13c36d12bd8744a8cd7281f698e67993",
+      "message": "fix(coding-agent): resolved UTF-8 corruption in bash executor output (#433)",
+      "author": "Can Bölük",
+      "date": "2026-01-04",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/bash-executor.ts",
+          "add": 3,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "ddf8bfceee7fbf1a42d2d38697084e7105fd7ac1",
+      "message": "fix(hooks): deep copy messages in context event before passing to hooks",
+      "author": "Mario Zechner",
+      "date": "2026-01-04",
+      "grade": "A",
+      "module": "runner",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/hooks/runner.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "9b0ec024051fd114dacfe6649792562b162bd84d",
+      "message": "Fix version check URL typo (#423)",
+      "author": "Evgeniy Skuridin",
+      "date": "2026-01-03",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "e3c261671354fed3d3848f66bd11bab2898cc36a",
+      "message": "fix(tui): add legacy terminal support for shift+letter shortcuts",
+      "author": "Helmut Januschka",
+      "date": "2026-01-03",
+      "grade": "A",
+      "module": "keys",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/keys.ts",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "69a8ecd5b37fdde6eb2b93b78a3c7feefb54bec0",
+      "message": "fix: slash command autocomplete triggers for . - _ prefixes",
+      "author": "Mario Zechner",
+      "date": "2026-01-03",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/components/editor.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "2bd7b79a9bb1bea8e9a84ce8077810abcbf4e52a",
+      "message": "fix: selectCancel should include both escape and ctrl+c",
+      "author": "Helmut Januschka",
+      "date": "2026-01-03",
+      "grade": "A",
+      "module": "keybindings",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/keybindings.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "0f81b096252674f3324c19748af9a91ef679253b",
+      "message": "Fix edit tool diff not showing in TUI",
+      "author": "Mario Zechner",
+      "date": "2026-01-03",
+      "grade": "A",
+      "module": "tool-execution",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tool-execution.ts",
+          "add": 6,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "f7e7d6aa41925369058182535e488808e0bfd9d1",
+      "message": "fix(tui): add legacy terminal support for shift+letter shortcuts",
+      "author": "Helmut Januschka",
+      "date": "2026-01-03",
+      "grade": "A",
+      "module": "keys",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/keys.ts",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "209d95870e2bcd368b09ad76443c0000d232f855",
+      "message": "Fix arrow key in model selector prior to model loading (#398)",
+      "author": "Armin Ronacher",
+      "date": "2026-01-02",
+      "grade": "A",
+      "module": "model-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/model-selector.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "model"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "3ad5a168e7499ea4d9c87b5012875dd63dac7fa9",
+      "message": "Fix DynamicBorder crash when theme not initialized",
+      "author": "Mario Zechner",
+      "date": "2026-01-02",
+      "grade": "A",
+      "module": "dynamic-border",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/dynamic-border.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "d97a96493cd72e1a8a552fe46ca48e207ca193b9",
+      "message": "fix(tui): Strip OSC 8 hyperlink sequences in visibleWidth (#396)",
+      "author": "cursive",
+      "date": "2026-01-02",
+      "grade": "A",
+      "module": "utils",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/utils.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "1d9fa13d5843787bec904db8f762e3d294115f0f",
+      "message": "Fix crash on Unicode format characters in visibleWidth",
+      "author": "Mario Zechner",
+      "date": "2026-01-01",
+      "grade": "A",
+      "module": "utils",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/utils.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "dbdb99c486cabc705bfe7e3c863464a60b4b9bef",
+      "message": "Fix system prompt: add specific doc/example paths for each topic",
+      "author": "Mario Zechner",
+      "date": "2025-12-31",
+      "grade": "A",
+      "module": "system-prompt",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/system-prompt.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "98c85bf36a6f29a49182e3d315cfebd405288922",
+      "message": "fix(coding-agent): save initial model and thinking level to session",
+      "author": "Aliou Diallo",
+      "date": "2025-12-30",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/sdk.ts",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "8ed6f6dd85991ded5e724c94f346026cbf5c8afa",
+      "message": "Fix pods CLI: remove reference to non-existent stopAllModels",
+      "author": "Mario Zechner",
+      "date": "2025-12-30",
+      "grade": "A",
+      "module": "cli",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/pods/src/cli.ts",
+          "add": 1,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "92947a3dc450e1f8bd1eded4682bfe6766a1cbcc",
+      "message": "Fix common ancestor finding: iterate backwards to find deepest ancestor",
+      "author": "Mario Zechner",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "branch-summarization",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/compaction/branch-summarization.ts",
+          "add": 5,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "0fe9f74b4ec2ad7fc7f525f9c3f21c29e8dcb36c",
+      "message": "Return defensive copies from SettingsManager getters",
+      "author": "Mario Zechner",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "settings-manager",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/settings-manager.ts",
+          "add": 5,
+          "del": 5,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "32ec1fa883a5ae28792e5aeb84209e936d63068a",
+      "message": "fix(coding-agent): treat multiple roots as children of virtual branching root",
+      "author": "Mario Zechner",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "tree-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "d42a3d71fe752bffcb76c9eed821e4d20ec0f137",
+      "message": "fix: make OAuth login URL clickable in terminal",
+      "author": "Cursivez",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 3,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "e30c4e30cb9ae0b306382becf680067cad668857",
+      "message": "Fix /copy after aborts",
+      "author": "Armin Ronacher",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "agent-session",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/agent-session.ts",
+          "add": 7,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "3493e47b4dbae8548eeea52859305c3b54b6c838",
+      "message": "fix(coding-agent): move active path marker to right before entry text",
+      "author": "Mario Zechner",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "tree-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+          "add": 3,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "e50eae105476c7177a2d36f97f1271d4fe39f222",
+      "message": "fix(coding-agent): display multiple roots at indent 0, keep child logic intact",
+      "author": "Mario Zechner",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "tree-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+          "add": 5,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "97e5e8c918995c7003a52d1a5624cd3c0d1fc4de",
+      "message": "fix(coding-agent): use smaller bullet marker with space for active path",
+      "author": "Mario Zechner",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "tree-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "8d3b4dd762ece93ec5dcecc9c06b638736f36587",
+      "message": "fix(coding-agent): keep gutters when rendering virtual root children",
+      "author": "Mario Zechner",
+      "date": "2025-12-29",
+      "grade": "A",
+      "module": "tree-selector",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+          "add": 2,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "481bc79f83cadbdf765146853bdf66d895ae0ea6",
+      "message": "Fix Buffer usage in github-copilot.ts - use atob()",
+      "author": "Mario Zechner",
+      "date": "2025-12-28",
+      "grade": "A",
+      "module": "github-copilot",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/utils/oauth/github-copilot.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "ecef601d195620b6b107f25db07d54bca99be4f0",
+      "message": "Fix hook message duplication in TUI",
+      "author": "Mario Zechner",
+      "date": "2025-12-28",
+      "grade": "A",
+      "module": "session-manager",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/session-manager.ts",
+          "add": 5,
+          "del": 2,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 1,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "574f1cba3d5f0336e84a95a57e99caa9a8712328",
+      "message": "Fix messageTransformer to normalize HookMessage string content to array",
+      "author": "Mario Zechner",
+      "date": "2025-12-27",
+      "grade": "A",
+      "module": "messages",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/messages.ts",
+          "add": 3,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "754f55e3f6ce4cbf5b60ccd28f5674eedb6339e2",
+      "message": "Fix: handle branch_summary in kept messages before compaction",
+      "author": "Mario Zechner",
+      "date": "2025-12-26",
+      "grade": "A",
+      "module": "session-manager",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/session-manager.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "77595b97f94e5693a8ee87673b4da811f340bc8b",
+      "message": "Fix --session flag to use provided filename",
+      "author": "Mario Zechner",
+      "date": "2025-12-26",
+      "grade": "A",
+      "module": "session-manager",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/session-manager.ts",
+          "add": 5,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "e904b11e7b4fb97105712a951ffb72b2572df69f",
+      "message": "Fix Ghostty detection inside tmux for inline images (#299)",
+      "author": "Nico Bailon",
+      "date": "2025-12-24",
+      "grade": "A",
+      "module": "terminal-image",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/terminal-image.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "6201bae8057023143a719de1a8e399660a49718c",
+      "message": "Fix lint warnings in main.ts",
+      "author": "Mario Zechner",
+      "date": "2025-12-22",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 2,
+          "del": 5,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "3266cac0f1b185ced2beb713da82032a6cd1b68c",
+      "message": "Fix coloring in footer when context usage is colored",
+      "author": "Mario Zechner",
+      "date": "2025-12-20",
+      "grade": "A",
+      "module": "footer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/components/footer.ts",
+          "add": 8,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "c1382818cc8469aace68b987efbcd9b506cfe0eb",
+      "message": "fix(coding-agent): add connection error to retryable errors",
+      "author": "Mario Zechner",
+      "date": "2025-12-20",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 2,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/core/agent-session.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "2a0283ecfde0b41653f0a1260b112443480b80de",
+      "message": "Fix token counts in google-gemini-cli.ts for anthropic models.",
+      "author": "Mario Zechner",
+      "date": "2025-12-20",
+      "grade": "A",
+      "module": "google-gemini-cli",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/google-gemini-cli.ts",
+          "add": 5,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "0fc6689dfbed8eb0105d29bbdd7cccca2c6a34be",
+      "message": "fix(ai): re-enable SDK retries for Anthropic provider",
+      "author": "Mario Zechner",
+      "date": "2025-12-20",
+      "grade": "A",
+      "module": "anthropic",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/anthropic.ts",
+          "add": 0,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "84eaad8029aef9478d3c5264a432ff9ffe04267d",
+      "message": "fix(tui): use isBackspace and isEnter helpers in Editor",
+      "author": "Mario Zechner",
+      "date": "2025-12-19",
+      "grade": "A",
+      "module": "editor",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/components/editor.ts",
+          "add": 4,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "6ff405a976b4a0188ef4a46ffc0a140744e4352a",
+      "message": "fix(ai): prevent double API version path in Google provider URL",
+      "author": "Cyril",
+      "date": "2025-12-19",
+      "grade": "A",
+      "module": "google",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/google.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "a9a1a62b14a77bd6543a01bdf8c1372a42aad2bf",
+      "message": "fix(coding-agent): prevent global AGENTS.md from being loaded twice (#239)",
+      "author": "Aliou Diallo",
+      "date": "2025-12-19",
+      "grade": "A",
+      "module": "system-prompt",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/system-prompt.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "d2088f7789c37b365f8faef7ec839849d4d7fcd7",
+      "message": "Fix: handle IMAGE_RECITATION and IMAGE_OTHER FinishReason in Google provider",
+      "author": "Mario Zechner",
+      "date": "2025-12-18",
+      "grade": "A",
+      "module": "google",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/google.ts",
+          "add": 2,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "b9fd912ecf07758939da46bf8dc6be9897027fda",
+      "message": "fix(coding-agent): support symlinked slash commands in discovery",
+      "author": "Aliou Diallo",
+      "date": "2025-12-18",
+      "grade": "A",
+      "module": "slash-commands",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/core/slash-commands.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "ce9ffaff9152bede4c30037e2f8137a7d76e4c50",
+      "message": "Fix ANSI styles not preserved across newlines in text wrapping",
+      "author": "Mario Zechner",
+      "date": "2025-12-15",
+      "grade": "A",
+      "module": "utils",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/utils.ts",
+          "add": 7,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "5a231abe4c937d787011c8fee0d07ce26a18003f",
+      "message": "mom: remove last_prompt.txt debug file (context.jsonl is source of truth)",
+      "author": "Mario Zechner",
+      "date": "2025-12-11",
+      "grade": "A",
+      "module": "agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/mom/src/agent.ts",
+          "add": 1,
+          "del": 8,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "7323af1f697c773edd22cb0814fe03ebc75369c6",
+      "message": "fixes #161: stop theme watcher and exit cleanly in print mode",
+      "author": "Mario Zechner",
+      "date": "2025-12-10",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 4,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "a248e2547ab50c5e4dea33281aa3fc6fdd7950a3",
+      "message": "fix(ai): remove global process.env.ANTHROPIC_API_KEY deletion (#164)",
+      "author": "Lukas Pitschl",
+      "date": "2025-12-10",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/ai/src/providers/anthropic.ts",
+          "add": 0,
+          "del": 5,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "86c2a33df4d47fa0cc7782b8efb52f5affb682d7",
+      "message": "fix(coding-agent): skip hook init when no hooks configured",
+      "author": "Mario Zechner",
+      "date": "2025-12-09",
+      "grade": "A",
+      "module": "interactive-mode",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+          "add": 5,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "75c2eea15130cd3ba79dca4380f75daa465bdb24",
+      "message": "Fix --session flag to load session messages and restore model/thinking",
+      "author": "Mario Zechner",
+      "date": "2025-12-09",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 3,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "029a04c43b8308c3c9c1fc9138db4afd34bfb5bb",
+      "message": "fix(mom): clarify attach tool only works with /workspace/ files",
+      "author": "Mario Zechner",
+      "date": "2025-12-05",
+      "grade": "A",
+      "module": "attach",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/mom/src/tools/attach.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "5c388c0a7767acc6e21fdf31bce677e585497480",
+      "message": "fix: make footer token counts more compact",
+      "author": "Mario Zechner",
+      "date": "2025-12-05",
+      "grade": "A",
+      "module": "footer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/footer.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "4de46fbab360f4e196469be2b106e8965f2931c4",
+      "message": "fix: suppress stderr in execSync calls to prevent TUI corruption",
+      "author": "Mario Zechner",
+      "date": "2025-11-27",
+      "grade": "A",
+      "module": "autocomplete",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/autocomplete.ts",
+          "add": 4,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "0397dd44c838f5dba88a315c784976cb975c62cc",
+      "message": "coding-agent: add pi-session- prefix to exported HTML files (#72)",
+      "author": "Mario Zechner",
+      "date": "2025-11-27",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [
+        "export"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/export-html.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "5fcdf0cfd841d520b2b5b1198dc5893be7cadce6",
+      "message": "feat(mom): add arrow prefix to tool labels for visual distinction",
+      "author": "Mario Zechner",
+      "date": "2025-11-27",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/mom/CHANGELOG.md",
+          "add": 8,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/mom/src/agent.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "bfe7df6a491b59e220e4f58a1fcd75e4dc465b67",
+      "message": "fix: biome linter warnings (unused parameters)",
+      "author": "Mario Zechner",
+      "date": "2025-11-26",
+      "grade": "A",
+      "module": "agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/mom/src/agent.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/mom/src/main.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "958d265112e1bb969ed656adb6e126db2dc0378a",
+      "message": "fix: pass attachments to agent prompt from RPC interface",
+      "author": "kiliman",
+      "date": "2025-11-25",
+      "grade": "A",
+      "module": "coding-agent",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/main.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "59af0fd53a6128392a436decae967e0631dd2f33",
+      "message": "fix: markdown link rendering for links with identical text and href",
+      "author": "Mario Zechner",
+      "date": "2025-11-21",
+      "grade": "A",
+      "module": "c_h_a_n_g_e_l_o_g",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/CHANGELOG.md",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/components/markdown.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "c7e4c84731de8e6c3d4e983d7b0dc37004a10368",
+      "message": "Simplify thinking level display in footer (remove 'Thinking:' prefix)",
+      "author": "Mario Zechner",
+      "date": "2025-11-20",
+      "grade": "A",
+      "module": "footer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/footer.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "d771475f98aa9320e095d194a7dfddc953c5cc15",
+      "message": "Fix superfluous newline in update notification",
+      "author": "Mario Zechner",
+      "date": "2025-11-20",
+      "grade": "A",
+      "module": "package",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/package.json",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/coding-agent/src/tui/tui-renderer.ts",
+          "add": 0,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "b49ac57d59578a112bb766bebb3c16ee81ba785e",
+      "message": "Fix changelog spacing.",
+      "author": "Mario Zechner",
+      "date": "2025-11-13",
+      "grade": "A",
+      "module": "tui-renderer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/tui-renderer.ts",
+          "add": 0,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 1
+    },
+    {
+      "hash": "4ff9c826d8ca238bb5c5e10fa729674f4a4ab817",
+      "message": "Fix context percentage showing 0% when last message was aborted",
+      "author": "Mario Zechner",
+      "date": "2025-11-13",
+      "grade": "A",
+      "module": "footer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/footer.ts",
+          "add": 2,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "6cf2ac0519ab94dd6625b18ab156b5808e4edeba",
+      "message": "fix: remove debug context window size from footer",
+      "author": "Mario Zechner",
+      "date": "2025-11-13",
+      "grade": "A",
+      "module": "footer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/footer.ts",
+          "add": 1,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "c23f1576dca2ea79b8f1368b1d1def661cc517cc",
+      "message": "Fix markdown component nested list rendering.",
+      "author": "Mario Zechner",
+      "date": "2025-11-13",
+      "grade": "A",
+      "module": "markdown",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/components/markdown.ts",
+          "add": 4,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "2509add9bfba62b26a18c7f4a645541c482974b4",
+      "message": "fix: don't clear loading animation when Ctrl+C clears editor",
+      "author": "Mario Zechner",
+      "date": "2025-11-12",
+      "grade": "A",
+      "module": "tui-renderer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/tui-renderer.ts",
+          "add": 0,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 1
+    },
+    {
+      "hash": "ea8b8b7f543e170d46ccbc100106f9d42be05e49",
+      "message": "Fix thinking trace styling when text wraps",
+      "author": "Mario Zechner",
+      "date": "2025-11-11",
+      "grade": "A",
+      "module": "assistant-message",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/assistant-message.ts",
+          "add": 3,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "f5176bb173e9023e59e365aa26cad6e150f73663",
+      "message": "Fix double spacing before tool executions by removing bottom padding from assistant Markdown",
+      "author": "Mario Zechner",
+      "date": "2025-11-11",
+      "grade": "A",
+      "module": "tui-renderer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui/tui-renderer.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "97e00fc45d809eeeb5961e99f7c0cf34a90858bf",
+      "message": "Fix Escape key to cancel autocomplete before interrupting agent",
+      "author": "Mario Zechner",
+      "date": "2025-11-11",
+      "grade": "A",
+      "module": "tui-renderer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/coding-agent/src/tui-renderer.ts",
+          "add": 3,
+          "del": 2,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/components/editor.ts",
+          "add": 4,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "2a67556e5dd9749b6a6f7fe324ee656103bc5761",
+      "message": "Fix font-size inheritance in HTML artifact iframes",
+      "author": "Mario Zechner",
+      "date": "2025-10-11",
+      "grade": "A",
+      "module": "sandboxed_iframe",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/components/SandboxedIframe.ts",
+          "add": 6,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 7
+    },
+    {
+      "hash": "b288cd9448de8fc944575b79e82af6d6a64cae9a",
+      "message": "Add debug logging to RuntimeMessageRouter and increase API key validation tokens",
+      "author": "Mario Zechner",
+      "date": "2025-10-09",
+      "grade": "A",
+      "module": "provider_key_input",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/components/ProviderKeyInput.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/web-ui/src/components/sandbox/RuntimeMessageRouter.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "c0ad46fa012dda4dd8e7ba4e0f1e1f6b5b3b7ed4",
+      "message": "Fix javascript-repl to throw errors on execution failure",
+      "author": "Mario Zechner",
+      "date": "2025-10-09",
+      "grade": "A",
+      "module": "javascript-repl",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/tools/javascript-repl.ts",
+          "add": 2,
+          "del": 3,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    },
+    {
+      "hash": "bb138307b18eccf72860005d2c9ae7979ed67efc",
+      "message": "Fix ConsoleRuntimeProvider hanging by calling respond()",
+      "author": "Mario Zechner",
+      "date": "2025-10-09",
+      "grade": "A",
+      "module": "console_runtime_provider",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts",
+          "add": 5,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 6
+    },
+    {
+      "hash": "8747e01c31b99b7f18c6111350a267e7daa0cfdb",
+      "message": "Display return values and fix duplicate error messages in REPL",
+      "author": "Mario Zechner",
+      "date": "2025-10-09",
+      "grade": "A",
+      "module": "sandboxed_iframe",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/components/SandboxedIframe.ts",
+          "add": 1,
+          "del": 2,
+          "kind": "other"
+        },
+        {
+          "path": "packages/web-ui/src/tools/javascript-repl.ts",
+          "add": 6,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "38aaaee9680e58176259c164708c90a5530fed47",
+      "message": "Remove debug console.log statements causing duplicate error messages",
+      "author": "Mario Zechner",
+      "date": "2025-10-09",
+      "grade": "A",
+      "module": "console_runtime_provider",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts",
+          "add": 0,
+          "del": 4,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "b3cce7b400730b2143e7b1a7338f4f28db92c9fe",
+      "message": "Fix spinner showing on aborted tool calls in javascript-repl and artifacts renderers",
+      "author": "Mario Zechner",
+      "date": "2025-10-08",
+      "grade": "A",
+      "module": "artifacts-tool-renderer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/tools/artifacts/artifacts-tool-renderer.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/web-ui/src/tools/javascript-repl.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "7068c01b445d5ca3056f3b16f84fc7621a80c7a3",
+      "message": "Remove debug console.log from ChatPanel",
+      "author": "Mario Zechner",
+      "date": "2025-10-06",
+      "grade": "A",
+      "module": "chat_panel",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/ChatPanel.ts",
+          "add": 0,
+          "del": 9,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 9
+    },
+    {
+      "hash": "bcd109f2e9a52e58fe9ec54229caec2bb7596dbf",
+      "message": "Remove debug console.log from ChatPanel",
+      "author": "Mario Zechner",
+      "date": "2025-10-06",
+      "grade": "A",
+      "module": "chat_panel",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/web-ui/src/ChatPanel.ts",
+          "add": 0,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 1
+    },
+    {
+      "hash": "9e8607938690e9610aad2ec3a291a0e44a32027b",
+      "message": "Fix block indexing in Google provider impl",
+      "author": "Mario Zechner",
+      "date": "2025-09-19",
+      "grade": "A",
+      "module": "google",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/google.ts",
+          "add": 2,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "a62231987c3c522b787dbd6cd6bf4d3afa9316a4",
+      "message": "fix(ai): Add anthropic-dangerous-direct-browser-access header",
+      "author": "Mario Zechner",
+      "date": "2025-09-01",
+      "grade": "A",
+      "module": "anthropic",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/anthropic.ts",
+          "add": 7,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "da43e625f805a287bab553b9bfcc1114ecbddd7f",
+      "message": "fix(ai): Add dangerouslyAllowBrowser flag for Anthropic client",
+      "author": "Mario Zechner",
+      "date": "2025-09-01",
+      "grade": "A",
+      "module": "anthropic",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/anthropic.ts",
+          "add": 8,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 10
+    },
+    {
+      "hash": "7db3068ceeb16f6cc66abab3f25483169eb86a3f",
+      "message": "fix(ai): Fix OpenAI Responses provider import order and cost calculation",
+      "author": "Mario Zechner",
+      "date": "2025-08-31",
+      "grade": "A",
+      "module": "openai-responses",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/openai-responses.ts",
+          "add": 3,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 3
+    },
+    {
+      "hash": "545d04fc5c933a3b24554618d27c7239065322ed",
+      "message": "fix(ai): Fix OpenAI completions store field type issue",
+      "author": "Mario Zechner",
+      "date": "2025-08-30",
+      "grade": "A",
+      "module": "openai-completions",
+      "tags": [
+        "null_safety"
+      ],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/openai-completions.ts",
+          "add": 1,
+          "del": 1,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 2
+    },
+    {
+      "hash": "289e60ab88da50039b8df256226d86d0edd96bee",
+      "message": "fix(ai): Correct Gemini thinking config structure",
+      "author": "Mario Zechner",
+      "date": "2025-08-25",
+      "grade": "A",
+      "module": "gemini",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/ai/src/providers/gemini.ts",
+          "add": 3,
+          "del": 5,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 8
+    },
+    {
+      "hash": "2c03724862c82670ee34da9060f5fc03e23bfba8",
+      "message": "fix: Remove unused imports and add biome-ignore for false positive",
+      "author": "Mario Zechner",
+      "date": "2025-08-16",
+      "grade": "A",
+      "module": "tui-renderer",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/agent/src/renderers/tui-renderer.ts",
+          "add": 0,
+          "del": 1,
+          "kind": "other"
+        },
+        {
+          "path": "packages/tui/src/tui.ts",
+          "add": 1,
+          "del": 2,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 4
+    },
+    {
+      "hash": "5ceaa91c7452bd893d7a79caf85b0aa5c8e31386",
+      "message": "fix(tui): Trigger initial render when start() is called",
+      "author": "Mario Zechner",
+      "date": "2025-08-11",
+      "grade": "A",
+      "module": "tui",
+      "tags": [],
+      "changed_files": [
+        {
+          "path": "packages/tui/src/tui.ts",
+          "add": 5,
+          "del": 0,
+          "kind": "other"
+        }
+      ],
+      "total_lines": 5
+    }
+  ]
+}

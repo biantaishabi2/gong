@@ -1,0 +1,24 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/models.ts",
+      "hunks": [
+        {
+          "after_function": "export function supportsXhigh<TApi extends Api>(model: Model<TApi>): boolean {\n\treturn model.id.includes(\"gpt-5.2\");\n}",
+          "before_function": "export function supportsXhigh<TApi extends Api>(model: Model<TApi>): boolean {\n\treturn XHIGH_MODELS.has(model.id);\n}",
+          "changed_lines": [
+            53
+          ],
+          "function_line": 52,
+          "function_name": "supportsXhigh"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/ai/src/models.ts b/packages/ai/src/models.ts\nindex b6c91565..a9e987b9 100644\n--- a/packages/ai/src/models.ts\n+++ b/packages/ai/src/models.ts\n@@ -45,15 +45,12 @@ export function calculateCost<TApi extends Api>(model: Model<TApi>, usage: Usage\n \treturn usage.cost;\n }\n \n-/** Models that support xhigh thinking level */\n-const XHIGH_MODELS = new Set([\"gpt-5.1-codex-max\", \"gpt-5.2\", \"gpt-5.2-codex\"]);\n-\n /**\n  * Check if a model supports xhigh thinking level.\n  * Currently only certain OpenAI Codex models support this.\n  */\n export function supportsXhigh<TApi extends Api>(model: Model<TApi>): boolean {\n-\treturn XHIGH_MODELS.has(model.id);\n+\treturn model.id.includes(\"gpt-5.2\");\n }\n \n /**\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2e1c5ebdee5efdc5b13fc318700e8b8caa10a2e2",
+  "message": "fix(ai): relax xhigh model check",
+  "module": "models",
+  "tags": []
+}

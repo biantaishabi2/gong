@@ -1,0 +1,54 @@
+{
+  "source_commit": "98c85bf36a6f29a49182e3d315cfebd405288922",
+  "bug_summary": "新会话初始化后未写入初始 model 和 thinkingLevel，后续恢复会话缺少可恢复状态",
+  "module": "sdk",
+  "action": "createAgentSession",
+  "fix_summary": "新建会话时调用 appendModelChange 和 appendThinkingLevelChange 持久化初始状态",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "新会话不记录初始 model 和 thinkingLevel，resume 时无法恢复",
+  "correct_behavior": "新建会话后立即持久化 model.provider/model.id 和 thinkingLevel",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "新会话无历史消息，已解析初始 model 和 thinkingLevel",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "sdk",
+      "method": "createAgentSession"
+    },
+    "args": {
+      "model": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      },
+      "thinkingLevel": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "persisted": "bool"
+    },
+    "assertions": [
+      {
+        "what": "appendModelChange 被调用",
+        "type": "side_effect",
+        "expected": "sessionManager.appendModelChange(provider, id) called"
+      },
+      {
+        "what": "appendThinkingLevelChange 被调用",
+        "type": "side_effect",
+        "expected": "sessionManager.appendThinkingLevelChange(thinkingLevel) called"
+      }
+    ]
+  }
+}

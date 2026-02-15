@@ -1,0 +1,66 @@
+{
+  "action": "antigravity_request",
+  "boundary": "service",
+  "bug_summary": "Antigravity 请求头中的 User-Agent 版本过旧，导致与沙箱端点协议不匹配并可能请求失败",
+  "correct_behavior": "请求使用新值 antigravity/1.15.8 darwin/arm64",
+  "data_dependencies": [
+    "config"
+  ],
+  "fix_summary": "将 ANTIGRAVITY_HEADERS 的 User-Agent 从 antigravity/1.11.5 darwin/arm64 更新为 antigravity/1.15.8 darwin/arm64（含 provider 与示例扩展）",
+  "module": "ai",
+  "source_commit": "52532c7c008102d2555d2ecc49a120dd7741c879",
+  "test_spec": {
+    "args": {
+      "endpoint": {
+        "allowed": [
+          "https://daily-cloudcode-pa.sandbox.googleapis.com"
+        ],
+        "required": true,
+        "type": "string"
+      },
+      "headers": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      },
+      "payload": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "headers.User-Agent=antigravity/1.15.8 darwin/arm64",
+        "type": "service_call",
+        "what": "出站请求头 User-Agent 为 antigravity/1.15.8 darwin/arm64"
+      },
+      {
+        "expected": "headers.User-Agent!=antigravity/1.11.5 darwin/arm64",
+        "type": "service_call",
+        "what": "不再出现旧版本 User-Agent"
+      }
+    ],
+    "outputs": {
+      "http_status": "int",
+      "response_body": "json"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "服务已加载 Antigravity 请求头配置"
+      },
+      {
+        "involves": "config",
+        "what": "可向 Antigravity sandbox endpoint 发起请求"
+      }
+    ],
+    "trigger": {
+      "method": "request",
+      "target": "GoogleGeminiCliProvider",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "请求使用旧值 antigravity/1.11.5 darwin/arm64"
+}

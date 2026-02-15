@@ -1,0 +1,26 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/messages.ts",
+      "hunks": [
+        {
+          "after_function": "export function messageTransformer(messages: AppMessage[]): Message[] {\n\treturn messages\n\t\t.map((m): Message | null => {\n\t\t\tif (isBashExecutionMessage(m)) {\n\t\t\t\t// Convert bash execution to user message\n\t\t\t\treturn {\n\t\t\t\t\trole: \"user\",\n\t\t\t\t\tcontent: [{ type: \"text\", text: bashExecutionToText(m) }],\n\t\t\t\t\ttimestamp: m.timestamp,\n\t\t\t\t};\n\t\t\t}\n\t\t\tif (isHookMessage(m)) {\n\t\t\t\t// Convert hook message to user message for LLM\n\t\t\t\t// Normalize string content to array format\n\t\t\t\tconst content = typeof m.content === \"string\" ? [{ type: \"text\" as const, text: m.content }] : m.content;\n\t\t\t\treturn {\n\t\t\t\t\trole: \"user\",\n\t\t\t\t\tcontent,\n\t\t\t\t\ttimestamp: m.timestamp,\n\t\t\t\t};\n\t\t\t}\n\t\t\t// Pass through standard LLM roles\n\t\t\tif (m.role === \"user\" || m.role === \"assistant\" || m.role === \"toolResult\") {\n\t\t\t\treturn m as Message;\n\t\t\t}\n\t\t\t// Filter out unknown message types\n\t\t\treturn null;\n\t\t})\n\t\t.filter((m): m is Message => m !== null);\n}",
+          "before_function": "export function messageTransformer(messages: AppMessage[]): Message[] {\n\treturn messages\n\t\t.map((m): Message | null => {\n\t\t\tif (isBashExecutionMessage(m)) {\n\t\t\t\t// Convert bash execution to user message\n\t\t\t\treturn {\n\t\t\t\t\trole: \"user\",\n\t\t\t\t\tcontent: [{ type: \"text\", text: bashExecutionToText(m) }],\n\t\t\t\t\ttimestamp: m.timestamp,\n\t\t\t\t};\n\t\t\t}\n\t\t\tif (isHookMessage(m)) {\n\t\t\t\t// Convert hook message to user message for LLM\n\t\t\t\treturn {\n\t\t\t\t\trole: \"user\",\n\t\t\t\t\tcontent: m.content,\n\t\t\t\t\ttimestamp: m.timestamp,\n\t\t\t\t};\n\t\t\t}\n\t\t\t// Pass through standard LLM roles\n\t\t\tif (m.role === \"user\" || m.role === \"assistant\" || m.role === \"toolResult\") {\n\t\t\t\treturn m as Message;\n\t\t\t}\n\t\t\t// Filter out unknown message types\n\t\t\treturn null;\n\t\t})\n\t\t.filter((m): m is Message => m !== null);\n}",
+          "changed_lines": [
+            119,
+            120,
+            123
+          ],
+          "function_line": 106,
+          "function_name": "messageTransformer"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/messages.ts b/packages/coding-agent/src/core/messages.ts\nindex b202ca7d..fa4c2969 100644\n--- a/packages/coding-agent/src/core/messages.ts\n+++ b/packages/coding-agent/src/core/messages.ts\n@@ -116,9 +116,11 @@ export function messageTransformer(messages: AppMessage[]): Message[] {\n \t\t\t}\n \t\t\tif (isHookMessage(m)) {\n \t\t\t\t// Convert hook message to user message for LLM\n+\t\t\t\t// Normalize string content to array format\n+\t\t\t\tconst content = typeof m.content === \"string\" ? [{ type: \"text\" as const, text: m.content }] : m.content;\n \t\t\t\treturn {\n \t\t\t\t\trole: \"user\",\n-\t\t\t\t\tcontent: m.content,\n+\t\t\t\t\tcontent,\n \t\t\t\t\ttimestamp: m.timestamp,\n \t\t\t\t};\n \t\t\t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "574f1cba3d5f0336e84a95a57e99caa9a8712328",
+  "message": "Fix messageTransformer to normalize HookMessage string content to array",
+  "module": "messages",
+  "tags": []
+}

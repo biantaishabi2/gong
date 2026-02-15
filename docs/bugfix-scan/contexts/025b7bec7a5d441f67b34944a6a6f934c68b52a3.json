@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex d364dbbd..e2e6eccf 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -888,6 +888,7 @@ export class InteractiveMode {\n \n \t\tconst contextFiles = this.session.resourceLoader.getAgentsFiles().agentsFiles;\n \t\tif (contextFiles.length > 0) {\n+\t\t\tthis.chatContainer.addChild(new Spacer(1));\n \t\t\tconst contextList = contextFiles.map((f) => theme.fg(\"dim\", `  ${this.formatDisplayPath(f.path)}`)).join(\"\\n\");\n \t\t\tthis.chatContainer.addChild(new Text(`${sectionHeader(\"Context\")}\\n${contextList}`, 0, 0));\n \t\t\tthis.chatContainer.addChild(new Spacer(1));\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "025b7bec7a5d441f67b34944a6a6f934c68b52a3",
+  "message": "fix(coding-agent): add spacer before context output",
+  "module": "interactive-mode",
+  "tags": []
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "236285b3909b7e8f7a08eff3dffa7f6c2f0c49c8",
+  "bug_summary": "Terminal.app 不支持 truecolor 但未被检测为受限终端，导致颜色渲染异常",
+  "module": "theme",
+  "action": "detectColorSupport",
+  "fix_summary": "增加 TERM_PROGRAM === 'Apple_Terminal' 检测，Terminal.app 强制降级到 256color 模式",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Terminal.app 中使用 truecolor 导致颜色渲染错误或乱码",
+  "correct_behavior": "Terminal.app 被识别并自动降级到 256color，颜色正常显示",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "运行环境的 TERM_PROGRAM 环境变量已设置",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "theme",
+      "method": "detectColorSupport"
+    },
+    "args": {},
+    "outputs": {
+      "colorMode": "string"
+    },
+    "assertions": [
+      {
+        "what": "Terminal.app 返回 256color",
+        "type": "return_value",
+        "expected": "TERM_PROGRAM='Apple_Terminal' → colorMode === '256color'"
+      },
+      {
+        "what": "其他终端不受影响",
+        "type": "return_value",
+        "expected": "TERM_PROGRAM='iTerm.app' → 不强制降级"
+      }
+    ]
+  }
+}

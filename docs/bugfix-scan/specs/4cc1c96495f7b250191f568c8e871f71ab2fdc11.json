@@ -1,0 +1,43 @@
+{
+  "source_commit": "4cc1c96495f7b250191f568c8e871f71ab2fdc11",
+  "bug_summary": "--resume 取消选择时仅 return，未停止 theme watcher 且未显式退出，进程悬挂",
+  "module": "coding-agent",
+  "action": "resume_cancel",
+  "fix_summary": "取消时增加 stopThemeWatcher() 和 process.exit(0)，确保干净退出",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "取消 --resume 会话选择后进程不退出，终端挂起",
+  "correct_behavior": "取消后停止 theme watcher 并 exit(0)，进程干净退出",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "--resume 模式下会话选择器已显示",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "main",
+      "method": "handleResumeCancel"
+    },
+    "args": {},
+    "outputs": {
+      "process_exited": "bool"
+    },
+    "assertions": [
+      {
+        "what": "theme watcher 被停止",
+        "type": "return_value",
+        "expected": "stopThemeWatcher 被调用"
+      },
+      {
+        "what": "进程以 exit code 0 退出",
+        "type": "return_value",
+        "expected": "process.exit(0) 被调用"
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "keybindings",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "selectCancel_binding",
+      "boundary": "service",
+      "bug_summary": "selectCancel 仅绑定 escape 键，ctrl+c 在选择态无法触发取消",
+      "correct_behavior": "选择态按 escape 或 ctrl+c 均可触发取消",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 selectCancel 从 'escape' 改为 ['escape', 'ctrl+c'] 数组绑定",
+      "module": "keybindings",
+      "source_commit": "2bd7b79a9bb156e0c3e59adc32fccff91b3f2c93",
+      "test_spec": {
+        "args": {
+          "action": {
+            "allowed": [
+              "selectCancel"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "keys.includes('escape')",
+            "type": "return_value",
+            "what": "selectCancel 包含 escape"
+          },
+          {
+            "expected": "keys.includes('ctrl+c')",
+            "type": "return_value",
+            "what": "selectCancel 包含 ctrl+c"
+          }
+        ],
+        "outputs": {
+          "keys": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "组件处于选择态（如模型选择器、文件选择器）"
+          }
+        ],
+        "trigger": {
+          "method": "getBinding",
+          "target": "keybindings",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "选择态按 ctrl+c 无反应，只有 escape 能取消"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "source_commit": "2a0283ecfde024b3e7b16e4f8b17e3bce1ddf33b",
+  "bug_summary": "promptTokenCount 包含 cachedContentTokenCount 但未扣除，导致 input token 数与 cache read 重复计数",
+  "module": "google-gemini-cli",
+  "action": "parse_usage_metadata",
+  "fix_summary": "input token 改为 promptTokenCount - cachedContentTokenCount，消除重复计数",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "input=100, cacheRead=40 → 总计 140（实际应为 100）",
+  "correct_behavior": "input=60, cacheRead=40 → 总计 100（promptTokenCount=100 减去 cached=40）",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Gemini CLI 收到包含 usageMetadata 的响应",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "google-gemini-cli",
+      "method": "parseUsageMetadata"
+    },
+    "args": {},
+    "outputs": {
+      "input": "int",
+      "cacheRead": "int"
+    },
+    "assertions": [
+      {
+        "what": "input = promptTokenCount - cachedContentTokenCount",
+        "type": "return_value",
+        "expected": "input === promptTokenCount - cachedContentTokenCount"
+      },
+      {
+        "what": "无缓存时 input = promptTokenCount",
+        "type": "return_value",
+        "expected": "cachedContentTokenCount=0 时 input === promptTokenCount"
+      }
+    ]
+  }
+}

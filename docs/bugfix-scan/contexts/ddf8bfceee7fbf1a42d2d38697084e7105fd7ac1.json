@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/hooks/runner.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/hooks/runner.ts b/packages/coding-agent/src/core/hooks/runner.ts\nindex d3589e31..eceb1d18 100644\n--- a/packages/coding-agent/src/core/hooks/runner.ts\n+++ b/packages/coding-agent/src/core/hooks/runner.ts\n@@ -451,11 +451,11 @@ export class HookRunner {\n \t * Handlers are chained - each gets the previous handler's output (if any).\n \t * Returns the final modified messages, or the original if no modifications.\n \t *\n-\t * Note: Messages are already deep-copied by the caller (pi-ai preprocessor).\n+\t * Messages are deep-copied before passing to hooks, so mutations are safe.\n \t */\n \tasync emitContext(messages: AgentMessage[]): Promise<AgentMessage[]> {\n \t\tconst ctx = this.createContext();\n-\t\tlet currentMessages = messages;\n+\t\tlet currentMessages = structuredClone(messages);\n \n \t\tfor (const hook of this.hooks) {\n \t\t\tconst handlers = hook.handlers.get(\"context\");\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "ddf8bfceee7fbf1a42d2d38697084e7105fd7ac1",
+  "message": "fix(hooks): deep copy messages in context event before passing to hooks",
+  "module": "runner",
+  "tags": []
+}

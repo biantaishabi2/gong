@@ -1,0 +1,52 @@
+{
+  "source_commit": "69a8ecd5b37fdde6eb2b93b78a3c7feefb54bec0",
+  "bug_summary": "斜杠命令自动补全只识别字母数字字符作为前缀，不支持 . - _ 前缀的命令",
+  "module": "editor",
+  "action": "autocomplete_trigger",
+  "fix_summary": "将自动补全字符正则从 /[a-zA-Z0-9]/ 扩展为 /[a-zA-Z0-9.\\-_]/，支持点、横杠、下划线前缀",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "输入 /my-command 或 /my.cmd 时自动补全中断，因为 - 和 . 不被识别为合法前缀字符",
+  "correct_behavior": "输入包含 . - _ 的命令名时自动补全继续工作",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器已注册包含特殊字符的斜杠命令",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "editor",
+      "method": "handleKeyInput"
+    },
+    "args": {
+      "char": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "autocomplete_active": "bool"
+    },
+    "assertions": [
+      {
+        "what": ". 字符保持补全激活",
+        "type": "return_value",
+        "expected": "/[a-zA-Z0-9.\\-_]/.test('.')"
+      },
+      {
+        "what": "- 字符保持补全激活",
+        "type": "return_value",
+        "expected": "/[a-zA-Z0-9.\\-_]/.test('-')"
+      },
+      {
+        "what": "_ 字符保持补全激活",
+        "type": "return_value",
+        "expected": "/[a-zA-Z0-9.\\-_]/.test('_')"
+      }
+    ]
+  }
+}

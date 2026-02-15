@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/main.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/main.ts b/packages/coding-agent/src/main.ts\nindex 71fa6d14..3c1e2a68 100644\n--- a/packages/coding-agent/src/main.ts\n+++ b/packages/coding-agent/src/main.ts\n@@ -224,14 +224,11 @@ async function buildSessionOptions(parsed: Args, scopedModels: ScopedModel[]): P\n \n \t// System prompt\n \tif (parsed.systemPrompt && parsed.appendSystemPrompt) {\n-\t\toptions.systemPrompt = (defaultPrompt) => {\n-\t\t\t// Custom prompt with append\n-\t\t\treturn parsed.systemPrompt + \"\\n\\n\" + parsed.appendSystemPrompt;\n-\t\t};\n+\t\toptions.systemPrompt = `${parsed.systemPrompt}\\n\\n${parsed.appendSystemPrompt}`;\n \t} else if (parsed.systemPrompt) {\n \t\toptions.systemPrompt = parsed.systemPrompt;\n \t} else if (parsed.appendSystemPrompt) {\n-\t\toptions.systemPrompt = (defaultPrompt) => defaultPrompt + \"\\n\\n\" + parsed.appendSystemPrompt;\n+\t\toptions.systemPrompt = (defaultPrompt) => `${defaultPrompt}\\n\\n${parsed.appendSystemPrompt}`;\n \t}\n \n \t// Tools\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "6201bae8057023143a719de1a8e399660a49718c",
+  "message": "Fix lint warnings in main.ts",
+  "module": "coding-agent",
+  "tags": []
+}

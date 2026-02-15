@@ -1,0 +1,162 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "tui",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "ProcessTerminal.cleanup",
+      "boundary": "service",
+      "bug_summary": "终端退出时在关闭 raw mode 前未暂停 stdin，导致缓冲的 Ctrl+D 被重新解释并可能关闭 SSH 父 shell。",
+      "correct_behavior": "先暂停 stdin，再恢复 raw mode，缓冲 Ctrl+D 不会导致 SSH 会话被意外关闭。",
+      "data_dependencies": [
+        "session",
+        "config"
+      ],
+      "fix_summary": "在恢复 stdin raw mode 前调用 process.stdin.pause()，避免输入竞态。",
+      "module": "tui",
+      "source_commit": "f431f626090371fbf2d1d323593bbb5e446da5a4",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "pause_before_restore_raw_mode",
+            "type": "state_transition",
+            "what": "在 setRawMode(this.wasRaw) 之前执行 process.stdin.pause()"
+          },
+          {
+            "expected": "ssh_session_alive=true",
+            "type": "session_state",
+            "what": "存在缓冲 Ctrl+D 时不会触发父 shell 退出"
+          },
+          {
+            "expected": "stdin_raw_mode==wasRaw",
+            "type": "io_state",
+            "what": "退出后 raw mode 恢复为 this.wasRaw"
+          }
+        ],
+        "outputs": {
+          "raw_mode_restored": "bool",
+          "ssh_session_alive": "bool",
+          "stdin_paused": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "session",
+            "what": "运行于交互式 SSH 会话，stdin 可读且支持 raw mode"
+          },
+          {
+            "involves": "config",
+            "what": "终端组件已注册输入监听并可能存在缓冲输入（如 Ctrl+D）"
+          }
+        ],
+        "trigger": {
+          "method": "cleanup",
+          "target": "ProcessTerminal",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "恢复 raw mode 时未先暂停 stdin，缓冲 Ctrl+D 可能被 shell 消费并关闭 SSH 会话。"
+    },
+    {
+      "action": "start",
+      "boundary": "service",
+      "bug_summary": "TUI 的 start() 方法在已有子组件时未触发初次渲染，导致初始界面不显示",
+      "correct_behavior": "调用 start() 时若 children.length > 0 则自动调用 requestRender()，显示初始界面",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "在 start() 中检查 children.length > 0 时调用 requestRender()，确保有子组件时触发初始渲染",
+      "module": "tui",
+      "source_commit": "5ceaa91c7452bd893d7a79caf85b0aa5c8e31386",
+      "test_spec": {
+        "args": {
+          "childCount": {
+            "allowed": null,
+            "required": true,
+            "type": "number"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "requestRender called once when children.length > 0",
+            "type": "side_effect",
+            "what": "start() 后 requestRender 被调用一次"
+          },
+          {
+            "expected": "requestRender not called when children.length === 0",
+            "type": "side_effect",
+            "what": "无子组件时不触发渲染"
+          }
+        ],
+        "outputs": {
+          "render_triggered": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "TUI 实例已添加至少一个子组件"
+          }
+        ],
+        "trigger": {
+          "method": "start",
+          "target": "tui",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "调用 start() 后即使已有子组件也不会触发渲染，界面保持空白"
+    },
+    {
+      "action": "doRender",
+      "boundary": "service",
+      "bug_summary": "TUI 在调用 stop() 后仍可能继续执行 doRender()，导致退出后终端内容被再次覆盖或产生渲染伪影",
+      "correct_behavior": "调用 stop() 后，doRender() 立即返回不执行渲染；再次 start() 后恢复正常渲染",
+      "data_dependencies": [],
+      "fix_summary": "新增 stopped 状态位；start() 时重置为 false，stop() 时置为 true，并在 doRender() 开头短路返回",
+      "module": "tui",
+      "source_commit": "836e852af178a6f6b49fffea8ce4e6440f2c60cb",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "render_executed=false",
+            "type": "state",
+            "what": "stop() 之后调用 doRender() 不再进入渲染主体"
+          },
+          {
+            "expected": "terminal_buffer_changed=false",
+            "type": "state",
+            "what": "stop() 之后终端缓冲区不再被 doRender() 改写"
+          },
+          {
+            "expected": "render_executed=true",
+            "type": "state",
+            "what": "重新调用 start() 后 stopped 被重置，后续 doRender() 可正常执行"
+          }
+        ],
+        "outputs": {
+          "render_executed": "bool",
+          "terminal_buffer_changed": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "TUI 实例已初始化并启动过渲染循环"
+          },
+          {
+            "involves": "session",
+            "what": "存在一次已排队但尚未执行的渲染请求"
+          }
+        ],
+        "trigger": {
+          "method": "doRender",
+          "target": "TUI",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "调用 stop() 后，异步/延迟触发的 doRender() 仍会继续执行并写入终端"
+    }
+  ]
+}

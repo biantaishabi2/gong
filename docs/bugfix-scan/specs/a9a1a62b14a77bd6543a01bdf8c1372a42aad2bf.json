@@ -1,0 +1,49 @@
+{
+  "source_commit": "a9a1a62b14a77bd6543a01bdf8c1372a42aad2bf",
+  "bug_summary": "全局 AGENTS.md 路径与向上遍历命中的同一路径未去重，导致上下文文件被加载两次",
+  "module": "system-prompt",
+  "action": "loadProjectContextFiles",
+  "fix_summary": "使用 seenPaths Set 对已加载路径去重，避免同一文件重复加入列表",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "全局 AGENTS.md 在全局加载和遍历加载中各出现一次，上下文重复",
+  "correct_behavior": "seenPaths 去重后每个路径仅加载一次",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "全局 AGENTS.md 存在且 cwd 向上遍历会命中同一路径",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "system-prompt",
+      "method": "loadProjectContextFiles"
+    },
+    "args": {
+      "cwd": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "contextFiles": "array"
+    },
+    "assertions": [
+      {
+        "what": "路径无重复",
+        "type": "return_value",
+        "expected": "new Set(paths).size === paths.length"
+      },
+      {
+        "what": "全局路径仅出现一次",
+        "type": "return_value",
+        "expected": "paths.filter(p => p === globalPath).length === 1"
+      }
+    ]
+  }
+}

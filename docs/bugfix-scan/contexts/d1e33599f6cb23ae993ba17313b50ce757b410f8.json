@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex f8a5f885..cb6f7bc4 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -471,7 +471,10 @@ export class InteractiveMode {\n \t\tthis.setupKeyHandlers();\n \t\tthis.setupEditorSubmitHandler();\n \n-\t\t// Render initial messages before starting the UI to avoid layout jump\n+\t\t// Initialize extensions first so resources are shown before messages\n+\t\tawait this.initExtensions();\n+\n+\t\t// Render initial messages AFTER showing loaded resources\n \t\tthis.renderInitialMessages();\n \n \t\t// Start the UI\n@@ -481,9 +484,6 @@ export class InteractiveMode {\n \t\t// Set terminal title\n \t\tthis.updateTerminalTitle();\n \n-\t\t// Initialize extensions with TUI-based UI context\n-\t\tawait this.initExtensions();\n-\n \t\t// Subscribe to agent events\n \t\tthis.subscribeToAgent();\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "d1e33599f6cb23ae993ba17313b50ce757b410f8",
+  "message": "fix(coding-agent): show resources before messages when resuming session",
+  "module": "interactive-mode",
+  "tags": []
+}

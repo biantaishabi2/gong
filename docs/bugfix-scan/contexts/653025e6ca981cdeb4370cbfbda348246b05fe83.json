@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/openai-responses.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-responses.ts b/packages/ai/src/providers/openai-responses.ts\nindex d1ffc9ce..4675dea9 100644\n--- a/packages/ai/src/providers/openai-responses.ts\n+++ b/packages/ai/src/providers/openai-responses.ts\n@@ -87,7 +87,10 @@ export const streamOpenAIResponses: StreamFunction<\"openai-responses\"> = (\n \t\t\tconst apiKey = options?.apiKey || getEnvApiKey(model.provider) || \"\";\n \t\t\tconst client = createClient(model, context, apiKey);\n \t\t\tconst params = buildParams(model, context, options);\n-\t\t\tconst openaiStream = await client.responses.create(params, { signal: options?.signal, timeout: undefined });\n+\t\t\tconst openaiStream = await client.responses.create(\n+\t\t\t\tparams,\n+\t\t\t\toptions?.signal ? { signal: options.signal } : undefined,\n+\t\t\t);\n \t\t\tstream.push({ type: \"start\", partial: output });\n \n \t\t\tlet currentItem: ResponseReasoningItem | ResponseOutputMessage | ResponseFunctionToolCall | null = null;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "653025e6ca981cdeb4370cbfbda348246b05fe83",
+  "message": "Fix OpenAI responses timeout option (#706)",
+  "module": "openai-responses",
+  "tags": []
+}

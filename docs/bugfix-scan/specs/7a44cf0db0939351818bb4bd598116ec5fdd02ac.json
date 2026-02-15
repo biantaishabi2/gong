@@ -1,0 +1,52 @@
+{
+  "source_commit": "7a44cf0db0939351818bb4bd598116ec5fdd02ac",
+  "bug_summary": "matchesKey 仅比较原始字符，忽略 Kitty 协议无修饰序列，导致 release 事件不匹配",
+  "module": "keys",
+  "action": "matchesKey",
+  "fix_summary": "在原始字符匹配失败后追加 matchesKittySequence 检查，支持 Kitty 无修饰字母键序列",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Kitty 协议的无修饰字母键 release 事件不被 matchesKey 识别",
+  "correct_behavior": "matchesKey 同时检查原始字符和 Kitty 序列，两种格式均能匹配",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "终端使用 Kitty 键盘协议",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "keys",
+      "method": "matchesKey"
+    },
+    "args": {
+      "data": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "keyId": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "matched": "bool"
+    },
+    "assertions": [
+      {
+        "what": "原始字符 'a' 匹配 keyId 'a'",
+        "type": "return_value",
+        "expected": "matchesKey('a', 'a') === true"
+      },
+      {
+        "what": "Kitty 无修饰序列匹配 keyId 'a'",
+        "type": "return_value",
+        "expected": "matchesKey(kittySeq, 'a') === true"
+      }
+    ]
+  }
+}

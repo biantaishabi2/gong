@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "dynamic-border",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "constructor",
+      "boundary": "service",
+      "bug_summary": "DynamicBorder 构造函数默认参数在 theme 未初始化时立即调用 theme.fg 导致崩溃",
+      "correct_behavior": "theme 未初始化时 DynamicBorder 正常创建，渲染时再检查 theme",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将默认颜色函数改为延迟求值：运行时检查 theme 是否可用，不可用时返回原始字符串",
+      "module": "dynamic-border",
+      "source_commit": "3ad5a168e749a5ba7f43db8cc5bfc31c0fd96fe3",
+      "test_spec": {
+        "args": {
+          "color": {
+            "allowed": null,
+            "required": false,
+            "type": "function"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "new DynamicBorder() 不抛异常",
+            "type": "return_value",
+            "what": "theme 未初始化时不崩溃"
+          },
+          {
+            "expected": "theme 初始化后 color 函数调用 theme.fg",
+            "type": "return_value",
+            "what": "theme 可用时使用 theme.fg('border') 着色"
+          }
+        ],
+        "outputs": {
+          "instance": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "theme 模块尚未初始化（如测试环境或早期启动阶段）"
+          }
+        ],
+        "trigger": {
+          "method": "constructor",
+          "target": "DynamicBorder",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "theme 未初始化时创建 DynamicBorder 实例抛出 TypeError"
+    }
+  ]
+}

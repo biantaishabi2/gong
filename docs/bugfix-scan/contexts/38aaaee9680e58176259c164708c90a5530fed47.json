@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts b/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts\nindex 92bf55af..622d8085 100644\n--- a/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts\n+++ b/packages/web-ui/src/components/sandbox/ConsoleRuntimeProvider.ts\n@@ -128,19 +128,15 @@ export class ConsoleRuntimeProvider implements SandboxRuntimeProvider {\n \n \t\t\t\tif ((window as any).sendRuntimeMessage) {\n \t\t\t\t\tif (finalError) {\n-\t\t\t\t\t\tconsole.log(\"Reporting execution error:\", finalError);\n \t\t\t\t\t\tawait (window as any).sendRuntimeMessage({\n \t\t\t\t\t\t\ttype: \"execution-error\",\n \t\t\t\t\t\t\terror: finalError,\n \t\t\t\t\t\t});\n-\t\t\t\t\t\tconsole.log(\"Execution completed\");\n \t\t\t\t\t} else {\n-\t\t\t\t\t\tconsole.log(\"Reporting execution complete\");\n \t\t\t\t\t\tawait (window as any).sendRuntimeMessage({\n \t\t\t\t\t\t\ttype: \"execution-complete\",\n \t\t\t\t\t\t\treturnValue,\n \t\t\t\t\t\t});\n-\t\t\t\t\t\tconsole.log(\"Execution completed\");\n \t\t\t\t\t}\n \t\t\t\t}\n \t\t\t};\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "38aaaee9680e58176259c164708c90a5530fed47",
+  "message": "Remove debug console.log statements causing duplicate error messages",
+  "module": "console_runtime_provider",
+  "tags": []
+}

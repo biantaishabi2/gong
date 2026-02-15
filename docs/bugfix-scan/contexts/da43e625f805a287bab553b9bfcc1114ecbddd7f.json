@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/anthropic.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/anthropic.ts b/packages/ai/src/providers/anthropic.ts\nindex b2022097..4aed5a51 100644\n--- a/packages/ai/src/providers/anthropic.ts\n+++ b/packages/ai/src/providers/anthropic.ts\n@@ -52,10 +52,16 @@ export class AnthropicLLM implements LLM<AnthropicLLMOptions> {\n \t\t\tif (typeof process !== \"undefined\" && process.env) {\n \t\t\t\tprocess.env.ANTHROPIC_API_KEY = undefined;\n \t\t\t}\n-\t\t\tthis.client = new Anthropic({ apiKey: null, authToken: apiKey, baseURL: model.baseUrl, defaultHeaders });\n+\t\t\tthis.client = new Anthropic({\n+\t\t\t\tapiKey: null,\n+\t\t\t\tauthToken: apiKey,\n+\t\t\t\tbaseURL: model.baseUrl,\n+\t\t\t\tdefaultHeaders,\n+\t\t\t\tdangerouslyAllowBrowser: true,\n+\t\t\t});\n \t\t\tthis.isOAuthToken = true;\n \t\t} else {\n-\t\t\tthis.client = new Anthropic({ apiKey, baseURL: model.baseUrl });\n+\t\t\tthis.client = new Anthropic({ apiKey, baseURL: model.baseUrl, dangerouslyAllowBrowser: true });\n \t\t\tthis.isOAuthToken = false;\n \t\t}\n \t\tthis.modelInfo = model;\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "da43e625f805a287bab553b9bfcc1114ecbddd7f",
+  "message": "fix(ai): Add dangerouslyAllowBrowser flag for Anthropic client",
+  "module": "anthropic",
+  "tags": []
+}

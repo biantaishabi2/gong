@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex d40697fc..dc4019bf 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -456,6 +456,7 @@ export class InteractiveMode {\n \t\tthis.ui.addChild(this.pendingMessagesContainer);\n \t\tthis.ui.addChild(this.statusContainer);\n \t\tthis.ui.addChild(this.widgetContainer);\n+\t\tthis.renderWidgets(); // Initialize with default spacer\n \t\tthis.ui.addChild(this.editorContainer);\n \t\tthis.ui.addChild(this.footer);\n \t\tthis.ui.setFocus(this.editor);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "175a137d006a498ba5e1b0541b4fed79ef00738c",
+  "message": "Fix missing spacer between assistant message and text editor",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

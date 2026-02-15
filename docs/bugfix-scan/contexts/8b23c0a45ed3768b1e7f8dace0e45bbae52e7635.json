@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 1a267f4a..5d923fa0 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -3297,7 +3297,7 @@ export class InteractiveMode {\n \t\t\t}\n \n \t\t\t// Create the preview URL\n-\t\t\tconst previewUrl = `https://buildwithpi.ai/session?${gistId}`;\n+\t\t\tconst previewUrl = `https://buildwithpi.ai/session/#${gistId}`;\n \t\t\tthis.showStatus(`Share URL: ${previewUrl}\\nGist: ${gistUrl}`);\n \t\t} catch (error: unknown) {\n \t\t\tif (!loader.signal.aborted) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "8b23c0a45ed3768b1e7f8dace0e45bbae52e7635",
+  "message": "feat(coding-agent): use hash fragments for share URLs (#829)",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

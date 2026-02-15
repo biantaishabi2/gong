@@ -1,0 +1,703 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "coding-agent",
+  "spec_count": 14,
+  "specs": [
+    {
+      "action": "resume_cancel",
+      "boundary": "service",
+      "bug_summary": "--resume 取消选择时仅 return，未停止 theme watcher 且未显式退出，进程悬挂",
+      "correct_behavior": "取消后停止 theme watcher 并 exit(0)，进程干净退出",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "取消时增加 stopThemeWatcher() 和 process.exit(0)，确保干净退出",
+      "module": "coding-agent",
+      "source_commit": "4cc1c96495f7b250191f568c8e871f71ab2fdc11",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "stopThemeWatcher 被调用",
+            "type": "return_value",
+            "what": "theme watcher 被停止"
+          },
+          {
+            "expected": "process.exit(0) 被调用",
+            "type": "return_value",
+            "what": "进程以 exit code 0 退出"
+          }
+        ],
+        "outputs": {
+          "process_exited": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "--resume 模式下会话选择器已显示"
+          }
+        ],
+        "trigger": {
+          "method": "handleResumeCancel",
+          "target": "main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "取消 --resume 会话选择后进程不退出，终端挂起"
+    },
+    {
+      "action": "interactive_command_processing",
+      "boundary": "service",
+      "bug_summary": "交互命令处理不一致：/quit 未出现在补全列表，且 /exit 仍会触发退出",
+      "correct_behavior": "/quit 可被补全且仅 /quit 触发退出",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在内置斜杠命令中新增 /quit 补全，并移除 /exit 触发 shutdown 的分支",
+      "module": "coding-agent",
+      "source_commit": "8792ee2a6622974dce63baaee218d5eca70c38e5",
+      "test_spec": {
+        "args": {
+          "text": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "autocomplete_commands includes '/quit'",
+            "type": "state",
+            "what": "补全列表包含 /quit"
+          },
+          {
+            "expected": "shutdown_called=true when text='/quit'",
+            "type": "behavior",
+            "what": "输入 /quit 时触发退出"
+          },
+          {
+            "expected": "shutdown_called=false when text='/exit'",
+            "type": "behavior",
+            "what": "输入 /exit 时不触发退出"
+          }
+        ],
+        "outputs": {
+          "autocomplete_commands": "array",
+          "shutdown_called": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "已加载内置斜杠命令列表"
+          },
+          {
+            "involves": "session",
+            "what": "交互模式会话已启动"
+          }
+        ],
+        "trigger": {
+          "method": "processInputText",
+          "target": "InteractiveMode",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "/quit 不在补全中且 /exit 仍可退出"
+    },
+    {
+      "action": "index_exports",
+      "boundary": "service",
+      "bug_summary": "coding-agent 包入口未导出 discoverAndLoadExtensions，导致外部按文档或类型声明进行命名导入时失败",
+      "correct_behavior": "从 coding-agent 包入口命名导入 discoverAndLoadExtensions 成功且可用",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "在 packages/coding-agent/src/index.ts 的导出列表中新增 discoverAndLoadExtensions",
+      "module": "coding-agent",
+      "source_commit": "3830d74d22fa20ca0b2b2c7398c2fb674f98a065",
+      "test_spec": {
+        "args": {
+          "symbol": {
+            "allowed": [
+              "discoverAndLoadExtensions"
+            ],
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "import_result=success",
+            "type": "return_value",
+            "what": "从包入口进行命名导入 discoverAndLoadExtensions 不抛出错误"
+          },
+          {
+            "expected": "is_exported=true",
+            "type": "return_value",
+            "what": "包入口导出对象包含 discoverAndLoadExtensions"
+          }
+        ],
+        "outputs": {
+          "import_result": "string",
+          "is_exported": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "已构建或可直接解析 coding-agent 包入口文件"
+          },
+          {
+            "involves": "file",
+            "what": "存在调用方通过命名导入使用 discoverAndLoadExtensions 的场景"
+          }
+        ],
+        "trigger": {
+          "method": "index_exports",
+          "target": "coding-agent",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "从 coding-agent 包入口命名导入 discoverAndLoadExtensions 时报错或为 undefined"
+    },
+    {
+      "action": "normalizeExtensionSource",
+      "boundary": "service",
+      "bug_summary": "归一化扩展来源时未识别原始 http(s) git URL 且未去除 .git 后缀，匹配键不一致",
+      "correct_behavior": "key 为 github.com/acme/ext，去除协议前缀和 .git 后缀",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "增加原始 git URL 识别和 .git 后缀去除，生成一致的归一化 key",
+      "module": "coding-agent",
+      "source_commit": "d89f6e08ce58d4c38189b1787363269d91147dcc",
+      "test_spec": {
+        "args": {
+          "source": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "key === 'github.com/acme/agent-ext'",
+            "type": "return_value",
+            "what": "去除协议前缀和 .git 后缀"
+          },
+          {
+            "expected": "type === 'git'",
+            "type": "return_value",
+            "what": "类型为 git"
+          }
+        ],
+        "outputs": {
+          "key": "string",
+          "type": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "扩展来源为原始 git URL"
+          }
+        ],
+        "trigger": {
+          "method": "normalizeExtensionSource",
+          "target": "coding-agent",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "https://github.com/acme/ext.git@v1 的 key 含 .git 后缀，与其他引用方式不一致"
+    },
+    {
+      "action": "runPrintMode",
+      "boundary": "service",
+      "bug_summary": "非交互打印模式执行完成后未停止 theme watcher，进程被文件监听器持续占用无法退出",
+      "correct_behavior": "打印模式完成后调用 stopThemeWatcher() 并 process.exit(0)",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "在打印模式完成后调用 stopThemeWatcher() 并 process.exit(0)，确保进程干净退出",
+      "module": "coding-agent",
+      "source_commit": "7323af1f697c773edd22cb0814fe03ebc75369c6",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "stopThemeWatcher() called before exit",
+            "type": "side_effect",
+            "what": "stopThemeWatcher 被调用"
+          },
+          {
+            "expected": "process.exit(0) called",
+            "type": "side_effect",
+            "what": "进程以 0 退出"
+          }
+        ],
+        "outputs": {
+          "process_exited": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "CLI 以 --print 模式运行，theme watcher 已初始化"
+          }
+        ],
+        "trigger": {
+          "method": "runPrintMode",
+          "target": "coding-agent/main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "打印模式完成后进程不退出，theme file watcher 保持进程存活"
+    },
+    {
+      "action": "logExtensionErrors",
+      "boundary": "service",
+      "bug_summary": "扩展加载失败后未遍历输出 errors，用户看不到具体失败扩展和原因",
+      "correct_behavior": "每个失败扩展输出 Failed to load extension \"path\": error 到 stderr",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "加载扩展后遍历 extensionsResult.errors 并 console.error 输出每个失败记录",
+      "module": "coding-agent",
+      "source_commit": "b74a3658f370068bc159908a553f9892be89791f",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "console.error called with 'Failed to load extension'",
+            "type": "side_effect",
+            "what": "stderr 包含失败扩展路径"
+          },
+          {
+            "expected": "error message includes extension path and error",
+            "type": "side_effect",
+            "what": "输出具体错误原因"
+          }
+        ],
+        "outputs": {
+          "error_output": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "扩展目录中存在无法加载的扩展"
+          }
+        ],
+        "trigger": {
+          "method": "main",
+          "target": "coding-agent/main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "扩展加载失败时无错误输出，用户不知道哪个扩展失败"
+    },
+    {
+      "action": "sessionRestore",
+      "boundary": "service",
+      "bug_summary": "会话恢复条件未包含 --session 标志，导致仅使用 --session 时不加载历史消息和模型设置",
+      "correct_behavior": "--session=file 启动时完整恢复会话：加载历史消息、恢复 savedModel 和 savedThinkingLevel",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "在恢复条件中增加 parsed.session 检查，使 --session 与 --continue/--resume 一样触发恢复逻辑",
+      "module": "coding-agent",
+      "source_commit": "75c2eea15130cd3ba79dca4380f75daa465bdb24",
+      "test_spec": {
+        "args": {
+          "session": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "parsed.session 被纳入恢复条件判断",
+            "type": "return_value",
+            "what": "--session 触发会话恢复"
+          },
+          {
+            "expected": "messages 被 savedMessages 替换",
+            "type": "side_effect",
+            "what": "历史消息被加载"
+          }
+        ],
+        "outputs": {
+          "restored": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "存在有效的会话文件，包含保存的模型、思考级别和消息历史"
+          }
+        ],
+        "trigger": {
+          "method": "main",
+          "target": "coding-agent/main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "--session=file 启动时不加载历史消息、不恢复模型和思考级别"
+    },
+    {
+      "action": "localPathDetection",
+      "boundary": "service",
+      "bug_summary": "扩展源路径以点号开头（如 .pi/...）时未被识别为本地路径，导致被错误按非本地来源处理",
+      "correct_behavior": "识别所有 . 前缀路径，.pi/extensions/agent-end.ts 被正确判定为本地路径",
+      "data_dependencies": [
+        "file",
+        "config"
+      ],
+      "fix_summary": "将本地路径判断从仅匹配 \"./\" 和 \"../\" 调整为统一匹配 \".\" 前缀，使 .pi/... 也被识别为本地路径",
+      "module": "coding-agent",
+      "source_commit": "88ac5ca1d9d5ecd68b5b40167472ab4d208a70e1",
+      "test_spec": {
+        "args": {
+          "source": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "is_local_path=true",
+            "type": "return_value",
+            "what": "source=.pi/extensions/agent-end.ts 被判定为本地路径"
+          },
+          {
+            "expected": "resolved_source=.pi/extensions/agent-end.ts",
+            "type": "return_value",
+            "what": "本地扩展路径走本地解析而非包名解析"
+          }
+        ],
+        "outputs": {
+          "is_local_path": "bool",
+          "resolved_source": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "工作区存在 .pi/extensions/agent-end.ts 文件"
+          },
+          {
+            "involves": "config",
+            "what": "扩展加载配置包含 source=.pi/extensions/agent-end.ts"
+          }
+        ],
+        "trigger": {
+          "method": "localPathDetection",
+          "target": "DefaultPackageManager",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "仅识别 ./ 或 ../，导致 .pi/extensions/agent-end.ts 被误判为非本地路径"
+    },
+    {
+      "action": "rpcPrompt",
+      "boundary": "service",
+      "bug_summary": "RPC prompt 分支调用 agent.prompt 时未传 attachments 参数，附件上下文丢失",
+      "correct_behavior": "RPC prompt 将 attachments 透传给 agent.prompt",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "将 agent.prompt(input.message) 改为 agent.prompt(input.message, input.attachments)",
+      "module": "coding-agent",
+      "source_commit": "958d265112e1bb969ed656adb6e126db2dc0378a",
+      "test_spec": {
+        "args": {
+          "attachments": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          },
+          "message": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "agent.prompt called with (message, attachments)",
+            "type": "side_effect",
+            "what": "agent.prompt 接收到 attachments"
+          }
+        ],
+        "outputs": {
+          "prompt_called_with_attachments": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "RPC 请求包含 message 和 attachments"
+          }
+        ],
+        "trigger": {
+          "method": "handleRpcPrompt",
+          "target": "coding-agent/main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "RPC 带附件的 prompt 请求在 agent 侧丢失附件"
+    },
+    {
+      "action": "buildSessionOptions",
+      "boundary": "service",
+      "bug_summary": "同时传入 systemPrompt 与 appendSystemPrompt 时将 systemPrompt 设为函数而非合并字符串，导致类型不符",
+      "correct_behavior": "options.systemPrompt 被设为 systemPrompt + '\\n\\n' + appendSystemPrompt 的合并字符串",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "将 systemPrompt 从返回函数改为直接拼接 systemPrompt + appendSystemPrompt 的字符串",
+      "module": "coding-agent",
+      "source_commit": "6201bae8057023143a719de1a8e399660a49718c",
+      "test_spec": {
+        "args": {
+          "appendSystemPrompt": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "systemPrompt": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "typeof options.systemPrompt === 'string'",
+            "type": "return_value",
+            "what": "systemPrompt 为字符串类型"
+          },
+          {
+            "expected": "options.systemPrompt === systemPrompt + '\\n\\n' + appendSystemPrompt",
+            "type": "return_value",
+            "what": "合并后包含两部分"
+          }
+        ],
+        "outputs": {
+          "merged_prompt": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "CLI 参数同时包含 --system-prompt 和 --append-system-prompt"
+          }
+        ],
+        "trigger": {
+          "method": "buildSessionOptions",
+          "target": "coding-agent/main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "options.systemPrompt 被设为 (defaultPrompt) => {...} 函数，类型与预期的字符串不一致"
+    },
+    {
+      "action": "checkForNewVersion",
+      "boundary": "http",
+      "bug_summary": "npm latest 查询 URL 包名多了一个空格(pi -coding-agent)，导致版本检查请求 404",
+      "correct_behavior": "fetch 正确的无空格 URL，成功获取最新版本号",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "修正 URL 中的 'pi -coding-agent' 为 'pi-coding-agent'，去除多余空格",
+      "module": "coding-agent",
+      "source_commit": "9b0ec024051fd114dacfe6649792562b162bd84d",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "url === 'https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest'",
+            "type": "return_value",
+            "what": "URL 不含空格"
+          },
+          {
+            "expected": "latestVersion !== undefined",
+            "type": "return_value",
+            "what": "成功获取版本号"
+          }
+        ],
+        "outputs": {
+          "latestVersion": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "npm registry 可访问"
+          }
+        ],
+        "trigger": {
+          "method": "GET",
+          "target": "registry.npmjs.org",
+          "type": "http_request"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "fetch URL 包含空格导致 404，版本检查始终失败"
+    },
+    {
+      "action": "navigateToSelectedPoint",
+      "boundary": "event",
+      "bug_summary": "树导航摘要跳转时会无条件用 result.editorText 覆盖编辑器，导致用户已有内容丢失",
+      "correct_behavior": "仅在当前编辑器为空白时才写入 result.editorText，保留用户已有内容",
+      "data_dependencies": [
+        "session",
+        "file"
+      ],
+      "fix_summary": "在设置编辑器文本前新增非空校验：仅当 result.editorText 存在且当前编辑器为空白时才 setText",
+      "module": "coding-agent",
+      "source_commit": "fe1d0ae7f33cc99d7f7d1805ae3ae99e0e77fc54",
+      "test_spec": {
+        "args": {
+          "currentEditorText": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "editorText": {
+            "allowed": null,
+            "required": false,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "finalEditorText==currentEditorText",
+            "type": "state",
+            "what": "当 currentEditorText 为非空时，不调用覆盖写入，finalEditorText 保持原值"
+          },
+          {
+            "expected": "finalEditorText==editorText",
+            "type": "state",
+            "what": "当 currentEditorText 为空白且 editorText 有值时，finalEditorText 被设置为 editorText"
+          },
+          {
+            "expected": "statusMessage='Navigated to selected point'",
+            "type": "ui_state",
+            "what": "状态提示仍显示导航完成"
+          }
+        ],
+        "outputs": {
+          "finalEditorText": "string",
+          "statusMessage": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "session",
+            "what": "已进入交互模式会话"
+          },
+          {
+            "involves": "file",
+            "what": "编辑器中已有非空文本且导航结果包含 editorText"
+          }
+        ],
+        "trigger": {
+          "method": "navigateToSelectedPoint",
+          "target": "InteractiveMode",
+          "type": "event_handler"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "只要 result.editorText 存在就覆盖编辑器内容"
+    },
+    {
+      "action": "loadExtensions",
+      "boundary": "service",
+      "bug_summary": "扩展路径仅来自 CLI --extension 参数，未合并 settings.json 中配置的扩展",
+      "correct_behavior": "CLI --extension 和 settings.json extensions 合并加载",
+      "data_dependencies": [
+        "config",
+        "file"
+      ],
+      "fix_summary": "创建 SettingsManager 读取 settings.json extensions，与 CLI 参数合并",
+      "module": "coding-agent",
+      "source_commit": "e4f63f585f01a8ff6483cd0b7058acb685cd2768",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "extensionPaths includes settings.json extensions",
+            "type": "return_value",
+            "what": "包含 settings.json 扩展"
+          },
+          {
+            "expected": "extensionPaths includes CLI extensions",
+            "type": "return_value",
+            "what": "包含 CLI 扩展"
+          }
+        ],
+        "outputs": {
+          "extensionPaths": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "settings.json 包含 extensions 配置"
+          }
+        ],
+        "trigger": {
+          "method": "main",
+          "target": "coding-agent/main",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "settings.json 中的 extensions 被忽略"
+    },
+    {
+      "action": "error_message_paths",
+      "boundary": "service",
+      "bug_summary": "错误消息中硬编码了路径 ~/.pi/agent/，未使用动态获取的实际路径",
+      "correct_behavior": "错误消息使用 getSettingsPath()/getAuthPath() 返回的实际路径",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "使用 getAuthPath() 和 getSettingsPath() 动态获取路径替代硬编码的 ~/.pi/agent/",
+      "module": "coding-agent",
+      "source_commit": "69d02b8a5fce07041f77aba64c6ebbc8589827ab",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "!message.includes('~/.pi/agent/')",
+            "type": "return_value",
+            "what": "错误消息不含硬编码 ~/.pi/agent/"
+          },
+          {
+            "expected": "message.includes(getSettingsPath()) || message.includes(getAuthPath())",
+            "type": "return_value",
+            "what": "使用动态路径函数"
+          }
+        ],
+        "outputs": {
+          "error_message": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "自定义 agent 目录已配置，路径非默认 ~/.pi/agent/"
+          }
+        ],
+        "trigger": {
+          "method": "getErrorMessage",
+          "target": "coding-agent",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "错误消息显示硬编码的 ~/.pi/agent/settings.json，在自定义安装路径下误导用户"
+    }
+  ]
+}

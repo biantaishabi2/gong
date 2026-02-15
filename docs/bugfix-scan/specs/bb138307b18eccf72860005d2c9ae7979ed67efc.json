@@ -1,0 +1,47 @@
+{
+  "source_commit": "bb138307b18eccf72860005d2c9ae7979ed67efc",
+  "bug_summary": "ConsoleRuntimeProvider.handleMessage 未调用 respond()，导致消息处理后调用方无响应挂起",
+  "module": "console_runtime_provider",
+  "action": "handleMessage",
+  "fix_summary": "将 _respond 参数改为 respond 并在处理完消息后调用 respond({ success: true })",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "handleMessage 处理完消息后不回调 respond，调用方永久等待",
+  "correct_behavior": "handleMessage 处理完后调用 respond({ success: true }) 确认接收",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "ConsoleRuntimeProvider 已注册",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "console_runtime_provider",
+      "method": "handleMessage"
+    },
+    "args": {
+      "message": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "responded": "bool"
+    },
+    "assertions": [
+      {
+        "what": "respond 被调用",
+        "type": "side_effect",
+        "expected": "respond({ success: true }) called"
+      },
+      {
+        "what": "返回 true",
+        "type": "return_value",
+        "expected": "handleMessage returns true"
+      }
+    ]
+  }
+}

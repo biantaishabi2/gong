@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/main.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/main.ts b/packages/coding-agent/src/main.ts\nindex 355e5507..b4e599cb 100644\n--- a/packages/coding-agent/src/main.ts\n+++ b/packages/coding-agent/src/main.ts\n@@ -609,7 +609,7 @@ async function runRpcMode(agent: Agent, _sessionManager: SessionManager): Promis\n \n \t\t\t// Handle different RPC commands\n \t\t\tif (input.type === \"prompt\" && input.message) {\n-\t\t\t\tawait agent.prompt(input.message);\n+\t\t\t\tawait agent.prompt(input.message, input.attachments);\n \t\t\t} else if (input.type === \"abort\") {\n \t\t\t\tagent.abort();\n \t\t\t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "958d265112e1bb969ed656adb6e126db2dc0378a",
+  "message": "fix: pass attachments to agent prompt from RPC interface",
+  "module": "coding-agent",
+  "tags": []
+}

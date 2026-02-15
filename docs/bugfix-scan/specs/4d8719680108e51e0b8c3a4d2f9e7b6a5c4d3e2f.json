@@ -1,0 +1,51 @@
+{
+  "source_commit": "4d8719680108e51e0b8c3a4d2f9e7b6a5c4d3e2f",
+  "bug_summary": "默认 newLine 键位包含 alt+enter，导致 alt+enter 被误判为换行而非其原本用途",
+  "module": "r_e_a_d_m_e",
+  "action": "newLine_keybinding",
+  "fix_summary": "将 newLine 从 ['shift+enter', 'alt+enter'] 改为 'shift+enter'，移除 alt+enter",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "按 alt+enter 触发换行，与用户期望的其他功能冲突",
+  "correct_behavior": "仅 shift+enter 触发换行，alt+enter 可用于其他绑定",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "tui 编辑器使用默认键位配置",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "keybindings",
+      "method": "getBinding"
+    },
+    "args": {
+      "action": {
+        "type": "string",
+        "required": true,
+        "allowed": [
+          "newLine"
+        ]
+      }
+    },
+    "outputs": {
+      "keys": "string"
+    },
+    "assertions": [
+      {
+        "what": "newLine 绑定为 shift+enter",
+        "type": "return_value",
+        "expected": "keys === 'shift+enter'"
+      },
+      {
+        "what": "alt+enter 不在 newLine 绑定中",
+        "type": "return_value",
+        "expected": "keys 不包含 'alt+enter'"
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "source_commit": "31438fdf2af81eab22bdca7dda4fbb6d53e40d57",
+  "bug_summary": "仅对初始激活工具做 hook 包装，hooks 动态启用的非激活注册工具未被包装而绕过 hook",
+  "module": "sdk",
+  "action": "wrap_tools_with_hooks",
+  "fix_summary": "改为对全部注册工具（不仅仅是激活工具）做 hook 包装，确保 hooks 可动态启用任何工具",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "hooks 尝试启用非激活工具时，该工具未被 hook 包装，行为不受控",
+  "correct_behavior": "所有注册工具（包括非激活的）都被 hook 包装，动态启用时行为受 hook 控制",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "toolRegistry 包含激活和非激活的注册工具",
+        "involves": "config"
+      },
+      {
+        "what": "hookRunner 已配置",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "sdk",
+      "method": "initializeTools"
+    },
+    "args": {},
+    "outputs": {
+      "wrapped_tools": "array"
+    },
+    "assertions": [
+      {
+        "what": "所有注册工具都被 hook 包装",
+        "type": "return_value",
+        "expected": "wrappedAllTools.length === toolRegistry.size"
+      },
+      {
+        "what": "非激活工具也被包装",
+        "type": "return_value",
+        "expected": "非激活工具的调用经过 hookRunner"
+      }
+    ]
+  }
+}

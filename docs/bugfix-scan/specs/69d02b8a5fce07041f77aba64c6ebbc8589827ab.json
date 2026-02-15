@@ -1,0 +1,43 @@
+{
+  "source_commit": "69d02b8a5fce07041f77aba64c6ebbc8589827ab",
+  "bug_summary": "错误消息中硬编码了路径 ~/.pi/agent/，未使用动态获取的实际路径",
+  "module": "coding-agent",
+  "action": "error_message_paths",
+  "fix_summary": "使用 getAuthPath() 和 getSettingsPath() 动态获取路径替代硬编码的 ~/.pi/agent/",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "错误消息显示硬编码的 ~/.pi/agent/settings.json，在自定义安装路径下误导用户",
+  "correct_behavior": "错误消息使用 getSettingsPath()/getAuthPath() 返回的实际路径",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "自定义 agent 目录已配置，路径非默认 ~/.pi/agent/",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent",
+      "method": "getErrorMessage"
+    },
+    "args": {},
+    "outputs": {
+      "error_message": "string"
+    },
+    "assertions": [
+      {
+        "what": "错误消息不含硬编码 ~/.pi/agent/",
+        "type": "return_value",
+        "expected": "!message.includes('~/.pi/agent/')"
+      },
+      {
+        "what": "使用动态路径函数",
+        "type": "return_value",
+        "expected": "message.includes(getSettingsPath()) || message.includes(getAuthPath())"
+      }
+    ]
+  }
+}

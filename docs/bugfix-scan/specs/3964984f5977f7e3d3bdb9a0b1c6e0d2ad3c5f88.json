@@ -1,0 +1,47 @@
+{
+  "source_commit": "3964984f5977f7e3d3bdb9a0b1c6e0d2ad3c5f88",
+  "bug_summary": "处理排队中的 steering 用户消息时错误清空编辑器文本，导致用户正在编辑的草稿丢失",
+  "module": "interactive-mode",
+  "action": "handle_queued_steering",
+  "fix_summary": "移除 steering 消息处理中的 this.editor.setText('') 调用",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "steering 消息入队处理时编辑器文本被清空，用户草稿丢失",
+  "correct_behavior": "steering 消息处理不影响编辑器内容，用户草稿保留",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器有用户输入的草稿文本",
+        "involves": "config"
+      },
+      {
+        "what": "有排队中的 steering 用户消息",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "processQueuedMessage"
+    },
+    "args": {},
+    "outputs": {
+      "editor_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "处理 steering 后编辑器文本不变",
+        "type": "return_value",
+        "expected": "editor_text === original_draft"
+      },
+      {
+        "what": "steering 消息正常入队处理",
+        "type": "return_value",
+        "expected": "message 被正确发送到 agent"
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "source_commit": "0138eee6f761791b3a45028904864faa7625f070",
+  "bug_summary": "ls 工具被错误映射为 Glob，导致 Anthropic 侧接收到错误的工具名，ls 操作实际执行的是 Glob 语义",
+  "module": "anthropic",
+  "action": "tool_name_mapping",
+  "fix_summary": "将 claudeCodeToolNames 中 ls 的映射从 Glob 修正为 Ls，使 Anthropic provider 正确转发工具调用",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "toClaudeCodeName('ls') 返回 'Glob'，导致 Anthropic 侧将 ls 请求路由到 Glob 工具",
+  "correct_behavior": "toClaudeCodeName('ls') 返回 'Ls'，ls 工具调用被正确路由",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Anthropic provider 已加载 claudeCodeToolNames 映射表",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "anthropic",
+      "method": "toClaudeCodeName"
+    },
+    "args": {
+      "name": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "mapped_name": "string"
+    },
+    "assertions": [
+      {
+        "what": "ls 映射到 Ls 而非 Glob",
+        "type": "return_value",
+        "expected": "toClaudeCodeName('ls') === 'Ls'"
+      },
+      {
+        "what": "其他工具映射不受影响（bash→Bash, grep→Grep, find→Glob）",
+        "type": "return_value",
+        "expected": "toClaudeCodeName('bash') === 'Bash'"
+      }
+    ]
+  }
+}

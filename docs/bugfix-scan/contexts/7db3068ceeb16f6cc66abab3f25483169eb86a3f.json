@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/openai-responses.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-responses.ts b/packages/ai/src/providers/openai-responses.ts\nindex e494f325..fc0e1dcf 100644\n--- a/packages/ai/src/providers/openai-responses.ts\n+++ b/packages/ai/src/providers/openai-responses.ts\n@@ -10,6 +10,7 @@ import type {\n \tResponseOutputMessage,\n \tResponseReasoningItem,\n } from \"openai/resources/responses/responses.js\";\n+import { calculateCost } from \"../models.js\";\n import type {\n \tAssistantMessage,\n \tContext,\n@@ -236,6 +237,8 @@ export class OpenAIResponsesLLM implements LLM<OpenAIResponsesLLMOptions> {\n \t\t\t\tstopReason = \"toolUse\";\n \t\t\t}\n \n+\t\t\tcalculateCost(this.modelInfo, usage);\n+\n \t\t\tconst output = {\n \t\t\t\trole: \"assistant\",\n \t\t\t\tcontent: blocks,\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "7db3068ceeb16f6cc66abab3f25483169eb86a3f",
+  "message": "fix(ai): Fix OpenAI Responses provider import order and cost calculation",
+  "module": "openai-responses",
+  "tags": []
+}

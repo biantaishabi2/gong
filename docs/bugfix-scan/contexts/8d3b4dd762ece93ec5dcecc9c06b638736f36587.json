@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\nindex a9343b79..2ce199ec 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n@@ -330,15 +330,13 @@ class TreeList implements Component {\n \n \t\t\t// If multiple roots, shift display (roots at 0, not 1)\n \t\t\tconst displayIndent = this.multipleRoots ? Math.max(0, flatNode.indent - 1) : flatNode.indent;\n-\t\t\t// Also shift gutters for multiple roots (skip first gutter which is the virtual root level)\n-\t\t\tconst displayGutters = this.multipleRoots ? flatNode.gutters.slice(1) : flatNode.gutters;\n \n \t\t\t// Build prefix: gutters + connector + extra spaces\n-\t\t\tconst gutterStr = displayGutters.map((g) => (g ? \"│ \" : \"  \")).join(\"\");\n+\t\t\tconst gutterStr = flatNode.gutters.map((g) => (g ? \"│ \" : \"  \")).join(\"\");\n \t\t\tconst connector =\n \t\t\t\tflatNode.showConnector && !flatNode.isVirtualRootChild ? (flatNode.isLast ? \"└─\" : \"├─\") : \"\";\n \t\t\t// Extra indent for visual grouping beyond gutters/connector\n-\t\t\tconst prefixLevels = displayGutters.length + (connector ? 1 : 0);\n+\t\t\tconst prefixLevels = flatNode.gutters.length + (connector ? 1 : 0);\n \t\t\tconst extraIndent = \"  \".repeat(Math.max(0, displayIndent - prefixLevels));\n \t\t\tconst prefix = gutterStr + connector + extraIndent;\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "8d3b4dd762ece93ec5dcecc9c06b638736f36587",
+  "message": "fix(coding-agent): keep gutters when rendering virtual root children",
+  "module": "tree-selector",
+  "tags": []
+}

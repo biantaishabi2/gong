@@ -1,0 +1,64 @@
+{
+  "action": "detectCompat",
+  "boundary": "service",
+  "bug_summary": "兼容性检测未识别 DeepSeek 域名，导致其被错误地走到支持 developer role 的路径",
+  "correct_behavior": "baseUrl 包含 deepseek.com 时被识别为兼容提供方，并禁用不支持的 developer role",
+  "data_dependencies": [
+    "config"
+  ],
+  "fix_summary": "在 detectCompat 中新增 baseUrl.includes(\"deepseek.com\")，将 DeepSeek URL 纳入兼容检测并关闭不支持的 developer role",
+  "module": "ai",
+  "source_commit": "4f9deddd477dfbcb39d6274751cd1b44b7507aff",
+  "test_spec": {
+    "args": {
+      "baseUrl": {
+        "allowed": null,
+        "required": true,
+        "type": "string"
+      },
+      "model": {
+        "allowed": null,
+        "required": true,
+        "type": "json"
+      },
+      "provider": {
+        "allowed": null,
+        "required": true,
+        "type": "string"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "is_compat_provider=true",
+        "type": "return_value",
+        "what": "当 baseUrl 包含 deepseek.com 时应判定为兼容提供方"
+      },
+      {
+        "expected": "compat 中 developer role 标记为禁用",
+        "type": "return_value",
+        "what": "DeepSeek 场景下禁用不支持的 developer role"
+      }
+    ],
+    "outputs": {
+      "compat": "json",
+      "is_compat_provider": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "config",
+        "what": "AI 提供方配置可传入自定义 baseUrl"
+      },
+      {
+        "involves": "config",
+        "what": "请求模型信息包含 provider 与 baseUrl"
+      }
+    ],
+    "trigger": {
+      "method": "detectCompat",
+      "target": "openai-completions",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "baseUrl 为 DeepSeek 时未被识别为兼容提供方，developer role 未被禁用"
+}

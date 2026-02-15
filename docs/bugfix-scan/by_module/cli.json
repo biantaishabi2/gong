@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "cli",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "importCommands",
+      "boundary": "service",
+      "bug_summary": "pods CLI 引用了不存在的 stopAllModels 导入，lazy import 也引用了已移出的 showKnownModels",
+      "correct_behavior": "正确从 commands/models.js 静态导入所有需要的函数",
+      "data_dependencies": [
+        "file"
+      ],
+      "fix_summary": "将 stopAllModels 和 showKnownModels 改为静态导入，移除动态 import 中的错误引用",
+      "module": "cli",
+      "source_commit": "8ed6f6dd85991ded5e724c94f346026cbf5c8afa",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "typeof stopAllModels === 'function'",
+            "type": "return_value",
+            "what": "stopAllModels 可用"
+          },
+          {
+            "expected": "typeof showKnownModels === 'function'",
+            "type": "return_value",
+            "what": "showKnownModels 可用"
+          }
+        ],
+        "outputs": {
+          "imported": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "file",
+            "what": "pods CLI 模块已编译"
+          }
+        ],
+        "trigger": {
+          "method": "import",
+          "target": "cli",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "CLI 启动时因导入不存在的 stopAllModels 导致运行时错误"
+    }
+  ]
+}

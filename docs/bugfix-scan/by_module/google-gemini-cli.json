@@ -1,0 +1,93 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "google-gemini-cli",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "parse_usage_metadata",
+      "boundary": "service",
+      "bug_summary": "promptTokenCount 包含 cachedContentTokenCount 但未扣除，导致 input token 数与 cache read 重复计数",
+      "correct_behavior": "input=60, cacheRead=40 → 总计 100（promptTokenCount=100 减去 cached=40）",
+      "data_dependencies": [
+        "network"
+      ],
+      "fix_summary": "input token 改为 promptTokenCount - cachedContentTokenCount，消除重复计数",
+      "module": "google-gemini-cli",
+      "source_commit": "2a0283ecfde024b3e7b16e4f8b17e3bce1ddf33b",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "input === promptTokenCount - cachedContentTokenCount",
+            "type": "return_value",
+            "what": "input = promptTokenCount - cachedContentTokenCount"
+          },
+          {
+            "expected": "cachedContentTokenCount=0 时 input === promptTokenCount",
+            "type": "return_value",
+            "what": "无缓存时 input = promptTokenCount"
+          }
+        ],
+        "outputs": {
+          "cacheRead": "int",
+          "input": "int"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "Gemini CLI 收到包含 usageMetadata 的响应"
+          }
+        ],
+        "trigger": {
+          "method": "parseUsageMetadata",
+          "target": "google-gemini-cli",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "input=100, cacheRead=40 → 总计 140（实际应为 100）"
+    },
+    {
+      "action": "buildUserMessage",
+      "boundary": "service",
+      "bug_summary": "Gemini CLI 用户消息用字符串拼接构造，格式不统一且含可选文本时有风险",
+      "correct_behavior": "使用模板字面量 `${...}` 统一拼接，格式清晰",
+      "data_dependencies": [],
+      "fix_summary": "将字符串拼接改为模板字面量统一格式",
+      "module": "google-gemini-cli",
+      "source_commit": "ef7c52ffa170ef109e80404438450ef6ed159e8b",
+      "test_spec": {
+        "args": {
+          "existingText": {
+            "allowed": null,
+            "required": false,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "text uses template literal formatting",
+            "type": "return_value",
+            "what": "使用模板字面量格式"
+          }
+        ],
+        "outputs": {
+          "text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "bridgePrompt 和 existingText 均非空"
+          }
+        ],
+        "trigger": {
+          "method": "buildUserMessage",
+          "target": "google-gemini-cli",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "使用 + 拼接多段文本，可读性差且格式不统一"
+    }
+  ]
+}

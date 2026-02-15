@@ -1,0 +1,100 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "runner",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "emitContext",
+      "boundary": "service",
+      "bug_summary": "emitContext 直接传递原始 messages 引用，hook 的原地修改会污染调用方数据",
+      "correct_behavior": "structuredClone 深拷贝后传递，hook 修改不影响原始 messages",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "使用 structuredClone 深拷贝 messages 后再传递给 hooks",
+      "module": "runner",
+      "source_commit": "8b6bc3030174503a350c616d7e8e8cdd1e45c31d",
+      "test_spec": {
+        "args": {
+          "messages": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "originalMessages deep-equal before and after",
+            "type": "return_value",
+            "what": "原始 messages 不被修改"
+          },
+          {
+            "expected": "currentMessages = structuredClone(messages)",
+            "type": "return_value",
+            "what": "使用 structuredClone"
+          }
+        ],
+        "outputs": {
+          "result": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "已注册会修改消息的 context hook"
+          }
+        ],
+        "trigger": {
+          "method": "emitContext",
+          "target": "runner",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "hook 修改 messages 数组会影响调用方持有的原始数据"
+    },
+    {
+      "action": "emitContext",
+      "boundary": "service",
+      "bug_summary": "context 事件直接传原始 messages 引用给 hooks，hook 原地修改污染调用方输入（与 8b6bc3 相同修复）",
+      "correct_behavior": "structuredClone 隔离，hook 修改不影响原始数据",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "使用 structuredClone 深拷贝 messages 后传递给 hooks",
+      "module": "runner",
+      "source_commit": "ddf8bfceee7fbf1a42d2d38697084e7105fd7ac1",
+      "test_spec": {
+        "args": {
+          "messages": {
+            "allowed": null,
+            "required": true,
+            "type": "array"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "originalMessages unchanged after hooks run",
+            "type": "return_value",
+            "what": "原始 messages 不被修改"
+          }
+        ],
+        "outputs": {
+          "result": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "已注册会修改消息的 context hook"
+          }
+        ],
+        "trigger": {
+          "method": "emitContext",
+          "target": "runner",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "hook 修改影响原始 messages 数据"
+    }
+  ]
+}

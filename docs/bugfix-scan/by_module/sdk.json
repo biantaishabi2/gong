@@ -1,0 +1,156 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "sdk",
+  "spec_count": 3,
+  "specs": [
+    {
+      "action": "createAgentSession",
+      "boundary": "service",
+      "bug_summary": "无可用模型时的回退提示文案缺少 /model 操作指引，用户完成认证后不知如何选模型",
+      "correct_behavior": "提示信息追加 'Then use /model to select a model.'，完整引导用户从认证到选模型",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "在 modelFallbackMessage 末尾追加 'Then use /model to select a model.' 指引",
+      "module": "sdk",
+      "source_commit": "0423c2c2d53ba933162e9e0c3cc271e58454bf4c",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "message.includes('Use /login')",
+            "type": "return_value",
+            "what": "回退消息包含 /login 指引"
+          },
+          {
+            "expected": "message.includes('use /model to select a model')",
+            "type": "return_value",
+            "what": "回退消息包含 /model 指引"
+          },
+          {
+            "expected": "message.includes('authentication.md')",
+            "type": "return_value",
+            "what": "回退消息包含认证文档链接"
+          }
+        ],
+        "outputs": {
+          "modelFallbackMessage": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "会话创建时无可用模型且无 API key"
+          }
+        ],
+        "trigger": {
+          "method": "createAgentSession",
+          "target": "sdk",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "提示信息为 'No models available. Use /login or set an API key...'，认证后缺少后续步骤"
+    },
+    {
+      "action": "createAgentSession",
+      "boundary": "service",
+      "bug_summary": "新会话初始化后未写入初始 model 和 thinkingLevel，后续恢复会话缺少可恢复状态",
+      "correct_behavior": "新建会话后立即持久化 model.provider/model.id 和 thinkingLevel",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "新建会话时调用 appendModelChange 和 appendThinkingLevelChange 持久化初始状态",
+      "module": "sdk",
+      "source_commit": "98c85bf36a6f29a49182e3d315cfebd405288922",
+      "test_spec": {
+        "args": {
+          "model": {
+            "allowed": null,
+            "required": true,
+            "type": "object"
+          },
+          "thinkingLevel": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "sessionManager.appendModelChange(provider, id) called",
+            "type": "side_effect",
+            "what": "appendModelChange 被调用"
+          },
+          {
+            "expected": "sessionManager.appendThinkingLevelChange(thinkingLevel) called",
+            "type": "side_effect",
+            "what": "appendThinkingLevelChange 被调用"
+          }
+        ],
+        "outputs": {
+          "persisted": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "新会话无历史消息，已解析初始 model 和 thinkingLevel"
+          }
+        ],
+        "trigger": {
+          "method": "createAgentSession",
+          "target": "sdk",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "新会话不记录初始 model 和 thinkingLevel，resume 时无法恢复"
+    },
+    {
+      "action": "wrap_tools_with_hooks",
+      "boundary": "service",
+      "bug_summary": "仅对初始激活工具做 hook 包装，hooks 动态启用的非激活注册工具未被包装而绕过 hook",
+      "correct_behavior": "所有注册工具（包括非激活的）都被 hook 包装，动态启用时行为受 hook 控制",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "改为对全部注册工具（不仅仅是激活工具）做 hook 包装，确保 hooks 可动态启用任何工具",
+      "module": "sdk",
+      "source_commit": "31438fdf2af81eab22bdca7dda4fbb6d53e40d57",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "wrappedAllTools.length === toolRegistry.size",
+            "type": "return_value",
+            "what": "所有注册工具都被 hook 包装"
+          },
+          {
+            "expected": "非激活工具的调用经过 hookRunner",
+            "type": "return_value",
+            "what": "非激活工具也被包装"
+          }
+        ],
+        "outputs": {
+          "wrapped_tools": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "toolRegistry 包含激活和非激活的注册工具"
+          },
+          {
+            "involves": "config",
+            "what": "hookRunner 已配置"
+          }
+        ],
+        "trigger": {
+          "method": "initializeTools",
+          "target": "sdk",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "hooks 尝试启用非激活工具时，该工具未被 hook 包装，行为不受控"
+    }
+  ]
+}

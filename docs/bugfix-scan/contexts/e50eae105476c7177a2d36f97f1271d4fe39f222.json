@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\nindex 1b3cd280..438e66b5 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n@@ -46,6 +46,7 @@ class TreeList implements Component {\n \tprivate filterMode: FilterMode = \"default\";\n \tprivate searchQuery = \"\";\n \tprivate toolCallMap: Map<string, ToolCallInfo> = new Map();\n+\tprivate multipleRoots = false;\n \n \tpublic onSelect?: (entryId: string) => void;\n \tpublic onCancel?: () => void;\n@@ -54,6 +55,7 @@ class TreeList implements Component {\n \tconstructor(tree: SessionTreeNode[], currentLeafId: string | null, maxVisibleLines: number) {\n \t\tthis.currentLeafId = currentLeafId;\n \t\tthis.maxVisibleLines = maxVisibleLines;\n+\t\tthis.multipleRoots = tree.length > 1;\n \t\tthis.flatNodes = this.flattenTree(tree);\n \t\tthis.applyFilter();\n \n@@ -305,7 +307,9 @@ class TreeList implements Component {\n \n \t\t\t// Build line: cursor + indent + label + content + suffix\n \t\t\tconst cursor = isSelected ? theme.fg(\"accent\", \"› \") : \"  \";\n-\t\t\tconst indentStr = \"  \".repeat(flatNode.indent);\n+\t\t\t// If multiple roots, shift indent down by 1 for display (roots at 0, not 1)\n+\t\t\tconst displayIndent = this.multipleRoots ? Math.max(0, flatNode.indent - 1) : flatNode.indent;\n+\t\t\tconst indentStr = \"  \".repeat(displayIndent);\n \t\t\tconst label = flatNode.node.label ? theme.fg(\"warning\", `[${flatNode.node.label}] `) : \"\";\n \t\t\tconst content = this.getEntryDisplayText(flatNode.node, isSelected);\n \t\t\tconst suffix = isCurrentLeaf ? theme.fg(\"accent\", \" *\") : \"\";\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "e50eae105476c7177a2d36f97f1271d4fe39f222",
+  "message": "fix(coding-agent): display multiple roots at indent 0, keep child logic intact",
+  "module": "tree-selector",
+  "tags": []
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "27b27d94412b59adf91bffd08eea9b2f735a2fbb",
+  "bug_summary": "/reload 后恢复了旧编辑器实例而非重新创建的新编辑器，导致状态不一致",
+  "module": "interactive-mode",
+  "action": "handleReload",
+  "fix_summary": "将 restoreEditor 改为 dismissLoader(editor) 接收参数化编辑器，确保 /reload 后使用正确的编辑器实例",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "/reload 完成后 editorContainer 恢复的是 reload 前的旧编辑器引用",
+  "correct_behavior": "/reload 完成后使用正确的编辑器实例（新创建或当前活跃的）",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "交互模式已运行，用户执行 /reload",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "handleReload"
+    },
+    "args": {},
+    "outputs": {
+      "active_editor": "object"
+    },
+    "assertions": [
+      {
+        "what": "reload 后 editorContainer 使用正确的编辑器实例",
+        "type": "return_value",
+        "expected": "active_editor 是当前有效实例"
+      },
+      {
+        "what": "焦点设置到正确的编辑器",
+        "type": "return_value",
+        "expected": "ui.focus === active_editor"
+      }
+    ]
+  }
+}

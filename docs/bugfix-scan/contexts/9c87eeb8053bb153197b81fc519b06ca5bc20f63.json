@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/login-dialog.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/login-dialog.ts b/packages/coding-agent/src/modes/interactive/components/login-dialog.ts\nindex 369615b3..01d58af7 100644\n--- a/packages/coding-agent/src/modes/interactive/components/login-dialog.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/login-dialog.ts\n@@ -109,9 +109,9 @@ export class LoginDialogComponent extends Container {\n \n \t/**\n \t * Called by onPrompt callback - show prompt and wait for input\n+\t * Note: Does NOT clear content, appends to existing (preserves URL from showAuth)\n \t */\n \tshowPrompt(message: string, placeholder?: string): Promise<string> {\n-\t\tthis.contentContainer.clear();\n \t\tthis.contentContainer.addChild(new Spacer(1));\n \t\tthis.contentContainer.addChild(new Text(theme.fg(\"text\", message), 1, 0));\n \t\tif (placeholder) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "9c87eeb8053bb153197b81fc519b06ca5bc20f63",
+  "message": "Fix Anthropic login not showing URL (showPrompt should not clear content)",
+  "module": "login-dialog",
+  "tags": []
+}

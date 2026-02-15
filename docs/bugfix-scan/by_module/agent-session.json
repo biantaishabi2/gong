@@ -1,0 +1,181 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "agent-session",
+  "spec_count": 4,
+  "specs": [
+    {
+      "action": "isRetryableError",
+      "boundary": "service",
+      "bug_summary": "可重试错误正则未包含 fetch failed，该网络失败不触发自动重试",
+      "correct_behavior": "'fetch failed' 被识别为可重试并自动重试",
+      "data_dependencies": [],
+      "fix_summary": "在重试正则中添加 fetch failed 模式",
+      "module": "agent-session",
+      "source_commit": "fb6d464edc0763e943ea41da918a0480e8b04b08",
+      "test_spec": {
+        "args": {
+          "errorMessage": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "isRetryableError('fetch failed') === true",
+            "type": "return_value",
+            "what": "fetch failed 可重试"
+          }
+        ],
+        "outputs": {
+          "retryable": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "API 请求返回 fetch failed 错误"
+          }
+        ],
+        "trigger": {
+          "method": "isRetryableError",
+          "target": "agent-session",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "'fetch failed' 错误不被识别为可重试"
+    },
+    {
+      "action": "isRetryableError",
+      "boundary": "service",
+      "bug_summary": "可重试错误正则遗漏 connection error，连接错误不触发自动重试",
+      "correct_behavior": "'connection error' 被识别为可重试",
+      "data_dependencies": [],
+      "fix_summary": "在重试正则中添加 connection error 模式",
+      "module": "agent-session",
+      "source_commit": "c1382818cc8469aace68b987efbcd9b506cfe0eb",
+      "test_spec": {
+        "args": {
+          "errorMessage": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "isRetryableError('connection error') === true",
+            "type": "return_value",
+            "what": "connection error 可重试"
+          }
+        ],
+        "outputs": {
+          "retryable": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "API 请求返回 connection error"
+          }
+        ],
+        "trigger": {
+          "method": "isRetryableError",
+          "target": "agent-session",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "'connection error' 消息不匹配可重试模式"
+    },
+    {
+      "action": "getLastAssistantMessage",
+      "boundary": "service",
+      "bug_summary": "/copy 查找最后 assistant 消息时未跳过 aborted 且空内容的消息，复制到空回复",
+      "correct_behavior": "/copy 跳过 aborted 空消息，复制到有内容的 assistant 回复",
+      "data_dependencies": [
+        "state"
+      ],
+      "fix_summary": "在 find 中过滤掉 stopReason=aborted 且 content 为空的 assistant 消息",
+      "module": "agent-session",
+      "source_commit": "e30c4e30cb9ae0b306382becf680067cad668857",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "message.content.length > 0",
+            "type": "return_value",
+            "what": "跳过 aborted 空消息"
+          },
+          {
+            "expected": "message.stopReason !== 'aborted' || message.content.length > 0",
+            "type": "return_value",
+            "what": "返回有内容的消息"
+          }
+        ],
+        "outputs": {
+          "message": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "state",
+            "what": "消息序列末尾有 aborted 空消息，之前有正常 assistant 消息"
+          }
+        ],
+        "trigger": {
+          "method": "getLastAssistantMessage",
+          "target": "agent-session",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "/copy 命中 aborted 空消息，复制内容为空"
+    },
+    {
+      "action": "isRetryableError",
+      "boundary": "service",
+      "bug_summary": "可重试错误模式缺少 terminated 关键字，terminated 类型的连接错误不会触发自动重试",
+      "correct_behavior": "包含 'terminated' 的错误消息被识别为可重试并自动重试",
+      "data_dependencies": [],
+      "fix_summary": "在重试正则中添加 terminated 模式匹配",
+      "module": "agent-session",
+      "source_commit": "9b84857b838eab0ca40160eaf9cba1acc56f6004",
+      "test_spec": {
+        "args": {
+          "errorMessage": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "isRetryableError('connection terminated') === true",
+            "type": "return_value",
+            "what": "terminated 错误可重试"
+          },
+          {
+            "expected": "isRetryableError('overloaded') === true",
+            "type": "return_value",
+            "what": "其他已有模式仍可重试"
+          }
+        ],
+        "outputs": {
+          "retryable": "bool"
+        },
+        "preconditions": [
+          {
+            "involves": "network",
+            "what": "API 请求返回包含 terminated 的错误"
+          }
+        ],
+        "trigger": {
+          "method": "isRetryableError",
+          "target": "agent-session",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "包含 'terminated' 的错误消息不被识别为可重试"
+    }
+  ]
+}

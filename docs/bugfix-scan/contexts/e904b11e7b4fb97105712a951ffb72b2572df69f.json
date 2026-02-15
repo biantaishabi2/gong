@@ -1,0 +1,24 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/terminal-image.ts",
+      "hunks": [
+        {
+          "after_function": "export function detectCapabilities(): TerminalCapabilities {\n\tconst termProgram = process.env.TERM_PROGRAM?.toLowerCase() || \"\";\n\tconst term = process.env.TERM?.toLowerCase() || \"\";\n\tconst colorTerm = process.env.COLORTERM?.toLowerCase() || \"\";\n\n\tif (process.env.KITTY_WINDOW_ID || termProgram === \"kitty\") {\n\t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (termProgram === \"ghostty\" || term.includes(\"ghostty\") || process.env.GHOSTTY_RESOURCES_DIR) {\n\t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (process.env.WEZTERM_PANE || termProgram === \"wezterm\") {\n\t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (process.env.ITERM_SESSION_ID || termProgram === \"iterm.app\") {\n\t\treturn { images: \"iterm2\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (termProgram === \"vscode\") {\n\t\treturn { images: null, trueColor: true, hyperlinks: true };\n\t}\n\n\tif (termProgram === \"alacritty\") {\n\t\treturn { images: null, trueColor: true, hyperlinks: true };\n\t}\n\n\tconst trueColor = colorTerm === \"truecolor\" || colorTerm === \"24bit\";\n\treturn { images: null, trueColor, hyperlinks: true };\n}",
+          "before_function": "export function detectCapabilities(): TerminalCapabilities {\n\tconst termProgram = process.env.TERM_PROGRAM?.toLowerCase() || \"\";\n\tconst term = process.env.TERM?.toLowerCase() || \"\";\n\tconst colorTerm = process.env.COLORTERM?.toLowerCase() || \"\";\n\n\tif (process.env.KITTY_WINDOW_ID || termProgram === \"kitty\") {\n\t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (termProgram === \"ghostty\" || term.includes(\"ghostty\")) {\n\t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (process.env.WEZTERM_PANE || termProgram === \"wezterm\") {\n\t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (process.env.ITERM_SESSION_ID || termProgram === \"iterm.app\") {\n\t\treturn { images: \"iterm2\", trueColor: true, hyperlinks: true };\n\t}\n\n\tif (termProgram === \"vscode\") {\n\t\treturn { images: null, trueColor: true, hyperlinks: true };\n\t}\n\n\tif (termProgram === \"alacritty\") {\n\t\treturn { images: null, trueColor: true, hyperlinks: true };\n\t}\n\n\tconst trueColor = colorTerm === \"truecolor\" || colorTerm === \"24bit\";\n\treturn { images: null, trueColor, hyperlinks: true };\n}",
+          "changed_lines": [
+            47
+          ],
+          "function_line": 38,
+          "function_name": "detectCapabilities"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/tui/src/terminal-image.ts b/packages/tui/src/terminal-image.ts\nindex c12cf2c9..a0aa569c 100644\n--- a/packages/tui/src/terminal-image.ts\n+++ b/packages/tui/src/terminal-image.ts\n@@ -44,7 +44,7 @@ export function detectCapabilities(): TerminalCapabilities {\n \t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n \t}\n \n-\tif (termProgram === \"ghostty\" || term.includes(\"ghostty\")) {\n+\tif (termProgram === \"ghostty\" || term.includes(\"ghostty\") || process.env.GHOSTTY_RESOURCES_DIR) {\n \t\treturn { images: \"kitty\", trueColor: true, hyperlinks: true };\n \t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "e904b11e7b4fb97105712a951ffb72b2572df69f",
+  "message": "Fix Ghostty detection inside tmux for inline images (#299)",
+  "module": "terminal-image",
+  "tags": []
+}

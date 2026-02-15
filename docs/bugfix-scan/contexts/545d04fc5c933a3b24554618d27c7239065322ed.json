@@ -1,0 +1,16 @@
+{
+  "diffs": [
+    {
+      "file": "packages/ai/src/providers/openai-completions.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/ai/src/providers/openai-completions.ts b/packages/ai/src/providers/openai-completions.ts\nindex 4a0b1ef5..840fa6af 100644\n--- a/packages/ai/src/providers/openai-completions.ts\n+++ b/packages/ai/src/providers/openai-completions.ts\n@@ -53,7 +53,7 @@ export class OpenAICompletionsLLM implements LLM<OpenAICompletionsLLMOptions> {\n \n \t\t\t// Cerebras/xAI dont like the \"store\" field\n \t\t\tif (!this.modelInfo.baseUrl?.includes(\"cerebras.ai\") && !this.modelInfo.baseUrl?.includes(\"api.x.ai\")) {\n-\t\t\t\t(params as any).store = false;\n+\t\t\t\tparams.store = false;\n \t\t\t}\n \n \t\t\tif (options?.maxTokens) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "545d04fc5c933a3b24554618d27c7239065322ed",
+  "message": "fix(ai): Fix OpenAI completions store field type issue",
+  "module": "openai-completions",
+  "tags": [
+    "null_safety"
+  ]
+}

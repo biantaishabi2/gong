@@ -1,0 +1,54 @@
+{
+  "source_commit": "8d3b4dd762ece93ec5dcecc9c06b638736f36587",
+  "bug_summary": "多根树渲染虚拟根子节点时错误裁剪首层 gutters，导致缩进对齐丢失",
+  "module": "tree-selector",
+  "action": "renderLine",
+  "fix_summary": "移除 multipleRoots 时 gutters.slice(1) 的裁剪逻辑，保留完整 gutters",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "虚拟根子节点的 gutters 被 slice(1) 裁掉首层，缩进对齐错误",
+  "correct_behavior": "虚拟根子节点保留完整 gutters，前缀对齐正确",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "树为多根模式，存在虚拟根子节点",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tree-selector",
+      "method": "renderLine"
+    },
+    "args": {
+      "multipleRoots": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      },
+      "gutters": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "prefix": "string"
+    },
+    "assertions": [
+      {
+        "what": "gutters 不被裁剪",
+        "type": "return_value",
+        "expected": "displayGutters.length === flatNode.gutters.length"
+      },
+      {
+        "what": "缩进对齐正确",
+        "type": "return_value",
+        "expected": "prefix 列数等于 gutters 长度"
+      }
+    ]
+  }
+}

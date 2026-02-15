@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 4245c78c..f7d9b356 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -370,8 +370,10 @@ export class InteractiveMode {\n \t\t// Load changelog (only show new entries, skip for resumed sessions)\n \t\tthis.changelogMarkdown = this.getChangelogForDisplay();\n \n-\t\t// Setup autocomplete with fd tool for file path completion\n-\t\tthis.fdPath = await ensureTool(\"fd\");\n+\t\t// Ensure fd and rg are available (downloads if missing, adds to PATH via getBinDir)\n+\t\t// Both are needed: fd for autocomplete, rg for grep tool and bash commands\n+\t\tconst [fdPath] = await Promise.all([ensureTool(\"fd\"), ensureTool(\"rg\")]);\n+\t\tthis.fdPath = fdPath;\n \n \t\t// Add header container as first child\n \t\tthis.ui.addChild(this.headerContainer);\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "a6cd254471b6b0cc3a08782e9026dd14b03773fe",
+  "message": "fix(coding-agent): ensure rg is downloaded at startup alongside fd",
+  "module": "interactive-mode",
+  "tags": []
+}

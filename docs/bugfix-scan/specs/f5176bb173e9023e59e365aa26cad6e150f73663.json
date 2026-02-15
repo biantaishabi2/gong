@@ -1,0 +1,42 @@
+{
+  "source_commit": "f5176bb173e9023e59e365aa26cad6e150f73663",
+  "bug_summary": "Assistant Markdown 默认底部 padding 导致工具执行前出现双倍间距",
+  "module": "tui-renderer",
+  "action": "renderAssistantText",
+  "fix_summary": "创建 Markdown 时传入 paddingY=0，消除额外间距",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Assistant 文本与下方工具执行间有多余空行",
+  "correct_behavior": "paddingY=0 消除额外间距，紧凑显示",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Assistant 输出文本后紧接工具执行",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tui-renderer",
+      "method": "renderAssistantText"
+    },
+    "args": {
+      "text": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "markdown_component": "object"
+    },
+    "assertions": [
+      {
+        "what": "paddingY 为 0",
+        "type": "return_value",
+        "expected": "new Markdown(text, undefined, undefined, 0)"
+      }
+    ]
+  }
+}

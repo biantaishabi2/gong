@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/main.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/main.ts b/packages/coding-agent/src/main.ts\nindex fa6974ab..dc1778ca 100644\n--- a/packages/coding-agent/src/main.ts\n+++ b/packages/coding-agent/src/main.ts\n@@ -35,7 +35,7 @@ import { ensureTool } from \"./utils/tools-manager.js\";\n \n async function checkForNewVersion(currentVersion: string): Promise<string | undefined> {\n \ttry {\n-\t\tconst response = await fetch(\"https://registry.npmjs.org/@mariozechner/pi -coding-agent/latest\");\n+\t\tconst response = await fetch(\"https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest\");\n \t\tif (!response.ok) return undefined;\n \n \t\tconst data = (await response.json()) as { version?: string };\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "9b0ec024051fd114dacfe6649792562b162bd84d",
+  "message": "Fix version check URL typo (#423)",
+  "module": "coding-agent",
+  "tags": []
+}

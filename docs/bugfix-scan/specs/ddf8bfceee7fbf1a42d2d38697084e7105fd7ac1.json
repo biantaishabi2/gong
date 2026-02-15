@@ -1,0 +1,44 @@
+{
+  "source_commit": "ddf8bfceee7fbf1a42d2d38697084e7105fd7ac1",
+  "bug_summary": "context 事件直接传原始 messages 引用给 hooks，hook 原地修改污染调用方输入（与 8b6bc3 相同修复）",
+  "module": "runner",
+  "action": "emitContext",
+  "fix_summary": "使用 structuredClone 深拷贝 messages 后传递给 hooks",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "hook 修改影响原始 messages 数据",
+  "correct_behavior": "structuredClone 隔离，hook 修改不影响原始数据",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "已注册会修改消息的 context hook",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "runner",
+      "method": "emitContext"
+    },
+    "args": {
+      "messages": {
+        "type": "array",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "result": "object"
+    },
+    "assertions": [
+      {
+        "what": "原始 messages 不被修改",
+        "type": "return_value",
+        "expected": "originalMessages unchanged after hooks run"
+      }
+    ]
+  }
+}

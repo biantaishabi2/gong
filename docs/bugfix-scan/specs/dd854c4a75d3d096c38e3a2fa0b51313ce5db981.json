@@ -1,0 +1,5 @@
+{
+  "reason": "feature",
+  "skip": true,
+  "summary": "该提交仅在 web-ui 入口文件新增导出符号（CustomProviderCard、ProviderKeyInput、AbortedMessage、ToolMessageDebugView），未体现缺陷修复行为或错误语义变更。"
+}

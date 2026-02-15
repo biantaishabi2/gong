@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tool-execution.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tool-execution.ts b/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\nindex 52bda96d..35bad0e6 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tool-execution.ts\n@@ -9,6 +9,7 @@ import {\n \tSpacer,\n \tText,\n \ttype TUI,\n+\ttruncateToWidth,\n } from \"@mariozechner/pi-tui\";\n import stripAnsi from \"strip-ansi\";\n import type { ToolDefinition } from \"../../../core/extensions/types.js\";\n@@ -384,7 +385,7 @@ export class ToolExecutionComponent extends Container {\n \t\t\t\t\t\t\t\tconst hint =\n \t\t\t\t\t\t\t\t\ttheme.fg(\"muted\", `... (${cachedSkipped} earlier lines,`) +\n \t\t\t\t\t\t\t\t\t` ${keyHint(\"expandTools\", \"to expand\")})`;\n-\t\t\t\t\t\t\t\treturn [\"\", hint, ...cachedLines];\n+\t\t\t\t\t\t\t\treturn [\"\", truncateToWidth(hint, width, \"...\"), ...cachedLines];\n \t\t\t\t\t\t\t}\n \t\t\t\t\t\t\t// Add blank line for spacing (matches expanded case)\n \t\t\t\t\t\t\treturn [\"\", ...cachedLines];\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "0faba293e61ebf451a0a238f16bc437d3a2cbcf4",
+  "message": "fix(coding-agent): truncate bash hint line to terminal width",
+  "module": "a_g_e_n_t_s",
+  "tags": []
+}

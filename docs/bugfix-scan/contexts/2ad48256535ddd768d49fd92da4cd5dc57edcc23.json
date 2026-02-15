@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/settings-manager.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/settings-manager.ts b/packages/coding-agent/src/core/settings-manager.ts\nindex 1d13dbe4..c82ef528 100644\n--- a/packages/coding-agent/src/core/settings-manager.ts\n+++ b/packages/coding-agent/src/core/settings-manager.ts\n@@ -680,6 +680,7 @@ export class SettingsManager {\n \n \tsetAutocompleteMaxVisible(maxVisible: number): void {\n \t\tthis.globalSettings.autocompleteMaxVisible = Math.max(3, Math.min(20, Math.floor(maxVisible)));\n+\t\tthis.markModified(\"autocompleteMaxVisible\");\n \t\tthis.save();\n \t}\n \n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2ad48256535ddd768d49fd92da4cd5dc57edcc23",
+  "message": "fix: autocompleteMaxVisible setting not persisting",
+  "module": "settings-manager",
+  "tags": []
+}

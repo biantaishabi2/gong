@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "google-shared",
+  "spec_count": 2,
+  "specs": [
+    {
+      "action": "convertMessages",
+      "boundary": "service",
+      "bug_summary": "Gemini 3 遇到无 thoughtSignature 的历史 toolCall 时仅输出普通工具调用文本，缺少反模仿提示，导致模型可能模仿错误格式",
+      "correct_behavior": "无签名 toolCall 渲染为包含 Historical context 说明、工具名、参数和 Do not mimic this format 防模仿警告的文本",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "无签名 toolCall 转换为包含 Historical context 说明和 Do not mimic this format 警告的文本块",
+      "module": "google-shared",
+      "source_commit": "5d3e7d5aaa8a5301fa5937bcd1bd7d3557c60c6f",
+      "test_spec": {
+        "args": {
+          "modelId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "toolName": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "text.includes('Historical context')",
+            "type": "return_value",
+            "what": "输出包含 Historical context 文案"
+          },
+          {
+            "expected": "text.includes('Do not mimic this format')",
+            "type": "return_value",
+            "what": "输出包含防模仿警告"
+          },
+          {
+            "expected": "text.includes(toolName) && text.includes(argsStr)",
+            "type": "return_value",
+            "what": "输出包含工具名和参数"
+          }
+        ],
+        "outputs": {
+          "rendered_text": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "Gemini 3 模型存在无 thoughtSignature 的历史 toolCall 消息"
+          }
+        ],
+        "trigger": {
+          "method": "convertMessages",
+          "target": "google-shared",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "无签名 toolCall 渲染为 [Tool Call: bash]\\nArguments: ... 的简单文本，模型可能模仿此格式"
+    },
+    {
+      "action": "convertMessages",
+      "boundary": "service",
+      "bug_summary": "Claude 模型经由 Google APIs 调用时工具调用和结果未携带 tool call id，导致调用链无法关联",
+      "correct_behavior": "Claude 模型的 functionCall.id 和 functionResponse.id 均等于原始 toolCallId",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "新增 requiresToolCallId 检测 Claude 模型，为 functionCall 和 functionResponse 添加 id 字段",
+      "module": "google-shared",
+      "source_commit": "7a41975e9ec07acd3992cfef9867c30e728f4238",
+      "test_spec": {
+        "args": {
+          "modelId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          },
+          "toolCallId": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "functionCall.id === toolCallId",
+            "type": "return_value",
+            "what": "functionCall 包含 id"
+          },
+          {
+            "expected": "functionResponse.id === toolCallId",
+            "type": "return_value",
+            "what": "functionResponse 包含 id"
+          }
+        ],
+        "outputs": {
+          "functionCall": "object",
+          "functionResponse": "object"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "模型为 Claude 系列且消息中包含 toolCall 和 toolResult"
+          }
+        ],
+        "trigger": {
+          "method": "convertMessages",
+          "target": "google-shared",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "Claude 模型的 functionCall 和 functionResponse 缺少 id，调用结果无法正确关联"
+    }
+  ]
+}

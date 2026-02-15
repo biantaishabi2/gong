@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/agent-session.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/agent-session.ts b/packages/coding-agent/src/core/agent-session.ts\nindex f5c86f03..23f956d3 100644\n--- a/packages/coding-agent/src/core/agent-session.ts\n+++ b/packages/coding-agent/src/core/agent-session.ts\n@@ -1862,8 +1862,8 @@ export class AgentSession {\n \t\tif (isContextOverflow(message, contextWindow)) return false;\n \n \t\tconst err = message.errorMessage;\n-\t\t// Match: overloaded_error, rate limit, 429, 500, 502, 503, 504, service unavailable, connection errors, fetch failed\n-\t\treturn /overloaded|rate.?limit|too many requests|429|500|502|503|504|service.?unavailable|server error|internal error|connection.?error|connection.?refused|other side closed|fetch failed|upstream.?connect|reset before headers/i.test(\n+\t\t// Match: overloaded_error, rate limit, 429, 500, 502, 503, 504, service unavailable, connection errors, fetch failed, terminated\n+\t\treturn /overloaded|rate.?limit|too many requests|429|500|502|503|504|service.?unavailable|server error|internal error|connection.?error|connection.?refused|other side closed|fetch failed|upstream.?connect|reset before headers|terminated/i.test(\n \t\t\terr,\n \t\t);\n \t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "9b84857b838eab0ca40160eaf9cba1acc56f6004",
+  "message": "fix(coding-agent): add 'terminated' to retryable error patterns",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,63 @@
+{
+  "action": "shutdownHandler",
+  "boundary": "event",
+  "bug_summary": "扩展触发 shutdown 时，在非流式会话下未进入 clean TUI shutdown 路径，可能导致退出流程不完整",
+  "correct_behavior": "非流式会话触发 shutdown 会设置标记位并立即执行 this.shutdown()",
+  "data_dependencies": [
+    "session",
+    "config"
+  ],
+  "fix_summary": "在 shutdownHandler 中新增非流式分支：当 session.isStreaming=false 时主动调用 this.shutdown()",
+  "module": "interactive-mode",
+  "source_commit": "92fdb53c106d8424589cd2e3a5e62cda5ba3cdec",
+  "test_spec": {
+    "args": {
+      "session_is_streaming": {
+        "allowed": [
+          true,
+          false
+        ],
+        "required": true,
+        "type": "bool"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "shutdownRequested=true",
+        "type": "state_change",
+        "what": "收到 shutdown 事件后应先将 shutdownRequested 置为 true"
+      },
+      {
+        "expected": "this.shutdown() called once",
+        "type": "method_call",
+        "what": "当 session_is_streaming=false 时必须调用 clean TUI shutdown 路径"
+      },
+      {
+        "expected": "this.shutdown() not called in handler",
+        "type": "method_call",
+        "what": "当 session_is_streaming=true 时不应立即调用 this.shutdown()"
+      }
+    ],
+    "outputs": {
+      "shutdown_invoked": "bool",
+      "shutdown_requested": "bool"
+    },
+    "preconditions": [
+      {
+        "involves": "session",
+        "what": "交互会话已建立"
+      },
+      {
+        "involves": "config",
+        "what": "扩展可触发 shutdown 事件"
+      }
+    ],
+    "trigger": {
+      "method": "shutdownHandler",
+      "target": "InteractiveMode",
+      "type": "event_handler"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "非流式会话触发 shutdown 仅设置标记位，未执行 this.shutdown()"
+}

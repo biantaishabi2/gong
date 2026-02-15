@@ -1,0 +1,42 @@
+{
+  "source_commit": "ef7c52ffa170ef109e80404438450ef6ed159e8b",
+  "bug_summary": "Gemini CLI 用户消息用字符串拼接构造，格式不统一且含可选文本时有风险",
+  "module": "google-gemini-cli",
+  "action": "buildUserMessage",
+  "fix_summary": "将字符串拼接改为模板字面量统一格式",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "使用 + 拼接多段文本，可读性差且格式不统一",
+  "correct_behavior": "使用模板字面量 `${...}` 统一拼接，格式清晰",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "bridgePrompt 和 existingText 均非空",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "google-gemini-cli",
+      "method": "buildUserMessage"
+    },
+    "args": {
+      "existingText": {
+        "type": "string",
+        "required": false,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "text": "string"
+    },
+    "assertions": [
+      {
+        "what": "使用模板字面量格式",
+        "type": "return_value",
+        "expected": "text uses template literal formatting"
+      }
+    ]
+  }
+}

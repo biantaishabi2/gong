@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/session-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/session-selector.ts b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\nindex ec156a73..c63ea6d8 100644\n--- a/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/session-selector.ts\n@@ -168,7 +168,12 @@ class SessionList implements Component {\n \t\t\t\tlines.push(theme.fg(\"muted\", \"  No sessions found\"));\n \t\t\t} else {\n \t\t\t\t// \"Current folder\" scope - hint to try \"all\"\n-\t\t\t\tlines.push(theme.fg(\"muted\", \"  No sessions in current folder. Press Tab to view all.\"));\n+\t\t\t\tlines.push(\n+\t\t\t\t\ttheme.fg(\n+\t\t\t\t\t\t\"muted\",\n+\t\t\t\t\t\ttruncateToWidth(\"  No sessions in current folder. Press Tab to view all.\", width, \"…\"),\n+\t\t\t\t\t),\n+\t\t\t\t);\n \t\t\t}\n \t\t\treturn lines;\n \t\t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2836d97735dc7105f28b662f272ab75bb844f607",
+  "message": "Fix session picker empty state overflow",
+  "module": "session-selector",
+  "tags": []
+}

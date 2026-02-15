@@ -1,0 +1,49 @@
+{
+  "source_commit": "a62231987c3c522b787dbd6cd6bf4d3afa9316a4",
+  "bug_summary": "非 OAuth 分支未设置 Anthropic 默认请求头，缺少 anthropic-dangerous-direct-browser-access",
+  "module": "anthropic",
+  "action": "createClient",
+  "fix_summary": "为非 OAuth 客户端设置 defaultHeaders，包含 accept、anthropic-dangerous-direct-browser-access 和 anthropic-beta",
+  "test_type": "regression",
+  "boundary": "http",
+  "wrong_behavior": "非 OAuth 客户端缺少 anthropic-dangerous-direct-browser-access 头，浏览器直连失败",
+  "correct_behavior": "非 OAuth 客户端携带完整默认请求头，浏览器直连正常工作",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "使用非 OAuth API key 初始化 Anthropic 客户端",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "anthropic",
+      "method": "createClient"
+    },
+    "args": {
+      "apiKey": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "client": "object"
+    },
+    "assertions": [
+      {
+        "what": "包含 browser-access 头",
+        "type": "return_value",
+        "expected": "headers['anthropic-dangerous-direct-browser-access'] === 'true'"
+      },
+      {
+        "what": "包含 accept 头",
+        "type": "return_value",
+        "expected": "headers['accept'] === 'application/json'"
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "source_commit": "5fcdf0cfd841d520b2b5b1198dc5893be7cadce6",
+  "bug_summary": "工具开始提示直接渲染为下划线包裹标签，缺少箭头前缀导致与普通文本视觉区分不足",
+  "module": "mom",
+  "action": "tool_execution_start",
+  "fix_summary": "将工具标签从 _label_ 改为 _→ label_，添加箭头前缀增强视觉区分",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "工具执行开始时响应 _label_，缺少箭头，与普通文本难以区分",
+  "correct_behavior": "工具执行开始时响应 _→ label_，箭头前缀提供视觉区分",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "存在工具执行开始事件，label 不为空",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "mom/agent",
+      "method": "tool_execution_start"
+    },
+    "args": {
+      "label": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "response_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "响应文本以 _→ 开头",
+        "type": "return_value",
+        "expected": "response === `_→ ${label}_`"
+      }
+    ]
+  }
+}

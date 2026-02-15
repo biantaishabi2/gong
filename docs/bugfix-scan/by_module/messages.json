@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "messages",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "messageTransformer",
+      "boundary": "service",
+      "bug_summary": "HookMessage 的 content 为字符串类型时未归一化为数组格式，下游处理因格式不一致报错",
+      "correct_behavior": "字符串 content 被自动归一化为 [{type:'text', text}] 数组格式",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "增加 typeof content === 'string' 检查，字符串自动转为 [{type:'text', text: content}] 数组",
+      "module": "messages",
+      "source_commit": "574f1cba3d5fc0a3b2e1d4f5c6b7a8e9d0f1c2a3",
+      "test_spec": {
+        "args": {},
+        "assertions": [
+          {
+            "expected": "typeof content === 'string' → [{type:'text', text: content}]",
+            "type": "return_value",
+            "what": "字符串 content 被转为数组"
+          },
+          {
+            "expected": "Array.isArray(content) → 原样保留",
+            "type": "return_value",
+            "what": "已是数组的 content 不变"
+          }
+        ],
+        "outputs": {
+          "transformed": "array"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "消息列表包含 HookMessage，其 content 为字符串类型"
+          }
+        ],
+        "trigger": {
+          "method": "transformMessages",
+          "target": "messages",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "HookMessage content 为字符串时下游期望数组格式，处理失败"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "source_commit": "d89f6e08ce58d4c38189b1787363269d91147dcc",
+  "bug_summary": "归一化扩展来源时未识别原始 http(s) git URL 且未去除 .git 后缀，匹配键不一致",
+  "module": "coding-agent",
+  "action": "normalizeExtensionSource",
+  "fix_summary": "增加原始 git URL 识别和 .git 后缀去除，生成一致的归一化 key",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "https://github.com/acme/ext.git@v1 的 key 含 .git 后缀，与其他引用方式不一致",
+  "correct_behavior": "key 为 github.com/acme/ext，去除协议前缀和 .git 后缀",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "扩展来源为原始 git URL",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "coding-agent",
+      "method": "normalizeExtensionSource"
+    },
+    "args": {
+      "source": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "type": "string",
+      "key": "string"
+    },
+    "assertions": [
+      {
+        "what": "去除协议前缀和 .git 后缀",
+        "type": "return_value",
+        "expected": "key === 'github.com/acme/agent-ext'"
+      },
+      {
+        "what": "类型为 git",
+        "type": "return_value",
+        "expected": "type === 'git'"
+      }
+    ]
+  }
+}

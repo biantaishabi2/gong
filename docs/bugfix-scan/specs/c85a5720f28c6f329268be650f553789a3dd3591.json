@@ -1,0 +1,54 @@
+{
+  "source_commit": "c85a5720f28c6f329268be650f553789a3dd3591",
+  "bug_summary": "/skill 提示仅注入正文，未包含 skill 文件路径和相对引用基准目录",
+  "module": "interactive-mode",
+  "action": "handleSkillCommand",
+  "fix_summary": "在提示内容前添加 Skill location 和 References are relative to 头信息",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "skill 提示缺少路径上下文，相对路径引用无法定位",
+  "correct_behavior": "提示包含 Skill location: path 和 References are relative to: dir",
+  "data_dependencies": [
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "已加载包含相对路径引用的 skill 文件",
+        "involves": "file"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "interactive-mode",
+      "method": "handleSkillCommand"
+    },
+    "args": {
+      "skillPath": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "args": {
+        "type": "string",
+        "required": false,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "prompt": "string"
+    },
+    "assertions": [
+      {
+        "what": "包含 Skill location",
+        "type": "return_value",
+        "expected": "prompt.includes('Skill location: ' + skillPath)"
+      },
+      {
+        "what": "包含 References are relative to",
+        "type": "return_value",
+        "expected": "prompt.includes('References are relative to ' + dirname(skillPath))"
+      }
+    ]
+  }
+}

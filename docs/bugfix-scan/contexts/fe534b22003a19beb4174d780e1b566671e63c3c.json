@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/input.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/input.ts b/packages/tui/src/components/input.ts\nindex 369ea2fb..99ae2b78 100644\n--- a/packages/tui/src/components/input.ts\n+++ b/packages/tui/src/components/input.ts\n@@ -307,9 +307,12 @@ export class Input implements Component, Focusable {\n \n \t\t// Build line with fake cursor\n \t\t// Insert cursor character at cursor position\n+\t\tconst graphemes = [...segmenter.segment(visibleText.slice(cursorDisplay))];\n+\t\tconst cursorGrapheme = graphemes[0];\n+\n \t\tconst beforeCursor = visibleText.slice(0, cursorDisplay);\n-\t\tconst atCursor = visibleText[cursorDisplay] || \" \"; // Character at cursor, or space if at end\n-\t\tconst afterCursor = visibleText.slice(cursorDisplay + 1);\n+\t\tconst atCursor = cursorGrapheme?.segment ?? \" \"; // Character at cursor, or space if at end\n+\t\tconst afterCursor = visibleText.slice(cursorDisplay + atCursor.length);\n \n \t\t// Hardware cursor marker (zero-width, emitted before fake cursor for IME positioning)\n \t\tconst marker = this.focused ? CURSOR_MARKER : \"\";\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "fe534b22003a19beb4174d780e1b566671e63c3c",
+  "message": "fix(tui): handle emojis in input cursor (#1183)",
+  "module": "input",
+  "tags": []
+}

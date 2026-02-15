@@ -1,0 +1,28 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/core/compaction/branch-summarization.ts",
+      "hunks": [
+        {
+          "after_function": "export function collectEntriesForBranchSummary(\n\tsession: ReadonlySessionManager,\n\toldLeafId: string | null,\n\ttargetId: string,\n): CollectEntriesResult {\n\t// If no old position, nothing to summarize\n\tif (!oldLeafId) {\n\t\treturn { entries: [], commonAncestorId: null };\n\t}\n\n\t// Find common ancestor (deepest node that's on both paths)\n\tconst oldPath = new Set(session.getPath(oldLeafId).map((e) => e.id));\n\tconst targetPath = session.getPath(targetId);\n\n\t// targetPath is root-first, so iterate backwards to find deepest common ancestor\n\tlet commonAncestorId: string | null = null;\n\tfor (let i = targetPath.length - 1; i >= 0; i--) {\n\t\tif (oldPath.has(targetPath[i].id)) {\n\t\t\tcommonAncestorId = targetPath[i].id;\n\t\t\tbreak;\n\t\t}\n\t}\n\n\t// Collect entries from old leaf back to common ancestor\n\tconst entries: SessionEntry[] = [];\n\tlet current: string | null = oldLeafId;\n\n\twhile (current && current !== commonAncestorId) {\n\t\tconst entry = session.getEntry(current);\n\t\tif (!entry) break;\n\t\tentries.push(entry);\n\t\tcurrent = entry.parentId;\n\t}\n\n\t// Reverse to get chronological order\n\tentries.reverse();\n\n\treturn { entries, commonAncestorId };\n}",
+          "before_function": "export function collectEntriesForBranchSummary(\n\tsession: ReadonlySessionManager,\n\toldLeafId: string | null,\n\ttargetId: string,\n): CollectEntriesResult {\n\t// If no old position, nothing to summarize\n\tif (!oldLeafId) {\n\t\treturn { entries: [], commonAncestorId: null };\n\t}\n\n\t// Find common ancestor\n\tconst oldPath = new Set(session.getPath(oldLeafId).map((e) => e.id));\n\tconst targetPath = session.getPath(targetId);\n\n\tlet commonAncestorId: string | null = null;\n\tfor (const entry of targetPath) {\n\t\tif (oldPath.has(entry.id)) {\n\t\t\tcommonAncestorId = entry.id;\n\t\t\tbreak;\n\t\t}\n\t}\n\n\t// Collect entries from old leaf back to common ancestor\n\tconst entries: SessionEntry[] = [];\n\tlet current: string | null = oldLeafId;\n\n\twhile (current && current !== commonAncestorId) {\n\t\tconst entry = session.getEntry(current);\n\t\tif (!entry) break;\n\t\tentries.push(entry);\n\t\tcurrent = entry.parentId;\n\t}\n\n\t// Reverse to get chronological order\n\tentries.reverse();\n\n\treturn { entries, commonAncestorId };\n}",
+          "changed_lines": [
+            94,
+            98,
+            100,
+            101,
+            102
+          ],
+          "function_line": 84,
+          "function_name": "collectEntriesForBranchSummary"
+        }
+      ],
+      "raw_diff": "diff --git a/packages/coding-agent/src/core/compaction/branch-summarization.ts b/packages/coding-agent/src/core/compaction/branch-summarization.ts\nindex 952676be..1d37158c 100644\n--- a/packages/coding-agent/src/core/compaction/branch-summarization.ts\n+++ b/packages/coding-agent/src/core/compaction/branch-summarization.ts\n@@ -91,14 +91,15 @@ export function collectEntriesForBranchSummary(\n \t\treturn { entries: [], commonAncestorId: null };\n \t}\n \n-\t// Find common ancestor\n+\t// Find common ancestor (deepest node that's on both paths)\n \tconst oldPath = new Set(session.getPath(oldLeafId).map((e) => e.id));\n \tconst targetPath = session.getPath(targetId);\n \n+\t// targetPath is root-first, so iterate backwards to find deepest common ancestor\n \tlet commonAncestorId: string | null = null;\n-\tfor (const entry of targetPath) {\n-\t\tif (oldPath.has(entry.id)) {\n-\t\t\tcommonAncestorId = entry.id;\n+\tfor (let i = targetPath.length - 1; i >= 0; i--) {\n+\t\tif (oldPath.has(targetPath[i].id)) {\n+\t\t\tcommonAncestorId = targetPath[i].id;\n \t\t\tbreak;\n \t\t}\n \t}\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "92947a3dc450e1f8bd1eded4682bfe6766a1cbcc",
+  "message": "Fix common ancestor finding: iterate backwards to find deepest ancestor",
+  "module": "branch-summarization",
+  "tags": []
+}

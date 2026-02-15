@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-02-16T03:09:00+0800",
+  "module": "input",
+  "spec_count": 1,
+  "specs": [
+    {
+      "action": "render",
+      "boundary": "service",
+      "bug_summary": "输入框光标在包含 emoji 的文本中按 UTF-16 码元切分，导致光标字符与后续文本截断错误",
+      "correct_behavior": "使用 grapheme 首段作为 atCursor，并按该段长度计算 afterCursor，emoji 光标显示正确",
+      "data_dependencies": [
+        "config"
+      ],
+      "fix_summary": "改为基于 grapheme 分割定位光标字符，使用当前 grapheme 长度计算 afterCursor，避免 emoji 被拆分",
+      "module": "input",
+      "source_commit": "fe534b22003a19beb4174d780e1b566671e63c3c",
+      "test_spec": {
+        "args": {
+          "cursorDisplay": {
+            "allowed": null,
+            "required": true,
+            "type": "int"
+          },
+          "focused": {
+            "allowed": [
+              true,
+              false
+            ],
+            "required": true,
+            "type": "bool"
+          },
+          "visibleText": {
+            "allowed": null,
+            "required": true,
+            "type": "string"
+          }
+        },
+        "assertions": [
+          {
+            "expected": "atCursor 等于当前完整 grapheme",
+            "type": "output",
+            "what": "atCursor 必须是完整 emoji grapheme，而非半个代理对字符"
+          },
+          {
+            "expected": "afterCursor 与预期后缀完全一致",
+            "type": "output",
+            "what": "afterCursor 的起始位置按 atCursor.length 偏移，不丢失或重复后续字符"
+          },
+          {
+            "expected": "rendered_line 中光标位置与 emoji 边界对齐",
+            "type": "output",
+            "what": "渲染结果中光标覆盖字符与视觉字符边界一致"
+          }
+        ],
+        "outputs": {
+          "afterCursor": "string",
+          "atCursor": "string",
+          "rendered_line": "string"
+        },
+        "preconditions": [
+          {
+            "involves": "config",
+            "what": "输入组件已聚焦并启用假光标渲染路径"
+          },
+          {
+            "involves": "config",
+            "what": "输入文本包含 emoji（多码元 grapheme）且光标位于该 emoji 位置"
+          }
+        ],
+        "trigger": {
+          "method": "render",
+          "target": "Input",
+          "type": "service_call"
+        }
+      },
+      "test_type": "regression",
+      "wrong_behavior": "使用 visibleText[cursorDisplay] 和 cursorDisplay+1 截取，emoji 被拆分导致显示错位"
+    }
+  ]
+}

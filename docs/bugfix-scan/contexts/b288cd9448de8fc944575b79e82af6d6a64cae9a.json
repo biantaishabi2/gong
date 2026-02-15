@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/web-ui/src/components/ProviderKeyInput.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/components/ProviderKeyInput.ts b/packages/web-ui/src/components/ProviderKeyInput.ts\nindex e5dc3363..db5ccee9 100644\n--- a/packages/web-ui/src/components/ProviderKeyInput.ts\n+++ b/packages/web-ui/src/components/ProviderKeyInput.ts\n@@ -67,7 +67,7 @@ export class ProviderKeyInput extends LitElement {\n \n \t\t\tconst result = await complete(model, context, {\n \t\t\t\tapiKey,\n-\t\t\t\tmaxTokens: 10,\n+\t\t\t\tmaxTokens: 200,\n \t\t\t} as any);\n \n \t\t\treturn result.stopReason === \"stop\";\n"
+    },
+    {
+      "file": "packages/web-ui/src/components/sandbox/RuntimeMessageRouter.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/web-ui/src/components/sandbox/RuntimeMessageRouter.ts b/packages/web-ui/src/components/sandbox/RuntimeMessageRouter.ts\nindex 13674689..d88c95f0 100644\n--- a/packages/web-ui/src/components/sandbox/RuntimeMessageRouter.ts\n+++ b/packages/web-ui/src/components/sandbox/RuntimeMessageRouter.ts\n@@ -183,6 +183,8 @@ export class RuntimeMessageRouter {\n \t\t\t\tconst context = this.sandboxes.get(sandboxId);\n \t\t\t\tif (!context) return false;\n \n+\t\t\t\tconsole.log(\"Router received user script message for sandbox:\", sandboxId, message);\n+\n \t\t\t\tconst respond = (response: any) => {\n \t\t\t\t\tsendResponse({\n \t\t\t\t\t\t...response,\n@@ -210,6 +212,7 @@ export class RuntimeMessageRouter {\n \t\t\t};\n \n \t\t\tchrome.runtime.onUserScriptMessage.addListener(this.userScriptMessageListener);\n+\t\t\tconsole.log(\"[RuntimeMessageRouter] Registered chrome.runtime.onUserScriptMessage listener\");\n \t\t}\n \t}\n }\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "b288cd9448de8fc944575b79e82af6d6a64cae9a",
+  "message": "Add debug logging to RuntimeMessageRouter and increase API key validation tokens",
+  "module": "provider_key_input",
+  "tags": []
+}

@@ -1,0 +1,49 @@
+{
+  "source_commit": "7db3068ceeb16f6cc66abab3f25483169eb86a3f",
+  "bug_summary": "OpenAI Responses provider 未执行成本计算，usage 返回后未累计费用",
+  "module": "openai-responses",
+  "action": "handleCompletion",
+  "fix_summary": "导入 calculateCost 并在收到 usage 数据后调用 calculateCost(modelInfo, usage)",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "请求完成后 usage 数据被忽略，成本未累计",
+  "correct_behavior": "请求完成后调用 calculateCost(modelInfo, usage) 正确累计费用",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "OpenAI Responses 请求完成并返回 usage 数据",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "openai-responses",
+      "method": "handleCompletion"
+    },
+    "args": {
+      "modelInfo": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      },
+      "usage": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "cost_calculated": "bool"
+    },
+    "assertions": [
+      {
+        "what": "calculateCost 被调用",
+        "type": "side_effect",
+        "expected": "calculateCost(modelInfo, usage) called"
+      }
+    ]
+  }
+}

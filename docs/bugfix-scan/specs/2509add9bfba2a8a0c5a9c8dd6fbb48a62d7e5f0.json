@@ -1,0 +1,43 @@
+{
+  "source_commit": "2509add9bfba2a8a0c5a9c8dd6fbb48a62d7e5f0",
+  "bug_summary": "clearEditor 错误清空 statusContainer，Ctrl+C 清空编辑器时加载动画被一并移除",
+  "module": "tui-renderer",
+  "action": "clearEditor",
+  "fix_summary": "移除 clearEditor 中对 statusContainer.clear() 的调用，使 Ctrl+C 仅清空编辑器内容",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "Ctrl+C 清空编辑器时加载动画消失",
+  "correct_behavior": "Ctrl+C 仅清空编辑器文本，加载动画继续显示",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "编辑器有内容且状态栏正在显示加载动画",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tui-renderer",
+      "method": "clearEditor"
+    },
+    "args": {},
+    "outputs": {
+      "status_animation_visible": "bool"
+    },
+    "assertions": [
+      {
+        "what": "清空编辑器后加载动画仍在显示",
+        "type": "return_value",
+        "expected": "status_animation_visible === true"
+      },
+      {
+        "what": "编辑器内容被清空",
+        "type": "return_value",
+        "expected": "editor.getText() === ''"
+      }
+    ]
+  }
+}

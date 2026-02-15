@@ -1,0 +1,49 @@
+{
+  "source_commit": "59af0fd53a610c4b8e2d3a1f5c6b7d8e9f0a2b3c",
+  "bug_summary": "markdown 链接渲染时用带 ANSI 样式的 linkText 与 href 比较，相同文本被误判为不同导致链接重复显示",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "render_markdown_link",
+  "fix_summary": "比较时改用原始 token.text 而非样式化的 linkText，避免 ANSI code 干扰",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "文本与 href 相同的链接被重复渲染（如 [https://x](https://x) 显示两次）",
+  "correct_behavior": "文本与 href 相同时只渲染一次",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "markdown 文本包含链接",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "markdown",
+      "method": "renderLink"
+    },
+    "args": {
+      "token": {
+        "type": "object",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rendered": "string"
+    },
+    "assertions": [
+      {
+        "what": "text === href 时不重复渲染",
+        "type": "return_value",
+        "expected": "token.text === token.href 时输出不含重复 URL"
+      },
+      {
+        "what": "text !== href 时正常显示",
+        "type": "return_value",
+        "expected": "token.text !== token.href 时输出 [text](href) 格式"
+      }
+    ]
+  }
+}

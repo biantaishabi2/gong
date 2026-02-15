@@ -1,0 +1,47 @@
+{
+  "source_commit": "97e5e8c918995c7003a52d1a5624cd3c0d1fc4de",
+  "bug_summary": "活跃路径标记使用过大圆点●且无尾随空格，导致条目文本贴连和显示不一致",
+  "module": "tree-selector",
+  "action": "renderActivePathMarker",
+  "fix_summary": "将标记从 ● 改为 • 加尾随空格，使用更小圆点且与文本间有间距",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "标记为 ●（大圆点无空格），与条目文本紧贴",
+  "correct_behavior": "标记为 '• '（小圆点加空格），与文本有间距",
+  "data_dependencies": [],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "树选择器有活跃路径条目",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "tree-selector",
+      "method": "renderActivePathMarker"
+    },
+    "args": {
+      "isOnActivePath": {
+        "type": "bool",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "marker": "string"
+    },
+    "assertions": [
+      {
+        "what": "活跃路径使用小圆点加空格",
+        "type": "return_value",
+        "expected": "marker === '• '"
+      },
+      {
+        "what": "非活跃路径为空",
+        "type": "return_value",
+        "expected": "marker === '' when !isOnActivePath"
+      }
+    ]
+  }
+}

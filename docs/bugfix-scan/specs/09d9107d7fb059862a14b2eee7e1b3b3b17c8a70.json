@@ -1,0 +1,49 @@
+{
+  "source_commit": "09d9107d7fb059862a14b2eee7e1b3b3b17c8a70",
+  "bug_summary": "PI_CODING_AGENT_DIR 环境变量不支持 ~ 展开，设置 ~/custom-dir 时路径解析错误",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "action": "getAgentDir",
+  "fix_summary": "在读取 PI_CODING_AGENT_DIR 后增加 tilde 展开逻辑：~ 映射为 homedir()，~/ 前缀替换为 homedir()",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "设置 PI_CODING_AGENT_DIR=~/custom-dir 时返回字面量 '~/custom-dir' 而非展开路径",
+  "correct_behavior": "设置 PI_CODING_AGENT_DIR=~/custom-dir 时返回 '/home/user/custom-dir'（tilde 被展开）",
+  "data_dependencies": [
+    "config",
+    "file"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "PI_CODING_AGENT_DIR 环境变量已设置",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "config",
+      "method": "getAgentDir"
+    },
+    "args": {},
+    "outputs": {
+      "agentDir": "string"
+    },
+    "assertions": [
+      {
+        "what": "~ 单独使用时展开为 homedir()",
+        "type": "return_value",
+        "expected": "PI_CODING_AGENT_DIR='~' → agentDir === homedir()"
+      },
+      {
+        "what": "~/ 前缀展开为 homedir() + 后续路径",
+        "type": "return_value",
+        "expected": "PI_CODING_AGENT_DIR='~/foo' → agentDir === homedir() + '/foo'"
+      },
+      {
+        "what": "非 ~ 开头的路径原样返回",
+        "type": "return_value",
+        "expected": "PI_CODING_AGENT_DIR='/abs/path' → agentDir === '/abs/path'"
+      }
+    ]
+  }
+}

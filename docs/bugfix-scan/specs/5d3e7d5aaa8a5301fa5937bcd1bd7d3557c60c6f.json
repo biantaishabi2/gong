@@ -1,0 +1,59 @@
+{
+  "source_commit": "5d3e7d5aaa8a5301fa5937bcd1bd7d3557c60c6f",
+  "bug_summary": "Gemini 3 遇到无 thoughtSignature 的历史 toolCall 时仅输出普通工具调用文本，缺少反模仿提示，导致模型可能模仿错误格式",
+  "module": "google-shared",
+  "action": "convertMessages",
+  "fix_summary": "无签名 toolCall 转换为包含 Historical context 说明和 Do not mimic this format 警告的文本块",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "无签名 toolCall 渲染为 [Tool Call: bash]\\nArguments: ... 的简单文本，模型可能模仿此格式",
+  "correct_behavior": "无签名 toolCall 渲染为包含 Historical context 说明、工具名、参数和 Do not mimic this format 防模仿警告的文本",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "Gemini 3 模型存在无 thoughtSignature 的历史 toolCall 消息",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "google-shared",
+      "method": "convertMessages"
+    },
+    "args": {
+      "modelId": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      },
+      "toolName": {
+        "type": "string",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rendered_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "输出包含 Historical context 文案",
+        "type": "return_value",
+        "expected": "text.includes('Historical context')"
+      },
+      {
+        "what": "输出包含防模仿警告",
+        "type": "return_value",
+        "expected": "text.includes('Do not mimic this format')"
+      },
+      {
+        "what": "输出包含工具名和参数",
+        "type": "return_value",
+        "expected": "text.includes(toolName) && text.includes(argsStr)"
+      }
+    ]
+  }
+}

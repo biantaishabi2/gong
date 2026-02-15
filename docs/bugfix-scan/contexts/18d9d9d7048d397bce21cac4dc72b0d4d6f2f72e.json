@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/tui/src/components/editor.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/components/editor.ts b/packages/tui/src/components/editor.ts\nindex b7fc164a..ee498bd9 100644\n--- a/packages/tui/src/components/editor.ts\n+++ b/packages/tui/src/components/editor.ts\n@@ -1565,6 +1565,7 @@ export class Editor implements Component, Focusable {\n \t * Insert text at cursor position (used by yank operations).\n \t */\n \tprivate insertYankedText(text: string): void {\n+\t\tthis.historyIndex = -1; // Exit history browsing mode\n \t\tconst lines = text.split(\"\\n\");\n \n \t\tif (lines.length === 1) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "18d9d9d7048d397bce21cac4dc72b0d4d6f2f72e",
+  "message": "fix(tui): document kill ring and reset history",
+  "module": "c_h_a_n_g_e_l_o_g",
+  "tags": []
+}

@@ -1,0 +1,49 @@
+{
+  "source_commit": "2836d97735dcc0b0b7fd2ab75df97e2a7f5c8e8a",
+  "bug_summary": "当前目录无会话时的空状态提示未按终端宽度截断，窄终端下文本溢出",
+  "module": "session-selector",
+  "action": "render_empty_state",
+  "fix_summary": "将 'No sessions in current folder. Press Tab to view all.' 包裹 truncateToWidth 按 width 截断",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "窄终端下 'No sessions in current folder...' 文本溢出",
+  "correct_behavior": "提示文案按终端宽度截断并以省略号结尾",
+  "data_dependencies": [
+    "config"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "会话选择器过滤到当前目录，无匹配会话",
+        "involves": "config"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "session-selector",
+      "method": "render"
+    },
+    "args": {
+      "width": {
+        "type": "int",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "rendered_line": "string"
+    },
+    "assertions": [
+      {
+        "what": "空状态文案不超过终端宽度",
+        "type": "return_value",
+        "expected": "rendered_line.length <= width"
+      },
+      {
+        "what": "宽度不足时以 … 截断",
+        "type": "return_value",
+        "expected": "width 不足时 rendered_line.endsWith('…')"
+      }
+    ]
+  }
+}

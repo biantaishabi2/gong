@@ -1,0 +1,14 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/components/tree-selector.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\nindex e1007d70..1b3cd280 100644\n--- a/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n+++ b/packages/coding-agent/src/modes/interactive/components/tree-selector.ts\n@@ -81,8 +81,11 @@ class TreeList implements Component {\n \t\tconst stack: StackItem[] = [];\n \n \t\t// Add roots in reverse order\n+\t\t// If multiple roots, treat them as children of a virtual root that branches\n+\t\t// So they start at indent 1 with justBranched=true\n+\t\tconst multipleRoots = roots.length > 1;\n \t\tfor (let i = roots.length - 1; i >= 0; i--) {\n-\t\t\tstack.push([roots[i], 0, roots.length > 1]);\n+\t\t\tstack.push([roots[i], multipleRoots ? 1 : 0, multipleRoots]);\n \t\t}\n \n \t\twhile (stack.length > 0) {\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "32ec1fa883a5ae28792e5aeb84209e936d63068a",
+  "message": "fix(coding-agent): treat multiple roots as children of virtual branching root",
+  "module": "tree-selector",
+  "tags": []
+}

@@ -1,0 +1,54 @@
+{
+  "source_commit": "6cf2ac0519ab94dd6625b18ab156b5808e4edeba",
+  "bug_summary": "footer 的 contextPercent 显示中拼入了调试用的 contextWindow 原始数值",
+  "module": "footer",
+  "action": "renderContextPercent",
+  "fix_summary": "移除 contextPercent 字符串中的 (${contextWindow}) 部分，仅显示百分比值",
+  "test_type": "regression",
+  "boundary": "service",
+  "wrong_behavior": "显示 '45.2% (200000)' 暴露了内部窗口大小数值",
+  "correct_behavior": "仅显示 '45.2%'，不暴露 contextWindow 数值",
+  "data_dependencies": [
+    "state"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "已有 contextTokens 和 contextWindow 使用数据",
+        "involves": "state"
+      }
+    ],
+    "trigger": {
+      "type": "service_call",
+      "target": "footer",
+      "method": "renderContextPercent"
+    },
+    "args": {
+      "contextTokens": {
+        "type": "number",
+        "required": true,
+        "allowed": null
+      },
+      "contextWindow": {
+        "type": "number",
+        "required": true,
+        "allowed": null
+      }
+    },
+    "outputs": {
+      "display_text": "string"
+    },
+    "assertions": [
+      {
+        "what": "显示正确的百分比",
+        "type": "return_value",
+        "expected": "display === `${(tokens/window*100).toFixed(1)}%`"
+      },
+      {
+        "what": "不包含窗口大小数值",
+        "type": "return_value",
+        "expected": "!display.includes(String(contextWindow))"
+      }
+    ]
+  }
+}

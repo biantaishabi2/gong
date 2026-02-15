@@ -1,0 +1,19 @@
+{
+  "diffs": [
+    {
+      "file": "packages/coding-agent/src/modes/interactive/interactive-mode.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/coding-agent/src/modes/interactive/interactive-mode.ts b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\nindex 0bca4ea6..8a2f7fc0 100644\n--- a/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n+++ b/packages/coding-agent/src/modes/interactive/interactive-mode.ts\n@@ -1555,6 +1555,9 @@ export class InteractiveMode {\n \t\t\tif (newEditor.borderColor !== undefined) {\n \t\t\t\tnewEditor.borderColor = this.defaultEditor.borderColor;\n \t\t\t}\n+\t\t\tif (newEditor.setPaddingX !== undefined) {\n+\t\t\t\tnewEditor.setPaddingX(this.defaultEditor.getPaddingX());\n+\t\t\t}\n \n \t\t\t// Set autocomplete if supported\n \t\t\tif (newEditor.setAutocompleteProvider && this.autocompleteProvider) {\n@@ -3030,6 +3033,9 @@ export class InteractiveMode {\n \t\t\t\t\tonEditorPaddingXChange: (padding) => {\n \t\t\t\t\t\tthis.settingsManager.setEditorPaddingX(padding);\n \t\t\t\t\t\tthis.defaultEditor.setPaddingX(padding);\n+\t\t\t\t\t\tif (this.editor !== this.defaultEditor && this.editor.setPaddingX !== undefined) {\n+\t\t\t\t\t\t\tthis.editor.setPaddingX(padding);\n+\t\t\t\t\t\t}\n \t\t\t\t\t},\n \t\t\t\t\tonCancel: () => {\n \t\t\t\t\t\tdone();\n"
+    },
+    {
+      "file": "packages/tui/src/editor-component.ts",
+      "hunks": [],
+      "raw_diff": "diff --git a/packages/tui/src/editor-component.ts b/packages/tui/src/editor-component.ts\nindex d59d2e29..9116de09 100644\n--- a/packages/tui/src/editor-component.ts\n+++ b/packages/tui/src/editor-component.ts\n@@ -62,4 +62,7 @@ export interface EditorComponent extends Component {\n \n \t/** Border color function */\n \tborderColor?: (str: string) => string;\n+\n+\t/** Set horizontal padding */\n+\tsetPaddingX?(padding: number): void;\n }\n"
+    }
+  ],
+  "grade": "A",
+  "hash": "2bbc25523736419d8b041460d8c462f6c7130d60",
+  "message": "fix(coding-agent): propagate paddingX to custom editors",
+  "module": "interactive-mode",
+  "tags": []
+}

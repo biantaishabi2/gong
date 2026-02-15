@@ -1,0 +1,55 @@
+{
+  "action": "context_output_render",
+  "boundary": "service",
+  "bug_summary": "当存在 context 文件时，界面在 Context 区块前缺少空行，导致输出粘连、可读性差",
+  "correct_behavior": "Context 区块前有一个 Spacer(1)，与前文形成清晰视觉分隔",
+  "data_dependencies": [
+    "file",
+    "session"
+  ],
+  "fix_summary": "在渲染 Context 列表前新增一个 Spacer(1) 作为前置分隔",
+  "module": "interactive-mode",
+  "source_commit": "025b7bec7a5d441f67b34944a6a6f934c68b52a3",
+  "test_spec": {
+    "args": {
+      "contextFiles": {
+        "allowed": null,
+        "required": true,
+        "type": "array"
+      }
+    },
+    "assertions": [
+      {
+        "expected": "Spacer(1) 紧邻在 Context 文本组件之前",
+        "type": "state",
+        "what": "当 contextFiles.length > 0 时，Context 标题前先插入一个 Spacer(1)"
+      },
+      {
+        "expected": "sectionHeader(\"Context\") 与格式化路径列表正常输出",
+        "type": "state",
+        "what": "Context 区块仍保留原有标题与文件列表渲染"
+      }
+    ],
+    "outputs": {
+      "chat_container_children": "array",
+      "context_block_text": "string"
+    },
+    "preconditions": [
+      {
+        "involves": "file",
+        "what": "会话资源加载器返回至少一个 agents 文件路径"
+      },
+      {
+        "involves": "session",
+        "what": "交互会话已初始化并可向 chatContainer 写入子组件"
+      }
+    ],
+    "trigger": {
+      "method": "context_output_render",
+      "target": "InteractiveMode",
+      "type": "service_call"
+    }
+  },
+  "test_type": "regression",
+  "wrong_behavior": "Context 区块直接跟在前一段内容后，无前置空行分隔"
+}

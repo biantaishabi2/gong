@@ -1,0 +1,43 @@
+{
+  "source_commit": "9b0ec024051fd114dacfe6649792562b162bd84d",
+  "bug_summary": "npm latest 查询 URL 包名多了一个空格(pi -coding-agent)，导致版本检查请求 404",
+  "module": "coding-agent",
+  "action": "checkForNewVersion",
+  "fix_summary": "修正 URL 中的 'pi -coding-agent' 为 'pi-coding-agent'，去除多余空格",
+  "test_type": "regression",
+  "boundary": "http",
+  "wrong_behavior": "fetch URL 包含空格导致 404，版本检查始终失败",
+  "correct_behavior": "fetch 正确的无空格 URL，成功获取最新版本号",
+  "data_dependencies": [
+    "network"
+  ],
+  "test_spec": {
+    "preconditions": [
+      {
+        "what": "npm registry 可访问",
+        "involves": "network"
+      }
+    ],
+    "trigger": {
+      "type": "http_request",
+      "target": "registry.npmjs.org",
+      "method": "GET"
+    },
+    "args": {},
+    "outputs": {
+      "latestVersion": "string"
+    },
+    "assertions": [
+      {
+        "what": "URL 不含空格",
+        "type": "return_value",
+        "expected": "url === 'https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest'"
+      },
+      {
+        "what": "成功获取版本号",
+        "type": "return_value",
+        "expected": "latestVersion !== undefined"
+      }
+    ]
+  }
+}
