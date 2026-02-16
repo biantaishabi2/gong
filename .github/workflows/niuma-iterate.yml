@@ -23,6 +23,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史，确保可以 fetch 远程分支重建 worktree
 
       - name: Find PR Number
         id: find_pr
@@ -65,6 +67,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史，确保可以 fetch 远程分支重建 worktree
 
       - name: Extract Issue Number from PR
         id: extract
