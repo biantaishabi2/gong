@@ -39,6 +39,7 @@ defmodule Gong.AutoCompaction do
       case Gong.Compaction.Lock.acquire(session_id) do
         :ok ->
           try do
+            opts = Keyword.put_new(opts, :summarize_fn, &Gong.Compaction.Summarizer.summarize/1)
             {compacted, summary} = Gong.Compaction.compact(messages, opts)
             {:compacted, compacted, summary}
           after

@@ -17,6 +17,11 @@ defmodule Gong.Application do
     # 注册 DeepSeek provider（复用 OpenAI ChatAPI）
     ReqLLM.Providers.register(Gong.Providers.DeepSeek)
 
+    # 初始化 ETS 表（非 GenServer，启动时创建即可）
+    Gong.CommandRegistry.init()
+    Gong.PromptTemplate.init()
+    Gong.ModelRegistry.init()
+
     opts = [strategy: :one_for_one, name: Gong.Supervisor]
     Supervisor.start_link(children, opts)
   end
