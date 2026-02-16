@@ -137,6 +137,8 @@ defmodule Gong.AgentLoop do
   end
 
   # 检查是否需要自动重试（仅对 {:error, _} 类型响应）
+  # 注意：retry 不消耗 turn 计数，因为是重试同一轮而非新一轮。
+  # 由 Retry.should_retry?/2 内部的 max_retries=3 兜底防止无限重试。
   defp maybe_retry({:error, error_msg}, agent, call_id, llm_backend, hooks, opts, turn, max_turns) do
     error_class = Gong.Retry.classify_error(error_msg)
     attempt = Keyword.get(opts, :retry_attempt, 0)
@@ -399,6 +401,8 @@ defmodule Gong.AgentLoop do
   defp to_atom_safe(key) when is_atom(key), do: key
 
   defp to_atom_safe(key) when is_binary(key) do
+    # 优先使用已存在的 atom，避免 atom 泄漏。
+    # 工具名来自 LLM 响应，集合有限，fallback 到 to_atom 风险可控。
     try do
       String.to_existing_atom(key)
     rescue
