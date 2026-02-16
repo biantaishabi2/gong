@@ -119,4 +119,21 @@ defmodule Gong.BDD.Generated.ProviderEdgeTest do
     :ok
   end
 
+  # Source: PROVIDER-ERR-007
+  @tag :provider
+  @tag :regression
+  @tag :unit
+  test "[PROVIDER-ERR-007] SDK 重试策略未被意外禁用 (Pi#0fc6689)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-007"}
+    # line 60: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 60, raw: "GIVEN create_temp_dir"}, 60)
+    # line 61: WHEN get_provider_retry_config provider="anthropic"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_provider_retry_config, %{provider: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 61, raw: "WHEN get_provider_retry_config provider=\"anthropic\""}, 61)
+    # line 62: THEN assert_provider_retries_enabled min_retries=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_retries_enabled, %{min_retries: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 62, raw: "THEN assert_provider_retries_enabled min_retries=1"}, 62)
+    _ctx = ctx
+    :ok
+  end
+
 end

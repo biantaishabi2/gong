@@ -29,3 +29,12 @@ GIVEN create_temp_dir
 WHEN tool_bash command="sleep 300 & sleep 300 & wait" timeout=2
 THEN assert_output_contains text="timed out"
 THEN assert_result_field field="timed_out" expected="true"
+
+# ══════════════════════════════════════════════
+# Group 2: pi-mono bugfix 回归（1 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BASH-ERR-005] TITLE: UTF-8 多字节字符输出不乱码 (Pi#6ddfd1b) TAGS: unit external_io regression
+GIVEN create_temp_dir
+WHEN tool_bash command="echo '中文测试输出'"
+THEN assert_tool_success content_contains="中文测试输出"

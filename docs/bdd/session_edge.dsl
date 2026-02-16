@@ -55,3 +55,29 @@ GIVEN create_temp_dir
 GIVEN register_failing_event_handler
 WHEN emit_event event="test_event"
 THEN assert_handler_error_propagated
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归（1 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: SESSION-ERR-007] TITLE: 最后 assistant 查找跳过 aborted 空消息 (Pi#e30c4e3) TAGS: unit tape regression
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="问题"
+GIVEN tape_append kind="assistant" content="有内容的回复"
+GIVEN tape_append kind="assistant" content="" metadata_kv="stop_reason:aborted"
+WHEN when_tape_get_last_assistant
+THEN assert_tape_last_content contains="有内容的回复"
+
+# ══════════════════════════════════════════════
+# Group 4: pi-mono bugfix 回归覆盖（1 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: SESSION-ERR-008] TITLE: 分叉后仅 user 消息的 flush 重置 (Pi#b5be54b) TAGS: unit tape regression
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="原始消息"
+GIVEN tape_fork
+GIVEN tape_append kind="user" content="分叉后用户消息"
+WHEN when_tape_flush
+THEN assert_flush_reset

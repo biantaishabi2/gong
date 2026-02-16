@@ -55,3 +55,15 @@ GIVEN create_settings_file scope="project" content="not valid json{{"
 GIVEN init_settings
 WHEN get_setting key="model"
 THEN assert_setting_value expected="deepseek:deepseek-chat"
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归 (1 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: SETTINGS-008] TITLE: getter 返回副本修改不影响存储 (Pi#bugfix) TAGS: unit settings regression
+GIVEN create_temp_dir
+GIVEN init_settings
+WHEN get_setting key="model"
+WHEN mutate_last_setting_value
+WHEN get_setting key="model"
+THEN assert_setting_value expected="deepseek:deepseek-chat"

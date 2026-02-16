@@ -104,9 +104,10 @@ defmodule Gong.Compaction do
   """
   @spec split_with_system_preserved([map()], non_neg_integer()) :: {[map()], [map()]}
   def split_with_system_preserved(messages, window_size) do
+    # 保留 system 和 branch_summary 类型消息（不参与压缩）
     {system_msgs, non_system} =
       Enum.split_with(messages, fn msg ->
-        get_role(msg) == "system"
+        get_role(msg) in ["system", "branch_summary"]
       end)
 
     if length(non_system) <= window_size do

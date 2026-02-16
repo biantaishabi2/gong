@@ -135,4 +135,46 @@ defmodule Gong.BDD.Generated.RetryTest do
     :ok
   end
 
+  # Source: BDD-RETRY-010
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-010] fetch failed 分类为 transient (Pi#fb6d464)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-010"}
+    # line 47: WHEN classify_error error="fetch failed"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :classify_error, %{error: "fetch failed"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 47, raw: "WHEN classify_error error=\"fetch failed\""}, 47)
+    # line 48: THEN assert_error_class expected="transient"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_class, %{expected: "transient"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 48, raw: "THEN assert_error_class expected=\"transient\""}, 48)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-RETRY-011
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-011] 泛化 connection error 分类为 transient (Pi#c138281)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-011"}
+    # line 51: WHEN classify_error error="connection error"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :classify_error, %{error: "connection error"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 51, raw: "WHEN classify_error error=\"connection error\""}, 51)
+    # line 52: THEN assert_error_class expected="transient"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_class, %{expected: "transient"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 52, raw: "THEN assert_error_class expected=\"transient\""}, 52)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: BDD-RETRY-012
+  @tag :agent_loop
+  @tag :unit
+  test "[BDD-RETRY-012] terminated 分类为 transient (Pi#9b84857)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-RETRY-012"}
+    # line 55: WHEN classify_error error="connection terminated unexpectedly"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :classify_error, %{error: "connection terminated unexpectedly"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 55, raw: "WHEN classify_error error=\"connection terminated unexpectedly\""}, 55)
+    # line 56: THEN assert_error_class expected="transient"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_class, %{expected: "transient"}, %{file: "/home/wangbo/document/gong/docs/bdd/retry.dsl", line: 56, raw: "THEN assert_error_class expected=\"transient\""}, 56)
+    _ctx = ctx
+    :ok
+  end
+
 end

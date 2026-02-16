@@ -239,4 +239,108 @@ defmodule Gong.BDD.Generated.ExtensionTest do
     :ok
   end
 
+  # Source: EXTEND-012
+  @tag :extension
+  @tag :regression
+  @tag :unit
+  test "[EXTEND-012] git URL 归一化" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-012"}
+    # line 105: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 105, raw: "GIVEN create_temp_dir"}, 105)
+    # line 106: WHEN normalize_git_url url="https://github.com/anthropic/pi-mono.git"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :normalize_git_url, %{url: "https://github.com/anthropic/pi-mono.git"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 106, raw: "WHEN normalize_git_url url=\"https://github.com/anthropic/pi-mono.git\""}, 106)
+    # line 107: THEN assert_normalized_url expected="https://github.com/anthropic/pi-mono"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_normalized_url, %{expected: "https://github.com/anthropic/pi-mono"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 107, raw: "THEN assert_normalized_url expected=\"https://github.com/anthropic/pi-mono\""}, 107)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-013
+  @tag :extension
+  @tag :regression
+  @tag :unit
+  test "[EXTEND-013] 扩展加载失败错误日志" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-013"}
+    # line 110: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 110, raw: "GIVEN create_temp_dir"}, 110)
+    # line 111: WHEN format_load_error path="bad_ext.ex" reason="syntax error"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :format_load_error, %{path: "bad_ext.ex", reason: "syntax error"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 111, raw: "WHEN format_load_error path=\"bad_ext.ex\" reason=\"syntax error\""}, 111)
+    # line 112: THEN assert_error_info_contains expected="bad_ext.ex"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_info_contains, %{expected: "bad_ext.ex"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 112, raw: "THEN assert_error_info_contains expected=\"bad_ext.ex\""}, 112)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-014
+  @tag :extension
+  @tag :regression
+  @tag :unit
+  test "[EXTEND-014] .pi/ 路径识别为本地" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-014"}
+    # line 115: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 115, raw: "GIVEN create_temp_dir"}, 115)
+    # line 116: WHEN check_local_path path=".pi/extensions/my_ext"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :check_local_path, %{path: ".pi/extensions/my_ext"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 116, raw: "WHEN check_local_path path=\".pi/extensions/my_ext\""}, 116)
+    # line 117: THEN assert_is_local expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_is_local, %{expected: "true"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 117, raw: "THEN assert_is_local expected=\"true\""}, 117)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-015
+  @tag :extension
+  @tag :regression
+  @tag :unit
+  test "[EXTEND-015] CLI + settings.json 扩展路径合并" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-015"}
+    # line 120: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 120, raw: "GIVEN create_temp_dir"}, 120)
+    # line 121: WHEN merge_extension_paths cli="./a,./b" settings="./b,./c"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :merge_extension_paths, %{cli: "./a,./b", settings: "./b,./c"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 121, raw: "WHEN merge_extension_paths cli=\"./a,./b\" settings=\"./b,./c\""}, 121)
+    # line 122: THEN assert_merged_paths expected="./a,./b,./c"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_merged_paths, %{expected: "./a,./b,./c"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 122, raw: "THEN assert_merged_paths expected=\"./a,./b,./c\""}, 122)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-016
+  @tag :extension
+  @tag :regression
+  @tag :unit
+  test "[EXTEND-016] @ 前缀路径归一化" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-016"}
+    # line 125: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 125, raw: "GIVEN create_temp_dir"}, 125)
+    # line 126: WHEN normalize_at_prefix path="@anthropic/claude-ext"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :normalize_at_prefix, %{path: "@anthropic/claude-ext"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 126, raw: "WHEN normalize_at_prefix path=\"@anthropic/claude-ext\""}, 126)
+    # line 127: THEN assert_normalized_path expected="anthropic/claude-ext"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_normalized_path, %{expected: "anthropic/claude-ext"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 127, raw: "THEN assert_normalized_path expected=\"anthropic/claude-ext\""}, 127)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: EXTEND-017
+  @tag :extension
+  @tag :regression
+  @tag :unit
+  test "[EXTEND-017] 扩展上下文 model 动态更新" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "EXTEND-017"}
+    # line 130: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 130, raw: "GIVEN create_temp_dir"}, 130)
+    # line 131: WHEN build_extension_context model="gpt-4"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :build_extension_context, %{model: "gpt-4"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 131, raw: "WHEN build_extension_context model=\"gpt-4\""}, 131)
+    # line 132: WHEN update_extension_context_model model="claude-3"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :update_extension_context_model, %{model: "claude-3"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 132, raw: "WHEN update_extension_context_model model=\"claude-3\""}, 132)
+    # line 133: THEN assert_extension_context_model expected="claude-3"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_extension_context_model, %{expected: "claude-3"}, %{file: "/home/wangbo/document/gong/docs/bdd/extension.dsl", line: 133, raw: "THEN assert_extension_context_model expected=\"claude-3\""}, 133)
+    _ctx = ctx
+    :ok
+  end
+
 end

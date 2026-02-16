@@ -40,3 +40,17 @@ THEN assert_should_retry expected=false
 [SCENARIO: BDD-RETRY-009] TITLE: should_retry permanent 返回 false TAGS: unit agent_loop
 WHEN retry_should_retry error_class="permanent" attempt=0
 THEN assert_should_retry expected=false
+
+# ── 3. pi-mono bugfix 回归覆盖 ──
+
+[SCENARIO: BDD-RETRY-010] TITLE: fetch failed 分类为 transient (Pi#fb6d464) TAGS: unit agent_loop
+WHEN classify_error error="fetch failed"
+THEN assert_error_class expected="transient"
+
+[SCENARIO: BDD-RETRY-011] TITLE: 泛化 connection error 分类为 transient (Pi#c138281) TAGS: unit agent_loop
+WHEN classify_error error="connection error"
+THEN assert_error_class expected="transient"
+
+[SCENARIO: BDD-RETRY-012] TITLE: terminated 分类为 transient (Pi#9b84857) TAGS: unit agent_loop
+WHEN classify_error error="connection terminated unexpectedly"
+THEN assert_error_class expected="transient"

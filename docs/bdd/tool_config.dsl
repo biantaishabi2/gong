@@ -47,3 +47,12 @@ THEN assert_tool_config_error contains="nonexistent"
 GIVEN init_tool_config
 WHEN set_active_tools_safe tools=""
 THEN assert_tool_config_error contains="empty"
+
+# ══════════════════════════════════════════════
+# pi-mono bugfix 回归覆盖
+# ══════════════════════════════════════════════
+
+[SCENARIO: TOOLCFG-007] TITLE: 工具 schema 默认包含 strict 字段 (Pi#a613306) TAGS: unit tool_config regression
+GIVEN init_tool_config
+WHEN get_tool_schema tool="bash"
+THEN assert_tool_schema_has_field field="strict" expected="false"

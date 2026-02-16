@@ -91,4 +91,21 @@ defmodule Gong.BDD.Generated.StreamEdgeTest do
     :ok
   end
 
+  # Source: STREAM-ERR-006
+  @tag :regression
+  @tag :stream
+  @tag :unit
+  test "[STREAM-ERR-006] 流式 content block 索引单调递增 (Pi#9e86079)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "STREAM-ERR-006"}
+    # line 45: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_edge.dsl", line: 45, raw: "GIVEN create_temp_dir"}, 45)
+    # line 46: WHEN emit_content_blocks blocks="text:hello|text:world"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :emit_content_blocks, %{blocks: "text:hello|text:world"}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_edge.dsl", line: 46, raw: "WHEN emit_content_blocks blocks=\"text:hello|text:world\""}, 46)
+    # line 47: THEN assert_content_indices_sequential
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_content_indices_sequential, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/stream_edge.dsl", line: 47, raw: "THEN assert_content_indices_sequential"}, 47)
+    _ctx = ctx
+    :ok
+  end
+
 end

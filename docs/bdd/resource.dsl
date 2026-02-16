@@ -61,3 +61,14 @@ GIVEN create_resource_file name="a.md" content="# A"
 WHEN load_resources
 THEN assert_resource_count expected=1
 THEN assert_resource_content contains="# A"
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归 (1 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: RESOURCE-008] TITLE: 重复路径加载资源自动去重 (Pi#bugfix) TAGS: unit resource regression
+GIVEN create_temp_dir
+GIVEN create_resource_dir scope="project"
+GIVEN create_resource_file name="dup.md" content="# Dedup Test"
+WHEN load_resources_from_duplicate_paths
+THEN assert_resource_count expected=1

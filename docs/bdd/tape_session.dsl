@@ -59,3 +59,13 @@ GIVEN tape_append kind="user" content="根"
 WHEN tape_branch_from anchor="session-start"
 WHEN tape_branch_from anchor="session-start"
 THEN assert_tape_branches anchor="session-start" expected=2
+
+# ══════════════════════════════════════════════
+# pi-mono bugfix 回归覆盖
+# ══════════════════════════════════════════════
+
+[SCENARIO: SESSION-007] TITLE: 新会话持久化初始模型和思考级别 (Pi#98c85bf) TAGS: unit session tape regression
+GIVEN create_temp_dir
+GIVEN tape_init
+WHEN tape_persist_initial_state model="deepseek:deepseek-chat" thinking_level="high"
+THEN assert_initial_state_persisted model="deepseek:deepseek-chat" thinking_level="high"

@@ -85,4 +85,20 @@ defmodule Gong.ToolConfig do
 
   @doc "返回所有预设名"
   def presets, do: Map.keys(@presets)
+
+  @doc "获取工具的 schema 定义（含 strict 字段）"
+  @spec get_tool_schema(String.t() | atom()) :: map()
+  def get_tool_schema(tool_name) when is_binary(tool_name) do
+    get_tool_schema(String.to_existing_atom(tool_name))
+  rescue
+    ArgumentError -> %{name: tool_name, strict: false}
+  end
+
+  def get_tool_schema(tool_name) when is_atom(tool_name) do
+    if tool_name in @all_tools do
+      %{name: to_string(tool_name), strict: false, type: "object"}
+    else
+      %{name: to_string(tool_name), strict: false}
+    end
+  end
 end

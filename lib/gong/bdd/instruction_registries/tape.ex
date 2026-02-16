@@ -561,6 +561,66 @@ defmodule Gong.BDD.InstructionRegistries.Tape do
         name: :assert_handler_error_propagated, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      when_tape_get_last_assistant: %{
+        name: :when_tape_get_last_assistant, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_tape_last_content: %{
+        name: :assert_tape_last_content, kind: :then,
+        args: %{contains: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      when_tape_flush: %{
+        name: :when_tape_flush, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_flush_reset: %{
+        name: :assert_flush_reset, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      tape_persist_initial_state: %{
+        name: :tape_persist_initial_state, kind: :when,
+        args: %{
+          model: %{type: :string, required?: true, allowed: nil},
+          thinking_level: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_initial_state_persisted: %{
+        name: :assert_initial_state_persisted, kind: :then,
+        args: %{
+          model: %{type: :string, required?: true, allowed: nil},
+          thinking_level: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      find_deepest_common_ancestor: %{
+        name: :find_deepest_common_ancestor, kind: :when,
+        args: %{
+          anchor_a: %{type: :string, required?: true, allowed: nil},
+          anchor_b: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_common_ancestor: %{
+        name: :assert_common_ancestor, kind: :then,
+        args: %{expected: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

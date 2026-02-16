@@ -79,4 +79,21 @@ defmodule Gong.BDD.Generated.BashEdgeTest do
     :ok
   end
 
+  # Source: BASH-ERR-005
+  @tag :external_io
+  @tag :regression
+  @tag :unit
+  test "[BASH-ERR-005]" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BASH-ERR-005"}
+    # line 38: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_edge.dsl", line: 38, raw: "GIVEN create_temp_dir"}, 38)
+    # line 39: WHEN tool_bash command="echo '中文测试输出'"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tool_bash, %{command: "echo '中文测试输出'"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_edge.dsl", line: 39, raw: "WHEN tool_bash command=\"echo '中文测试输出'\""}, 39)
+    # line 40: THEN assert_tool_success content_contains="中文测试输出"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_success, %{content_contains: "中文测试输出"}, %{file: "/home/wangbo/document/gong/docs/bdd/bash_edge.dsl", line: 40, raw: "THEN assert_tool_success content_contains=\"中文测试输出\""}, 40)
+    _ctx = ctx
+    :ok
+  end
+
 end

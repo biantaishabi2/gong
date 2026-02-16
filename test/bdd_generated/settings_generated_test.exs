@@ -141,4 +141,27 @@ defmodule Gong.BDD.Generated.SettingsTest do
     :ok
   end
 
+  # Source: SETTINGS-008
+  @tag :regression
+  @tag :settings
+  @tag :unit
+  test "[SETTINGS-008] getter 返回副本修改不影响存储 (Pi#bugfix)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SETTINGS-008"}
+    # line 64: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
+    # line 65: GIVEN init_settings
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 65, raw: "GIVEN init_settings"}, 65)
+    # line 66: WHEN get_setting key="model"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_setting, %{key: "model"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 66, raw: "WHEN get_setting key=\"model\""}, 66)
+    # line 67: WHEN mutate_last_setting_value
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :mutate_last_setting_value, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 67, raw: "WHEN mutate_last_setting_value"}, 67)
+    # line 68: WHEN get_setting key="model"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_setting, %{key: "model"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 68, raw: "WHEN get_setting key=\"model\""}, 68)
+    # line 69: THEN assert_setting_value expected="deepseek:deepseek-chat"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_setting_value, %{expected: "deepseek:deepseek-chat"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 69, raw: "THEN assert_setting_value expected=\"deepseek:deepseek-chat\""}, 69)
+    _ctx = ctx
+    :ok
+  end
+
 end

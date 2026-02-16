@@ -135,4 +135,21 @@ defmodule Gong.BDD.Generated.ToolConfigTest do
     :ok
   end
 
+  # Source: TOOLCFG-007
+  @tag :regression
+  @tag :tool_config
+  @tag :unit
+  test "[TOOLCFG-007] 工具 schema 默认包含 strict 字段 (Pi#a613306)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TOOLCFG-007"}
+    # line 56: GIVEN init_tool_config
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 56, raw: "GIVEN init_tool_config"}, 56)
+    # line 57: WHEN get_tool_schema tool="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_tool_schema, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 57, raw: "WHEN get_tool_schema tool=\"bash\""}, 57)
+    # line 58: THEN assert_tool_schema_has_field field="strict" expected="false"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tool_schema_has_field, %{expected: "false", field: "strict"}, %{file: "/home/wangbo/document/gong/docs/bdd/tool_config.dsl", line: 58, raw: "THEN assert_tool_schema_has_field field=\"strict\" expected=\"false\""}, 58)
+    _ctx = ctx
+    :ok
+  end
+
 end

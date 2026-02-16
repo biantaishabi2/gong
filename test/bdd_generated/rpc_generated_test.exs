@@ -117,4 +117,23 @@ defmodule Gong.BDD.Generated.RpcTest do
     :ok
   end
 
+  # Source: RPC-008
+  @tag :regression
+  @tag :rpc
+  @tag :unit
+  test "[RPC-008] prompt 附件参数透传校验 (Pi#bugfix)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RPC-008"}
+    # line 52: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 52, raw: "GIVEN create_temp_dir"}, 52)
+    # line 53: WHEN rpc_dispatch_with_attachments method="echo_attachments" params="{\"prompt\":\"hello\",\"attachments\":[\"file1.md\",\"file2.md\"]}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :rpc_dispatch_with_attachments, %{method: "echo_attachments", params: "{\\\"prompt\\\":\\\"hello\\\",\\\"attachments\\\":[\\\"file1.md\\\",\\\"file2.md\\\"]}"}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 53, raw: "WHEN rpc_dispatch_with_attachments method=\"echo_attachments\" params=\"{\\\"prompt\\\":\\\"hello\\\",\\\"attachments\\\":[\\\"file1.md\\\",\\\"file2.md\\\"]}\""}, 53)
+    # line 54: THEN assert_rpc_result contains="file1.md"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_rpc_result, %{contains: "file1.md"}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 54, raw: "THEN assert_rpc_result contains=\"file1.md\""}, 54)
+    # line 55: THEN assert_rpc_result contains="file2.md"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_rpc_result, %{contains: "file2.md"}, %{file: "/home/wangbo/document/gong/docs/bdd/rpc.dsl", line: 55, raw: "THEN assert_rpc_result contains=\"file2.md\""}, 55)
+    _ctx = ctx
+    :ok
+  end
+
 end

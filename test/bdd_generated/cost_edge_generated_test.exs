@@ -123,4 +123,23 @@ defmodule Gong.BDD.Generated.CostEdgeTest do
     :ok
   end
 
+  # Source: COST-ERR-007
+  @tag :cost
+  @tag :regression
+  @tag :unit
+  test "[COST-ERR-007] provider 调用完成后自动记录成本 (Pi#7db3068)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "COST-ERR-007"}
+    # line 58: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_edge.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
+    # line 59: WHEN init_cost_tracker
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_cost_tracker, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_edge.dsl", line: 59, raw: "WHEN init_cost_tracker"}, 59)
+    # line 60: WHEN record_llm_call model="claude-3" input_tokens=200 output_tokens=80
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :record_llm_call, %{input_tokens: 200, model: "claude-3", output_tokens: 80}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_edge.dsl", line: 60, raw: "WHEN record_llm_call model=\"claude-3\" input_tokens=200 output_tokens=80"}, 60)
+    # line 61: THEN assert_cost_summary call_count=1 total_input=200 total_output=80
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cost_summary, %{call_count: 1, total_input: 200, total_output: 80}, %{file: "/home/wangbo/document/gong/docs/bdd/cost_edge.dsl", line: 61, raw: "THEN assert_cost_summary call_count=1 total_input=200 total_output=80"}, 61)
+    _ctx = ctx
+    :ok
+  end
+
 end

@@ -21,7 +21,11 @@ defmodule Gong.BDD.InstructionRegistries.ToolConfig do
       assert_preset_contains: Map.merge(@base, %{name: :assert_preset_contains, kind: :then, args: %{tool: %{type: :string, required?: true, allowed: nil}}}),
       assert_preset_not_contains: Map.merge(@base, %{name: :assert_preset_not_contains, kind: :then, args: %{tool: %{type: :string, required?: true, allowed: nil}}}),
       assert_preset_count: Map.merge(@base, %{name: :assert_preset_count, kind: :then, args: %{expected: %{type: :int, required?: true, allowed: nil}}}),
-      assert_tool_config_error: Map.merge(@base, %{name: :assert_tool_config_error, kind: :then, args: %{contains: %{type: :string, required?: true, allowed: nil}}})
+      assert_tool_config_error: Map.merge(@base, %{name: :assert_tool_config_error, kind: :then, args: %{contains: %{type: :string, required?: true, allowed: nil}}}),
+
+      # ── pi-mono bugfix 回归 ──
+      get_tool_schema: Map.merge(@base, %{name: :get_tool_schema, kind: :when, args: %{tool: %{type: :string, required?: true, allowed: nil}}}),
+      assert_tool_schema_has_field: Map.merge(@base, %{name: :assert_tool_schema_has_field, kind: :then, args: %{field: %{type: :string, required?: true, allowed: nil}, expected: %{type: :string, required?: true, allowed: nil}}, assert_class: :C})
     }
   end
 end

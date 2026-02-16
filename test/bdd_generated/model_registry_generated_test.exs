@@ -166,4 +166,23 @@ defmodule Gong.BDD.Generated.ModelRegistryTest do
     :ok
   end
 
+  # Source: MODEL-010
+  @tag :model
+  @tag :regression
+  @tag :unit
+  test "[MODEL-010] 模型能力判断使用 contains 而非精确匹配 (Pi#bugfix)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "MODEL-010"}
+    # line 70: GIVEN init_model_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_model_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 70, raw: "GIVEN init_model_registry"}, 70)
+    # line 71: GIVEN register_model name="vision_model" provider="openai" model_id="gpt-4o-vision" api_key_env="OPENAI_API_KEY"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :register_model, %{api_key_env: "OPENAI_API_KEY", model_id: "gpt-4o-vision", name: "vision_model", provider: "openai"}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 71, raw: "GIVEN register_model name=\"vision_model\" provider=\"openai\" model_id=\"gpt-4o-vision\" api_key_env=\"OPENAI_API_KEY\""}, 71)
+    # line 72: WHEN check_model_capability name="vision_model" capability="vision"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :check_model_capability, %{capability: "vision", name: "vision_model"}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 72, raw: "WHEN check_model_capability name=\"vision_model\" capability=\"vision\""}, 72)
+    # line 73: THEN assert_capability_match expected="true"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_capability_match, %{expected: "true"}, %{file: "/home/wangbo/document/gong/docs/bdd/model_registry.dsl", line: 73, raw: "THEN assert_capability_match expected=\"true\""}, 73)
+    _ctx = ctx
+    :ok
+  end
+
 end

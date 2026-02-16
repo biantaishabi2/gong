@@ -26,3 +26,18 @@ GIVEN tape_append kind="user" content="Run tests"
 GIVEN tape_append kind="tool_use" content="bash: ls -la"
 WHEN generate_branch_summary anchor="code_branch"
 THEN assert_branch_summary contains="Run tests"
+
+# ══════════════════════════════════════════════
+# pi-mono bugfix 回归覆盖
+# ══════════════════════════════════════════════
+
+[SCENARIO: BRANCHSUM-003] TITLE: 多层分支选最深公共祖先 (Pi#92947a3) TAGS: unit branch_summary regression
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="root"
+GIVEN tape_handoff name="level-1"
+GIVEN tape_append kind="user" content="branch L1"
+GIVEN tape_handoff name="level-2"
+GIVEN tape_append kind="user" content="branch L2"
+WHEN find_deepest_common_ancestor anchor_a="level-1" anchor_b="level-2"
+THEN assert_common_ancestor expected="level-1"

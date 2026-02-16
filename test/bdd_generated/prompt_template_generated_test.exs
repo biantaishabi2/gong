@@ -117,4 +117,27 @@ defmodule Gong.BDD.Generated.PromptTemplateTest do
     :ok
   end
 
+  # Source: TEMPLATE-007
+  @tag :regression
+  @tag :template
+  @tag :unit
+  test "[TEMPLATE-007] system prompt 和 append prompt 合并渲染 (Pi#bugfix)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "TEMPLATE-007"}
+    # line 55: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 55, raw: "GIVEN create_temp_dir"}, 55)
+    # line 56: WHEN init_prompt_templates
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_prompt_templates, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 56, raw: "WHEN init_prompt_templates"}, 56)
+    # line 57: WHEN register_template name="with_sys" content="[SYSTEM] {{system_prompt}} [APPEND] {{append_prompt}}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_template, %{content: "[SYSTEM] {{system_prompt}} [APPEND] {{append_prompt}}", name: "with_sys"}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 57, raw: "WHEN register_template name=\"with_sys\" content=\"[SYSTEM] {{system_prompt}} [APPEND] {{append_prompt}}\""}, 57)
+    # line 58: WHEN render_template name="with_sys" bindings="system_prompt:你是助手,append_prompt:请简洁回答"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_template, %{bindings: "system_prompt:你是助手,append_prompt:请简洁回答", name: "with_sys"}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 58, raw: "WHEN render_template name=\"with_sys\" bindings=\"system_prompt:你是助手,append_prompt:请简洁回答\""}, 58)
+    # line 59: THEN assert_rendered_content contains="你是助手"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_rendered_content, %{contains: "你是助手"}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 59, raw: "THEN assert_rendered_content contains=\"你是助手\""}, 59)
+    # line 60: THEN assert_rendered_content contains="请简洁回答"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_rendered_content, %{contains: "请简洁回答"}, %{file: "/home/wangbo/document/gong/docs/bdd/prompt_template.dsl", line: 60, raw: "THEN assert_rendered_content contains=\"请简洁回答\""}, 60)
+    _ctx = ctx
+    :ok
+  end
+
 end

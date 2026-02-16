@@ -41,4 +41,14 @@ defmodule Gong.Hook do
     on_input: 2,
     on_before_agent: 2
   ]
+
+  @doc "构建 hook 消息（content 归一化为数组，role 为 hookMessage）"
+  @spec build_message(String.t() | [map()]) :: map()
+  def build_message(content) when is_binary(content) do
+    %{role: "hookMessage", content: [%{type: "text", text: content}]}
+  end
+
+  def build_message(content) when is_list(content) do
+    %{role: "hookMessage", content: content}
+  end
 end

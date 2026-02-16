@@ -49,3 +49,13 @@ GIVEN register_model name="new_model" provider="anthropic" model_id="claude-3"
 WHEN trigger_overflow_on_model model="old_model"
 WHEN switch_model_after_overflow new_model="new_model"
 THEN assert_no_compaction_on_new_model
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归（1 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: COST-ERR-007] TITLE: provider 调用完成后自动记录成本 (Pi#7db3068) TAGS: unit cost regression
+GIVEN create_temp_dir
+WHEN init_cost_tracker
+WHEN record_llm_call model="claude-3" input_tokens=200 output_tokens=80
+THEN assert_cost_summary call_count=1 total_input=200 total_output=80

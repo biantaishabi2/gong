@@ -220,6 +220,26 @@ defmodule Gong.BDD.InstructionRegistries.Model do
         },
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      check_model_capability: %{
+        name: :check_model_capability, kind: :when,
+        args: %{
+          name: %{type: :string, required?: true, allowed: nil},
+          capability: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_capability_match: %{
+        name: :assert_capability_match, kind: :then,
+        args: %{
+          expected: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

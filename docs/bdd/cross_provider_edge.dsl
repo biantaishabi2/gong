@@ -39,3 +39,24 @@ GIVEN create_temp_dir
 GIVEN cross_provider_tool_calls_message
 WHEN buffer_tool_result_during_stream
 THEN assert_tool_result_buffered
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归覆盖（3 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: CROSS-ERR-006] TITLE: 工具名映射 Glob 不误映射为 Ls (Pi#0138eee) TAGS: unit cross_provider regression
+GIVEN create_temp_dir
+GIVEN cross_provider_tool_calls_with_name tool_name="Glob"
+WHEN convert_messages from="anthropic" to="openai"
+THEN assert_converted_tool_name expected="Glob"
+
+[SCENARIO: CROSS-ERR-007] TITLE: 跨 provider 转换保留 tool_call_id (Pi#7a41975) TAGS: unit cross_provider regression
+GIVEN create_temp_dir
+GIVEN cross_provider_tool_calls_with_id tool_call_id="call_abc123"
+WHEN convert_messages from="anthropic" to="google"
+THEN assert_converted_tool_call_id expected="call_abc123"
+
+[SCENARIO: CROSS-ERR-008] TITLE: compat 检测覆盖 DeepSeek/OpenCode 域名 (Pi#4f9dedd) TAGS: unit cross_provider regression
+GIVEN create_temp_dir
+WHEN check_provider_compat url="https://api.deepseek.com/v1"
+THEN assert_compat_detected provider="deepseek"

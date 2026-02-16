@@ -97,4 +97,59 @@ defmodule Gong.BDD.Generated.CrossProviderEdgeTest do
     :ok
   end
 
+  # Source: CROSS-ERR-006
+  @tag :cross_provider
+  @tag :regression
+  @tag :unit
+  test "[CROSS-ERR-006] 工具名映射 Glob 不误映射为 Ls (Pi#0138eee)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CROSS-ERR-006"}
+    # line 48: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 48, raw: "GIVEN create_temp_dir"}, 48)
+    # line 49: GIVEN cross_provider_tool_calls_with_name tool_name="Glob"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_tool_calls_with_name, %{tool_name: "Glob"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 49, raw: "GIVEN cross_provider_tool_calls_with_name tool_name=\"Glob\""}, 49)
+    # line 50: WHEN convert_messages from="anthropic" to="openai"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "anthropic", to: "openai"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 50, raw: "WHEN convert_messages from=\"anthropic\" to=\"openai\""}, 50)
+    # line 51: THEN assert_converted_tool_name expected="Glob"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_tool_name, %{expected: "Glob"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 51, raw: "THEN assert_converted_tool_name expected=\"Glob\""}, 51)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CROSS-ERR-007
+  @tag :cross_provider
+  @tag :regression
+  @tag :unit
+  test "[CROSS-ERR-007] 跨 provider 转换保留 tool_call_id (Pi#7a41975)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CROSS-ERR-007"}
+    # line 54: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 54, raw: "GIVEN create_temp_dir"}, 54)
+    # line 55: GIVEN cross_provider_tool_calls_with_id tool_call_id="call_abc123"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_tool_calls_with_id, %{tool_call_id: "call_abc123"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 55, raw: "GIVEN cross_provider_tool_calls_with_id tool_call_id=\"call_abc123\""}, 55)
+    # line 56: WHEN convert_messages from="anthropic" to="google"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "anthropic", to: "google"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 56, raw: "WHEN convert_messages from=\"anthropic\" to=\"google\""}, 56)
+    # line 57: THEN assert_converted_tool_call_id expected="call_abc123"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_tool_call_id, %{expected: "call_abc123"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 57, raw: "THEN assert_converted_tool_call_id expected=\"call_abc123\""}, 57)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CROSS-ERR-008
+  @tag :cross_provider
+  @tag :regression
+  @tag :unit
+  test "[CROSS-ERR-008] compat 检测覆盖 DeepSeek/OpenCode 域名 (Pi#4f9dedd)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CROSS-ERR-008"}
+    # line 60: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 60, raw: "GIVEN create_temp_dir"}, 60)
+    # line 61: WHEN check_provider_compat url="https://api.deepseek.com/v1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :check_provider_compat, %{url: "https://api.deepseek.com/v1"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 61, raw: "WHEN check_provider_compat url=\"https://api.deepseek.com/v1\""}, 61)
+    # line 62: THEN assert_compat_detected provider="deepseek"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compat_detected, %{provider: "deepseek"}, %{file: "/home/wangbo/document/gong/docs/bdd/cross_provider_edge.dsl", line: 62, raw: "THEN assert_compat_detected provider=\"deepseek\""}, 62)
+    _ctx = ctx
+    :ok
+  end
+
 end

@@ -46,3 +46,15 @@ GIVEN create_temp_dir
 WHEN init_prompt_templates
 WHEN render_template name="code_review" bindings=""
 THEN assert_rendered_content contains="{{code}}"
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归 (1 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: TEMPLATE-007] TITLE: system prompt 和 append prompt 合并渲染 (Pi#bugfix) TAGS: unit template regression
+GIVEN create_temp_dir
+WHEN init_prompt_templates
+WHEN register_template name="with_sys" content="[SYSTEM] {{system_prompt}} [APPEND] {{append_prompt}}"
+WHEN render_template name="with_sys" bindings="system_prompt:你是助手,append_prompt:请简洁回答"
+THEN assert_rendered_content contains="你是助手"
+THEN assert_rendered_content contains="请简洁回答"

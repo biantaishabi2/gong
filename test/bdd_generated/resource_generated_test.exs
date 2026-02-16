@@ -153,4 +153,25 @@ defmodule Gong.BDD.Generated.ResourceTest do
     :ok
   end
 
+  # Source: RESOURCE-008
+  @tag :regression
+  @tag :resource
+  @tag :unit
+  test "[RESOURCE-008] 重复路径加载资源自动去重 (Pi#bugfix)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "RESOURCE-008"}
+    # line 70: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 70, raw: "GIVEN create_temp_dir"}, 70)
+    # line 71: GIVEN create_resource_dir scope="project"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_dir, %{scope: "project"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 71, raw: "GIVEN create_resource_dir scope=\"project\""}, 71)
+    # line 72: GIVEN create_resource_file name="dup.md" content="# Dedup Test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_resource_file, %{content: "# Dedup Test", name: "dup.md"}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 72, raw: "GIVEN create_resource_file name=\"dup.md\" content=\"# Dedup Test\""}, 72)
+    # line 73: WHEN load_resources_from_duplicate_paths
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_resources_from_duplicate_paths, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 73, raw: "WHEN load_resources_from_duplicate_paths"}, 73)
+    # line 74: THEN assert_resource_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_resource_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/resource.dsl", line: 74, raw: "THEN assert_resource_count expected=1"}, 74)
+    _ctx = ctx
+    :ok
+  end
+
 end

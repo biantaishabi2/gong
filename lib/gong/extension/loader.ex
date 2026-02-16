@@ -113,6 +113,16 @@ defmodule Gong.Extension.Loader do
     end
   end
 
+  @doc """
+  格式化扩展加载失败的错误信息。
+
+  返回包含文件路径和错误原因的可读字符串。
+  """
+  @spec format_load_error(Path.t(), term()) :: String.t()
+  def format_load_error(path, reason) do
+    "[Extension] 加载失败: #{Path.basename(path)} — #{inspect(reason)}"
+  end
+
   defp implements_extension?(module) do
     behaviours = module.module_info(:attributes)
     |> Keyword.get_values(:behaviour)

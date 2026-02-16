@@ -100,6 +100,21 @@ defmodule Gong.BDD.InstructionRegistries.Resource do
         async?: false,
         eventually?: false,
         assert_class: nil
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      load_resources_from_duplicate_paths: %{
+        name: :load_resources_from_duplicate_paths,
+        kind: :when,
+        args: %{},
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:unit],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
       }
     }
   end

@@ -51,3 +51,12 @@ GIVEN cross_provider_messages_with_gateway provider="anthropic" count=2
 WHEN convert_messages from="openai" to="anthropic"
 THEN assert_converted_messages count=2
 THEN assert_required_fields_added field="anthropic-version"
+
+# ══════════════════════════════════════════════
+# pi-mono bugfix 回归覆盖
+# ══════════════════════════════════════════════
+
+[SCENARIO: PROVIDER-ERR-007] TITLE: SDK 重试策略未被意外禁用 (Pi#0fc6689) TAGS: unit provider regression
+GIVEN create_temp_dir
+WHEN get_provider_retry_config provider="anthropic"
+THEN assert_provider_retries_enabled min_retries=1

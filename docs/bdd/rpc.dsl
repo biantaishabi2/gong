@@ -43,3 +43,13 @@ THEN assert_rpc_error code=-32600
 GIVEN create_temp_dir
 WHEN rpc_dispatch_raise method="crash"
 THEN assert_rpc_error code=-32603
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归 (1 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: RPC-008] TITLE: prompt 附件参数透传校验 (Pi#bugfix) TAGS: unit rpc regression
+GIVEN create_temp_dir
+WHEN rpc_dispatch_with_attachments method="echo_attachments" params="{\"prompt\":\"hello\",\"attachments\":[\"file1.md\",\"file2.md\"]}"
+THEN assert_rpc_result contains="file1.md"
+THEN assert_rpc_result contains="file2.md"

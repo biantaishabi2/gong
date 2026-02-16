@@ -135,4 +135,54 @@ defmodule Gong.BDD.Generated.SessionEdgeTest do
     :ok
   end
 
+  # Source: SESSION-ERR-007
+  @tag :regression
+  @tag :tape
+  @tag :unit
+  test "[SESSION-ERR-007] 最后 assistant 查找跳过 aborted 空消息 (Pi#e30c4e3)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SESSION-ERR-007"}
+    # line 64: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
+    # line 65: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 65, raw: "GIVEN tape_init"}, 65)
+    # line 66: GIVEN tape_append kind="user" content="问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "问题", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 66, raw: "GIVEN tape_append kind=\"user\" content=\"问题\""}, 66)
+    # line 67: GIVEN tape_append kind="assistant" content="有内容的回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "有内容的回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 67, raw: "GIVEN tape_append kind=\"assistant\" content=\"有内容的回复\""}, 67)
+    # line 68: GIVEN tape_append kind="assistant" content="" metadata_kv="stop_reason:aborted"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "", kind: "assistant", metadata_kv: "stop_reason:aborted"}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 68, raw: "GIVEN tape_append kind=\"assistant\" content=\"\" metadata_kv=\"stop_reason:aborted\""}, 68)
+    # line 69: WHEN when_tape_get_last_assistant
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_tape_get_last_assistant, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 69, raw: "WHEN when_tape_get_last_assistant"}, 69)
+    # line 70: THEN assert_tape_last_content contains="有内容的回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tape_last_content, %{contains: "有内容的回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 70, raw: "THEN assert_tape_last_content contains=\"有内容的回复\""}, 70)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: SESSION-ERR-008
+  @tag :regression
+  @tag :tape
+  @tag :unit
+  test "[SESSION-ERR-008] 分叉后仅 user 消息的 flush 重置 (Pi#b5be54b)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SESSION-ERR-008"}
+    # line 77: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 77, raw: "GIVEN create_temp_dir"}, 77)
+    # line 78: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 78, raw: "GIVEN tape_init"}, 78)
+    # line 79: GIVEN tape_append kind="user" content="原始消息"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "原始消息", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 79, raw: "GIVEN tape_append kind=\"user\" content=\"原始消息\""}, 79)
+    # line 80: GIVEN tape_fork
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_fork, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 80, raw: "GIVEN tape_fork"}, 80)
+    # line 81: GIVEN tape_append kind="user" content="分叉后用户消息"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "分叉后用户消息", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 81, raw: "GIVEN tape_append kind=\"user\" content=\"分叉后用户消息\""}, 81)
+    # line 82: WHEN when_tape_flush
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_tape_flush, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 82, raw: "WHEN when_tape_flush"}, 82)
+    # line 83: THEN assert_flush_reset
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_flush_reset, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/session_edge.dsl", line: 83, raw: "THEN assert_flush_reset"}, 83)
+    _ctx = ctx
+    :ok
+  end
+
 end

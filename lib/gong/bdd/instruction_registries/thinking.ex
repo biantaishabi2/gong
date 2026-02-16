@@ -74,6 +74,24 @@ defmodule Gong.BDD.InstructionRegistries.Thinking do
         name: :assert_max_tokens_ge_budget, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      build_thinking_config: %{
+        name: :build_thinking_config, kind: :when,
+        args: %{
+          level: %{type: :string, required?: true, allowed: nil},
+          provider: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_thinking_config_flat: %{
+        name: :assert_thinking_config_flat, kind: :then,
+        args: %{key: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

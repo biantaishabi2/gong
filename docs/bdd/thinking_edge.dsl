@@ -20,3 +20,12 @@ THEN assert_thinking_params contains="budget_tokens"
 GIVEN create_temp_dir
 WHEN parse_thinking_level str="off"
 THEN assert_parsed_thinking_level expected="off"
+
+# ══════════════════════════════════════════════
+# Group 2: pi-mono bugfix 回归覆盖（1 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: THINK-ERR-004] TITLE: thinking config 在顶层而非嵌套 config.config (Pi#289e60a) TAGS: unit thinking regression
+GIVEN create_temp_dir
+WHEN build_thinking_config level="high" provider="gemini"
+THEN assert_thinking_config_flat key="thinking_budget"

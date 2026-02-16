@@ -61,3 +61,13 @@ GIVEN init_model_registry
 WHEN cleanup_model_registry
 WHEN get_model_string_safe
 THEN assert_model_string expected="deepseek:deepseek-chat"
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归 (1 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: MODEL-010] TITLE: 模型能力判断使用 contains 而非精确匹配 (Pi#bugfix) TAGS: unit model regression
+GIVEN init_model_registry
+GIVEN register_model name="vision_model" provider="openai" model_id="gpt-4o-vision" api_key_env="OPENAI_API_KEY"
+WHEN check_model_capability name="vision_model" capability="vision"
+THEN assert_capability_match expected="true"

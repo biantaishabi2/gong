@@ -96,3 +96,38 @@ GIVEN create_extension_file name="cleanup_ext.ex" content="defmodule CleanupExt 
 WHEN load_extension path="cleanup_ext.ex"
 WHEN cleanup_extension name="CleanupExt"
 THEN assert_extension_cleanup_called
+
+# ══════════════════════════════════════════════
+# Group 4: pi-mono bugfix 回归 (6 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: EXTEND-012] TITLE: git URL 归一化 TAGS: unit extension regression
+GIVEN create_temp_dir
+WHEN normalize_git_url url="https://github.com/anthropic/pi-mono.git"
+THEN assert_normalized_url expected="https://github.com/anthropic/pi-mono"
+
+[SCENARIO: EXTEND-013] TITLE: 扩展加载失败错误日志 TAGS: unit extension regression
+GIVEN create_temp_dir
+WHEN format_load_error path="bad_ext.ex" reason="syntax error"
+THEN assert_error_info_contains expected="bad_ext.ex"
+
+[SCENARIO: EXTEND-014] TITLE: .pi/ 路径识别为本地 TAGS: unit extension regression
+GIVEN create_temp_dir
+WHEN check_local_path path=".pi/extensions/my_ext"
+THEN assert_is_local expected="true"
+
+[SCENARIO: EXTEND-015] TITLE: CLI + settings.json 扩展路径合并 TAGS: unit extension regression
+GIVEN create_temp_dir
+WHEN merge_extension_paths cli="./a,./b" settings="./b,./c"
+THEN assert_merged_paths expected="./a,./b,./c"
+
+[SCENARIO: EXTEND-016] TITLE: @ 前缀路径归一化 TAGS: unit extension regression
+GIVEN create_temp_dir
+WHEN normalize_at_prefix path="@anthropic/claude-ext"
+THEN assert_normalized_path expected="anthropic/claude-ext"
+
+[SCENARIO: EXTEND-017] TITLE: 扩展上下文 model 动态更新 TAGS: unit extension regression
+GIVEN create_temp_dir
+WHEN build_extension_context model="gpt-4"
+WHEN update_extension_context_model model="claude-3"
+THEN assert_extension_context_model expected="claude-3"

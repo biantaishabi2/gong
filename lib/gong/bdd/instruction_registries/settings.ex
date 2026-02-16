@@ -165,6 +165,14 @@ defmodule Gong.BDD.InstructionRegistries.Settings do
         name: :reload_settings, kind: :when,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      mutate_last_setting_value: %{
+        name: :mutate_last_setting_value, kind: :when,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
       }
     }
   end

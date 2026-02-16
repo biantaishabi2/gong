@@ -203,6 +203,45 @@ defmodule Gong.BDD.InstructionRegistries.CrossProvider do
         name: :assert_observer_saw_updated_state, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      cross_provider_tool_calls_with_name: %{
+        name: :cross_provider_tool_calls_with_name, kind: :given,
+        args: %{tool_name: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_converted_tool_name: %{
+        name: :assert_converted_tool_name, kind: :then,
+        args: %{expected: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      cross_provider_tool_calls_with_id: %{
+        name: :cross_provider_tool_calls_with_id, kind: :given,
+        args: %{tool_call_id: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_converted_tool_call_id: %{
+        name: :assert_converted_tool_call_id, kind: :then,
+        args: %{expected: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+      check_provider_compat: %{
+        name: :check_provider_compat, kind: :when,
+        args: %{url: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_compat_detected: %{
+        name: :assert_compat_detected, kind: :then,
+        args: %{provider: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

@@ -117,6 +117,22 @@ defmodule Gong.ProviderRegistry do
     end
   end
 
+  @doc "获取 provider 的重试配置"
+  @spec get_retry_config(String.t()) :: map()
+  def get_retry_config(provider) when is_binary(provider) do
+    ensure_table!()
+
+    # 从注册的 provider 配置中获取重试设置，默认 max_retries=2
+    case :ets.lookup(@table, provider) do
+      [{^provider, entry}] ->
+        Map.get(entry, :retry_config, %{max_retries: 2})
+
+      [] ->
+        # 未注册的 provider 返回默认配置（不禁用重试）
+        %{max_retries: 2}
+    end
+  end
+
   @spec cleanup() :: :ok
   def cleanup do
     if :ets.whereis(@table) != :undefined do

@@ -61,4 +61,33 @@ defmodule Gong.BDD.Generated.BranchSummaryTest do
     :ok
   end
 
+  # Source: BRANCHSUM-003
+  @tag :branch_summary
+  @tag :regression
+  @tag :unit
+  test "[BRANCHSUM-003] 多层分支选最深公共祖先 (Pi#92947a3)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BRANCHSUM-003"}
+    # line 35: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 35, raw: "GIVEN create_temp_dir"}, 35)
+    # line 36: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 36, raw: "GIVEN tape_init"}, 36)
+    # line 37: GIVEN tape_append kind="user" content="root"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "root", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 37, raw: "GIVEN tape_append kind=\"user\" content=\"root\""}, 37)
+    # line 38: GIVEN tape_handoff name="level-1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_handoff, %{name: "level-1"}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 38, raw: "GIVEN tape_handoff name=\"level-1\""}, 38)
+    # line 39: GIVEN tape_append kind="user" content="branch L1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "branch L1", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 39, raw: "GIVEN tape_append kind=\"user\" content=\"branch L1\""}, 39)
+    # line 40: GIVEN tape_handoff name="level-2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_handoff, %{name: "level-2"}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 40, raw: "GIVEN tape_handoff name=\"level-2\""}, 40)
+    # line 41: GIVEN tape_append kind="user" content="branch L2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "branch L2", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 41, raw: "GIVEN tape_append kind=\"user\" content=\"branch L2\""}, 41)
+    # line 42: WHEN find_deepest_common_ancestor anchor_a="level-1" anchor_b="level-2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :find_deepest_common_ancestor, %{anchor_a: "level-1", anchor_b: "level-2"}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 42, raw: "WHEN find_deepest_common_ancestor anchor_a=\"level-1\" anchor_b=\"level-2\""}, 42)
+    # line 43: THEN assert_common_ancestor expected="level-1"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_common_ancestor, %{expected: "level-1"}, %{file: "/home/wangbo/document/gong/docs/bdd/branch_summary.dsl", line: 43, raw: "THEN assert_common_ancestor expected=\"level-1\""}, 43)
+    _ctx = ctx
+    :ok
+  end
+
 end

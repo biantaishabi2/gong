@@ -61,6 +61,18 @@ defmodule Gong.BDD.InstructionRegistries.RPC do
         args: %{method: %{type: :string, required?: true, allowed: nil}},
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      rpc_dispatch_with_attachments: %{
+        name: :rpc_dispatch_with_attachments, kind: :when,
+        args: %{
+          method: %{type: :string, required?: true, allowed: nil},
+          params: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
       }
     }
   end

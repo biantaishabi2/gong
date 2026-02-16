@@ -192,3 +192,13 @@ THEN assert_token_estimate_value expected=12
 GIVEN create_temp_dir
 WHEN estimate_text content="hello world test"
 THEN assert_token_estimate_value expected=4
+
+# ══════════════════════════════════════════════
+# Group 9: pi-mono bugfix 回归（1 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-COMPACT-027] TITLE: compaction 保留区间含 branch_summary 条目 (Pi#754f55e) TAGS: unit compaction regression
+GIVEN compaction_messages_with_branch_summary count=10 summary_at=7
+GIVEN compaction_summarize_fn_ok
+WHEN when_compact max_tokens=50 window_size=3
+THEN assert_branch_summary_preserved

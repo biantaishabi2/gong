@@ -372,6 +372,51 @@ defmodule Gong.Tape.Store do
     end
   end
 
+  # ── 元数据存储 ──
+
+  @doc "存储键值元数据到 workspace"
+  @spec put_metadata(t(), String.t(), term()) :: :ok
+  def put_metadata(%__MODULE__{workspace_path: ws}, key, value) do
+    meta_path = Path.join(ws, "metadata.json")
+    existing = case File.read(meta_path) do
+      {:ok, content} -> Jason.decode!(content)
+      _ -> %{}
+    end
+
+    updated = Map.put(existing, key, value)
+    File.write!(meta_path, Jason.encode!(updated))
+    :ok
+  end
+
+  @doc "读取键值元数据"
+  @spec get_metadata(t(), String.t()) :: term() | nil
+  def get_metadata(%__MODULE__{workspace_path: ws}, key) do
+    meta_path = Path.join(ws, "metadata.json")
+    case File.read(meta_path) do
+      {:ok, content} ->
+        meta = Jason.decode!(content)
+        Map.get(meta, key)
+      _ -> nil
+    end
+  end
+
+  @doc "查找两个 anchor 的最深公共祖先（最大的 seq 不大于两者中较小的）"
+  @spec find_common_ancestor(t(), String.t(), String.t()) :: String.t() | nil
+  def find_common_ancestor(%__MODULE__{db_conn: conn}, anchor_a, anchor_b) do
+    seq_a = Index.anchor_seq(conn, anchor_a)
+    seq_b = Index.anchor_seq(conn, anchor_b)
+
+    cond do
+      seq_a == nil or seq_b == nil -> nil
+      # a 是 b 的祖先（seq 更小）
+      seq_a < seq_b -> anchor_a
+      # b 是 a 的祖先
+      seq_b < seq_a -> anchor_b
+      # 相同
+      true -> anchor_a
+    end
+  end
+
   # ── 私有辅助 ──
 
   defp find_anchor_dir(%__MODULE__{workspace_path: ws}, anchor_name) do

@@ -108,6 +108,20 @@ defmodule Gong.BDD.InstructionRegistries.Stream do
         name: :assert_tool_result_buffered, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      emit_content_blocks: %{
+        name: :emit_content_blocks, kind: :when,
+        args: %{blocks: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_content_indices_sequential: %{
+        name: :assert_content_indices_sequential, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

@@ -157,4 +157,24 @@ defmodule Gong.BDD.Generated.TapeSessionTest do
     :ok
   end
 
+  # Source: SESSION-007
+  @tag :regression
+  @tag :session
+  @tag :tape
+  @tag :unit
+  test "[SESSION-007] 新会话持久化初始模型和思考级别 (Pi#98c85bf)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "SESSION-007"}
+    # line 68: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_session.dsl", line: 68, raw: "GIVEN create_temp_dir"}, 68)
+    # line 69: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_session.dsl", line: 69, raw: "GIVEN tape_init"}, 69)
+    # line 70: WHEN tape_persist_initial_state model="deepseek:deepseek-chat" thinking_level="high"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :tape_persist_initial_state, %{model: "deepseek:deepseek-chat", thinking_level: "high"}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_session.dsl", line: 70, raw: "WHEN tape_persist_initial_state model=\"deepseek:deepseek-chat\" thinking_level=\"high\""}, 70)
+    # line 71: THEN assert_initial_state_persisted model="deepseek:deepseek-chat" thinking_level="high"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_initial_state_persisted, %{model: "deepseek:deepseek-chat", thinking_level: "high"}, %{file: "/home/wangbo/document/gong/docs/bdd/tape_session.dsl", line: 71, raw: "THEN assert_initial_state_persisted model=\"deepseek:deepseek-chat\" thinking_level=\"high\""}, 71)
+    _ctx = ctx
+    :ok
+  end
+
 end

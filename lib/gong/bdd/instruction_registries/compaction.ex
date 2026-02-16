@@ -387,6 +387,23 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         name: :assert_no_compaction_on_new_model, kind: :then,
         args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      compaction_messages_with_branch_summary: %{
+        name: :compaction_messages_with_branch_summary, kind: :given,
+        args: %{
+          count: %{type: :int, required?: true, allowed: nil},
+          summary_at: %{type: :int, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_branch_summary_preserved: %{
+        name: :assert_branch_summary_preserved, kind: :then,
+        args: %{}, outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

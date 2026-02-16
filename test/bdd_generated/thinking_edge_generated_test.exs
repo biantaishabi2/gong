@@ -55,4 +55,21 @@ defmodule Gong.BDD.Generated.ThinkingEdgeTest do
     :ok
   end
 
+  # Source: THINK-ERR-004
+  @tag :regression
+  @tag :thinking
+  @tag :unit
+  test "[THINK-ERR-004] thinking config 在顶层而非嵌套 config.config (Pi#289e60a)" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "THINK-ERR-004"}
+    # line 29: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking_edge.dsl", line: 29, raw: "GIVEN create_temp_dir"}, 29)
+    # line 30: WHEN build_thinking_config level="high" provider="gemini"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :build_thinking_config, %{level: "high", provider: "gemini"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking_edge.dsl", line: 30, raw: "WHEN build_thinking_config level=\"high\" provider=\"gemini\""}, 30)
+    # line 31: THEN assert_thinking_config_flat key="thinking_budget"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_thinking_config_flat, %{key: "thinking_budget"}, %{file: "/home/wangbo/document/gong/docs/bdd/thinking_edge.dsl", line: 31, raw: "THEN assert_thinking_config_flat key=\"thinking_budget\""}, 31)
+    _ctx = ctx
+    :ok
+  end
+
 end

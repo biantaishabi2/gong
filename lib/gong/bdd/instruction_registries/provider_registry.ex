@@ -107,6 +107,21 @@ defmodule Gong.BDD.InstructionRegistries.ProviderReg do
         },
         outputs: %{}, rules: [], boundary: :test_runtime,
         scopes: [:unit], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── pi-mono bugfix 回归 ──
+
+      get_provider_retry_config: %{
+        name: :get_provider_retry_config, kind: :when,
+        args: %{provider: %{type: :string, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
+      },
+      assert_provider_retries_enabled: %{
+        name: :assert_provider_retries_enabled, kind: :then,
+        args: %{min_retries: %{type: :int, required?: true, allowed: nil}},
+        outputs: %{}, rules: [], boundary: :test_runtime,
+        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
       }
     }
   end

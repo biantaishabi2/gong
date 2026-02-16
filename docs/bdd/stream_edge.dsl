@@ -36,3 +36,12 @@ THEN assert_no_race_condition
 GIVEN create_temp_dir
 WHEN validate_stream_events types="text_delta,text_end"
 THEN assert_sequence_invalid
+
+# ══════════════════════════════════════════════
+# Group 3: pi-mono bugfix 回归（1 场景）
+# ══════════════════════════════════════════════
+
+[SCENARIO: STREAM-ERR-006] TITLE: 流式 content block 索引单调递增 (Pi#9e86079) TAGS: unit stream regression
+GIVEN create_temp_dir
+WHEN emit_content_blocks blocks="text:hello|text:world"
+THEN assert_content_indices_sequential

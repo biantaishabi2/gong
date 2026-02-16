@@ -273,6 +273,13 @@ WHEN agent_chat prompt="测试turn"
 THEN assert_telemetry_received event="gong.turn.start"
 THEN assert_no_crash
 
+[SCENARIO: BDD-HOOK-024] TITLE: 非激活工具也触发 before_tool_call hook (Pi#31438fd) TAGS: unit hook regression
+GIVEN create_temp_dir
+GIVEN init_tool_config_with_preset preset="readonly"
+GIVEN register_tracking_hook
+WHEN run_hook_gate_for_tool tool="bash"
+THEN assert_tracking_hook_invoked callback="before_tool_call"
+
 [SCENARIO: BDD-HOOK-023] TITLE: 完整事件序列验证 TAGS: hook telemetry
 GIVEN create_temp_dir
 GIVEN create_temp_file path="seq.txt" content="序列"

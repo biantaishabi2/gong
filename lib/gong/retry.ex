@@ -44,7 +44,7 @@ defmodule Gong.Retry do
   # ── 错误模式匹配 ──
 
   defp rate_limit?(str), do: str =~ ~r/429|rate.?limit/i
-  defp connection_error?(str), do: str =~ ~r/connect|timeout|ECONNREFUSED|ETIMEDOUT/i
+  defp connection_error?(str), do: str =~ ~r/connect|timeout|ECONNREFUSED|ETIMEDOUT|fetch failed/i
 
   defp context_overflow?(str) do
     str =~ ~r/too long|exceeds.*context|token.*exceed|maximum prompt|reduce.*length/i
