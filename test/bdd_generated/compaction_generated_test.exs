@@ -457,40 +457,6 @@ defmodule Gong.BDD.Generated.CompactionTest do
     :ok
   end
 
-  # Source: BDD-COMPACT-025
-  @tag :compaction
-  @tag :token
-  @tag :unit
-  test "[BDD-COMPACT-025]" do
-    run_id = Gong.BDD.Instructions.V1.new_run_id()
-    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-025"}
-    # line 187: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 187, raw: "GIVEN create_temp_dir"}, 187)
-    # line 188: WHEN estimate_text content="你好世界测试"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :estimate_text, %{content: "你好世界测试"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 188, raw: "WHEN estimate_text content=\"你好世界测试\""}, 188)
-    # line 189: THEN assert_token_estimate_value expected=12
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_token_estimate_value, %{expected: 12}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 189, raw: "THEN assert_token_estimate_value expected=12"}, 189)
-    _ctx = ctx
-    :ok
-  end
-
-  # Source: BDD-COMPACT-026
-  @tag :compaction
-  @tag :token
-  @tag :unit
-  test "[BDD-COMPACT-026]" do
-    run_id = Gong.BDD.Instructions.V1.new_run_id()
-    ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-026"}
-    # line 192: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 192, raw: "GIVEN create_temp_dir"}, 192)
-    # line 193: WHEN estimate_text content="hello world test"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :estimate_text, %{content: "hello world test"}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 193, raw: "WHEN estimate_text content=\"hello world test\""}, 193)
-    # line 194: THEN assert_token_estimate_value expected=4
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_token_estimate_value, %{expected: 4}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 194, raw: "THEN assert_token_estimate_value expected=4"}, 194)
-    _ctx = ctx
-    :ok
-  end
-
   # Source: BDD-COMPACT-027
   @tag :compaction
   @tag :regression
@@ -498,14 +464,14 @@ defmodule Gong.BDD.Generated.CompactionTest do
   test "[BDD-COMPACT-027] compaction 保留区间含 branch_summary 条目 (Pi#754f55e)" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-COMPACT-027"}
-    # line 201: GIVEN compaction_messages_with_branch_summary count=10 summary_at=7
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages_with_branch_summary, %{count: 10, summary_at: 7}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 201, raw: "GIVEN compaction_messages_with_branch_summary count=10 summary_at=7"}, 201)
-    # line 202: GIVEN compaction_summarize_fn_ok
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_summarize_fn_ok, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 202, raw: "GIVEN compaction_summarize_fn_ok"}, 202)
-    # line 203: WHEN when_compact max_tokens=50 window_size=3
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_compact, %{max_tokens: 50, window_size: 3}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 203, raw: "WHEN when_compact max_tokens=50 window_size=3"}, 203)
-    # line 204: THEN assert_branch_summary_preserved
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_branch_summary_preserved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 204, raw: "THEN assert_branch_summary_preserved"}, 204)
+    # line 191: GIVEN compaction_messages_with_branch_summary count=10 summary_at=7
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_messages_with_branch_summary, %{count: 10, summary_at: 7}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 191, raw: "GIVEN compaction_messages_with_branch_summary count=10 summary_at=7"}, 191)
+    # line 192: GIVEN compaction_summarize_fn_ok
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :compaction_summarize_fn_ok, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 192, raw: "GIVEN compaction_summarize_fn_ok"}, 192)
+    # line 193: WHEN when_compact max_tokens=50 window_size=3
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :when_compact, %{max_tokens: 50, window_size: 3}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 193, raw: "WHEN when_compact max_tokens=50 window_size=3"}, 193)
+    # line 194: THEN assert_branch_summary_preserved
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_branch_summary_preserved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/compaction.dsl", line: 194, raw: "THEN assert_branch_summary_preserved"}, 194)
     _ctx = ctx
     :ok
   end

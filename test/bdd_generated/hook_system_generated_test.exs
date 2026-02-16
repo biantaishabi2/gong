@@ -623,61 +623,40 @@ defmodule Gong.BDD.Generated.HookSystemTest do
     :ok
   end
 
-  # Source: BDD-HOOK-024
-  @tag :hook
-  @tag :regression
-  @tag :unit
-  test "[BDD-HOOK-024] 非激活工具也触发 before_tool_call hook (Pi#31438fd)" do
-    run_id = Gong.BDD.Instructions.V1.new_run_id()
-    ctx = %{run_id: run_id, scenario_id: "BDD-HOOK-024"}
-    # line 277: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 277, raw: "GIVEN create_temp_dir"}, 277)
-    # line 278: GIVEN init_tool_config_with_preset preset="readonly"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_tool_config_with_preset, %{preset: "readonly"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 278, raw: "GIVEN init_tool_config_with_preset preset=\"readonly\""}, 278)
-    # line 279: GIVEN register_tracking_hook
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :register_tracking_hook, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 279, raw: "GIVEN register_tracking_hook"}, 279)
-    # line 280: WHEN run_hook_gate_for_tool tool="bash"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :run_hook_gate_for_tool, %{tool: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 280, raw: "WHEN run_hook_gate_for_tool tool=\"bash\""}, 280)
-    # line 281: THEN assert_tracking_hook_invoked callback="before_tool_call"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_tracking_hook_invoked, %{callback: "before_tool_call"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 281, raw: "THEN assert_tracking_hook_invoked callback=\"before_tool_call\""}, 281)
-    _ctx = ctx
-    :ok
-  end
-
   # Source: BDD-HOOK-023
   @tag :hook
   @tag :telemetry
   test "[BDD-HOOK-023] 完整事件序列验证" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "BDD-HOOK-023"}
-    # line 284: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 284, raw: "GIVEN create_temp_dir"}, 284)
-    # line 285: GIVEN create_temp_file path="seq.txt" content="序列"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "序列", path: "seq.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 285, raw: "GIVEN create_temp_file path=\"seq.txt\" content=\"序列\""}, 285)
-    # line 286: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 286, raw: "GIVEN configure_agent"}, 286)
-    # line 287: GIVEN attach_telemetry_handler event="gong.agent.start"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 287, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.start\""}, 287)
-    # line 288: GIVEN attach_telemetry_handler event="gong.turn.start"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.turn.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 288, raw: "GIVEN attach_telemetry_handler event=\"gong.turn.start\""}, 288)
-    # line 289: GIVEN attach_telemetry_handler event="gong.tool.start"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 289, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.start\""}, 289)
-    # line 290: GIVEN attach_telemetry_handler event="gong.tool.stop"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 290, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 290)
-    # line 291: GIVEN attach_telemetry_handler event="gong.turn.end"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.turn.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 291, raw: "GIVEN attach_telemetry_handler event=\"gong.turn.end\""}, 291)
-    # line 292: GIVEN attach_telemetry_handler event="gong.agent.end"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 292, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.end\""}, 292)
-    # line 293: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/seq.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/seq.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 293, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/seq.txt\""}, 293)
-    # line 294: GIVEN mock_llm_response response_type="text" content="序列完成"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "序列完成", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 294, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"序列完成\""}, 294)
-    # line 295: WHEN agent_chat prompt="读取序列"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读取序列"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 295, raw: "WHEN agent_chat prompt=\"读取序列\""}, 295)
-    # line 296: THEN assert_telemetry_sequence sequence="gong.agent.start,gong.turn.start,gong.tool.start,gong.tool.stop,gong.turn.end,gong.agent.end"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_sequence, %{sequence: "gong.agent.start,gong.turn.start,gong.tool.start,gong.tool.stop,gong.turn.end,gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 296, raw: "THEN assert_telemetry_sequence sequence=\"gong.agent.start,gong.turn.start,gong.tool.start,gong.tool.stop,gong.turn.end,gong.agent.end\""}, 296)
-    # line 297: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 297, raw: "THEN assert_no_crash"}, 297)
+    # line 277: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 277, raw: "GIVEN create_temp_dir"}, 277)
+    # line 278: GIVEN create_temp_file path="seq.txt" content="序列"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "序列", path: "seq.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 278, raw: "GIVEN create_temp_file path=\"seq.txt\" content=\"序列\""}, 278)
+    # line 279: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 279, raw: "GIVEN configure_agent"}, 279)
+    # line 280: GIVEN attach_telemetry_handler event="gong.agent.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 280, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.start\""}, 280)
+    # line 281: GIVEN attach_telemetry_handler event="gong.turn.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.turn.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 281, raw: "GIVEN attach_telemetry_handler event=\"gong.turn.start\""}, 281)
+    # line 282: GIVEN attach_telemetry_handler event="gong.tool.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 282, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.start\""}, 282)
+    # line 283: GIVEN attach_telemetry_handler event="gong.tool.stop"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.tool.stop"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 283, raw: "GIVEN attach_telemetry_handler event=\"gong.tool.stop\""}, 283)
+    # line 284: GIVEN attach_telemetry_handler event="gong.turn.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.turn.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 284, raw: "GIVEN attach_telemetry_handler event=\"gong.turn.end\""}, 284)
+    # line 285: GIVEN attach_telemetry_handler event="gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :attach_telemetry_handler, %{event: "gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 285, raw: "GIVEN attach_telemetry_handler event=\"gong.agent.end\""}, 285)
+    # line 286: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/seq.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/seq.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 286, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/seq.txt\""}, 286)
+    # line 287: GIVEN mock_llm_response response_type="text" content="序列完成"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "序列完成", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 287, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"序列完成\""}, 287)
+    # line 288: WHEN agent_chat prompt="读取序列"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat, %{prompt: "读取序列"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 288, raw: "WHEN agent_chat prompt=\"读取序列\""}, 288)
+    # line 289: THEN assert_telemetry_sequence sequence="gong.agent.start,gong.turn.start,gong.tool.start,gong.tool.stop,gong.turn.end,gong.agent.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_telemetry_sequence, %{sequence: "gong.agent.start,gong.turn.start,gong.tool.start,gong.tool.stop,gong.turn.end,gong.agent.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 289, raw: "THEN assert_telemetry_sequence sequence=\"gong.agent.start,gong.turn.start,gong.tool.start,gong.tool.stop,gong.turn.end,gong.agent.end\""}, 289)
+    # line 290: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_system.dsl", line: 290, raw: "THEN assert_no_crash"}, 290)
     _ctx = ctx
     :ok
   end

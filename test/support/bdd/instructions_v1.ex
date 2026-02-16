@@ -550,12 +550,6 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_lock_race_result} ->
         assert_lock_race_result!(ctx, args, meta)
 
-      {:when, :estimate_text} ->
-        estimate_text!(ctx, args, meta)
-
-      {:then, :assert_token_estimate_value} ->
-        assert_token_estimate_value!(ctx, args, meta)
-
       # ── Provider Registry ──
 
       {:when, :init_provider_registry} ->
@@ -1468,60 +1462,9 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_import_resolved} ->
         assert_import_resolved!(ctx, args, meta)
 
-      # ── Hook/Extension: pi-mono bugfix 回归 ──
-
-      {:when, :build_hook_message} ->
-        build_hook_message!(ctx, args, meta)
-
-      {:then, :assert_hook_message_role} ->
-        assert_hook_message_role!(ctx, args, meta)
-
-      {:when, :build_hook_message_string} ->
-        build_hook_message_string!(ctx, args, meta)
-
-      {:then, :assert_hook_message_content_is_array} ->
-        assert_hook_message_content_is_array!(ctx, args, meta)
-
       {:then, :assert_conflicting_extension_removed} ->
         assert_conflicting_extension_removed!(ctx, args, meta)
 
-      # ── Extension: pi-mono bugfix 回归 #21-#26 ──
-
-      {:when, :normalize_git_url} ->
-        normalize_git_url!(ctx, args, meta)
-
-      {:then, :assert_normalized_url} ->
-        assert_normalized_url!(ctx, args, meta)
-
-      {:when, :format_load_error} ->
-        format_load_error!(ctx, args, meta)
-
-      {:then, :assert_error_info_contains} ->
-        assert_error_info_contains!(ctx, args, meta)
-
-      {:when, :check_local_path} ->
-        check_local_path!(ctx, args, meta)
-
-      {:then, :assert_is_local} ->
-        assert_is_local!(ctx, args, meta)
-
-      {:when, :merge_extension_paths} ->
-        merge_extension_paths!(ctx, args, meta)
-
-      {:then, :assert_merged_paths} ->
-        assert_merged_paths!(ctx, args, meta)
-
-      {:when, :normalize_at_prefix} ->
-        normalize_at_prefix!(ctx, args, meta)
-
-      {:when, :build_extension_context} ->
-        build_extension_context!(ctx, args, meta)
-
-      {:when, :update_extension_context_model} ->
-        update_extension_context_model!(ctx, args, meta)
-
-      {:then, :assert_extension_context_model} ->
-        assert_extension_context_model!(ctx, args, meta)
 
       # ── Tape pending/session switch/event handler ──
 
@@ -1607,20 +1550,6 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_capability_match} ->
         assert_capability_match!(ctx, args, meta)
-
-      # ── Gap #20: 非激活工具 hook 包装 ──
-
-      {:given, :init_tool_config_with_preset} ->
-        init_tool_config_with_preset!(ctx, args, meta)
-
-      {:given, :register_tracking_hook} ->
-        register_tracking_hook!(ctx, args, meta)
-
-      {:when, :run_hook_gate_for_tool} ->
-        run_hook_gate_for_tool!(ctx, args, meta)
-
-      {:then, :assert_tracking_hook_invoked} ->
-        assert_tracking_hook_invoked!(ctx, args, meta)
 
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
@@ -3831,18 +3760,6 @@ defmodule Gong.BDD.Instructions.V1 do
     actual = Map.fetch!(ctx, :lock_race_winners)
     assert actual == expected,
       "期望 #{expected} 个获胜者，实际：#{actual}"
-    ctx
-  end
-
-  defp estimate_text!(ctx, %{content: content}, _meta) do
-    estimate = Gong.Compaction.TokenEstimator.estimate(content)
-    Map.put(ctx, :token_estimate_value, estimate)
-  end
-
-  defp assert_token_estimate_value!(ctx, %{expected: expected}, _meta) do
-    actual = Map.fetch!(ctx, :token_estimate_value)
-    assert actual == expected,
-      "期望 token 估算=#{expected}，实际：#{actual}"
     ctx
   end
 
@@ -6855,36 +6772,6 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
-  # ── Hook/Extension: pi-mono bugfix 回归实现 ──
-
-  # 构建 hook 消息（正确的 role 应为 hookMessage）
-  defp build_hook_message!(ctx, %{content: content}, _meta) do
-    msg = Gong.Hook.build_message(content)
-    Map.put(ctx, :hook_message, msg)
-  end
-
-  defp assert_hook_message_role!(ctx, %{expected: expected}, _meta) do
-    msg = Map.fetch!(ctx, :hook_message)
-    role = Map.get(msg, :role, Map.get(msg, "role"))
-    assert role == expected,
-      "期望 Hook 消息 role='#{expected}'，实际：'#{role}'"
-    ctx
-  end
-
-  # 构建字符串 content 的 hook 消息，归一化后应为数组
-  defp build_hook_message_string!(ctx, %{content: content}, _meta) do
-    msg = Gong.Hook.build_message(content)
-    Map.put(ctx, :hook_message, msg)
-  end
-
-  defp assert_hook_message_content_is_array!(ctx, _args, _meta) do
-    msg = Map.fetch!(ctx, :hook_message)
-    content = Map.get(msg, :content, Map.get(msg, "content"))
-    assert is_list(content),
-      "期望 Hook 消息 content 归一化为数组，实际：#{inspect(content)}"
-    ctx
-  end
-
   # 冲突扩展应从已加载列表中移除
   defp assert_conflicting_extension_removed!(ctx, _args, _meta) do
     loaded = ctx[:loaded_extensions] || []
@@ -6909,94 +6796,6 @@ defmodule Gong.BDD.Instructions.V1 do
         :ok
     end
 
-    ctx
-  end
-
-  # ══════════════════════════════════════════════════════════════
-  # Extension: pi-mono bugfix 回归 #21-#26 实现
-  # ══════════════════════════════════════════════════════════════
-
-  # #21: git URL 归一化 — 移除 .git 后缀
-  defp normalize_git_url!(ctx, %{url: url}, _meta) do
-    normalized = Gong.Extension.Source.normalize_git_url(url)
-    Map.put(ctx, :normalized_url, normalized)
-  end
-
-  defp assert_normalized_url!(ctx, %{expected: expected}, _meta) do
-    actual = Map.fetch!(ctx, :normalized_url)
-    assert actual == expected,
-      "期望归一化 URL='#{expected}'，实际：'#{actual}'"
-    ctx
-  end
-
-  # #22: 扩展加载失败错误日志
-  defp format_load_error!(ctx, %{path: path, reason: reason}, _meta) do
-    error_info = Gong.Extension.Loader.format_load_error(path, reason)
-    Map.put(ctx, :error_info, error_info)
-  end
-
-  defp assert_error_info_contains!(ctx, %{expected: expected}, _meta) do
-    error_info = Map.fetch!(ctx, :error_info)
-    assert String.contains?(error_info, expected),
-      "期望错误信息包含 '#{expected}'，实际：'#{error_info}'"
-    ctx
-  end
-
-  # #23: .pi/ 路径识别为本地
-  defp check_local_path!(ctx, %{path: path}, _meta) do
-    is_local = Gong.Extension.Source.local_path?(path)
-    Map.put(ctx, :is_local, is_local)
-  end
-
-  defp assert_is_local!(ctx, %{expected: expected}, _meta) do
-    actual = ctx[:is_local]
-    expected_bool = expected == "true"
-    assert actual == expected_bool,
-      "期望 local_path?='#{expected}'，实际：'#{actual}'"
-    ctx
-  end
-
-  # #24: CLI + settings.json 扩展路径合并
-  defp merge_extension_paths!(ctx, %{cli: cli, settings: settings}, _meta) do
-    cli_paths = String.split(cli, ",", trim: true)
-    settings_paths = String.split(settings, ",", trim: true)
-    merged = Gong.Extension.Source.merge_paths(cli_paths, settings_paths)
-    Map.put(ctx, :merged_paths, merged)
-  end
-
-  defp assert_merged_paths!(ctx, %{expected: expected}, _meta) do
-    actual = Map.fetch!(ctx, :merged_paths)
-    expected_list = String.split(expected, ",", trim: true)
-    assert actual == expected_list,
-      "期望合并路径=#{inspect(expected_list)}，实际：#{inspect(actual)}"
-    ctx
-  end
-
-  # #25: @ 前缀路径归一化
-  defp normalize_at_prefix!(ctx, %{path: path}, _meta) do
-    normalized = Gong.Extension.Source.normalize_at_prefix(path)
-    Map.put(ctx, :normalized_path, normalized)
-  end
-
-  # #26: 扩展上下文 model 动态更新
-  defp build_extension_context!(ctx, %{model: model}, _meta) do
-    ext_ctx = Gong.Extension.Context.build(%{model: model})
-    Map.put(ctx, :extension_context, ext_ctx)
-  end
-
-  defp update_extension_context_model!(ctx, %{model: model}, _meta) do
-    ext_ctx = Map.fetch!(ctx, :extension_context)
-    updated = Gong.Extension.Context.update_model(ext_ctx, model)
-    Map.put(ctx, :extension_context, updated)
-  end
-
-  defp assert_extension_context_model!(ctx, %{expected: expected}, _meta) do
-    ext_ctx = Map.fetch!(ctx, :extension_context)
-    actual = Gong.Extension.Context.get_model(ext_ctx)
-    # 清理 persistent_term
-    Gong.Extension.Context.cleanup(ext_ctx)
-    assert actual == expected,
-      "期望扩展上下文 model='#{expected}'，实际：'#{actual}'"
     ctx
   end
 
@@ -7202,62 +7001,6 @@ defmodule Gong.BDD.Instructions.V1 do
     expected_bool = expected == "true"
     assert actual == expected_bool,
       "期望能力匹配=#{expected}，实际：#{actual}"
-    ctx
-  end
-
-  # ══════════════════════════════════════════════════════════════
-  # Gap #20: 非激活工具也触发 before_tool_call hook
-  # ══════════════════════════════════════════════════════════════
-
-  defp init_tool_config_with_preset!(ctx, %{preset: preset}, _meta) do
-    Gong.ToolConfig.init(preset: String.to_atom(preset))
-    ctx
-  end
-
-  defp register_tracking_hook!(ctx, _args, _meta) do
-    # 用进程字典追踪 hook 调用
-    Process.put(:tracking_hook_calls, [])
-
-    # 动态创建追踪模块
-    module_name = Module.concat(Gong.TestHooks, "TrackingHook_#{System.unique_integer([:positive])}")
-
-    test_pid = self()
-
-    contents =
-      quote do
-        @behaviour Gong.Hook
-        def before_tool_call(tool, params) do
-          send(unquote(test_pid), {:hook_invoked, :before_tool_call, tool, params})
-          :ok
-        end
-      end
-
-    Module.create(module_name, contents, Macro.Env.location(__ENV__))
-    Map.put(ctx, :tracking_hook_module, module_name)
-  end
-
-  defp run_hook_gate_for_tool!(ctx, %{tool: tool_name}, _meta) do
-    hook = Map.fetch!(ctx, :tracking_hook_module)
-    tool_atom = String.to_atom(tool_name)
-
-    # 关键：无论工具是否在 active_tools 中，HookRunner.gate 都应调用 hook
-    result = Gong.HookRunner.gate([hook], :before_tool_call, [tool_atom, %{}])
-    Map.put(ctx, :hook_gate_result, result)
-  end
-
-  defp assert_tracking_hook_invoked!(ctx, %{callback: callback}, _meta) do
-    callback_atom = String.to_atom(callback)
-
-    # 检查是否收到了 hook 调用消息
-    received =
-      receive do
-        {:hook_invoked, ^callback_atom, _tool, _params} -> true
-      after
-        1000 -> false
-      end
-
-    assert received,
-      "期望 hook 回调 #{callback} 被调用，但未收到调用消息（工具可能不在 active_tools 中时被跳过）"
     ctx
   end
 

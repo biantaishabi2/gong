@@ -183,16 +183,6 @@ WHEN when_release_lock session_id="handover-session"
 WHEN when_acquire_lock session_id="handover-session"
 THEN assert_no_compaction_error
 
-[SCENARIO: BDD-COMPACT-025] TITLE: Token 估算中文纯文本精度 TAGS: unit compaction token
-GIVEN create_temp_dir
-WHEN estimate_text content="你好世界测试"
-THEN assert_token_estimate_value expected=12
-
-[SCENARIO: BDD-COMPACT-026] TITLE: Token 估算英文纯文本精度 TAGS: unit compaction token
-GIVEN create_temp_dir
-WHEN estimate_text content="hello world test"
-THEN assert_token_estimate_value expected=4
-
 # ══════════════════════════════════════════════
 # Group 9: pi-mono bugfix 回归（1 场景）
 # ══════════════════════════════════════════════

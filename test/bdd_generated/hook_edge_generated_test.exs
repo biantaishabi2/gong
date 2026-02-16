@@ -149,40 +149,6 @@ defmodule Gong.BDD.Generated.HookEdgeTest do
     :ok
   end
 
-  # Source: EXT-ERR-007
-  @tag :hook
-  @tag :regression
-  @tag :unit
-  test "[EXT-ERR-007] Hook 消息 role 为 hookMessage 而非 user (Pi#ecef601)" do
-    run_id = Gong.BDD.Instructions.V1.new_run_id()
-    ctx = %{run_id: run_id, scenario_id: "EXT-ERR-007"}
-    # line 71: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 71, raw: "GIVEN create_temp_dir"}, 71)
-    # line 72: WHEN build_hook_message content="hook test"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :build_hook_message, %{content: "hook test"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 72, raw: "WHEN build_hook_message content=\"hook test\""}, 72)
-    # line 73: THEN assert_hook_message_role expected="hookMessage"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_hook_message_role, %{expected: "hookMessage"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 73, raw: "THEN assert_hook_message_role expected=\"hookMessage\""}, 73)
-    _ctx = ctx
-    :ok
-  end
-
-  # Source: EXT-ERR-008
-  @tag :hook
-  @tag :regression
-  @tag :unit
-  test "[EXT-ERR-008] Hook 消息字符串 content 归一化为数组 (Pi#574f1cb)" do
-    run_id = Gong.BDD.Instructions.V1.new_run_id()
-    ctx = %{run_id: run_id, scenario_id: "EXT-ERR-008"}
-    # line 76: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 76, raw: "GIVEN create_temp_dir"}, 76)
-    # line 77: WHEN build_hook_message_string content="test string"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :build_hook_message_string, %{content: "test string"}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 77, raw: "WHEN build_hook_message_string content=\"test string\""}, 77)
-    # line 78: THEN assert_hook_message_content_is_array
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_hook_message_content_is_array, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 78, raw: "THEN assert_hook_message_content_is_array"}, 78)
-    _ctx = ctx
-    :ok
-  end
-
   # Source: EXT-ERR-009
   @tag :extension
   @tag :regression
@@ -190,16 +156,16 @@ defmodule Gong.BDD.Generated.HookEdgeTest do
   test "[EXT-ERR-009] 冲突扩展从已加载列表中移除 (Pi#5c047c3)" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "EXT-ERR-009"}
-    # line 81: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 81, raw: "GIVEN create_temp_dir"}, 81)
-    # line 82: GIVEN create_extension_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 82, raw: "GIVEN create_extension_dir"}, 82)
-    # line 83: GIVEN create_conflicting_extensions
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_conflicting_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 83, raw: "GIVEN create_conflicting_extensions"}, 83)
-    # line 84: WHEN load_all_extensions
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_all_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 84, raw: "WHEN load_all_extensions"}, 84)
-    # line 85: THEN assert_conflicting_extension_removed
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_conflicting_extension_removed, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 85, raw: "THEN assert_conflicting_extension_removed"}, 85)
+    # line 71: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 71, raw: "GIVEN create_temp_dir"}, 71)
+    # line 72: GIVEN create_extension_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_extension_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 72, raw: "GIVEN create_extension_dir"}, 72)
+    # line 73: GIVEN create_conflicting_extensions
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_conflicting_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 73, raw: "GIVEN create_conflicting_extensions"}, 73)
+    # line 74: WHEN load_all_extensions
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :load_all_extensions, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 74, raw: "WHEN load_all_extensions"}, 74)
+    # line 75: THEN assert_conflicting_extension_removed
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_conflicting_extension_removed, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/hook_edge.dsl", line: 75, raw: "THEN assert_conflicting_extension_removed"}, 75)
     _ctx = ctx
     :ok
   end

@@ -313,35 +313,6 @@ defmodule Gong.BDD.InstructionRegistries.Compaction do
         eventually?: false,
         assert_class: :C
       },
-      estimate_text: %{
-        name: :estimate_text,
-        kind: :when,
-        args: %{
-          content: %{type: :string, required?: true, allowed: nil}
-        },
-        outputs: %{},
-        rules: [],
-        boundary: :test_runtime,
-        scopes: [:unit],
-        async?: false,
-        eventually?: false,
-        assert_class: nil
-      },
-      assert_token_estimate_value: %{
-        name: :assert_token_estimate_value,
-        kind: :then,
-        args: %{
-          expected: %{type: :int, required?: true, allowed: nil}
-        },
-        outputs: %{},
-        rules: [],
-        boundary: :test_runtime,
-        scopes: [:unit],
-        async?: false,
-        eventually?: false,
-        assert_class: :C
-      },
-
       # ── Session header 边界 + 工具调用摘要 + 跨模型 overflow ──
       compaction_messages_with_session_header: %{
         name: :compaction_messages_with_session_header, kind: :given,

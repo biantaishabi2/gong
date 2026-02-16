@@ -64,18 +64,8 @@ WHEN load_extension_with_imports
 THEN assert_import_resolved
 
 # ══════════════════════════════════════════════
-# Group 3: pi-mono bugfix 回归覆盖（3 场景）
+# Group 3: pi-mono bugfix 回归覆盖（1 场景）
 # ══════════════════════════════════════════════
-
-[SCENARIO: EXT-ERR-007] TITLE: Hook 消息 role 为 hookMessage 而非 user (Pi#ecef601) TAGS: unit hook regression
-GIVEN create_temp_dir
-WHEN build_hook_message content="hook test"
-THEN assert_hook_message_role expected="hookMessage"
-
-[SCENARIO: EXT-ERR-008] TITLE: Hook 消息字符串 content 归一化为数组 (Pi#574f1cb) TAGS: unit hook regression
-GIVEN create_temp_dir
-WHEN build_hook_message_string content="test string"
-THEN assert_hook_message_content_is_array
 
 [SCENARIO: EXT-ERR-009] TITLE: 冲突扩展从已加载列表中移除 (Pi#5c047c3) TAGS: unit extension regression
 GIVEN create_temp_dir

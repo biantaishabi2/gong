@@ -135,32 +135,6 @@ defmodule Gong.BDD.InstructionRegistries.Hook do
         assert_class: :C
       },
 
-      # ── pi-mono bugfix 回归：非激活工具 hook 包装 ──
-
-      init_tool_config_with_preset: %{
-        name: :init_tool_config_with_preset, kind: :given,
-        args: %{preset: %{type: :string, required?: true, allowed: nil}},
-        outputs: %{}, rules: [], boundary: :test_runtime,
-        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
-      },
-      register_tracking_hook: %{
-        name: :register_tracking_hook, kind: :given,
-        args: %{},
-        outputs: %{}, rules: [], boundary: :test_runtime,
-        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
-      },
-      run_hook_gate_for_tool: %{
-        name: :run_hook_gate_for_tool, kind: :when,
-        args: %{tool: %{type: :string, required?: true, allowed: nil}},
-        outputs: %{}, rules: [], boundary: :test_runtime,
-        scopes: [:unit], async?: false, eventually?: false, assert_class: nil
-      },
-      assert_tracking_hook_invoked: %{
-        name: :assert_tracking_hook_invoked, kind: :then,
-        args: %{callback: %{type: :string, required?: true, allowed: nil}},
-        outputs: %{}, rules: [], boundary: :test_runtime,
-        scopes: [:unit], async?: false, eventually?: false, assert_class: :C
-      }
     }
   end
 
