@@ -36,10 +36,10 @@ defmodule Gong.AgentLoop do
     hooks = Keyword.get(opts, :hooks, [])
 
     # Extension 集成：加载并初始化
-    {ext_states, hooks} =
+    {ext_states, all_hooks} =
       case Gong.ExtensionIntegration.setup(opts) do
-        {:ok, %{ext_states: ext_states, hooks: ext_hooks}} ->
-          {ext_states, hooks ++ ext_hooks}
+        {:ok, %{ext_states: states, hooks: ext_hooks}} ->
+          {states, hooks ++ ext_hooks}
 
         {:error, _reason} ->
           {[], hooks}
@@ -51,15 +51,15 @@ defmodule Gong.AgentLoop do
     # Hook: on_input — 变换或短路用户输入
     result =
       try do
-        case Gong.HookRunner.pipe_input(hooks, prompt, []) do
+        case Gong.HookRunner.pipe_input(all_hooks, prompt, []) do
           :handled ->
             {:ok, "", agent}
 
           {:transform, new_prompt, _images} ->
-            do_run(agent, new_prompt, llm_backend, hooks, opts)
+            do_run(agent, new_prompt, llm_backend, all_hooks, opts)
 
           :passthrough ->
-            do_run(agent, prompt, llm_backend, hooks, opts)
+            do_run(agent, prompt, llm_backend, all_hooks, opts)
         end
       after
         # Extension 清理

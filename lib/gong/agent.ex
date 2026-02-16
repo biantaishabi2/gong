@@ -19,6 +19,5 @@ defmodule Gong.Agent do
       Gong.Tools.Ls
     ],
     model: "deepseek:deepseek-chat",
-    max_iterations: 25,
-    system_prompt: Gong.Prompt.default_system_prompt()
+    max_iterations: 25
 end

@@ -31,25 +31,32 @@ defmodule Gong.ExtensionIntegration do
     if paths == [] do
       {:ok, %{ext_states: [], tools: [], hooks: []}}
     else
-      with {:ok, modules, _load_errors} <- Loader.load_all(paths),
-           {:ok, modules} <- Loader.detect_conflicts(modules) do
-        {ext_states, _init_errors} = Runner.init_all(modules, opts)
+      # 验证路径必须是目录
+      non_dirs = Enum.reject(paths, &File.dir?/1)
 
-        tools = Runner.collect_tools(ext_states)
-        hooks = Runner.collect_hooks(ext_states)
-        commands = Runner.collect_commands(ext_states)
+      if non_dirs != [] do
+        {:error, "extension_paths 必须是目录路径，以下路径无效: #{inspect(non_dirs)}"}
+      else
+        with {:ok, modules, _load_errors} <- Loader.load_all(paths),
+             {:ok, modules} <- Loader.detect_conflicts(modules) do
+          {ext_states, _init_errors} = Runner.init_all(modules, opts)
 
-        # 注册命令到 CommandRegistry
-        for cmd <- commands do
-          Gong.CommandRegistry.register(
-            cmd.name,
-            cmd.handler,
-            description: Map.get(cmd, :description, ""),
-            extension: Map.get(cmd, :extension)
-          )
+          tools = Runner.collect_tools(ext_states)
+          hooks = Runner.collect_hooks(ext_states)
+          commands = Runner.collect_commands(ext_states)
+
+          # 注册命令到 CommandRegistry（容错：跳过格式不正确的命令）
+          for cmd <- commands, is_map(cmd), is_map_key(cmd, :name), is_map_key(cmd, :handler) do
+            Gong.CommandRegistry.register(
+              cmd.name,
+              cmd.handler,
+              description: Map.get(cmd, :description, ""),
+              extension: Map.get(cmd, :extension)
+            )
+          end
+
+          {:ok, %{ext_states: ext_states, tools: tools, hooks: hooks}}
         end
-
-        {:ok, %{ext_states: ext_states, tools: tools, hooks: hooks}}
       end
     end
   rescue
