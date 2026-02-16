@@ -1,0 +1,53 @@
+name: niuma - Discussion Check
+
+on:
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '*/15 * * * *'
+
+concurrency:
+  group: niuma-discuss-${{ github.event.issue.number || 'schedule' }}
+  cancel-in-progress: true
+
+jobs:
+  discussion-check:
+    runs-on: self-hosted
+    if: >
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request == null) ||
+      github.event_name == 'schedule'
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # 事件驱动：issue 评论触发
+      - name: Check Discussion (event)
+        if: github.event_name == 'issue_comment'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels -q '.labels[].name')
+          if echo "$LABELS" | grep -q "bot:needs-discussion"; then
+            niuma discuss \
+              --repo "$REPO" \
+              --issue "$ISSUE_NUMBER" || true
+          fi
+
+      # 定时扫描：检查所有讨论中的 issue
+      - name: Check Discussion (scheduled)
+        if: github.event_name == 'schedule'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          ISSUES=$(gh issue list --label "bot:needs-discussion" --json number -q '.[].number')
+          for ISSUE in $ISSUES; do
+            echo "检查 issue #$ISSUE 讨论收敛..."
+            niuma discuss \
+              --repo "$REPO" \
+              --issue "$ISSUE" || true
+          done

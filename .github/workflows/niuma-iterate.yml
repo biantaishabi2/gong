@@ -1,0 +1,93 @@
+name: niuma - Iterate
+
+on:
+  issues:
+    types: [labeled]
+  pull_request_review:
+    types: [submitted]
+
+concurrency:
+  group: niuma-iterate-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  # AI 自审不通过 → 自动迭代
+  iterate-from-review:
+    runs-on: self-hosted
+    if: >
+      github.event_name == 'issues' &&
+      github.event.label.name == 'bot:pr-needs-fix'
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find PR Number
+        id: find_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          PR_NUMBER=$(gh api "repos/${REPO}/issues/${ISSUE_NUMBER}/comments" \
+            --jq '.[].body | select(contains("BOT:PR_CREATED"))' | grep -Eo 'pr=[0-9]+' | sed 's/pr=//' | tail -1)
+          if [ -z "$PR_NUMBER" ]; then
+            echo "::warning::未在 issue #${ISSUE_NUMBER} 的评论中找到 PR 号"
+          fi
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Iterate on Review
+        if: steps.find_pr.outputs.pr_number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          niuma iterate \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --pr "$PR_NUMBER" \
+            --repo-dir "$WORKSPACE"
+
+  # 人工 PR review changes_requested → 迭代
+  iterate-from-human:
+    runs-on: self-hosted
+    if: >
+      github.event_name == 'pull_request_review' &&
+      github.event.review.state == 'changes_requested'
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract Issue Number from PR
+        id: extract
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          BODY=$(gh pr view "$PR_NUMBER" --json body -q '.body')
+          ISSUE_NUMBER=$(echo "$BODY" | grep -Eo 'Closes #[0-9]+' | sed 's/Closes #//' | head -1)
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Iterate on Review
+        if: steps.extract.outputs.issue_number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ steps.extract.outputs.issue_number }}
+          PR_NUMBER: ${{ steps.extract.outputs.pr_number }}
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          niuma iterate \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --pr "$PR_NUMBER" \
+            --repo-dir "$WORKSPACE"

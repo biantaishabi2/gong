@@ -1,0 +1,34 @@
+name: niuma - Implement
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  group: niuma-impl-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  implement:
+    runs-on: self-hosted
+    if: >
+      github.event.label.name == 'bot:plan-final' ||
+      github.event.label.name == 'bot:plan-approved'
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Implement Code
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          niuma fix \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --repo-dir "$WORKSPACE"

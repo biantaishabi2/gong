@@ -1,0 +1,29 @@
+name: niuma - Plan Draft
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  group: niuma-plan-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  plan-draft:
+    runs-on: self-hosted
+    if: github.event.label.name == 'bot:fix'
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate Plan Draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          niuma plan-draft \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER"
