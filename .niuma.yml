@@ -1,0 +1,5 @@
+ai:
+  default: claude
+  providers:
+    claude:
+      cmd: "cat {prompt_file} | CLAUDECODE= claude -p --output-format text --max-budget-usd 10 --permission-mode acceptEdits --add-dir {workdir}"
