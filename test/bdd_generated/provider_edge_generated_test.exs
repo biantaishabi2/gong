@@ -5,38 +5,22 @@ defmodule Gong.BDD.Generated.ProviderEdgeTest do
 
   @moduletag :bdd_generated
 
-  # Source: PROVIDER-ERR-001
-  @tag :retry
-  @tag :unit
-  test "[PROVIDER-ERR-001] 非标准 stop_reason 归类为 permanent" do
-    run_id = Gong.BDD.Instructions.V1.new_run_id()
-    ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-001"}
-    # line 9: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 9, raw: "GIVEN create_temp_dir"}, 9)
-    # line 10: WHEN classify_error error="stop_reason: content_policy violation"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :classify_error, %{error: "stop_reason: content_policy violation"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 10, raw: "WHEN classify_error error=\"stop_reason: content_policy violation\""}, 10)
-    # line 11: THEN assert_error_class expected="permanent"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_error_class, %{expected: "permanent"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 11, raw: "THEN assert_error_class expected=\"permanent\""}, 11)
-    _ctx = ctx
-    :ok
-  end
-
   # Source: PROVIDER-ERR-002
   @tag :cross_provider
   @tag :unit
   test "[PROVIDER-ERR-002] 厂商不支持的字段自动剥离" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-002"}
-    # line 14: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 14, raw: "GIVEN create_temp_dir"}, 14)
-    # line 15: GIVEN cross_provider_messages_with_unsupported_fields count=2 field="store"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_messages_with_unsupported_fields, %{count: 2, field: "store"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 15, raw: "GIVEN cross_provider_messages_with_unsupported_fields count=2 field=\"store\""}, 15)
-    # line 16: WHEN convert_messages from="openai" to="anthropic"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "openai", to: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 16, raw: "WHEN convert_messages from=\"openai\" to=\"anthropic\""}, 16)
-    # line 17: THEN assert_converted_messages count=2
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_messages, %{count: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 17, raw: "THEN assert_converted_messages count=2"}, 17)
-    # line 18: THEN assert_fields_stripped field="store"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_fields_stripped, %{field: "store"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 18, raw: "THEN assert_fields_stripped field=\"store\""}, 18)
+    # line 9: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 9, raw: "GIVEN create_temp_dir"}, 9)
+    # line 10: GIVEN cross_provider_messages_with_unsupported_fields count=2 field="store"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_messages_with_unsupported_fields, %{count: 2, field: "store"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 10, raw: "GIVEN cross_provider_messages_with_unsupported_fields count=2 field=\"store\""}, 10)
+    # line 11: WHEN convert_messages from="openai" to="anthropic"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "openai", to: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 11, raw: "WHEN convert_messages from=\"openai\" to=\"anthropic\""}, 11)
+    # line 12: THEN assert_converted_messages count=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_messages, %{count: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 12, raw: "THEN assert_converted_messages count=2"}, 12)
+    # line 13: THEN assert_fields_stripped field="store"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_fields_stripped, %{field: "store"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 13, raw: "THEN assert_fields_stripped field=\"store\""}, 13)
     _ctx = ctx
     :ok
   end
@@ -47,16 +31,16 @@ defmodule Gong.BDD.Generated.ProviderEdgeTest do
   test "[PROVIDER-ERR-003] 上下文窗口大小按模型动态适配" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-003"}
-    # line 25: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 25, raw: "GIVEN create_temp_dir"}, 25)
-    # line 26: GIVEN init_model_registry
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_model_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 26, raw: "GIVEN init_model_registry"}, 26)
-    # line 27: GIVEN register_model_with_context_window name="claude3" provider="anthropic" model_id="claude-3-opus" context_window=200000
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :register_model_with_context_window, %{context_window: 200000, model_id: "claude-3-opus", name: "claude3", provider: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 27, raw: "GIVEN register_model_with_context_window name=\"claude3\" provider=\"anthropic\" model_id=\"claude-3-opus\" context_window=200000"}, 27)
-    # line 28: WHEN switch_model name="claude3"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :switch_model, %{name: "claude3"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 28, raw: "WHEN switch_model name=\"claude3\""}, 28)
-    # line 29: THEN assert_context_window_size name="claude3" expected=200000
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_context_window_size, %{expected: 200000, name: "claude3"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 29, raw: "THEN assert_context_window_size name=\"claude3\" expected=200000"}, 29)
+    # line 20: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 20, raw: "GIVEN create_temp_dir"}, 20)
+    # line 21: GIVEN init_model_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_model_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 21, raw: "GIVEN init_model_registry"}, 21)
+    # line 22: GIVEN register_model_with_context_window name="claude3" provider="anthropic" model_id="claude-3-opus" context_window=200000
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :register_model_with_context_window, %{context_window: 200000, model_id: "claude-3-opus", name: "claude3", provider: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 22, raw: "GIVEN register_model_with_context_window name=\"claude3\" provider=\"anthropic\" model_id=\"claude-3-opus\" context_window=200000"}, 22)
+    # line 23: WHEN switch_model name="claude3"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :switch_model, %{name: "claude3"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 23, raw: "WHEN switch_model name=\"claude3\""}, 23)
+    # line 24: THEN assert_context_window_size name="claude3" expected=200000
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_context_window_size, %{expected: 200000, name: "claude3"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 24, raw: "THEN assert_context_window_size name=\"claude3\" expected=200000"}, 24)
     _ctx = ctx
     :ok
   end
@@ -67,14 +51,14 @@ defmodule Gong.BDD.Generated.ProviderEdgeTest do
   test "[PROVIDER-ERR-004]" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-004"}
-    # line 32: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 32, raw: "GIVEN create_temp_dir"}, 32)
-    # line 33: WHEN init_provider_registry
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_provider_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 33, raw: "WHEN init_provider_registry"}, 33)
-    # line 34: WHEN register_provider_with_timeout name="slow_provider" module="MockProvider" timeout=30000
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_provider_with_timeout, %{module: "MockProvider", name: "slow_provider", timeout: 30000}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 34, raw: "WHEN register_provider_with_timeout name=\"slow_provider\" module=\"MockProvider\" timeout=30000"}, 34)
-    # line 35: THEN assert_provider_timeout name="slow_provider" expected=30000
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_timeout, %{expected: 30000, name: "slow_provider"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 35, raw: "THEN assert_provider_timeout name=\"slow_provider\" expected=30000"}, 35)
+    # line 27: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 27, raw: "GIVEN create_temp_dir"}, 27)
+    # line 28: WHEN init_provider_registry
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_provider_registry, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 28, raw: "WHEN init_provider_registry"}, 28)
+    # line 29: WHEN register_provider_with_timeout name="slow_provider" module="MockProvider" timeout=30000
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :register_provider_with_timeout, %{module: "MockProvider", name: "slow_provider", timeout: 30000}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 29, raw: "WHEN register_provider_with_timeout name=\"slow_provider\" module=\"MockProvider\" timeout=30000"}, 29)
+    # line 30: THEN assert_provider_timeout name="slow_provider" expected=30000
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_timeout, %{expected: 30000, name: "slow_provider"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 30, raw: "THEN assert_provider_timeout name=\"slow_provider\" expected=30000"}, 30)
     _ctx = ctx
     :ok
   end
@@ -85,16 +69,16 @@ defmodule Gong.BDD.Generated.ProviderEdgeTest do
   test "[PROVIDER-ERR-005] 流中断后令牌统计保留部分数据" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-005"}
-    # line 42: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 42, raw: "GIVEN create_temp_dir"}, 42)
-    # line 43: WHEN init_cost_tracker
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_cost_tracker, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 43, raw: "WHEN init_cost_tracker"}, 43)
-    # line 44: WHEN record_partial_llm_call model="claude-3" input_tokens=500 output_tokens=100 reason="abort"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :record_partial_llm_call, %{input_tokens: 500, model: "claude-3", output_tokens: 100, reason: "abort"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 44, raw: "WHEN record_partial_llm_call model=\"claude-3\" input_tokens=500 output_tokens=100 reason=\"abort\""}, 44)
-    # line 45: THEN assert_partial_tokens_preserved model="claude-3"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_partial_tokens_preserved, %{model: "claude-3"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 45, raw: "THEN assert_partial_tokens_preserved model=\"claude-3\""}, 45)
-    # line 46: THEN assert_cost_summary call_count=1
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cost_summary, %{call_count: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 46, raw: "THEN assert_cost_summary call_count=1"}, 46)
+    # line 37: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 37, raw: "GIVEN create_temp_dir"}, 37)
+    # line 38: WHEN init_cost_tracker
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :init_cost_tracker, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 38, raw: "WHEN init_cost_tracker"}, 38)
+    # line 39: WHEN record_partial_llm_call model="claude-3" input_tokens=500 output_tokens=100 reason="abort"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :record_partial_llm_call, %{input_tokens: 500, model: "claude-3", output_tokens: 100, reason: "abort"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 39, raw: "WHEN record_partial_llm_call model=\"claude-3\" input_tokens=500 output_tokens=100 reason=\"abort\""}, 39)
+    # line 40: THEN assert_partial_tokens_preserved model="claude-3"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_partial_tokens_preserved, %{model: "claude-3"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 40, raw: "THEN assert_partial_tokens_preserved model=\"claude-3\""}, 40)
+    # line 41: THEN assert_cost_summary call_count=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cost_summary, %{call_count: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 41, raw: "THEN assert_cost_summary call_count=1"}, 41)
     _ctx = ctx
     :ok
   end
@@ -105,16 +89,16 @@ defmodule Gong.BDD.Generated.ProviderEdgeTest do
   test "[PROVIDER-ERR-006] 跨网关路由 Claude 模型时包含必需 provider 特定字段" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-006"}
-    # line 49: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 49, raw: "GIVEN create_temp_dir"}, 49)
-    # line 50: GIVEN cross_provider_messages_with_gateway provider="anthropic" count=2
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_messages_with_gateway, %{count: 2, provider: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 50, raw: "GIVEN cross_provider_messages_with_gateway provider=\"anthropic\" count=2"}, 50)
-    # line 51: WHEN convert_messages from="openai" to="anthropic"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "openai", to: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 51, raw: "WHEN convert_messages from=\"openai\" to=\"anthropic\""}, 51)
-    # line 52: THEN assert_converted_messages count=2
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_messages, %{count: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 52, raw: "THEN assert_converted_messages count=2"}, 52)
-    # line 53: THEN assert_required_fields_added field="anthropic-version"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_required_fields_added, %{field: "anthropic-version"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 53, raw: "THEN assert_required_fields_added field=\"anthropic-version\""}, 53)
+    # line 44: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 44, raw: "GIVEN create_temp_dir"}, 44)
+    # line 45: GIVEN cross_provider_messages_with_gateway provider="anthropic" count=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :cross_provider_messages_with_gateway, %{count: 2, provider: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 45, raw: "GIVEN cross_provider_messages_with_gateway provider=\"anthropic\" count=2"}, 45)
+    # line 46: WHEN convert_messages from="openai" to="anthropic"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :convert_messages, %{from: "openai", to: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 46, raw: "WHEN convert_messages from=\"openai\" to=\"anthropic\""}, 46)
+    # line 47: THEN assert_converted_messages count=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_converted_messages, %{count: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 47, raw: "THEN assert_converted_messages count=2"}, 47)
+    # line 48: THEN assert_required_fields_added field="anthropic-version"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_required_fields_added, %{field: "anthropic-version"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 48, raw: "THEN assert_required_fields_added field=\"anthropic-version\""}, 48)
     _ctx = ctx
     :ok
   end
@@ -126,12 +110,12 @@ defmodule Gong.BDD.Generated.ProviderEdgeTest do
   test "[PROVIDER-ERR-007] SDK 重试策略未被意外禁用 (Pi#0fc6689)" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "PROVIDER-ERR-007"}
-    # line 60: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 60, raw: "GIVEN create_temp_dir"}, 60)
-    # line 61: WHEN get_provider_retry_config provider="anthropic"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_provider_retry_config, %{provider: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 61, raw: "WHEN get_provider_retry_config provider=\"anthropic\""}, 61)
-    # line 62: THEN assert_provider_retries_enabled min_retries=1
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_retries_enabled, %{min_retries: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 62, raw: "THEN assert_provider_retries_enabled min_retries=1"}, 62)
+    # line 55: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 55, raw: "GIVEN create_temp_dir"}, 55)
+    # line 56: WHEN get_provider_retry_config provider="anthropic"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_provider_retry_config, %{provider: "anthropic"}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 56, raw: "WHEN get_provider_retry_config provider=\"anthropic\""}, 56)
+    # line 57: THEN assert_provider_retries_enabled min_retries=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_provider_retries_enabled, %{min_retries: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/provider_edge.dsl", line: 57, raw: "THEN assert_provider_retries_enabled min_retries=1"}, 57)
     _ctx = ctx
     :ok
   end

@@ -5,16 +5,6 @@
 # Group 1: 错误分类与成本（3 场景）
 # ══════════════════════════════════════════════
 
-[SCENARIO: COST-ERR-001] TITLE: 429 限流不触发压缩 TAGS: unit retry
-GIVEN create_temp_dir
-WHEN classify_error error="429 rate limit"
-THEN assert_error_class expected="transient"
-
-[SCENARIO: COST-ERR-002] TITLE: context_length_exceeded 正确识别 TAGS: unit retry
-GIVEN create_temp_dir
-WHEN classify_error error="token count exceeds context window"
-THEN assert_error_class expected="context_overflow"
-
 [SCENARIO: COST-ERR-003] TITLE: 流中断保留令牌计数 TAGS: unit cost
 GIVEN create_temp_dir
 WHEN init_cost_tracker

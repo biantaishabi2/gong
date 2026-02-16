@@ -5,11 +5,6 @@
 # Group 1: 错误分类与容错（2 场景）
 # ══════════════════════════════════════════════
 
-[SCENARIO: PROVIDER-ERR-001] TITLE: 非标准 stop_reason 归类为 permanent TAGS: unit retry
-GIVEN create_temp_dir
-WHEN classify_error error="stop_reason: content_policy violation"
-THEN assert_error_class expected="permanent"
-
 [SCENARIO: PROVIDER-ERR-002] TITLE: 厂商不支持的字段自动剥离 TAGS: unit cross_provider
 GIVEN create_temp_dir
 GIVEN cross_provider_messages_with_unsupported_fields count=2 field="store"

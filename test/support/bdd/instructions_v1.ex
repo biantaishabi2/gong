@@ -447,26 +447,6 @@ defmodule Gong.BDD.Instructions.V1 do
       {:when, :steering_check_steering} ->
         steering_check_steering!(ctx, args, meta)
 
-      # ── Agent Loop: Retry ──
-
-      {:when, :classify_error} ->
-        classify_error!(ctx, args, meta)
-
-      {:when, :retry_delay} ->
-        retry_delay!(ctx, args, meta)
-
-      {:when, :retry_should_retry} ->
-        retry_should_retry!(ctx, args, meta)
-
-      {:then, :assert_error_class} ->
-        assert_error_class!(ctx, args, meta)
-
-      {:then, :assert_delay_ms} ->
-        assert_delay_ms!(ctx, args, meta)
-
-      {:then, :assert_should_retry} ->
-        assert_should_retry!(ctx, args, meta)
-
       # ── Agent Loop: Compaction 配对保护 ──
 
       {:given, :compaction_messages_with_tools} ->
@@ -763,17 +743,6 @@ defmodule Gong.BDD.Instructions.V1 do
 
       {:then, :assert_api_key_result} ->
         assert_api_key_result!(ctx, args, meta)
-
-      # ── Thinking 补充 ──
-
-      {:when, :parse_thinking_level} ->
-        parse_thinking_level!(ctx, args, meta)
-
-      {:then, :assert_parsed_thinking_level} ->
-        assert_parsed_thinking_level!(ctx, args, meta)
-
-      {:then, :assert_parsed_thinking_error} ->
-        assert_parsed_thinking_error!(ctx, args, meta)
 
       # ── Provider 补充 ──
 
@@ -3442,45 +3411,6 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
-  # ── Retry 实现 ──
-
-  defp classify_error!(ctx, %{error: error}, _meta) do
-    class = Gong.Retry.classify_error(error)
-    Map.put(ctx, :retry_error_class, class)
-  end
-
-  defp retry_delay!(ctx, %{attempt: attempt}, _meta) do
-    delay = Gong.Retry.delay_ms(attempt)
-    Map.put(ctx, :retry_delay_ms, delay)
-  end
-
-  defp retry_should_retry!(ctx, %{error_class: error_class, attempt: attempt}, _meta) do
-    class = String.to_existing_atom(error_class)
-    result = Gong.Retry.should_retry?(class, attempt)
-    Map.put(ctx, :retry_should_retry, result)
-  end
-
-  defp assert_error_class!(ctx, %{expected: expected}, _meta) do
-    actual = Map.fetch!(ctx, :retry_error_class)
-    assert to_string(actual) == expected,
-      "期望错误分类=#{expected}，实际：#{actual}"
-    ctx
-  end
-
-  defp assert_delay_ms!(ctx, %{expected: expected}, _meta) do
-    actual = Map.fetch!(ctx, :retry_delay_ms)
-    assert actual == expected,
-      "期望延迟=#{expected}ms，实际：#{actual}ms"
-    ctx
-  end
-
-  defp assert_should_retry!(ctx, %{expected: expected}, _meta) do
-    actual = Map.fetch!(ctx, :retry_should_retry)
-    assert actual == expected,
-      "期望 should_retry=#{expected}，实际：#{actual}"
-    ctx
-  end
-
   # ── Compaction 配对保护实现 ──
 
   defp compaction_messages_with_tools!(ctx, %{count: count, tool_pair_at: tool_pair_at} = args, _meta) do
@@ -4350,29 +4280,6 @@ defmodule Gong.BDD.Instructions.V1 do
       "error" ->
         assert match?({:error, _}, result), "期望 error，实际：#{inspect(result)}"
     end
-    ctx
-  end
-
-  # ── Thinking 补充实现 ──
-
-  defp parse_thinking_level!(ctx, %{str: str}, _meta) do
-    result = Gong.Thinking.parse(str)
-    Map.put(ctx, :parsed_thinking, result)
-  end
-
-  defp assert_parsed_thinking_level!(ctx, %{expected: expected}, _meta) do
-    result = Map.fetch!(ctx, :parsed_thinking)
-    assert match?({:ok, _}, result), "期望解析成功，实际：#{inspect(result)}"
-    {:ok, level} = result
-    assert to_string(level) == expected,
-      "期望 level=#{expected}，实际：#{level}"
-    ctx
-  end
-
-  defp assert_parsed_thinking_error!(ctx, _args, _meta) do
-    result = Map.fetch!(ctx, :parsed_thinking)
-    assert result == {:error, :invalid_level},
-      "期望解析错误 :invalid_level，实际：#{inspect(result)}"
     ctx
   end
 

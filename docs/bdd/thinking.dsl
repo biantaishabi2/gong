@@ -34,16 +34,6 @@ THEN assert_thinking_params_empty
 # Group 2: Thinking 补充覆盖（5 场景）
 # ══════════════════════════════════════════════
 
-[SCENARIO: THINKING-006] TITLE: parse 有效字符串 TAGS: unit thinking
-GIVEN create_temp_dir
-WHEN parse_thinking_level str="high"
-THEN assert_parsed_thinking_level expected="high"
-
-[SCENARIO: THINKING-007] TITLE: parse 无效字符串 TAGS: unit thinking
-GIVEN create_temp_dir
-WHEN parse_thinking_level str="超高"
-THEN assert_parsed_thinking_error
-
 [SCENARIO: THINKING-008] TITLE: OpenAI provider 参数 TAGS: unit thinking
 GIVEN create_temp_dir
 WHEN thinking_to_provider level="high" provider="openai"

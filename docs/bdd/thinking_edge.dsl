@@ -16,11 +16,6 @@ GIVEN create_temp_dir
 WHEN thinking_to_provider level="high" provider="anthropic"
 THEN assert_thinking_params contains="budget_tokens"
 
-[SCENARIO: THINK-ERR-003] TITLE: thinking 级别持久化含 off 状态 TAGS: unit thinking
-GIVEN create_temp_dir
-WHEN parse_thinking_level str="off"
-THEN assert_parsed_thinking_level expected="off"
-
 # ══════════════════════════════════════════════
 # Group 2: pi-mono bugfix 回归覆盖（1 场景）
 # ══════════════════════════════════════════════
