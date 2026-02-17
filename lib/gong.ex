@@ -11,6 +11,6 @@ defmodule Gong do
   - `Gong.Tools.*` — 7 个 Jido Action 模块（read/write/edit/bash/grep/find/ls）
   - `Gong.Tape.*` — 会话存储层（文件夹 + SQLite 索引）
   - `Gong.Compaction` — 上下文压缩（滑动窗口 + 摘要）
-  - `Gong.Truncate` — 输出截断系统（head/tail/line 三策略）
+  - `Gong.Utils.Truncate` — 通用输出截断工具（head/tail/line 三策略）
   """
 end

@@ -116,7 +116,12 @@ defmodule Gong.Tools.Bash do
       {:ok,
        Gong.ToolResult.new(
          output <> "\n\nCommand timed out after #{timeout_sec} seconds",
-         %{exit_code: nil, timed_out: true, truncated: state.total_bytes > @max_output_bytes, temp_file: state.temp_path}
+         %{
+           exit_code: nil,
+           timed_out: true,
+           truncated: state.total_bytes > @max_output_bytes,
+           temp_file: state.temp_path
+         }
        )}
     else
       receive do
@@ -143,7 +148,9 @@ defmodule Gong.Tools.Bash do
     # 当总输出超过阈值时创建临时文件
     temp_path =
       if new_total > @max_output_bytes and state.temp_path == nil do
-        path = Path.join(System.tmp_dir!(), "gong_bash_#{:erlang.unique_integer([:positive])}.out")
+        path =
+          Path.join(System.tmp_dir!(), "gong_bash_#{:erlang.unique_integer([:positive])}.out")
+
         buffered = state.chunks |> IO.iodata_to_binary()
         File.write!(path, buffered <> data)
         path
@@ -164,7 +171,13 @@ defmodule Gong.Tools.Bash do
         {new_chunks, new_buf}
       end
 
-    %{state | chunks: trimmed, buf_bytes: trimmed_bytes, total_bytes: new_total, temp_path: temp_path}
+    %{
+      state
+      | chunks: trimmed,
+        buf_bytes: trimmed_bytes,
+        total_bytes: new_total,
+        temp_path: temp_path
+    }
   end
 
   defp trim_buffer(chunks, buf_bytes) when buf_bytes <= @max_buffer_bytes, do: {chunks, buf_bytes}
@@ -181,7 +194,12 @@ defmodule Gong.Tools.Bash do
     {:ok,
      Gong.ToolResult.new(
        output,
-       %{exit_code: 0, timed_out: false, truncated: state.total_bytes > @max_output_bytes, temp_file: state.temp_path}
+       %{
+         exit_code: 0,
+         timed_out: false,
+         truncated: state.total_bytes > @max_output_bytes,
+         temp_file: state.temp_path
+       }
      )}
   end
 
@@ -196,7 +214,12 @@ defmodule Gong.Tools.Bash do
     {:ok,
      Gong.ToolResult.new(
        content,
-       %{exit_code: exit_code, timed_out: false, truncated: state.total_bytes > @max_output_bytes, temp_file: state.temp_path}
+       %{
+         exit_code: exit_code,
+         timed_out: false,
+         truncated: state.total_bytes > @max_output_bytes,
+         temp_file: state.temp_path
+       }
      )}
   end
 
@@ -207,7 +230,7 @@ defmodule Gong.Tools.Bash do
     raw = String.trim_trailing(raw, "\n")
 
     if total_bytes > @max_output_bytes do
-      result = Gong.Truncate.truncate(raw, :tail, max_bytes: @max_output_bytes)
+      result = Gong.Utils.Truncate.truncate(raw, :tail, max_bytes: @max_output_bytes)
       result.content <> "\n[原始 #{total_bytes} 字节]"
     else
       maybe_truncate_lines(raw)

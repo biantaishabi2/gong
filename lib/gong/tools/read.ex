@@ -150,8 +150,7 @@ defmodule Gong.Tools.Read do
          )}
 
       start_line > total_lines ->
-        {:error,
-         "Offset #{start_line} is beyond end of file (#{total_lines} lines total)"}
+        {:error, "Offset #{start_line} is beyond end of file (#{total_lines} lines total)"}
 
       true ->
         selected =
@@ -174,12 +173,21 @@ defmodule Gong.Tools.Read do
           |> Enum.join("\n")
 
         # 字节截断
-        trunc_result = Gong.Truncate.truncate(formatted, :head, max_bytes: @max_bytes)
+        trunc_result = Gong.Utils.Truncate.truncate(formatted, :head, max_bytes: @max_bytes)
         final_content = trunc_result.content
         truncated_by_bytes = trunc_result.truncated
 
         truncated = remaining > 0 or truncated_by_bytes
-        details = build_truncation_details(total_lines, start_line, output_lines, remaining, truncated_by_bytes, limit)
+
+        details =
+          build_truncation_details(
+            total_lines,
+            start_line,
+            output_lines,
+            remaining,
+            truncated_by_bytes,
+            limit
+          )
 
         # 续读提示
         hint =

@@ -2,7 +2,7 @@ defmodule Gong.Tools.Truncate do
   @moduledoc """
   文件截断工具 Action。
 
-  包装 Gong.Truncate 为工具，支持 max_lines 参数。
+  包装 Gong.Utils.Truncate 为工具，支持 max_lines 参数。
   """
 
   use Jido.Action,
@@ -20,7 +20,7 @@ defmodule Gong.Tools.Truncate do
     case File.read(path) do
       {:ok, content} ->
         max = Map.get(params, :max_lines, 100)
-        result = Gong.Truncate.truncate(content, :head, max_lines: max)
+        result = Gong.Utils.Truncate.truncate(content, :head, max_lines: max)
 
         {:ok,
          %{
