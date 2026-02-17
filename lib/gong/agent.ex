@@ -19,6 +19,5 @@ defmodule Gong.Agent do
       Gong.Tools.Ls
     ],
     model: "deepseek:deepseek-chat",
-    max_iterations: 25,
-    system_prompt: "你是 Gong，一个通用编码 Agent。使用提供的工具完成用户任务。优先使用专用工具而非 bash。文件路径使用绝对路径。回复简洁，中文。"
+    max_iterations: 25
 end

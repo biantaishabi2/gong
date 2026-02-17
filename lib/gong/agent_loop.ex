@@ -35,20 +35,37 @@ defmodule Gong.AgentLoop do
     llm_backend = Keyword.fetch!(opts, :llm_backend)
     hooks = Keyword.get(opts, :hooks, [])
 
+    # Extension 集成：加载并初始化
+    {ext_states, all_hooks} =
+      case Gong.ExtensionIntegration.setup(opts) do
+        {:ok, %{ext_states: states, hooks: ext_hooks}} ->
+          {states, hooks ++ ext_hooks}
+
+        {:error, _reason} ->
+          {[], hooks}
+      end
+
     # 发送 telemetry: agent 开始
     :telemetry.execute([:gong, :agent, :start], %{count: 1}, %{prompt: prompt})
 
     # Hook: on_input — 变换或短路用户输入
     result =
-      case Gong.HookRunner.pipe_input(hooks, prompt, []) do
-        :handled ->
-          {:ok, "", agent}
+      try do
+        case Gong.HookRunner.pipe_input(all_hooks, prompt, []) do
+          :handled ->
+            {:ok, "", agent}
 
-        {:transform, new_prompt, _images} ->
-          do_run(agent, new_prompt, llm_backend, hooks, opts)
+          {:transform, new_prompt, _images} ->
+            do_run(agent, new_prompt, llm_backend, all_hooks, opts)
 
-        :passthrough ->
-          do_run(agent, prompt, llm_backend, hooks, opts)
+          :passthrough ->
+            do_run(agent, prompt, llm_backend, all_hooks, opts)
+        end
+      after
+        # Extension 清理
+        if ext_states != [] do
+          Gong.ExtensionIntegration.teardown(ext_states)
+        end
       end
 
     # 发送 telemetry: agent 结束
@@ -63,6 +80,11 @@ defmodule Gong.AgentLoop do
     # Hook: on_before_agent — Agent 调用前注入/变换
     {prompt, _system, extra_messages} =
       Gong.HookRunner.pipe_before_agent(hooks, prompt, "")
+
+    # 构建动态 system prompt 并注入 conversation 头部
+    system_prompt = Gong.Prompt.full_system_prompt(opts)
+
+    agent = inject_extra_messages(agent, [%{role: :system, content: system_prompt}])
 
     # 将 hook 注入的 extra messages 写入 conversation
     agent =
