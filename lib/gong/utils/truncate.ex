@@ -25,6 +25,20 @@ defmodule Gong.Utils.Truncate do
               first_line_exceeds_limit: false,
               max_lines: nil,
               max_bytes: nil
+
+    @type t :: %__MODULE__{
+            content: String.t(),
+            truncated: boolean(),
+            truncated_by: :lines | :bytes | :chars | nil,
+            total_lines: non_neg_integer(),
+            total_bytes: non_neg_integer(),
+            output_lines: non_neg_integer(),
+            output_bytes: non_neg_integer(),
+            last_line_partial: boolean(),
+            first_line_exceeds_limit: boolean(),
+            max_lines: non_neg_integer() | nil,
+            max_bytes: non_neg_integer() | nil
+          }
   end
 
   @default_max_bytes 30_000
