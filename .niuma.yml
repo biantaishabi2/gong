@@ -28,5 +28,6 @@ ai:
     provider: codex
 
 workflow:
+  max_iterate_rounds: 10
   allowed_prefixes:
     - "automation/"
