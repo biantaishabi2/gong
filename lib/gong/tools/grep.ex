@@ -16,7 +16,11 @@ defmodule Gong.Tools.Grep do
       context: [type: :non_neg_integer, default: 0, doc: "上下文行数"],
       ignore_case: [type: :boolean, default: false, doc: "忽略大小写"],
       fixed_strings: [type: :boolean, default: false, doc: "字面匹配（非正则）"],
-      output_mode: [type: :string, default: "content", doc: "输出模式：content/files_with_matches/count"]
+      output_mode: [
+        type: :string,
+        default: "content",
+        doc: "输出模式：content/files_with_matches/count"
+      ]
     ]
 
   @max_matches 100
@@ -47,7 +51,8 @@ defmodule Gong.Tools.Grep do
 
       {_output, 1} ->
         # rg exit 1 = no matches
-        {:ok, Gong.ToolResult.new("No matches found.", %{matches: [], total: 0, truncated: false})}
+        {:ok,
+         Gong.ToolResult.new("No matches found.", %{matches: [], total: 0, truncated: false})}
 
       {output, 2} ->
         {:error, "grep error: #{String.trim(output)}"}
@@ -126,7 +131,10 @@ defmodule Gong.Tools.Grep do
     {final_content, byte_truncated} = maybe_truncate(content)
     truncated = truncated or byte_truncated
 
-    hint = if truncated, do: "\n[Results truncated at #{@max_matches} matches or #{@max_bytes} bytes]", else: ""
+    hint =
+      if truncated,
+        do: "\n[Results truncated at #{@max_matches} matches or #{@max_bytes} bytes]",
+        else: ""
 
     {:ok,
      Gong.ToolResult.new(
@@ -164,8 +172,8 @@ defmodule Gong.Tools.Grep do
   defp maybe_truncate(content) when byte_size(content) <= @max_bytes, do: {content, false}
 
   defp maybe_truncate(content) do
-    %Gong.Truncate.Result{content: truncated} =
-      Gong.Truncate.truncate(content, :head, max_bytes: @max_bytes)
+    %Gong.Utils.Truncate.Result{content: truncated} =
+      Gong.Utils.Truncate.truncate(content, :head, max_bytes: @max_bytes)
 
     {truncated, true}
   end
@@ -189,10 +197,17 @@ defmodule Gong.Tools.Grep do
     case System.cmd("grep", args, stderr_to_stdout: true) do
       {output, 0} ->
         lines = String.split(output, "\n", trim: true) |> Enum.take(@max_matches)
-        {:ok, Gong.ToolResult.new(Enum.join(lines, "\n"), %{matches: [], total: length(lines), truncated: false})}
+
+        {:ok,
+         Gong.ToolResult.new(Enum.join(lines, "\n"), %{
+           matches: [],
+           total: length(lines),
+           truncated: false
+         })}
 
       {_output, 1} ->
-        {:ok, Gong.ToolResult.new("No matches found.", %{matches: [], total: 0, truncated: false})}
+        {:ok,
+         Gong.ToolResult.new("No matches found.", %{matches: [], total: 0, truncated: false})}
 
       {output, _} ->
         {:error, "grep error: #{String.trim(output)}"}

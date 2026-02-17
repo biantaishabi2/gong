@@ -1986,20 +1986,20 @@ defmodule Gong.BDD.Instructions.V1 do
   defp truncate_head!(ctx, args, _meta) do
     content = Map.fetch!(ctx, String.to_atom(args.content_var))
     opts = build_truncate_opts(args)
-    result = Gong.Truncate.truncate(content, :head, opts)
+    result = Gong.Utils.Truncate.truncate(content, :head, opts)
     Map.put(ctx, :last_result, result)
   end
 
   defp truncate_tail!(ctx, args, _meta) do
     content = Map.fetch!(ctx, String.to_atom(args.content_var))
     opts = build_truncate_opts(args)
-    result = Gong.Truncate.truncate(content, :tail, opts)
+    result = Gong.Utils.Truncate.truncate(content, :tail, opts)
     Map.put(ctx, :last_result, result)
   end
 
   defp truncate_line!(ctx, args, _meta) do
     content = Map.fetch!(ctx, String.to_atom(args.content_var))
-    result = Gong.Truncate.truncate_line(content, args.max_chars)
+    result = Gong.Utils.Truncate.truncate_line(content, args.max_chars)
     Map.put(ctx, :last_result, result)
   end
 
@@ -2014,7 +2014,7 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp assert_truncation_result!(ctx, args, _meta) do
     result = ctx.last_result
-    assert %Gong.Truncate.Result{} = result, "期望 Truncate.Result，实际：#{inspect(result)}"
+    assert %Gong.Utils.Truncate.Result{} = result, "期望 Truncate.Result，实际：#{inspect(result)}"
 
     if args[:truncated] != nil do
       assert result.truncated == args.truncated,
