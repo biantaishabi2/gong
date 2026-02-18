@@ -83,8 +83,20 @@ defmodule Gong.CLI do
   end
 
   defp execute(%{command: :legacy_entry_alias, legacy_rest: rest, opts: opts}, runtime, run_opts) do
-    print_deprecation_warning("gong cli", "bin/gong #{Enum.join(rest, " ")}")
-    execute(%{command: :doctor, opts: opts}, runtime, run_opts)
+    print_deprecation_warning("gong cli", legacy_migration_cmd(rest))
+
+    case legacy_alias_target(rest, opts) do
+      {:ok, parsed} ->
+        execute(parsed, runtime, run_opts)
+
+      {:help, usage} ->
+        IO.puts(usage)
+        @exit_ok
+
+      {:error, :usage, message} ->
+        IO.puts(:stderr, message)
+        @exit_usage
+    end
   end
 
   defp execute(%{command: :doctor, opts: command_opts}, runtime, run_opts) do
@@ -193,6 +205,12 @@ defmodule Gong.CLI do
   defp runtime_error_reason({:otp_parse_failed, version}), do: "无法解析 OTP 版本（#{version}）"
   defp runtime_error_reason({:elixir_too_old, version}), do: "Elixir 版本过低（#{version}）"
   defp runtime_error_reason({:elixir_parse_failed, version}), do: "无法解析 Elixir 版本（#{version}）"
+
+  defp legacy_alias_target([], _opts), do: {:help, usage_text()}
+  defp legacy_alias_target(rest, opts), do: parse_command(rest, opts)
+
+  defp legacy_migration_cmd([]), do: "bin/gong help"
+  defp legacy_migration_cmd(rest), do: "bin/gong #{Enum.join(rest, " ")}"
 
   defp usage_text do
     """

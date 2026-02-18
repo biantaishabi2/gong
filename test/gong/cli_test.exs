@@ -4,25 +4,21 @@ defmodule Gong.CLITest do
   import ExUnit.CaptureIO
 
   @project_root File.cwd!()
+  @bin_gong Path.join(@project_root, "bin/gong")
+  @bin_gong_cli Path.join(@project_root, "bin/gong-cli")
 
   test "项目目录内 doctor 在不同入口配置下输出与退出码一致" do
-    {stdout_bin, stderr_bin, exit_bin} =
-      run_cli(["doctor"],
-        entry: "bin/gong",
-        cwd: @project_root
-      )
+    {output_bin, exit_bin} =
+      run_script(@bin_gong, ["doctor"], cd: @project_root)
 
-    {stdout_mix, stderr_mix, exit_mix} =
-      run_cli(["doctor"],
-        entry: "mix run -e 'Gong.CLI.main([\"doctor\"])'",
-        cwd: @project_root
+    {output_mix, exit_mix} =
+      run_mix_main(["doctor"],
+        cd: @project_root
       )
 
     assert exit_bin == 0
     assert exit_mix == 0
-    assert stderr_bin == ""
-    assert stderr_mix == ""
-    assert stdout_bin == stdout_mix
+    assert normalize_cli_output(output_bin) == normalize_cli_output(output_mix)
   end
 
   test "非 Elixir 项目目录执行 doctor 返回分层错误提示" do
@@ -31,29 +27,47 @@ defmodule Gong.CLITest do
 
     File.mkdir_p!(tmp_dir)
 
-    {_stdout, stderr, exit_code} =
-      run_cli(["doctor"],
-        cwd: tmp_dir
-      )
+    {output, exit_code} =
+      run_script(@bin_gong, ["doctor"], cd: tmp_dir)
 
     assert exit_code == 11
-    assert stderr =~ "缺少 mix.exs"
-    assert stderr =~ "Erlang/OTP >= 25"
-    assert stderr =~ "Elixir >= 1.14"
+    assert output =~ "缺少 mix.exs"
+    assert output =~ tmp_dir
+    assert output =~ "Erlang/OTP >= 25"
+    assert output =~ "Elixir >= 1.14"
   end
 
   test "旧入口兼容路径可用且输出 deprecation warning" do
+    {output, exit_code} =
+      run_script(@bin_gong_cli, ["doctor"], cd: @project_root)
+
+    assert exit_code == 0
+    assert output =~ "Gong CLI 健康检查通过"
+    assert output =~ "[DEPRECATION]"
+    assert output =~ "bin/gong doctor"
+  end
+
+  test "旧入口子命令 help 语义保持一致" do
     {stdout, stderr, exit_code} =
-      run_cli(["doctor"],
-        cwd: @project_root,
-        entry: "mix gong.cli",
-        legacy_entry: true
+      run_cli(["cli", "help"],
+        cwd: @project_root
       )
 
     assert exit_code == 0
-    assert stdout =~ "Gong CLI 健康检查通过"
+    assert stdout =~ "用法:"
     assert stderr =~ "[DEPRECATION]"
-    assert stderr =~ "bin/gong doctor"
+    assert stderr =~ "bin/gong help"
+  end
+
+  test "旧入口子命令 unknown 返回 usage 错误" do
+    {_stdout, stderr, exit_code} =
+      run_cli(["cli", "unknown"],
+        cwd: @project_root
+      )
+
+    assert exit_code == 2
+    assert stderr =~ "[DEPRECATION]"
+    assert stderr =~ "未知命令: unknown"
   end
 
   test "依赖版本不足时返回运行时错误码与修复指引" do
@@ -102,5 +116,30 @@ defmodule Gong.CLITest do
     assert stdout_exit_code == stderr_exit_code
 
     {stdout, stderr, stdout_exit_code}
+  end
+
+  defp run_script(script, args, opts) do
+    command_opts =
+      opts
+      |> Keyword.merge(stderr_to_stdout: true)
+      |> Keyword.update(:env, [{"MIX_ENV", "test"}], &[{"MIX_ENV", "test"} | &1])
+
+    System.cmd("bash", [script | args], command_opts)
+  end
+
+  defp run_mix_main(args, opts) do
+    command_opts =
+      opts
+      |> Keyword.merge(stderr_to_stdout: true)
+      |> Keyword.update(:env, [{"MIX_ENV", "test"}], &[{"MIX_ENV", "test"} | &1])
+
+    System.cmd("mix", ["run", "-e", "Gong.CLI.main(System.argv())", "--" | args], command_opts)
+  end
+
+  defp normalize_cli_output(output) do
+    output
+    |> String.split("\n", trim: true)
+    |> Enum.reject(&String.starts_with?(&1, ["Compiling ", "Generated "]))
+    |> Enum.join("\n")
   end
 end
