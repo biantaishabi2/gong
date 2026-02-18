@@ -93,10 +93,12 @@ defmodule Gong.CLI do
         execute(parsed, runtime, run_opts)
 
       {:help, usage} ->
+        maybe_warn_legacy_entry(run_opts, rest)
         IO.puts(usage)
         @exit_ok
 
       {:error, :usage, message} ->
+        maybe_warn_legacy_entry(run_opts, rest)
         IO.puts(:stderr, message)
         @exit_usage
     end
