@@ -73,7 +73,9 @@ THEN assert_tape_last_content contains="有内容的回复"
 # Group 4: pi-mono bugfix 回归覆盖（1 场景）
 # ══════════════════════════════════════════════
 
-[SCENARIO: SESSION-ERR-008] TITLE: 分叉后仅 user 消息的 flush 重置 (Pi#b5be54b) TAGS: unit tape regression
+# 说明：当前该场景仅验证 BDD 指令层的 flush 重置语义（模拟校验），
+# 尚未直接调用 Tape 持久化层的真实 flush 实现。
+[SCENARIO: SESSION-ERR-008] TITLE: 分叉后仅 user 消息的 flush 重置（当前为模拟校验） (Pi#b5be54b) TAGS: unit tape regression
 GIVEN create_temp_dir
 GIVEN tape_init
 GIVEN tape_append kind="user" content="原始消息"
