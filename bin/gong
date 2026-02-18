@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORK_DIR="${PWD}"
+
+export GONG_WORKDIR="${WORK_DIR}"
+export GONG_ENTRY="bin/gong"
+
+cd "${ROOT_DIR}"
+exec mix run -e 'System.halt(Gong.CLI.run(System.argv(), entry: System.get_env("GONG_ENTRY"), legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"))' -- "$@"
