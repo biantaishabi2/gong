@@ -26,15 +26,6 @@ jobs:
         with:
           token: ${{ secrets.NIUMA_PAT }}
 
-      - name: Build niuma from current commit
-        run: |
-          mkdir -p "$GITHUB_WORKSPACE/.tmp"
-          (
-            cd automation/niuma
-            go build -o "$GITHUB_WORKSPACE/.tmp/niuma" ./cmd/niuma
-          )
-          echo "NIUMA_BIN=$GITHUB_WORKSPACE/.tmp/niuma" >> "$GITHUB_ENV"
-
       - name: Run Orchestration
         id: control_run
         env:
@@ -43,7 +34,7 @@ jobs:
           WORKSPACE: ${{ github.workspace }}
           NIUMA_INTEGRATION_GATE_MAX_RETRIES: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
         run: |
-          "$NIUMA_BIN" control run \
+          niuma control run \
             --repo "$REPO" \
             --repo-dir "$WORKSPACE" \
             --integration-gate-max-retries "$NIUMA_INTEGRATION_GATE_MAX_RETRIES"
@@ -105,15 +96,6 @@ jobs:
         with:
           token: ${{ secrets.NIUMA_PAT }}
 
-      - name: Build niuma from current commit
-        run: |
-          mkdir -p "$GITHUB_WORKSPACE/.tmp"
-          (
-            cd automation/niuma
-            go build -o "$GITHUB_WORKSPACE/.tmp/niuma" ./cmd/niuma
-          )
-          echo "NIUMA_BIN=$GITHUB_WORKSPACE/.tmp/niuma" >> "$GITHUB_ENV"
-
       - name: Close Sub/Parent Issues After Integration Merge
         env:
           GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
@@ -121,7 +103,7 @@ jobs:
           WORKSPACE: ${{ github.workspace }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          "$NIUMA_BIN" control close-merged \
+          niuma control close-merged \
             --repo "$REPO" \
             --repo-dir "$WORKSPACE" \
             --pr "$PR_NUMBER"
