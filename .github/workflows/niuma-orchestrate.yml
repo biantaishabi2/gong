@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [closed]
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/5 * * * *'  # 每5分钟检查一次
 
 concurrency:
   group: niuma-orchestrate-${{ github.event.issue.number || github.event.pull_request.number || 'schedule' }}
@@ -23,6 +23,17 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NIUMA_PAT }}
+
+      - name: Build niuma from current commit
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.tmp"
+          (
+            cd automation/niuma
+            go build -o "$GITHUB_WORKSPACE/.tmp/niuma" ./cmd/niuma
+          )
+          echo "NIUMA_BIN=$GITHUB_WORKSPACE/.tmp/niuma" >> "$GITHUB_ENV"
 
       - name: Run Orchestration
         id: control_run
@@ -32,7 +43,7 @@ jobs:
           WORKSPACE: ${{ github.workspace }}
           NIUMA_INTEGRATION_GATE_MAX_RETRIES: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
         run: |
-          niuma control run \
+          "$NIUMA_BIN" control run \
             --repo "$REPO" \
             --repo-dir "$WORKSPACE" \
             --integration-gate-max-retries "$NIUMA_INTEGRATION_GATE_MAX_RETRIES"
@@ -49,7 +60,7 @@ jobs:
           fi
 
           STATUS=$(jq -r '
-            [ .[] | .metadata.integration_gate_status // empty ] as $s |
+            [ (.tasks // {}) | to_entries[] | .value.metadata.integration_gate_status // empty ] as $s |
             if ($s | index("escalated")) then "escalated"
             elif ($s | index("retrying")) then "retrying"
             elif ($s | index("pending")) then "pending"
@@ -91,6 +102,17 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NIUMA_PAT }}
+
+      - name: Build niuma from current commit
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.tmp"
+          (
+            cd automation/niuma
+            go build -o "$GITHUB_WORKSPACE/.tmp/niuma" ./cmd/niuma
+          )
+          echo "NIUMA_BIN=$GITHUB_WORKSPACE/.tmp/niuma" >> "$GITHUB_ENV"
 
       - name: Close Sub/Parent Issues After Integration Merge
         env:
@@ -99,7 +121,7 @@ jobs:
           WORKSPACE: ${{ github.workspace }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          niuma control close-merged \
+          "$NIUMA_BIN" control close-merged \
             --repo "$REPO" \
             --repo-dir "$WORKSPACE" \
             --pr "$PR_NUMBER"
