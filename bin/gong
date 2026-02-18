@@ -5,7 +5,54 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_DIR="${PWD}"
 
 export GONG_WORKDIR="${WORK_DIR}"
-export GONG_ENTRY="bin/gong"
+export GONG_ENTRY="${GONG_ENTRY:-bin/gong}"
+
+otp_version="${GONG_RUNTIME_OTP_OVERRIDE:-$(
+  erl -noshell -eval 'io:format("~s",[erlang:system_info(otp_release)]), halt().' 2>/dev/null || true
+)}"
+elixir_version="${GONG_RUNTIME_ELIXIR_OVERRIDE:-$(
+  elixir -e 'IO.write(System.version())' 2>/dev/null || true
+)}"
+
+if [[ -z "${otp_version}" ]]; then
+  otp_version="unknown"
+fi
+
+if [[ -z "${elixir_version}" ]]; then
+  elixir_version="unknown"
+fi
+
+runtime_reason=""
+
+if [[ "${otp_version}" =~ ^([0-9]+) ]]; then
+  otp_major="${BASH_REMATCH[1]}"
+  if (( otp_major < 25 )); then
+    runtime_reason="OTP 版本过低（${otp_major}）"
+  fi
+else
+  runtime_reason="无法解析 OTP 版本（${otp_version}）"
+fi
+
+if [[ -z "${runtime_reason}" ]]; then
+  if [[ "${elixir_version}" =~ ^([0-9]+)\.([0-9]+) ]]; then
+    elixir_major="${BASH_REMATCH[1]}"
+    elixir_minor="${BASH_REMATCH[2]}"
+    if (( elixir_major < 1 || (elixir_major == 1 && elixir_minor < 14) )); then
+      runtime_reason="Elixir 版本过低（${elixir_version}）"
+    fi
+  else
+    runtime_reason="无法解析 Elixir 版本（${elixir_version}）"
+  fi
+fi
+
+if [[ -n "${runtime_reason}" ]]; then
+  echo "[ERROR] 运行时依赖不满足。" >&2
+  echo "[ERROR] 要求: Erlang/OTP >= 25，Elixir >= 1.14" >&2
+  echo "[ERROR] 当前: OTP ${otp_version}，Elixir ${elixir_version}" >&2
+  echo "[ERROR] 详情: ${runtime_reason}" >&2
+  echo "[HINT] 请升级 Erlang/OTP 与 Elixir，或使用 include_erts=true 的 release 包。" >&2
+  exit 10
+fi
 
 cd "${ROOT_DIR}"
 exec mix run -e 'System.halt(Gong.CLI.run(System.argv(), entry: System.get_env("GONG_ENTRY"), legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"))' -- "$@"

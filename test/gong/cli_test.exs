@@ -44,6 +44,7 @@ defmodule Gong.CLITest do
     assert exit_code == 0
     assert output =~ "Gong CLI 健康检查通过"
     assert output =~ "[DEPRECATION]"
+    assert output =~ "旧入口 `bin/gong-cli` 已弃用"
     assert output =~ "bin/gong doctor"
   end
 
@@ -70,18 +71,21 @@ defmodule Gong.CLITest do
     assert stderr =~ "未知命令: unknown"
   end
 
-  test "依赖版本不足时返回运行时错误码与修复指引" do
-    {_stdout, stderr, exit_code} =
-      run_cli(["doctor"],
-        cwd: @project_root,
-        runtime: %{otp: "24", elixir: "1.13.4"}
+  test "依赖版本不足时官方入口返回运行时错误码与修复指引" do
+    {output, exit_code} =
+      run_script(@bin_gong, ["doctor"],
+        cd: @project_root,
+        env: [
+          {"GONG_RUNTIME_OTP_OVERRIDE", "24"},
+          {"GONG_RUNTIME_ELIXIR_OVERRIDE", "1.13.4"}
+        ]
       )
 
     assert exit_code == 10
-    assert stderr =~ "运行时依赖不满足"
-    assert stderr =~ "Erlang/OTP >= 25"
-    assert stderr =~ "Elixir >= 1.14"
-    assert stderr =~ "include_erts=true 的 release 包"
+    assert output =~ "运行时依赖不满足"
+    assert output =~ "Erlang/OTP >= 25"
+    assert output =~ "Elixir >= 1.14"
+    assert output =~ "include_erts=true 的 release 包"
   end
 
   defp run_cli(argv, opts) do
