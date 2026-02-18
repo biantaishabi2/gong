@@ -27,6 +27,12 @@ description: 为复杂需求生成父 issue + sub-issues 的 DAG 化写作模板
 2. control 自动流转：`bot:orchestrate` → `bot:queued` → `bot:fix`（ready 后触发单 issue 流程）。
 3. 单 Issue 直跑：可直接添加 `bot:fix`，不经过 DAG 编排。
 
+## 标题规范（必须）
+
+1. 父 issue：`feat(<scope>): <description>`。
+2. 子 issue：`sub(#<parent>): <description>`（推荐，便于按父 issue 检索）。
+3. 子 issue 的标题不重复写依赖；依赖只写在 body 的 `depends-on`。
+
 ## 写作原则（仅 issue 设计，不含运行时合并策略）
 
 1. 父 issue 只定义目标、边界、验收总标准。
@@ -126,8 +132,8 @@ depends-on: #<optional_dep_1>, #<optional_dep_2>
 
 ```bash
 # 创建父 issue
-gh issue create --title "feat: <parent-title>" --body-file /tmp/parent.md --label enhancement
+gh issue create --title "feat(<scope>): <parent-title>" --body-file /tmp/parent.md --label enhancement
 
 # 创建子 issue（示例）
-gh issue create --title "sub: <task-title>" --body-file /tmp/sub1.md --label enhancement
+gh issue create --title "sub(#<parent>): <task-title>" --body-file /tmp/sub1.md --label enhancement
 ```
