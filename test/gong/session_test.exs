@@ -58,12 +58,12 @@ defmodule Gong.SessionTest do
 
     snapshot = %{
       history: [%{role: :user, content: "old", turn_id: 7, ts: 1}],
-      turn_id: 7,
+      turn_cursor: 7,
       metadata: %{"lang" => "zh"}
     }
 
     assert {:ok, restored} = Session.restore(session, snapshot)
-    assert restored.turn_id == 7
+    assert restored.turn_cursor == 7
     assert restored.metadata == %{"lang" => "zh"}
     assert restored.history == snapshot.history
 

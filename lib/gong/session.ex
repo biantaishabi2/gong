@@ -125,10 +125,10 @@ defmodule Gong.Session do
   end
 
   @doc """
-  恢复持久核心状态（history/turn_id/metadata），不恢复订阅关系。
+  恢复持久核心状态（history/turn_cursor/metadata），不恢复订阅关系。
 
   `snapshot_or_session_id` 支持：
-  - `%{history:, turn_id:, metadata:}` 快照
+  - `%{history:, turn_cursor:, metadata:}` 快照（兼容读取 `turn_id`）
   - `session_id` 字符串（通过 `restore_fun` 注入查询）
   """
   @spec restore(pid(), map() | String.t()) ::
@@ -136,7 +136,7 @@ defmodule Gong.Session do
            %{
              session_id: String.t(),
              history: [history_entry()],
-             turn_id: non_neg_integer(),
+             turn_cursor: non_neg_integer(),
              metadata: map()
            }}
           | {:error, error_t()}
@@ -224,7 +224,7 @@ defmodule Gong.Session do
         state
         | session_id: restored.session_id,
           history: restored.history,
-          turn_id: restored.turn_id,
+          turn_id: restored.turn_cursor,
           metadata: restored.metadata,
           seq_by_turn: %{},
           turn_buffers: %{}
@@ -236,7 +236,7 @@ defmodule Gong.Session do
           "lifecycle.session_restored",
           %{restored: true},
           nil,
-          restored.turn_id
+          restored.turn_cursor
         )
 
       clear_subscriber_monitors(restored_state.monitors)
@@ -246,7 +246,7 @@ defmodule Gong.Session do
       response = %{
         session_id: new_state.session_id,
         history: new_state.history,
-        turn_id: new_state.turn_id,
+        turn_cursor: new_state.turn_id,
         metadata: new_state.metadata
       }
 
@@ -604,8 +604,12 @@ defmodule Gong.Session do
     history =
       Map.get(snapshot, :history, Map.get(snapshot, "history", []))
 
-    turn_id =
-      Map.get(snapshot, :turn_id, Map.get(snapshot, "turn_id", 0))
+    turn_cursor =
+      Map.get(
+        snapshot,
+        :turn_cursor,
+        Map.get(snapshot, "turn_cursor", Map.get(snapshot, :turn_id, Map.get(snapshot, "turn_id", 0)))
+      )
 
     metadata =
       Map.get(snapshot, :metadata, Map.get(snapshot, "metadata", %{}))
@@ -614,10 +618,16 @@ defmodule Gong.Session do
       Map.get(snapshot, :session_id, Map.get(snapshot, "session_id", fallback_session_id))
 
     with true <- is_list(history),
-         true <- is_integer(turn_id) and turn_id >= 0,
+         true <- is_integer(turn_cursor) and turn_cursor >= 0,
          true <- is_map(metadata),
          true <- is_binary(session_id) and session_id != "" do
-      {:ok, %{history: history, turn_id: turn_id, metadata: metadata, session_id: session_id}}
+      {:ok,
+       %{
+         history: history,
+         turn_cursor: turn_cursor,
+         metadata: metadata,
+         session_id: session_id
+       }}
     else
       false -> {:error, :invalid_argument}
     end
