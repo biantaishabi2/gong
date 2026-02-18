@@ -11,7 +11,7 @@ defmodule Gong.Session.Events do
   - `ts`
   - `type`
   - `payload`
-  - `meta`
+  - `error`
   """
 
   import Bitwise
@@ -47,7 +47,7 @@ defmodule Gong.Session.Events do
           ts: integer(),
           type: event_type(),
           payload: map(),
-          meta: map()
+          error: map() | nil
         }
 
   defstruct [
@@ -58,7 +58,7 @@ defmodule Gong.Session.Events do
     :ts,
     :type,
     payload: %{},
-    meta: %{},
+    error: nil,
     schema_version: @schema_version
   ]
 
@@ -71,12 +71,12 @@ defmodule Gong.Session.Events do
   def event_type?(type), do: MapSet.member?(@event_types, type)
 
   @doc "创建 Session 事件"
-  @spec new(event_type(), map(), map(), map()) :: {:ok, t()} | {:error, term()}
-  def new(type, payload, ctx, meta \\ %{}) do
+  @spec new(event_type(), map(), map(), map() | nil) :: {:ok, t()} | {:error, term()}
+  def new(type, payload, ctx, error \\ nil) do
     with true <- event_type?(type),
          :ok <- validate_ctx(ctx),
          true <- is_map(payload),
-         true <- is_map(meta) do
+         true <- is_nil(error) or is_map(error) do
       event = %__MODULE__{
         event_id: uuid_v7(),
         session_id: ctx.session_id,
@@ -85,7 +85,7 @@ defmodule Gong.Session.Events do
         ts: System.os_time(:millisecond),
         type: type,
         payload: payload,
-        meta: meta
+        error: error
       }
 
       validate(event)
@@ -101,43 +101,56 @@ defmodule Gong.Session.Events do
   说明：Stream 层仅负责 chunk 规范化与序列校验，前端语义统一在本模块归一。
   """
   @spec from_stream_event(StreamEvent.t(), map()) :: {:ok, t()} | {:error, term()}
-  def from_stream_event(stream_event, ctx), do: from_stream_event(stream_event, ctx, %{})
+  def from_stream_event(stream_event, ctx), do: from_stream_event(stream_event, ctx, nil)
 
-  @spec from_stream_event(StreamEvent.t(), map(), map()) :: {:ok, t()} | {:error, term()}
-  def from_stream_event(%StreamEvent{type: :text_start}, ctx, meta) do
-    new("message.start", %{}, ctx, meta)
+  @spec from_stream_event(StreamEvent.t(), map(), map() | nil) :: {:ok, t()} | {:error, term()}
+  def from_stream_event(%StreamEvent{type: :text_start}, ctx, _error) do
+    new("message.start", %{}, ctx, nil)
   end
 
-  def from_stream_event(%StreamEvent{type: :text_delta, content: content}, ctx, meta) do
-    new("message.delta", %{content: content || ""}, ctx, meta)
+  def from_stream_event(%StreamEvent{type: :text_delta, content: content}, ctx, _error) do
+    new("message.delta", %{content: content || ""}, ctx, nil)
   end
 
-  def from_stream_event(%StreamEvent{type: :text_end}, ctx, meta) do
-    new("message.end", %{}, ctx, meta)
+  def from_stream_event(%StreamEvent{type: :text_end}, ctx, _error) do
+    new("message.end", %{}, ctx, nil)
   end
 
   def from_stream_event(
         %StreamEvent{type: :tool_start, tool_name: tool_name, tool_args: tool_args},
         ctx,
-        meta
+        _error
       ) do
-    new("tool.start", %{tool_name: tool_name, tool_args: tool_args || %{}}, ctx, meta)
+    new("tool.start", %{tool_name: tool_name, tool_args: tool_args || %{}}, ctx, nil)
   end
 
   def from_stream_event(
         %StreamEvent{type: :tool_delta, content: content, tool_name: tool_name},
         ctx,
-        meta
+        _error
       ) do
-    new("tool.delta", %{tool_name: tool_name, content: content || ""}, ctx, meta)
+    new("tool.delta", %{tool_name: tool_name, content: content || ""}, ctx, nil)
   end
 
-  def from_stream_event(%StreamEvent{type: :tool_end, tool_name: tool_name}, ctx, meta) do
-    new("tool.end", %{tool_name: tool_name}, ctx, meta)
+  def from_stream_event(%StreamEvent{type: :tool_end, tool_name: tool_name}, ctx, _error) do
+    new("tool.end", %{tool_name: tool_name}, ctx, nil)
   end
 
-  def from_stream_event(%StreamEvent{type: :error, content: content}, ctx, meta) do
-    new("error.stream", %{message: content || "stream error"}, ctx, meta)
+  def from_stream_event(%StreamEvent{type: :error, content: content}, ctx, error) do
+    normalized_error =
+      if is_map(error) do
+        error
+      else
+        %{
+          code: :stream_error,
+          message: content || "stream error",
+          retriable: true,
+          retry_after: nil,
+          details: %{}
+        }
+      end
+
+    new("error.stream", %{}, ctx, normalized_error)
   end
 
   def from_stream_event(_event, _ctx, _meta), do: {:error, :unsupported_stream_event}
@@ -153,7 +166,7 @@ defmodule Gong.Session.Events do
          true <- is_integer(event.ts) and event.ts > 0,
          true <- event_type?(event.type),
          true <- is_map(event.payload),
-         true <- is_map(event.meta) do
+         true <- is_nil(event.error) or is_map(event.error) do
       {:ok, event}
     else
       false -> {:error, :invalid_event}

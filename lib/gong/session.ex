@@ -37,6 +37,9 @@ defmodule Gong.Session do
           required(:details) => map()
         }
 
+  @details_max_depth 8
+  @details_max_items 32
+
   @type history_entry :: %{
           required(:role) => atom(),
           required(:content) => String.t(),
@@ -59,7 +62,11 @@ defmodule Gong.Session do
   @doc "异步发送 prompt，函数立即返回，结果仅通过事件流回传。"
   @spec prompt(pid(), String.t(), keyword()) :: :ok | {:error, error_t()}
   def prompt(pid, message, opts) do
-    GenServer.call(pid, {:prompt, message, opts})
+    case safe_genserver_call(pid, {:prompt, message, opts}) do
+      {:ok, :ok} -> :ok
+      {:ok, {:error, _} = error} -> error
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
   end
 
   @deprecated "请使用 prompt/3"
@@ -73,7 +80,11 @@ defmodule Gong.Session do
   """
   @spec subscribe(pid(), pid()) :: :ok | {:error, error_t()}
   def subscribe(pid, subscriber) when is_pid(subscriber) do
-    GenServer.call(pid, {:subscribe, subscriber})
+    case safe_genserver_call(pid, {:subscribe, subscriber}) do
+      {:ok, :ok} -> :ok
+      {:ok, {:error, _} = error} -> error
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
   end
 
   @spec subscribe(pid(), (Events.t() -> any())) :: (-> :ok) | {:error, error_t()}
@@ -97,11 +108,21 @@ defmodule Gong.Session do
 
   @spec unsubscribe(pid(), pid()) :: :ok | {:error, error_t()}
   def unsubscribe(pid, subscriber) when is_pid(subscriber) do
-    GenServer.call(pid, {:unsubscribe, subscriber})
+    case safe_genserver_call(pid, {:unsubscribe, subscriber}) do
+      {:ok, :ok} -> :ok
+      {:ok, {:error, _} = error} -> error
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
   end
 
-  @spec history(pid()) :: [history_entry()]
-  def history(pid), do: GenServer.call(pid, :history)
+  @spec history(pid()) :: {:ok, [history_entry()]} | {:error, error_t()}
+  def history(pid) do
+    case safe_genserver_call(pid, :history) do
+      {:ok, history} when is_list(history) -> {:ok, history}
+      {:ok, {:error, _} = error} -> error
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
+  end
 
   @doc """
   恢复持久核心状态（history/turn_id/metadata），不恢复订阅关系。
@@ -120,12 +141,19 @@ defmodule Gong.Session do
            }}
           | {:error, error_t()}
   def restore(pid, snapshot_or_session_id) do
-    GenServer.call(pid, {:restore, snapshot_or_session_id})
+    case safe_genserver_call(pid, {:restore, snapshot_or_session_id}) do
+      {:ok, {:ok, _} = ok} -> ok
+      {:ok, {:error, _} = error} -> error
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
   end
 
-  @spec close(pid()) :: :ok
+  @spec close(pid()) :: :ok | {:error, error_t()}
   def close(pid) do
-    GenServer.stop(pid, :normal)
+    case safe_genserver_stop(pid) do
+      :ok -> :ok
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
   end
 
   @impl true
@@ -192,19 +220,28 @@ defmodule Gong.Session do
   def handle_call({:restore, source}, _from, state) do
     with {:ok, snapshot} <- load_snapshot(source, state),
          {:ok, restored} <- normalize_snapshot(snapshot, state.session_id) do
-      clear_subscriber_monitors(state.monitors)
-
-      new_state = %{
+      restored_state = %{
         state
         | session_id: restored.session_id,
           history: restored.history,
           turn_id: restored.turn_id,
           metadata: restored.metadata,
-          subscribers: MapSet.new(),
-          monitors: %{},
           seq_by_turn: %{},
           turn_buffers: %{}
       }
+
+      restored_state =
+        emit_event(
+          restored_state,
+          "lifecycle.session_restored",
+          %{restored: true},
+          nil,
+          restored.turn_id
+        )
+
+      clear_subscriber_monitors(restored_state.monitors)
+
+      new_state = %{restored_state | subscribers: MapSet.new(), monitors: %{}}
 
       response = %{
         session_id: new_state.session_id,
@@ -237,8 +274,8 @@ defmodule Gong.Session do
         emit_event(
           state,
           "lifecycle.turn_started",
-          %{async: true},
-          %{delivery: "best_effort_at_least_once"},
+          %{async: true, delivery: "best_effort_at_least_once"},
+          nil,
           turn_id
         )
 
@@ -300,7 +337,7 @@ defmodule Gong.Session do
         state,
         "lifecycle.turn_completed",
         %{status: "ok"},
-        %{},
+        nil,
         turn_id
       )
 
@@ -315,7 +352,7 @@ defmodule Gong.Session do
         state,
         "lifecycle.turn_completed",
         %{status: "error"},
-        %{},
+        nil,
         turn_id
       )
 
@@ -342,7 +379,7 @@ defmodule Gong.Session do
         state,
         "lifecycle.session_closed",
         %{reason: inspect(reason)},
-        %{},
+        nil,
         max(state.turn_id, 0)
       )
 
@@ -359,14 +396,14 @@ defmodule Gong.Session do
   @spec normalize_error(term()) :: error_t()
   def normalize_error(%{code: code} = err) do
     code = normalize_code(code)
-    details = ensure_map(Map.get(err, :details, %{}))
-    retry_after = normalize_retry_after(Map.get(err, :retry_after))
+    details = normalize_error_details(Map.get(err, :details, %{}))
+    retry_after = normalize_retry_after(Map.get(err, :retry_after), code)
 
     %{
       code: code,
       message: to_string(Map.get(err, :message, inspect(err))),
       retriable: retriable?(code, details, Map.get(err, :retriable)),
-      retry_after: if(code == :rate_limited, do: retry_after, else: nil),
+      retry_after: retry_after,
       details: details
     }
   end
@@ -378,8 +415,8 @@ defmodule Gong.Session do
       code: :rate_limited,
       message: "rate limited",
       retriable: true,
-      retry_after: normalize_retry_after(retry_after),
-      details: ensure_map(details)
+      retry_after: normalize_retry_after(retry_after, :rate_limited),
+      details: normalize_error_details(details)
     }
   end
 
@@ -401,7 +438,7 @@ defmodule Gong.Session do
       message: to_string(message),
       retriable: true,
       retry_after: nil,
-      details: ensure_map(details)
+      details: normalize_error_details(details)
     }
   end
 
@@ -496,14 +533,14 @@ defmodule Gong.Session do
 
   defp emit_runtime_error(state, turn_id, reason) do
     envelope = normalize_error(reason)
-    emit_event(state, "error.runtime", envelope, %{}, turn_id)
+    emit_event(state, "error.runtime", %{}, envelope, turn_id)
   end
 
-  defp emit_event(state, type, payload, meta, turn_id) do
+  defp emit_event(state, type, payload, error, turn_id) do
     {seq, state} = next_seq(state, turn_id)
     ctx = %{session_id: state.session_id, turn_id: turn_id, seq: seq}
 
-    case Events.new(type, payload, ctx, meta) do
+    case Events.new(type, payload, ctx, error) do
       {:ok, event} -> dispatch_event(state, event)
       {:error, _reason} -> state
     end
@@ -633,7 +670,7 @@ defmodule Gong.Session do
       code: code,
       message: message,
       retriable: retriable?(code, details, nil),
-      retry_after: nil,
+      retry_after: normalize_retry_after(nil, code),
       details: details
     }
   end
@@ -682,9 +719,76 @@ defmodule Gong.Session do
 
   defp normalize_code(_), do: :internal_error
 
-  defp normalize_retry_after(value) when is_integer(value) and value >= 0, do: value
-  defp normalize_retry_after(_), do: nil
+  defp normalize_retry_after(value, :rate_limited) when is_integer(value) and value >= 0,
+    do: value
 
-  defp ensure_map(value) when is_map(value), do: value
-  defp ensure_map(_), do: %{}
+  defp normalize_retry_after(_value, :rate_limited), do: 1
+  defp normalize_retry_after(_value, _code), do: nil
+
+  # 限制 details 的深度与宽度，避免极端嵌套导致序列化/日志开销失控
+  defp normalize_error_details(details) when is_map(details) do
+    sanitize_map(details, 0)
+  end
+
+  defp normalize_error_details(_), do: %{}
+
+  defp sanitize_map(_map, depth) when depth >= @details_max_depth do
+    %{truncated: true}
+  end
+
+  defp sanitize_map(map, depth) do
+    map
+    |> Enum.take(@details_max_items)
+    |> Enum.reduce(%{}, fn {key, value}, acc ->
+      Map.put(acc, key, sanitize_detail_value(value, depth + 1))
+    end)
+  end
+
+  defp sanitize_detail_value(_value, depth) when depth >= @details_max_depth, do: "[truncated]"
+
+  defp sanitize_detail_value(value, depth) when is_map(value) do
+    sanitize_map(value, depth)
+  end
+
+  defp sanitize_detail_value(value, depth) when is_list(value) do
+    value
+    |> Enum.take(@details_max_items)
+    |> Enum.map(&sanitize_detail_value(&1, depth + 1))
+  end
+
+  defp sanitize_detail_value(value, _depth)
+       when is_binary(value) or is_boolean(value) or is_integer(value) or is_float(value) or
+              is_atom(value) or is_nil(value) do
+    value
+  end
+
+  defp sanitize_detail_value(value, _depth), do: inspect(value)
+
+  defp safe_genserver_call(pid, message) do
+    try do
+      {:ok, GenServer.call(pid, message)}
+    catch
+      :exit, reason ->
+        {:error, normalize_genserver_exit(reason)}
+    end
+  end
+
+  defp safe_genserver_stop(pid) do
+    try do
+      GenServer.stop(pid, :normal)
+      :ok
+    catch
+      :exit, reason ->
+        {:error, normalize_genserver_exit(reason)}
+    end
+  end
+
+  defp normalize_genserver_exit({:noproc, _}), do: :session_not_found
+  defp normalize_genserver_exit({:normal, _}), do: :session_not_found
+  defp normalize_genserver_exit({:shutdown, _}), do: :session_not_found
+  defp normalize_genserver_exit({:timeout, _}), do: :timeout
+  defp normalize_genserver_exit(:noproc), do: :session_not_found
+  defp normalize_genserver_exit(:normal), do: :session_not_found
+  defp normalize_genserver_exit(:timeout), do: :timeout
+  defp normalize_genserver_exit(other), do: {:internal_error, :session_call_exit, inspect(other)}
 end
