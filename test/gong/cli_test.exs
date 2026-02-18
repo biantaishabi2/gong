@@ -48,6 +48,28 @@ defmodule Gong.CLITest do
     assert output =~ "bin/gong doctor"
   end
 
+  test "旧入口 help 路径输出 deprecation warning" do
+    {output, exit_code} =
+      run_script(@bin_gong_cli, ["help"], cd: @project_root)
+
+    assert exit_code == 0
+    assert output =~ "用法:"
+    assert output =~ "[DEPRECATION]"
+    assert output =~ "旧入口 `bin/gong-cli` 已弃用"
+    assert output =~ "bin/gong help"
+  end
+
+  test "旧入口 unknown 路径输出 deprecation warning" do
+    {output, exit_code} =
+      run_script(@bin_gong_cli, ["unknown"], cd: @project_root)
+
+    assert exit_code == 2
+    assert output =~ "未知命令: unknown"
+    assert output =~ "[DEPRECATION]"
+    assert output =~ "旧入口 `bin/gong-cli` 已弃用"
+    assert output =~ "bin/gong unknown"
+  end
+
   test "旧入口子命令 help 语义保持一致" do
     {stdout, stderr, exit_code} =
       run_cli(["cli", "help"],

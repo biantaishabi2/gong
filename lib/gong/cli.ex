@@ -30,14 +30,17 @@ defmodule Gong.CLI do
       execute(parsed, runtime, opts)
     else
       {:help, usage} ->
+        maybe_warn_legacy_entry(opts, argv)
         IO.puts(usage)
         @exit_ok
 
       {:error, :usage, message} ->
+        maybe_warn_legacy_entry(opts, argv)
         IO.puts(:stderr, message)
         @exit_usage
 
       {:error, :runtime, runtime, reason} ->
+        maybe_warn_legacy_entry(opts, argv)
         print_runtime_error(runtime, reason)
         @exit_runtime
     end
@@ -100,7 +103,7 @@ defmodule Gong.CLI do
   end
 
   defp execute(%{command: :doctor, opts: command_opts}, runtime, run_opts) do
-    maybe_warn_legacy_entry(run_opts)
+    maybe_warn_legacy_entry(run_opts, ["doctor"])
     cwd = resolve_cwd(command_opts, run_opts)
 
     if project_dir?(cwd) do
@@ -163,14 +166,17 @@ defmodule Gong.CLI do
     |> File.exists?()
   end
 
-  defp maybe_warn_legacy_entry(run_opts) do
+  defp maybe_warn_legacy_entry(run_opts, argv) do
     if Keyword.get(run_opts, :legacy_entry, false) do
       print_deprecation_warning(
         Keyword.get(run_opts, :entry, "mix gong.cli"),
-        "bin/gong doctor"
+        legacy_entry_migration_cmd(argv)
       )
     end
   end
+
+  defp legacy_entry_migration_cmd([]), do: "bin/gong help"
+  defp legacy_entry_migration_cmd(argv), do: "bin/gong #{Enum.join(argv, " ")}"
 
   defp print_deprecation_warning(old_entry, migration_cmd) do
     IO.puts(:stderr, "[DEPRECATION] 旧入口 `#{old_entry}` 已弃用，将在下个主版本升级为错误。")
