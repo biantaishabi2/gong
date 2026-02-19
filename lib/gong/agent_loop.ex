@@ -162,12 +162,14 @@ defmodule Gong.AgentLoop do
   # 注意：retry 不消耗 turn 计数，因为是重试同一轮而非新一轮。
   # 由 Retry.should_retry?/2 内部的 max_retries=3 兜底防止无限重试。
   defp maybe_retry({:error, error_msg}, agent, call_id, llm_backend, hooks, opts, turn, max_turns) do
-    error_class = Gong.Retry.classify_error(error_msg)
+    decision = Gong.Retry.is_retryable_error(error_msg)
     attempt = Keyword.get(opts, :retry_attempt, 0)
 
-    if Gong.Retry.should_retry?(error_class, attempt) do
+    if Gong.Retry.should_retry?(decision, attempt) do
       :telemetry.execute([:gong, :retry], %{attempt: attempt + 1}, %{
-        error_class: error_class,
+        error_class: decision.error_class,
+        retry_source: decision.source,
+        retry_reason: decision.reason,
         error: error_msg
       })
 
@@ -256,7 +258,17 @@ defmodule Gong.AgentLoop do
         if steering_config && tool_idx >= steering_config.after_tool do
           execute_skipped_tool(acc_agent, tc, tool_name, arguments, tool_idx)
         else
-          execute_single_tool(acc_agent, tc, tool_name, arguments, tool_atom, actions_by_name, tool_context, hooks, tool_idx)
+          execute_single_tool(
+            acc_agent,
+            tc,
+            tool_name,
+            arguments,
+            tool_atom,
+            actions_by_name,
+            tool_context,
+            hooks,
+            tool_idx
+          )
         end
       end)
 
@@ -291,7 +303,17 @@ defmodule Gong.AgentLoop do
   end
 
   # 正常执行单个工具
-  defp execute_single_tool(agent, tc, tool_name, arguments, tool_atom, actions_by_name, tool_context, hooks, tool_idx) do
+  defp execute_single_tool(
+         agent,
+         tc,
+         tool_name,
+         arguments,
+         tool_atom,
+         actions_by_name,
+         tool_context,
+         hooks,
+         tool_idx
+       ) do
     # 发送 telemetry: tool 开始
     :telemetry.execute([:gong, :tool, :start], %{count: 1}, %{
       tool: tool_name,

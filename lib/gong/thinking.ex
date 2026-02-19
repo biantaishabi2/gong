@@ -9,6 +9,19 @@ defmodule Gong.Thinking do
   @type level :: :off | :low | :medium | :high | :xhigh | :max
 
   @levels [:off, :low, :medium, :high, :xhigh, :max]
+  @default_level :off
+  @level_tokens %{
+    "off" => :off,
+    "none" => :off,
+    "disabled" => :off,
+    "low" => :low,
+    "medium" => :medium,
+    "high" => :high,
+    "xhigh" => :xhigh,
+    "x-high" => :xhigh,
+    "max" => :max
+  }
+  @level_by_index %{0 => :off, 1 => :low, 2 => :medium, 3 => :high, 4 => :xhigh, 5 => :max}
   @level_budgets %{
     off: 0,
     low: 1024,
@@ -21,6 +34,10 @@ defmodule Gong.Thinking do
   @doc "所有支持的 thinking level"
   @spec levels() :: [level()]
   def levels, do: @levels
+
+  @doc "默认 thinking level"
+  @spec default_level() :: level()
+  def default_level, do: @default_level
 
   @doc "验证 level 是否有效"
   @spec valid_level?(term()) :: boolean()
@@ -53,13 +70,65 @@ defmodule Gong.Thinking do
     %{thinking_budget: budget(level)}
   end
 
+  @doc """
+  兼容恢复：优先使用新字段，失败时回退旧字段，再回退默认值。
+  """
+  @spec restore_level(term(), term(), level()) :: {level(), :new | :legacy | :default}
+  def restore_level(new_value, legacy_value, fallback \\ @default_level) do
+    case normalize_level(new_value) do
+      {:ok, level} ->
+        {level, :new}
+
+      {:error, :invalid_level} ->
+        case normalize_level(legacy_value) do
+          {:ok, level} -> {level, :legacy}
+          {:error, :invalid_level} -> {fallback, :default}
+        end
+    end
+  end
+
+  @doc "规范化任意输入为合法 thinking level"
+  @spec normalize_level(term()) :: {:ok, level()} | {:error, :invalid_level}
+  def normalize_level(level) when is_atom(level) do
+    if valid_level?(level), do: {:ok, level}, else: {:error, :invalid_level}
+  end
+
+  def normalize_level(level) when is_integer(level) do
+    case Map.get(@level_by_index, level) do
+      nil -> {:error, :invalid_level}
+      normalized -> {:ok, normalized}
+    end
+  end
+
+  def normalize_level(level) when is_binary(level) do
+    level
+    |> String.trim()
+    |> String.downcase()
+    |> then(&Map.get(@level_tokens, &1))
+    |> case do
+      nil -> {:error, :invalid_level}
+      normalized -> {:ok, normalized}
+    end
+  end
+
+  def normalize_level(%{} = level_map) do
+    candidate =
+      Map.get(level_map, :level) ||
+        Map.get(level_map, "level") ||
+        Map.get(level_map, :thinking_level) ||
+        Map.get(level_map, "thinking_level") ||
+        Map.get(level_map, :thinkingLevel) ||
+        Map.get(level_map, "thinkingLevel")
+
+    normalize_level(candidate)
+  end
+
+  def normalize_level(_), do: {:error, :invalid_level}
+
   @doc "从字符串解析 level"
   @spec parse(String.t()) :: {:ok, level()} | {:error, :invalid_level}
   def parse(str) when is_binary(str) do
-    atom = String.to_existing_atom(str)
-    if valid_level?(atom), do: {:ok, atom}, else: {:error, :invalid_level}
-  rescue
-    ArgumentError -> {:error, :invalid_level}
+    normalize_level(str)
   end
 
   # 内部：OpenAI reasoning_effort 映射

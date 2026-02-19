@@ -65,7 +65,9 @@ defmodule Gong.SessionTest do
 
     assert {:ok, restored} = Session.restore(session, snapshot)
     assert restored.turn_cursor == 7
-    assert restored.metadata == %{"lang" => "zh"}
+    assert restored.metadata["lang"] == "zh"
+    assert get_in(restored.metadata, ["session", "model"]) == "deepseek:deepseek-chat"
+    assert get_in(restored.metadata, ["session", "thinking", "level"]) == "off"
     assert restored.history == snapshot.history
 
     assert_receive {:session_event, restored_event}, 300
@@ -290,6 +292,68 @@ defmodule Gong.SessionTest do
     assert Process.alive?(session)
   end
 
+  test "并发 restore 与 history 读取下 Session 保持可用" do
+    {:ok, session} =
+      Session.start_link(
+        session_id: "session-concurrent-restore",
+        backend: fn message, _opts, _ctx -> {:ok, [{:chunk, "echo:" <> message}, :done]} end
+      )
+
+    on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+    snapshot = %{
+      history: [%{role: :user, content: "legacy", turn_id: 5, ts: 1}],
+      turn_cursor: 5,
+      metadata: %{
+        "session" => %{
+          "model" => "openai/gpt-4o",
+          "thinking" => %{"level" => "medium"}
+        }
+      }
+    }
+
+    results =
+      1..24
+      |> Task.async_stream(
+        fn idx ->
+          case rem(idx, 3) do
+            0 ->
+              Session.restore(session, snapshot)
+
+            1 ->
+              Session.history(session)
+
+            2 ->
+              Session.restore(
+                session,
+                snapshot
+                |> Map.put(:turn_cursor, "bad-#{idx}")
+                |> Map.put(:turn_id, 7)
+              )
+          end
+        end,
+        max_concurrency: 8,
+        timeout: 2_000,
+        ordered: false
+      )
+      |> Enum.to_list()
+
+    assert Enum.all?(results, fn
+             {:ok, {:ok, %{turn_cursor: turn_cursor, metadata: metadata}}} ->
+               is_integer(turn_cursor) and turn_cursor >= 0 and is_map(metadata)
+
+             {:ok, {:ok, history}} when is_list(history) ->
+               true
+
+             _ ->
+               false
+           end)
+
+    assert Process.alive?(session)
+    assert :ok = Session.prompt(session, "after-concurrent-restore", [])
+    assert wait_until(fn -> history_len_at_least?(session, 2) end)
+  end
+
   test "错误详情会执行深度限制，避免无限递归展开" do
     deep_details =
       Enum.reduce(1..20, %{}, fn idx, acc ->
@@ -302,6 +366,259 @@ defmodule Gong.SessionTest do
     assert error.code == :internal_error
     assert contains_truncated_marker?(error.details)
     assert max_depth(error.details) <= 8
+  end
+
+  describe "get_last_assistant_message/1" do
+    test "忽略 tool_result 和空 assistant，优先提取多模态 text" do
+      messages = [
+        %{role: :user, content: "你好"},
+        %{role: :assistant, content: "旧回复"},
+        %{role: :tool_result, content: "工具执行结果"},
+        %{role: :assistant, content: "   "},
+        %{
+          role: :assistant,
+          content: [%{type: "image", value: "img://1"}, %{type: "text", text: "最终文本"}]
+        }
+      ]
+
+      assert Session.get_last_assistant_message(messages) == "最终文本"
+      assert Session.getLastAssistantMessage(messages) == "最终文本"
+    end
+
+    test "没有 text 片段时回退首个非空片段" do
+      messages = [
+        %{role: :assistant, content: [%{type: "image", content: "image://fallback"}]}
+      ]
+
+      assert Session.get_last_assistant_message(messages) == "image://fallback"
+    end
+
+    test "无有效 assistant 消息返回 nil" do
+      messages = [
+        %{role: :user, content: "hi"},
+        %{role: :assistant, content: ""},
+        %{role: :assistant, tool_calls: [%{name: "read"}], content: "tool call"},
+        %{role: :tool_result, content: "ok"}
+      ]
+
+      assert Session.get_last_assistant_message(messages) == nil
+    end
+
+    test "超长多模态 content 列表仍可提取最后有效 text" do
+      parts =
+        Enum.map(1..300, fn idx ->
+          if rem(idx, 2) == 0 do
+            %{type: "tool_result", content: "tool://#{idx}"}
+          else
+            %{type: "image", value: "img://#{idx}"}
+          end
+        end) ++ [%{type: "text", text: "终点文本"}]
+
+      messages = [%{role: :assistant, content: parts}]
+
+      assert Session.get_last_assistant_message(messages) == "终点文本"
+    end
+  end
+
+  describe "restore 兼容恢复语义" do
+    test "新字段优先于旧字段，并写回统一新格式" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-new-priority",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "old", turn_id: 2, ts: 1}],
+        turn_cursor: 2,
+        metadata: %{
+          "session" => %{
+            "model" => "anthropic:claude-3-5-sonnet",
+            "thinking" => %{"level" => "medium"}
+          },
+          "initial_state" => %{
+            "model" => "openai/gpt-4o",
+            "thinking_level" => "high"
+          },
+          "model" => "legacy:model"
+        }
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert get_in(restored.metadata, ["session", "model"]) == "anthropic:claude-3-5-sonnet"
+      assert get_in(restored.metadata, ["session", "thinking", "level"]) == "medium"
+      refute Map.has_key?(restored.metadata, "model")
+      refute Map.has_key?(restored.metadata, "thinking_level")
+    end
+
+    test "metadata.session 内旧字段不会覆盖新字段，且写回时会清理" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-session-legacy-keys-cleaned",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "legacy", turn_id: 3, ts: 1}],
+        turn_cursor: 3,
+        metadata: %{
+          "session" => %{
+            :model => "legacy:should-not-win",
+            :saved_model => "legacy:saved-model",
+            :thinking_level => "high",
+            "model" => "openai:gpt-4o",
+            "thinking" => %{"level" => "low"}
+          }
+        }
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert get_in(restored.metadata, ["session", "model"]) == "openai:gpt-4o"
+      assert get_in(restored.metadata, ["session", "thinking", "level"]) == "low"
+
+      session_metadata = restored.metadata["session"]
+      refute Map.has_key?(session_metadata, :model)
+      refute Map.has_key?(session_metadata, :saved_model)
+      refute Map.has_key?(session_metadata, :thinking_level)
+    end
+
+    test "turn_cursor 非法时继续回退 turn_id" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-turn-id-fallback",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "legacy", turn_id: 5, ts: 1}],
+        turn_cursor: "not-a-number",
+        turn_id: 5,
+        metadata: %{}
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert restored.turn_cursor == 5
+    end
+
+    test "异常格式不中断并回退默认 model/thinking/turn_cursor/history" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-invalid-format",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      snapshot = %{
+        history: "invalid-history",
+        turn_cursor: "not-a-number",
+        metadata: %{
+          "session" => %{
+            "model" => %{"provider" => "", "model_id" => ""},
+            "thinking" => %{"level" => "超高"}
+          }
+        }
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert restored.history == []
+      assert restored.turn_cursor == 0
+      assert get_in(restored.metadata, ["session", "model"]) == "deepseek:deepseek-chat"
+      assert get_in(restored.metadata, ["session", "thinking", "level"]) == "off"
+    end
+
+    test "模型字符串缺少 provider 或 model_id 时回退默认值" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-invalid-model-pair",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      Enum.each(["openai/", "openai:", ":gpt-4o"], fn invalid_model ->
+        snapshot = %{
+          history: [%{role: :user, content: "legacy", turn_id: 1, ts: 1}],
+          turn_cursor: 1,
+          metadata: %{
+            "session" => %{
+              "model" => invalid_model
+            }
+          }
+        }
+
+        assert {:ok, restored} = Session.restore(session, snapshot)
+        assert get_in(restored.metadata, ["session", "model"]) == "deepseek:deepseek-chat"
+      end)
+    end
+
+    test "模型 map 中 provider/model_id 仅空白字符时回退默认值" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-invalid-model-map-whitespace",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      Enum.each(
+        [
+          %{"provider" => " ", "model_id" => "gpt-4o"},
+          %{"provider" => "openai", "model_id" => "   "}
+        ],
+        fn invalid_model ->
+          snapshot = %{
+            history: [%{role: :user, content: "legacy", turn_id: 1, ts: 1}],
+            turn_cursor: 1,
+            metadata: %{
+              "session" => %{
+                "model" => invalid_model
+              }
+            }
+          }
+
+          assert {:ok, restored} = Session.restore(session, snapshot)
+          assert get_in(restored.metadata, ["session", "model"]) == "deepseek:deepseek-chat"
+        end
+      )
+    end
+
+    test "深层 thinking 嵌套结构不会中断恢复并回退默认值" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-deep-thinking",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      deep_thinking =
+        Enum.reduce(1..40, %{"level" => "high"}, fn idx, acc ->
+          %{"layer_#{idx}" => acc}
+        end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "legacy", turn_id: 1, ts: 1}],
+        turn_cursor: 1,
+        metadata: %{
+          "session" => %{
+            "model" => %{"provider" => "openai", "model_id" => "gpt-4o"},
+            "thinking" => deep_thinking
+          }
+        }
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert restored.turn_cursor == 1
+      assert get_in(restored.metadata, ["session", "model"]) == "openai:gpt-4o"
+      assert get_in(restored.metadata, ["session", "thinking", "level"]) == "off"
+    end
   end
 
   defp receive_until_turn_completed(acc) do

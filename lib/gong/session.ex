@@ -17,6 +17,9 @@ defmodule Gong.Session do
   alias Gong.Session.Events
   alias Gong.Stream
   alias Gong.Stream.Event, as: StreamEvent
+  alias Gong.Thinking
+
+  require Logger
 
   @type error_code ::
           :invalid_argument
@@ -39,6 +42,7 @@ defmodule Gong.Session do
 
   @details_max_depth 8
   @details_max_items 32
+  @default_model "deepseek:deepseek-chat"
 
   @type history_entry :: %{
           required(:role) => atom(),
@@ -142,6 +146,36 @@ defmodule Gong.Session do
       {:error, reason} -> {:error, normalize_error(reason)}
     end
   end
+
+  @doc """
+  查找最后一条有效 assistant 消息文本。
+
+  规则：
+  - 仅处理 assistant
+  - 忽略空内容
+  - 忽略工具调用/工具结果消息
+  - 多模态优先提取 text 片段，缺失时回退首个非空片段
+  """
+  @spec get_last_assistant_message([map()]) :: String.t() | nil
+  def get_last_assistant_message(messages) when is_list(messages) do
+    messages
+    |> Enum.reverse()
+    |> Enum.find_value(fn message ->
+      if assistant_message?(message) and not tool_like_message?(message) do
+        message
+        |> Map.get(:content, Map.get(message, "content"))
+        |> extract_message_text()
+      else
+        nil
+      end
+    end)
+  end
+
+  def get_last_assistant_message(_), do: nil
+
+  @doc "JS 风格兼容入口（与 get_last_assistant_message/1 等价）"
+  @spec getLastAssistantMessage([map()]) :: String.t() | nil
+  def getLastAssistantMessage(messages), do: get_last_assistant_message(messages)
 
   @doc """
   恢复持久核心状态（history/turn_cursor/metadata），不恢复订阅关系。
@@ -578,7 +612,9 @@ defmodule Gong.Session do
     delta_content = normalize_stream_delta_content(content)
 
     Map.update(state, :turn_buffers, %{turn_id => delta_content}, fn buffers ->
-      Map.update(buffers, turn_id, delta_content, fn existing -> (existing || "") <> delta_content end)
+      Map.update(buffers, turn_id, delta_content, fn existing ->
+        (existing || "") <> delta_content
+      end)
     end)
   end
 
@@ -640,37 +676,473 @@ defmodule Gong.Session do
   defp load_snapshot(_, _state), do: {:error, :invalid_argument}
 
   defp normalize_snapshot(snapshot, fallback_session_id) do
-    history =
-      Map.get(snapshot, :history, Map.get(snapshot, "history", []))
+    history = normalize_snapshot_history(snapshot)
+    turn_cursor = normalize_snapshot_turn_cursor(snapshot)
+    metadata = normalize_snapshot_metadata(snapshot_get(snapshot, :metadata))
+    session_id = normalize_snapshot_session_id(snapshot, fallback_session_id)
 
-    turn_cursor =
-      Map.get(
-        snapshot,
-        :turn_cursor,
-        Map.get(snapshot, "turn_cursor", Map.get(snapshot, :turn_id, Map.get(snapshot, "turn_id", 0)))
-      )
+    model = resolve_snapshot_model(snapshot, metadata)
+    thinking_level = resolve_snapshot_thinking_level(snapshot, metadata)
+    metadata = normalize_metadata_for_write(metadata, model, thinking_level)
 
-    metadata =
-      Map.get(snapshot, :metadata, Map.get(snapshot, "metadata", %{}))
+    {:ok,
+     %{
+       history: history,
+       turn_cursor: turn_cursor,
+       metadata: metadata,
+       session_id: session_id
+     }}
+  end
 
-    session_id =
-      Map.get(snapshot, :session_id, Map.get(snapshot, "session_id", fallback_session_id))
+  defp normalize_snapshot_history(snapshot) do
+    case snapshot_get(snapshot, :history) do
+      history when is_list(history) ->
+        history
 
-    with true <- is_list(history),
-         true <- is_integer(turn_cursor) and turn_cursor >= 0,
-         true <- is_map(metadata),
-         true <- is_binary(session_id) and session_id != "" do
-      {:ok,
-       %{
-         history: history,
-         turn_cursor: turn_cursor,
-         metadata: metadata,
-         session_id: session_id
-       }}
-    else
-      false -> {:error, :invalid_argument}
+      nil ->
+        []
+
+      other ->
+        Logger.warning("Session restore: history 格式无效，回退空数组，值=#{inspect(other)}")
+        []
     end
   end
+
+  defp normalize_snapshot_turn_cursor(snapshot) do
+    raw_turn_cursor = snapshot_get(snapshot, :turn_cursor)
+    raw_turn_id = snapshot_get(snapshot, :turn_id)
+
+    case normalize_non_negative_integer(raw_turn_cursor) do
+      {:ok, turn_cursor} ->
+        turn_cursor
+
+      :error ->
+        case normalize_non_negative_integer(raw_turn_id) do
+          {:ok, turn_id} ->
+            if not is_nil(raw_turn_cursor) do
+              Logger.warning(
+                "Session restore: turn_cursor 格式无效，改用 turn_id，turn_cursor=#{inspect(raw_turn_cursor)}，turn_id=#{inspect(raw_turn_id)}"
+              )
+            end
+
+            turn_id
+
+          :error ->
+            if not (is_nil(raw_turn_cursor) and is_nil(raw_turn_id)) do
+              Logger.warning(
+                "Session restore: turn_cursor/turn_id 格式无效，回退 0，turn_cursor=#{inspect(raw_turn_cursor)}，turn_id=#{inspect(raw_turn_id)}"
+              )
+            end
+
+            0
+        end
+    end
+  end
+
+  defp normalize_snapshot_session_id(snapshot, fallback_session_id) do
+    case snapshot_get(snapshot, :session_id) do
+      session_id when is_binary(session_id) and session_id != "" ->
+        session_id
+
+      nil ->
+        fallback_session_id
+
+      other ->
+        Logger.warning("Session restore: session_id 格式无效，使用默认 session_id，值=#{inspect(other)}")
+        fallback_session_id
+    end
+  end
+
+  defp normalize_snapshot_metadata(metadata) when is_map(metadata), do: metadata
+  defp normalize_snapshot_metadata(nil), do: %{}
+
+  defp normalize_snapshot_metadata(other) do
+    Logger.warning("Session restore: metadata 格式无效，回退空 map，值=#{inspect(other)}")
+    %{}
+  end
+
+  defp resolve_snapshot_model(snapshot, metadata) do
+    model =
+      pick_model_value(
+        [
+          {"snapshot.session.model", nested_get(snapshot, [:session, :model])},
+          {"snapshot.model", snapshot_get(snapshot, :model)},
+          {"metadata.session.model", nested_get(metadata, [:session, :model])}
+        ],
+        :new
+      ) ||
+        pick_model_value(
+          [
+            {"snapshot.saved_model", snapshot_get(snapshot, :saved_model)},
+            {"snapshot.savedModel", snapshot_get(snapshot, :savedModel)},
+            {"snapshot.model_name", snapshot_get(snapshot, :model_name)},
+            {"snapshot.modelName", snapshot_get(snapshot, :modelName)},
+            {"metadata.initial_state.model", nested_get(metadata, [:initial_state, :model])},
+            {"metadata.model", snapshot_get(metadata, :model)}
+          ],
+          :legacy
+        ) ||
+        @default_model
+
+    model
+  end
+
+  defp resolve_snapshot_thinking_level(snapshot, metadata) do
+    new_level =
+      pick_thinking_value(
+        [
+          {"snapshot.session.thinking.level",
+           nested_get(snapshot, [:session, :thinking, :level])},
+          {"snapshot.thinking.level", nested_get(snapshot, [:thinking, :level])},
+          {"metadata.session.thinking.level",
+           nested_get(metadata, [:session, :thinking, :level])},
+          {"metadata.thinking.level", nested_get(metadata, [:thinking, :level])}
+        ],
+        :new
+      )
+
+    legacy_level =
+      pick_thinking_value(
+        [
+          {"snapshot.thinking_level", snapshot_get(snapshot, :thinking_level)},
+          {"snapshot.thinkingLevel", snapshot_get(snapshot, :thinkingLevel)},
+          {"snapshot.savedThinkingLevel", snapshot_get(snapshot, :savedThinkingLevel)},
+          {"snapshot.saved_thinking_level", snapshot_get(snapshot, :saved_thinking_level)},
+          {"metadata.initial_state.thinking_level",
+           nested_get(metadata, [:initial_state, :thinking_level])},
+          {"metadata.thinking_level", snapshot_get(metadata, :thinking_level)},
+          {"metadata.thinkingLevel", snapshot_get(metadata, :thinkingLevel)}
+        ],
+        :legacy
+      )
+
+    {resolved_level, source} =
+      Thinking.restore_level(new_level, legacy_level, Thinking.default_level())
+
+    if source == :default and new_level == nil and legacy_level == nil do
+      Logger.warning("Session restore: thinking level 缺失，回退默认值 #{resolved_level}")
+    end
+
+    Atom.to_string(resolved_level)
+  end
+
+  defp normalize_metadata_for_write(metadata, model, thinking_level) do
+    canonical_session =
+      metadata
+      |> snapshot_get(:session)
+      |> normalize_snapshot_metadata()
+      |> drop_legacy_session_keys()
+      |> Map.put("model", model)
+      |> Map.put("thinking", %{"level" => thinking_level})
+
+    metadata
+    |> Map.drop([
+      :session,
+      :model,
+      "model",
+      :model_name,
+      "model_name",
+      :modelName,
+      "modelName",
+      :saved_model,
+      "saved_model",
+      :savedModel,
+      "savedModel",
+      :thinking,
+      "thinking",
+      :thinking_level,
+      "thinking_level",
+      :thinkingLevel,
+      "thinkingLevel",
+      :savedThinkingLevel,
+      "savedThinkingLevel",
+      :saved_thinking_level,
+      "saved_thinking_level"
+    ])
+    |> Map.put("session", canonical_session)
+  end
+
+  defp drop_legacy_session_keys(session) when is_map(session) do
+    Map.drop(session, [
+      :model,
+      "model",
+      :model_name,
+      "model_name",
+      :modelName,
+      "modelName",
+      :saved_model,
+      "saved_model",
+      :savedModel,
+      "savedModel",
+      :thinking,
+      "thinking",
+      :thinking_level,
+      "thinking_level",
+      :thinkingLevel,
+      "thinkingLevel",
+      :savedThinkingLevel,
+      "savedThinkingLevel",
+      :saved_thinking_level,
+      "saved_thinking_level"
+    ])
+  end
+
+  defp pick_model_value(candidates, source) do
+    Enum.find_value(candidates, fn {label, value} ->
+      case normalize_model_value(value) do
+        {:ok, model} ->
+          model
+
+        :error when is_nil(value) ->
+          nil
+
+        :error ->
+          Logger.warning(
+            "Session restore: #{source} model 字段格式无效，已忽略，来源=#{label}，值=#{inspect(value)}"
+          )
+
+          nil
+      end
+    end)
+  end
+
+  defp pick_thinking_value(candidates, source) do
+    Enum.find_value(candidates, fn {label, value} ->
+      case Thinking.normalize_level(value) do
+        {:ok, level} ->
+          level
+
+        {:error, :invalid_level} when is_nil(value) ->
+          nil
+
+        {:error, :invalid_level} ->
+          Logger.warning(
+            "Session restore: #{source} thinking 字段格式无效，已忽略，来源=#{label}，值=#{inspect(value)}"
+          )
+
+          nil
+      end
+    end)
+  end
+
+  defp normalize_model_value(value) when is_binary(value) do
+    model = String.trim(value)
+
+    cond do
+      model == "" ->
+        :error
+
+      String.contains?(model, ":") ->
+        normalize_model_pair(model, ":")
+
+      String.contains?(model, "/") ->
+        normalize_model_pair(model, "/")
+
+      true ->
+        :error
+    end
+  end
+
+  defp normalize_model_value(%{} = model) do
+    provider = snapshot_get(model, :provider)
+
+    model_id =
+      snapshot_get(model, :model_id) || snapshot_get(model, :modelId) || snapshot_get(model, :id)
+
+    with provider when is_binary(provider) <- provider,
+         model_id when is_binary(model_id) <- model_id do
+      provider = String.trim(provider)
+      model_id = String.trim(model_id)
+
+      if provider != "" and model_id != "" do
+        {:ok, "#{provider}:#{model_id}"}
+      else
+        :error
+      end
+    else
+      _ -> :error
+    end
+  end
+
+  defp normalize_model_value(_), do: :error
+
+  defp normalize_model_pair(model, separator) when is_binary(model) and is_binary(separator) do
+    case String.split(model, separator, parts: 2) do
+      [provider, model_id] ->
+        provider = String.trim(provider)
+        model_id = String.trim(model_id)
+
+        if provider != "" and model_id != "" do
+          {:ok, "#{provider}:#{model_id}"}
+        else
+          :error
+        end
+
+      _ ->
+        :error
+    end
+  end
+
+  defp normalize_non_negative_integer(value) when is_integer(value) and value >= 0,
+    do: {:ok, value}
+
+  defp normalize_non_negative_integer(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {parsed, ""} when parsed >= 0 -> {:ok, parsed}
+      _ -> :error
+    end
+  end
+
+  defp normalize_non_negative_integer(_), do: :error
+
+  defp snapshot_get(nil, _key), do: nil
+
+  defp snapshot_get(map, key) when is_map(map) and is_atom(key) do
+    string_key = Atom.to_string(key)
+
+    case Map.fetch(map, string_key) do
+      {:ok, value} -> value
+      :error -> Map.get(map, key)
+    end
+  end
+
+  defp snapshot_get(map, key) when is_map(map) and is_binary(key) do
+    Map.get(map, key)
+  end
+
+  defp snapshot_get(_other, _key), do: nil
+
+  defp nested_get(map, []), do: map
+
+  defp nested_get(map, [key | rest]) do
+    map
+    |> snapshot_get(key)
+    |> nested_get(rest)
+  end
+
+  # ── 最后 assistant 消息提取 ──
+
+  defp assistant_message?(message) when is_map(message) do
+    role = snapshot_get(message, :role)
+    role in [:assistant, "assistant"]
+  end
+
+  defp assistant_message?(_), do: false
+
+  defp tool_like_message?(message) when is_map(message) do
+    role = snapshot_get(message, :role)
+    has_tool_calls = snapshot_get(message, :tool_calls) not in [nil, []]
+    content = snapshot_get(message, :content)
+
+    role in [:tool, "tool", :tool_result, "tool_result", :tool_call, "tool_call"] or
+      has_tool_calls or tool_content_only?(content)
+  end
+
+  defp tool_like_message?(_), do: false
+
+  defp tool_content_only?(content) when is_list(content) do
+    effective_parts =
+      content
+      |> Enum.map(&normalize_content_part/1)
+      |> Enum.reject(&is_nil/1)
+
+    effective_parts != [] and
+      Enum.all?(
+        effective_parts,
+        &(&1.type in [:tool_call, "tool_call", :tool_result, "tool_result"])
+      )
+  end
+
+  defp tool_content_only?(_), do: false
+
+  defp extract_message_text(content) do
+    cond do
+      is_binary(content) ->
+        trim_to_nil(content)
+
+      is_list(content) ->
+        extract_text_from_parts(content) || extract_fallback_from_parts(content)
+
+      is_map(content) ->
+        extract_text_from_part(content) || extract_fallback_from_part(content)
+
+      true ->
+        nil
+    end
+  end
+
+  defp extract_text_from_parts(parts) do
+    texts =
+      parts
+      |> Enum.map(&extract_text_from_part/1)
+      |> Enum.reject(&is_nil/1)
+
+    case texts do
+      [] -> nil
+      values -> Enum.join(values, "\n")
+    end
+  end
+
+  defp extract_text_from_part(part) when is_map(part) do
+    type = snapshot_get(part, :type)
+
+    if type in [:text, "text"] do
+      snapshot_get(part, :text)
+      |> trim_to_nil()
+    else
+      nil
+    end
+  end
+
+  defp extract_text_from_part(_), do: nil
+
+  defp extract_fallback_from_parts(parts) do
+    Enum.find_value(parts, &extract_fallback_from_part/1)
+  end
+
+  defp extract_fallback_from_part(part) when is_binary(part), do: trim_to_nil(part)
+
+  defp extract_fallback_from_part(part) when is_map(part) do
+    if tool_content_part?(part) do
+      nil
+    else
+      candidate =
+        snapshot_get(part, :text) ||
+          snapshot_get(part, :content) ||
+          snapshot_get(part, :value)
+
+      trim_to_nil(candidate)
+    end
+  end
+
+  defp extract_fallback_from_part(_), do: nil
+
+  defp normalize_content_part(part) when is_map(part) do
+    %{
+      type: snapshot_get(part, :type),
+      text: snapshot_get(part, :text),
+      content: snapshot_get(part, :content),
+      value: snapshot_get(part, :value)
+    }
+  end
+
+  defp normalize_content_part(_), do: nil
+
+  defp tool_content_part?(part) when is_map(part) do
+    type = snapshot_get(part, :type)
+    type in [:tool_call, "tool_call", :tool_result, "tool_result"]
+  end
+
+  defp tool_content_part?(_), do: false
+
+  defp trim_to_nil(value) when is_binary(value) do
+    case String.trim(value) do
+      "" -> nil
+      trimmed -> trimmed
+    end
+  end
+
+  defp trim_to_nil(_), do: nil
 
   defp listener_loop(listener) do
     receive do
