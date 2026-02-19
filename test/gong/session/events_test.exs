@@ -102,6 +102,30 @@ defmodule Gong.Session.EventsTest do
              Events.validate_sequence([e2, e1], 1)
   end
 
+  test "非法 causation_id 不通过事件构建校验" do
+    assert {:error, :invalid_argument} =
+             Events.new("lifecycle.processing", %{}, %{
+               session_id: "session-events",
+               command_id: "cmd-events-6",
+               turn_id: 6,
+               seq: 2,
+               causation_id: "not-a-uuid"
+             })
+  end
+
+  test "ts 与 occurred_at 不一致时校验失败" do
+    {:ok, event} =
+      Events.new("lifecycle.received", %{}, %{
+        session_id: "session-events",
+        command_id: "cmd-events-7",
+        turn_id: 7,
+        seq: 1
+      })
+
+    invalid_event = %{event | ts: event.occurred_at + 1}
+    assert {:error, :invalid_event} = Events.validate(invalid_event)
+  end
+
   test "consume_event 支持断点续读和顺序异常检测" do
     cursor = Events.new_cursor(0)
 
@@ -132,5 +156,18 @@ defmodule Gong.Session.EventsTest do
   test "缺失 command_id 的事件上下文校验失败" do
     assert {:error, :invalid_event_context} =
              Events.new("lifecycle.received", %{}, %{session_id: "session-events", seq: 1})
+  end
+
+  test "非法 cursor 直接消费返回错误" do
+    {:ok, event} =
+      Events.new("lifecycle.received", %{}, %{
+        session_id: "session-events",
+        command_id: "cmd-events-8",
+        turn_id: 8,
+        seq: 1
+      })
+
+    assert {:error, :invalid_consumer_cursor} = Events.consume_event(%{}, event)
+    assert {:error, :invalid_consumer_cursor} = Events.consume_event(%{last_seq: -1, seen_event_ids: MapSet.new()}, event)
   end
 end

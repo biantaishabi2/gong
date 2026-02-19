@@ -253,6 +253,7 @@ defmodule Gong.Session do
       metadata: %{},
       subscribers: MapSet.new(),
       monitors: %{},
+      subscriber_forwarders: %{},
       session_seq: 0,
       command_last_event_id: %{},
       turn_buffers: %{}
@@ -268,11 +269,13 @@ defmodule Gong.Session do
         {:reply, :ok, state}
       else
         ref = Process.monitor(subscriber)
+        forwarder = spawn(fn -> subscriber_forwarder_loop(subscriber) end)
 
         new_state =
           state
           |> Map.update!(:subscribers, &MapSet.put(&1, subscriber))
-          |> put_in([:monitors, subscriber], ref)
+          |> Map.update!(:monitors, &Map.put(&1, subscriber, ref))
+          |> Map.update!(:subscriber_forwarders, &Map.put(&1, subscriber, forwarder))
 
         {:reply, :ok, new_state}
       end
@@ -282,17 +285,7 @@ defmodule Gong.Session do
   end
 
   def handle_call({:unsubscribe, subscriber}, _from, state) do
-    state =
-      case Map.pop(state.monitors, subscriber) do
-        {nil, _} ->
-          state
-
-        {ref, monitors} ->
-          Process.demonitor(ref, [:flush])
-          %{state | monitors: monitors}
-      end
-
-    new_state = Map.update!(state, :subscribers, &MapSet.delete(&1, subscriber))
+    new_state = unregister_subscriber(state, subscriber)
     {:reply, :ok, new_state}
   end
 
@@ -326,8 +319,10 @@ defmodule Gong.Session do
         )
 
       clear_subscriber_monitors(restored_state.monitors)
+      clear_subscriber_forwarders(restored_state.subscriber_forwarders)
 
-      new_state = %{restored_state | subscribers: MapSet.new(), monitors: %{}}
+      new_state =
+        %{restored_state | subscribers: MapSet.new(), monitors: %{}, subscriber_forwarders: %{}}
 
       response = %{
         session_id: new_state.session_id,
@@ -482,13 +477,13 @@ defmodule Gong.Session do
   end
 
   def handle_info({:DOWN, ref, :process, pid, _reason}, state) do
-    monitors =
-      case Map.get(state.monitors, pid) do
-        ^ref -> Map.delete(state.monitors, pid)
-        _ -> state.monitors
+    new_state =
+      if Map.get(state.monitors, pid) == ref do
+        unregister_subscriber(state, pid)
+      else
+        state
       end
 
-    new_state = %{state | monitors: monitors, subscribers: MapSet.delete(state.subscribers, pid)}
     {:noreply, new_state}
   end
 
@@ -718,8 +713,8 @@ defmodule Gong.Session do
   end
 
   defp dispatch_event(state, event) do
-    Enum.each(state.subscribers, fn subscriber ->
-      send(subscriber, {:session_event, event})
+    Enum.each(state.subscriber_forwarders, fn {_subscriber, forwarder} ->
+      send(forwarder, {:session_event, event})
     end)
 
     state
@@ -1381,6 +1376,36 @@ defmodule Gong.Session do
     end
   end
 
+  defp unregister_subscriber(state, subscriber) do
+    {ref, monitors} = Map.pop(state.monitors, subscriber)
+    {forwarder, forwarders} = Map.pop(state.subscriber_forwarders, subscriber)
+
+    if is_reference(ref), do: Process.demonitor(ref, [:flush])
+    stop_subscriber_forwarder(forwarder)
+
+    state
+    |> Map.put(:monitors, monitors)
+    |> Map.update!(:subscribers, &MapSet.delete(&1, subscriber))
+    |> Map.put(:subscriber_forwarders, forwarders)
+  end
+
+  defp stop_subscriber_forwarder(pid) when is_pid(pid) and Process.alive?(pid) do
+    Process.exit(pid, :normal)
+  end
+
+  defp stop_subscriber_forwarder(_), do: :ok
+
+  defp subscriber_forwarder_loop(subscriber) do
+    receive do
+      {:session_event, event} ->
+        send(subscriber, {:session_event, event})
+        subscriber_forwarder_loop(subscriber)
+
+      :stop ->
+        :ok
+    end
+  end
+
   defp safe_invoke_listener(listener, event) do
     try do
       _ = listener.(event)
@@ -1395,6 +1420,12 @@ defmodule Gong.Session do
   defp clear_subscriber_monitors(monitors) do
     Enum.each(monitors, fn {_pid, ref} ->
       Process.demonitor(ref, [:flush])
+    end)
+  end
+
+  defp clear_subscriber_forwarders(forwarders) do
+    Enum.each(forwarders, fn {_subscriber, forwarder} ->
+      stop_subscriber_forwarder(forwarder)
     end)
   end
 

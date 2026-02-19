@@ -82,7 +82,8 @@ defmodule Gong.CLISessionStreamIntegrationTest do
 
     on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
 
-    shadow_subscriber = spawn_link(fn -> shadow_subscriber_loop(self()) end)
+    test_process = self()
+    shadow_subscriber = spawn_link(fn -> shadow_subscriber_loop(test_process) end)
     on_exit(fn -> send(shadow_subscriber, :stop) end)
 
     assert :ok = CLI.subscribe_session_stream(session, self())
