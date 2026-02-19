@@ -132,13 +132,23 @@ defmodule Gong.Stream do
   end
 
   defp chunks_to_events([{:abort, reason} | _rest], events, started) do
-    error_event = Event.new(:error, content: to_string(reason))
+    error_event = Event.new(:error, content: safe_reason_to_string(reason))
 
     if started do
       end_event = Event.new(:text_end)
       Enum.reverse([end_event, error_event | events])
     else
       Enum.reverse([error_event | events])
+    end
+  end
+
+  defp safe_reason_to_string(reason) when is_binary(reason), do: reason
+
+  defp safe_reason_to_string(reason) do
+    try do
+      to_string(reason)
+    rescue
+      _ -> inspect(reason)
     end
   end
 
