@@ -949,9 +949,16 @@ defmodule Gong.Session do
     model_id =
       snapshot_get(model, :model_id) || snapshot_get(model, :modelId) || snapshot_get(model, :id)
 
-    with provider when is_binary(provider) and provider != "" <- provider,
-         model_id when is_binary(model_id) and model_id != "" <- model_id do
-      {:ok, "#{provider}:#{model_id}"}
+    with provider when is_binary(provider) <- provider,
+         model_id when is_binary(model_id) <- model_id do
+      provider = String.trim(provider)
+      model_id = String.trim(model_id)
+
+      if provider != "" and model_id != "" do
+        {:ok, "#{provider}:#{model_id}"}
+      else
+        :error
+      end
     else
       _ -> :error
     end

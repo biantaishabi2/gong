@@ -558,6 +558,37 @@ defmodule Gong.SessionTest do
       end)
     end
 
+    test "模型 map 中 provider/model_id 仅空白字符时回退默认值" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-invalid-model-map-whitespace",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      Enum.each(
+        [
+          %{"provider" => " ", "model_id" => "gpt-4o"},
+          %{"provider" => "openai", "model_id" => "   "}
+        ],
+        fn invalid_model ->
+          snapshot = %{
+            history: [%{role: :user, content: "legacy", turn_id: 1, ts: 1}],
+            turn_cursor: 1,
+            metadata: %{
+              "session" => %{
+                "model" => invalid_model
+              }
+            }
+          }
+
+          assert {:ok, restored} = Session.restore(session, snapshot)
+          assert get_in(restored.metadata, ["session", "model"]) == "deepseek:deepseek-chat"
+        end
+      )
+    end
+
     test "深层 thinking 嵌套结构不会中断恢复并回退默认值" do
       {:ok, session} =
         Session.start_link(
