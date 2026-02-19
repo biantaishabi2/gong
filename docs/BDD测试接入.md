@@ -193,6 +193,53 @@ THEN assert_tool_success truncated=false
 
 ## CI 门禁
 
+### 门禁模式（CI_GATE_MODE）
+
+CI 支持三档门禁模式，通过 `workflow_dispatch` 的 `gate_mode` 参数切换：
+
+| 模式 | 说明 | 触发方式 |
+|------|------|----------|
+| `bdd-only`（默认） | 根据变更类型智能选择测试范围 | PR / push 自动触发 |
+| `legacy` | 全量 BDD 回归，忽略 path-filter | `workflow_dispatch` 手动触发 |
+| `strict` | 发布前全量回归（含 quarantine） | `workflow_dispatch` 手动触发 |
+
+### 变更检测与测试范围
+
+CI 使用 `dorny/paths-filter` 检测变更类型，决定测试范围：
+
+| 变更类型 | 触发规则 | 判定标准 |
+|---------|---------|---------|
+| Session 核心文件 | 运行 `@session` BDD 子集 | 全部通过 |
+| 仅文档/注释 | 跳过 BDD | 直接通过 |
+| 其他代码 | 运行 BDD-only 全量主路径 | 全部通过 |
+
+### Session 影响文件清单
+
+以下路径变更会触发 Session BDD 子集：
+
+- `lib/gong/session.ex`
+- `lib/gong/session/**`
+- `docs/bdd/session_edge.dsl`
+- `docs/bdd/tape_session.dsl`
+- `test/bdd_generated/session_edge_generated_test.exs`
+- `test/bdd_generated/tape_session_generated_test.exs`
+
+### 标签约定
+
+| 标签 | 含义 | CI 行为 |
+|------|------|---------|
+| `@session` | Session 核心场景 | bdd-only 模式下 session 变更仅跑此子集 |
+| `@quarantine` | 已知 flaky 用例 | 隔离运行，失败不阻断，降级为告警 |
+| `@smoke` | 冒烟测试 | bdd-smoke 阶段运行 |
+| `@e2e` | 端到端真实 LLM 测试 | 仅 push 到 master/main 时运行 |
+
+### Quarantine 用例管理
+
+1. **标记**：在 DSL 场景的 TAGS 中添加 `quarantine`
+2. **CI 行为**：隔离运行，`continue-on-error`，失败降级为 warning
+3. **修复 SLA**：7 个工作日内修复或移除 quarantine 标记
+4. **升级**：连续 3 次迭代未修复，应升级为阻断
+
 ### bdd_gate.sh
 
 有了 `.bddc.toml`，门禁脚本无需传参：
