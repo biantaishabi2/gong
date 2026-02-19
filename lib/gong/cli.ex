@@ -392,9 +392,7 @@ defmodule Gong.CLI do
   defp validate_timestamp(_timestamp),
     do: invalid_argument("timestamp 必须是毫秒正整数", "请传入 Unix 毫秒时间戳")
 
-  defp payload_get(map, key) when is_map(map) and is_atom(key) do
-    Map.get(map, key) || Map.get(map, Atom.to_string(key))
-  end
+  defp payload_get(map, key), do: Events.payload_get(map, key)
 
   defp invalid_argument(message, hint) do
     {:error,

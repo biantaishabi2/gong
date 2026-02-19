@@ -320,6 +320,7 @@ defmodule Gong.Session do
           restored.turn_cursor
         )
 
+      restored_state = cleanup_command_chain(restored_state, restore_command_id)
       clear_subscriber_monitors(restored_state.monitors)
       clear_subscriber_forwarders(restored_state.subscriber_forwarders)
 
@@ -881,9 +882,7 @@ defmodule Gong.Session do
     end
   end
 
-  defp payload_get(map, key) when is_map(map) and is_atom(key) do
-    Map.get(map, key) || Map.get(map, Atom.to_string(key))
-  end
+  defp payload_get(map, key), do: Events.payload_get(map, key)
 
   defp resolve_backend(opts, default_backend) do
     case Keyword.get(opts, :backend, default_backend) do

@@ -300,6 +300,12 @@ defmodule Gong.Session.Events do
 
   def validate_sequence(_events, _start_seq), do: {:error, :invalid_argument}
 
+  @doc "从 map 中按 atom key 或 string key 取值（兼容混合键 map）"
+  @spec payload_get(map(), atom()) :: term()
+  def payload_get(map, key) when is_map(map) and is_atom(key) do
+    Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  end
+
   defp validate_ctx(%{session_id: session_id, command_id: command_id, seq: seq})
        when is_binary(session_id) and session_id != "" and is_binary(command_id) and
               command_id != "" and is_integer(seq) and seq > 0 do
