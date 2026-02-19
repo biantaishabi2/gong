@@ -453,6 +453,39 @@ defmodule Gong.SessionTest do
       refute Map.has_key?(restored.metadata, "thinking_level")
     end
 
+    test "metadata.session 内旧字段不会覆盖新字段，且写回时会清理" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-session-legacy-keys-cleaned",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "legacy", turn_id: 3, ts: 1}],
+        turn_cursor: 3,
+        metadata: %{
+          "session" => %{
+            :model => "legacy:should-not-win",
+            :saved_model => "legacy:saved-model",
+            :thinking_level => "high",
+            "model" => "openai:gpt-4o",
+            "thinking" => %{"level" => "low"}
+          }
+        }
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert get_in(restored.metadata, ["session", "model"]) == "openai:gpt-4o"
+      assert get_in(restored.metadata, ["session", "thinking", "level"]) == "low"
+
+      session_metadata = restored.metadata["session"]
+      refute Map.has_key?(session_metadata, :model)
+      refute Map.has_key?(session_metadata, :saved_model)
+      refute Map.has_key?(session_metadata, :thinking_level)
+    end
+
     test "turn_cursor 非法时继续回退 turn_id" do
       {:ok, session} =
         Session.start_link(

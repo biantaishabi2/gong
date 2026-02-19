@@ -831,6 +831,7 @@ defmodule Gong.Session do
       metadata
       |> snapshot_get(:session)
       |> normalize_snapshot_metadata()
+      |> drop_legacy_session_keys()
       |> Map.put("model", model)
       |> Map.put("thinking", %{"level" => thinking_level})
 
@@ -859,6 +860,31 @@ defmodule Gong.Session do
       "saved_thinking_level"
     ])
     |> Map.put("session", canonical_session)
+  end
+
+  defp drop_legacy_session_keys(session) when is_map(session) do
+    Map.drop(session, [
+      :model,
+      "model",
+      :model_name,
+      "model_name",
+      :modelName,
+      "modelName",
+      :saved_model,
+      "saved_model",
+      :savedModel,
+      "savedModel",
+      :thinking,
+      "thinking",
+      :thinking_level,
+      "thinking_level",
+      :thinkingLevel,
+      "thinkingLevel",
+      :savedThinkingLevel,
+      "savedThinkingLevel",
+      :saved_thinking_level,
+      "saved_thinking_level"
+    ])
   end
 
   defp pick_model_value(candidates, source) do
@@ -965,7 +991,12 @@ defmodule Gong.Session do
   defp snapshot_get(nil, _key), do: nil
 
   defp snapshot_get(map, key) when is_map(map) and is_atom(key) do
-    Map.get(map, key) || Map.get(map, Atom.to_string(key))
+    string_key = Atom.to_string(key)
+
+    case Map.fetch(map, string_key) do
+      {:ok, value} -> value
+      :error -> Map.get(map, key)
+    end
   end
 
   defp snapshot_get(map, key) when is_map(map) and is_binary(key) do
