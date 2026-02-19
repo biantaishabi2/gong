@@ -52,11 +52,26 @@ defmodule Gong.Session do
           (String.t(), keyword(), map() ->
              {:ok, [StreamEvent.t()] | list() | String.t() | map()} | {:error, term()})
 
-  @spec start_link(keyword()) :: GenServer.on_start()
+  @spec start_link(keyword()) :: {:ok, pid()} | {:error, error_t()}
   def start_link(opts \\ []) do
     name = Keyword.get(opts, :name)
     genserver_opts = if name, do: [name: name], else: []
-    GenServer.start_link(__MODULE__, opts, genserver_opts)
+
+    try do
+      case GenServer.start_link(__MODULE__, opts, genserver_opts) do
+        {:ok, pid} -> {:ok, pid}
+        {:error, reason} -> {:error, normalize_error(reason)}
+      end
+    rescue
+      FunctionClauseError ->
+        {:error, normalize_error(:invalid_argument)}
+
+      ArgumentError ->
+        {:error, normalize_error(:invalid_argument)}
+    catch
+      :exit, reason ->
+        {:error, normalize_error(normalize_genserver_exit(reason))}
+    end
   end
 
   @doc "异步发送 prompt，函数立即返回，结果仅通过事件流回传。"
@@ -555,12 +570,25 @@ defmodule Gong.Session do
   end
 
   defp maybe_buffer_stream_delta(state, turn_id, %StreamEvent{type: :text_delta, content: content}) do
-    Map.update(state, :turn_buffers, %{turn_id => content || ""}, fn buffers ->
-      Map.update(buffers, turn_id, content || "", fn existing -> existing <> (content || "") end)
+    delta_content = normalize_stream_delta_content(content)
+
+    Map.update(state, :turn_buffers, %{turn_id => delta_content}, fn buffers ->
+      Map.update(buffers, turn_id, delta_content, fn existing -> (existing || "") <> delta_content end)
     end)
   end
 
   defp maybe_buffer_stream_delta(state, _turn_id, _stream_event), do: state
+
+  defp normalize_stream_delta_content(content) when is_binary(content), do: content
+  defp normalize_stream_delta_content(nil), do: ""
+
+  defp normalize_stream_delta_content(content) do
+    try do
+      to_string(content)
+    rescue
+      _ -> inspect(content)
+    end
+  end
 
   defp next_seq(state, turn_id) do
     next = Map.get(state.seq_by_turn, turn_id, 0) + 1

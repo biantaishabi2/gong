@@ -3,6 +3,7 @@ defmodule Gong.SessionTest do
 
   alias Gong.Session
   alias Gong.Session.Events
+  alias Gong.Stream.Event, as: StreamEvent
 
   test "初始化后订阅事件流，turn 内 seq 单调递增且满足 schema 1.0.0" do
     {:ok, session} =
@@ -186,11 +187,49 @@ defmodule Gong.SessionTest do
   end
 
   test "非法 pid/name 参数返回统一错误而非抛异常" do
+    assert {:error, start_link_error} = Session.start_link(name: %{})
+    assert start_link_error.code == :invalid_argument
+
     assert {:error, history_error} = Session.history(%{})
     assert history_error.code == :invalid_argument
 
     assert {:error, close_error} = Session.close(%{})
     assert close_error.code == :invalid_argument
+  end
+
+  test "text_delta 非字符串不会导致 Session 崩溃" do
+    {:ok, session} =
+      Session.start_link(
+        session_id: "session-non-binary-text-delta",
+        backend: fn _message, _opts, _ctx ->
+          {:ok,
+           [
+             StreamEvent.new(:text_start),
+             StreamEvent.new(:text_delta, content: %{bad: :delta}),
+             StreamEvent.new(:text_end)
+           ]}
+        end
+      )
+
+    on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+    assert :ok = Session.subscribe(session, self())
+    assert :ok = Session.prompt(session, "trigger", [])
+
+    _events = receive_until_turn_completed([])
+    assert Process.alive?(session)
+
+    assert wait_until(fn ->
+             case Session.history(session) do
+               {:ok, history} ->
+                 Enum.any?(history, fn entry ->
+                   entry.role == :assistant and entry.turn_id == 1 and is_binary(entry.content)
+                 end)
+
+               {:error, _} ->
+                 false
+             end
+           end)
   end
 
   test "并发 prompt 下 Session 保持可用且完成所有 turn" do
