@@ -401,7 +401,7 @@ defmodule Gong.Session do
 
     %{
       code: code,
-      message: to_string(Map.get(err, :message, inspect(err))),
+      message: normalize_error_message(Map.get(err, :message, inspect(err))),
       retriable: retriable?(code, details, Map.get(err, :retriable)),
       retry_after: retry_after,
       details: details
@@ -425,7 +425,7 @@ defmodule Gong.Session do
 
     %{
       code: :internal_error,
-      message: to_string(message),
+      message: normalize_error_message(message),
       retriable: retriable?(:internal_error, details, nil),
       retry_after: nil,
       details: details
@@ -435,7 +435,7 @@ defmodule Gong.Session do
   def normalize_error({:stream_error, message, details}) do
     %{
       code: :stream_error,
-      message: to_string(message),
+      message: normalize_error_message(message),
       retriable: true,
       retry_after: nil,
       details: normalize_error_details(details)
@@ -772,9 +772,18 @@ defmodule Gong.Session do
 
   defp sanitize_detail_value(value, _depth), do: inspect(value)
 
+  defp normalize_error_message(message) when is_binary(message), do: message
+  defp normalize_error_message(message), do: inspect(message)
+
   defp safe_genserver_call(pid, message) do
     try do
       {:ok, GenServer.call(pid, message)}
+    rescue
+      FunctionClauseError ->
+        {:error, :invalid_argument}
+
+      ArgumentError ->
+        {:error, :invalid_argument}
     catch
       :exit, reason ->
         {:error, normalize_genserver_exit(reason)}
@@ -785,6 +794,12 @@ defmodule Gong.Session do
     try do
       GenServer.stop(pid, :normal)
       :ok
+    rescue
+      FunctionClauseError ->
+        {:error, :invalid_argument}
+
+      ArgumentError ->
+        {:error, :invalid_argument}
     catch
       :exit, reason ->
         {:error, normalize_genserver_exit(reason)}

@@ -162,6 +162,37 @@ defmodule Gong.SessionTest do
     assert restore_error.code == :session_not_found
   end
 
+  test "后端返回非字符串 message 不会导致 Session 崩溃" do
+    {:ok, session} =
+      Session.start_link(
+        session_id: "session-non-string-error-message",
+        backend: fn _message, _opts, _ctx ->
+          {:error, {:internal_error, :upstream_unavailable, %{reason: "bad gateway"}}}
+        end
+      )
+
+    on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+    assert :ok = Session.subscribe(session, self())
+    assert :ok = Session.prompt(session, "trigger", [])
+
+    events = receive_until_turn_completed([])
+    error_event = Enum.find(events, &(&1.type == "error.runtime"))
+
+    assert error_event != nil
+    assert error_event.error.code == :internal_error
+    assert is_binary(error_event.error.message)
+    assert Process.alive?(session)
+  end
+
+  test "非法 pid/name 参数返回统一错误而非抛异常" do
+    assert {:error, history_error} = Session.history(%{})
+    assert history_error.code == :invalid_argument
+
+    assert {:error, close_error} = Session.close(%{})
+    assert close_error.code == :invalid_argument
+  end
+
   test "并发 prompt 下 Session 保持可用且完成所有 turn" do
     {:ok, session} =
       Session.start_link(
