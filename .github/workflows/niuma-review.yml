@@ -25,8 +25,9 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
-          PR_NUMBER=$(gh api "repos/${REPO}/issues/${ISSUE_NUMBER}/comments" \
-            --jq '.[].body | select(contains("BOT:PR_CREATED"))' | grep -Eo 'pr=[0-9]+' | sed 's/pr=//' | tail -1)
+          PR_NUMBER=$(gh api --paginate "repos/${REPO}/issues/${ISSUE_NUMBER}/comments" \
+            --jq '.[] | select(.body | contains("BOT:PR_CREATED")) | .body' \
+            | sed -n 's/.*pr=\([0-9]\+\).*/\1/p' | tail -1)
           if [ -z "$PR_NUMBER" ]; then
             echo "::warning::未在 issue #${ISSUE_NUMBER} 的评论中找到 PR 号"
           fi
