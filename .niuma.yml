@@ -1,5 +1,5 @@
 ai:
-  default: codex
+  default: claude
   
   providers:
     # Claude Code
@@ -25,7 +25,7 @@ ai:
   # 实现阶段：切换 provider 只需改这里
   # 可选: claude | codex | kimi
   implementation:
-    provider: codex
+    provider: claude
 
 workflow:
   max_iterate_rounds: 10
