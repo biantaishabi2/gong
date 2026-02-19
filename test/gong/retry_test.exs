@@ -14,7 +14,8 @@ defmodule Gong.RetryTest do
     end
 
     test "context overflow 分类为 context_overflow" do
-      assert Gong.Retry.classify_error("prompt is too long for the context window") == :context_overflow
+      assert Gong.Retry.classify_error("prompt is too long for the context window") ==
+               :context_overflow
     end
 
     test "token exceeds context window 分类为 context_overflow" do
@@ -61,6 +62,50 @@ defmodule Gong.RetryTest do
     end
   end
 
+  describe "is_retryable_error/1 判定优先级" do
+    test "错误类型优先于 HTTP 状态码和标签" do
+      decision =
+        Gong.Retry.is_retryable_error(%{
+          type: "invalid_request",
+          status: 503,
+          tags: ["retryable"]
+        })
+
+      assert decision.retryable == false
+      assert decision.error_class == :permanent
+      assert decision.source == :error_type
+      assert decision.reason == :non_retryable_error_type
+      assert decision.matched == "invalid_request"
+    end
+
+    test "错误类型命中可重试时忽略不可重试状态码" do
+      decision =
+        Gong.Retry.is_retryable_error(%{
+          type: "timeout",
+          status: 400
+        })
+
+      assert decision.retryable == true
+      assert decision.error_class == :transient
+      assert decision.source == :error_type
+    end
+
+    test "HTTP 状态码命中 429/5xx 可重试" do
+      assert %{retryable: true, source: :http_status, matched: 429} =
+               Gong.Retry.is_retryable_error(%{status: 429})
+
+      assert %{retryable: true, source: :http_status, matched: 502} =
+               Gong.Retry.is_retryable_error(%{status_code: 502})
+    end
+
+    test "仅标签可用时读取标签判定" do
+      decision = Gong.Retry.is_retryable_error(%{metadata: %{tags: ["transient"]}})
+      assert decision.retryable == true
+      assert decision.source == :tag
+      assert decision.reason == :retryable_tag
+    end
+  end
+
   describe "should_retry?/2" do
     test "transient attempt=0 返回 true" do
       assert Gong.Retry.should_retry?(:transient, 0) == true
@@ -72,6 +117,12 @@ defmodule Gong.RetryTest do
 
     test "permanent 返回 false" do
       assert Gong.Retry.should_retry?(:permanent, 0) == false
+    end
+
+    test "统一判定结果可直接用于 should_retry?/2" do
+      decision = Gong.Retry.is_retryable_error(%{status: 429})
+      assert Gong.Retry.should_retry?(decision, 0) == true
+      assert Gong.Retry.should_retry?(decision, 3) == false
     end
   end
 end
