@@ -104,6 +104,13 @@ defmodule Gong.RetryTest do
       assert decision.source == :tag
       assert decision.reason == :retryable_tag
     end
+
+    test "兜底分支遇到未实现 String.Chars 的 map 不抛异常" do
+      decision = Gong.Retry.is_retryable_error(%{message: "plain"})
+      assert decision.retryable == false
+      assert decision.source == :none
+      assert decision.reason == :unknown
+    end
   end
 
   describe "should_retry?/2" do

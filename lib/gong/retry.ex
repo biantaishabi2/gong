@@ -183,7 +183,7 @@ defmodule Gong.Retry do
   end
 
   defp match_fallback_pattern(error) do
-    error_str = to_string(error)
+    error_str = error_to_pattern_string(error)
 
     cond do
       context_overflow?(error_str) ->
@@ -201,6 +201,19 @@ defmodule Gong.Retry do
 
       true ->
         {:error, :no_match}
+    end
+  end
+
+  defp error_to_pattern_string(error) when is_binary(error), do: error
+
+  defp error_to_pattern_string(error) when is_atom(error) or is_number(error),
+    do: to_string(error)
+
+  defp error_to_pattern_string(error) do
+    try do
+      to_string(error)
+    rescue
+      Protocol.UndefinedError -> inspect(error)
     end
   end
 

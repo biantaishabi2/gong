@@ -709,16 +709,33 @@ defmodule Gong.Session do
   end
 
   defp normalize_snapshot_turn_cursor(snapshot) do
-    raw_turn_cursor =
-      snapshot_get(snapshot, :turn_cursor) || snapshot_get(snapshot, :turn_id) || 0
+    raw_turn_cursor = snapshot_get(snapshot, :turn_cursor)
+    raw_turn_id = snapshot_get(snapshot, :turn_id)
 
     case normalize_non_negative_integer(raw_turn_cursor) do
       {:ok, turn_cursor} ->
         turn_cursor
 
       :error ->
-        Logger.warning("Session restore: turn_cursor 格式无效，回退 0，值=#{inspect(raw_turn_cursor)}")
-        0
+        case normalize_non_negative_integer(raw_turn_id) do
+          {:ok, turn_id} ->
+            if not is_nil(raw_turn_cursor) do
+              Logger.warning(
+                "Session restore: turn_cursor 格式无效，改用 turn_id，turn_cursor=#{inspect(raw_turn_cursor)}，turn_id=#{inspect(raw_turn_id)}"
+              )
+            end
+
+            turn_id
+
+          :error ->
+            if not (is_nil(raw_turn_cursor) and is_nil(raw_turn_id)) do
+              Logger.warning(
+                "Session restore: turn_cursor/turn_id 格式无效，回退 0，turn_cursor=#{inspect(raw_turn_cursor)}，turn_id=#{inspect(raw_turn_id)}"
+              )
+            end
+
+            0
+        end
     end
   end
 

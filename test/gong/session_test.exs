@@ -376,6 +376,26 @@ defmodule Gong.SessionTest do
       refute Map.has_key?(restored.metadata, "thinking_level")
     end
 
+    test "turn_cursor 非法时继续回退 turn_id" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-turn-id-fallback",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "legacy", turn_id: 5, ts: 1}],
+        turn_cursor: "not-a-number",
+        turn_id: 5,
+        metadata: %{}
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert restored.turn_cursor == 5
+    end
+
     test "异常格式不中断并回退默认 model/thinking/turn_cursor/history" do
       {:ok, session} =
         Session.start_link(
