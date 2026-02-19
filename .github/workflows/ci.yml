@@ -11,8 +11,8 @@ env:
   ERL_FLAGS: "+S 4:4"
 
 jobs:
-  bdd-gate:
-    name: BDD 门禁
+  bdd-smoke:
+    name: BDD Smoke 门禁
     runs-on: ubuntu-latest
 
     steps:
@@ -39,17 +39,96 @@ jobs:
       - name: 安装依赖
         run: mix deps.get
 
+      - name: 安装 bddc（若缺失）
+        run: |
+          if command -v bddc >/dev/null 2>&1; then
+            bddc --help >/dev/null
+            exit 0
+          fi
+          git clone --depth=1 https://github.com/biantaishabi2/Cli.git /tmp/cli
+          cd /tmp/cli/compiler/bddc
+          mix deps.get
+          MIX_ENV=prod mix escript.build
+          sudo install -m 0755 bdd_compiler /usr/local/bin/bdd_compiler
+          sudo ln -sfn /usr/local/bin/bdd_compiler /usr/local/bin/bddc
+
+      - name: 生成 BDD 测试
+        run: bddc compile
+
+      - name: 规范化 BDD 生成路径
+        run: ./scripts/normalize_bdd_generated_paths.sh
+
+      - name: 检查 BDD 生成文件已同步
+        run: git diff --exit-code -- test/bdd_generated docs/bdd/_generated/runtime_caps_v1.exs
+
       - name: 编译检查
         run: mix compile --warnings-as-errors
 
-      - name: BDD 测试
-        run: mix test test/bdd_generated/ --trace --exclude e2e
+      - name: BDD Smoke 测试
+        run: mix test test/bdd_generated/ --trace --only smoke --exclude e2e
+
+  bdd-full:
+    name: BDD Full 门禁
+    runs-on: ubuntu-latest
+    needs: bdd-smoke
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装系统依赖
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: 安装 Erlang/Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "26"
+          elixir-version: "1.17"
+
+      - name: 缓存依赖
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: mix-${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          restore-keys: mix-${{ runner.os }}-
+
+      - name: 安装依赖
+        run: mix deps.get
+
+      - name: 安装 bddc（若缺失）
+        run: |
+          if command -v bddc >/dev/null 2>&1; then
+            bddc --help >/dev/null
+            exit 0
+          fi
+          git clone --depth=1 https://github.com/biantaishabi2/Cli.git /tmp/cli
+          cd /tmp/cli/compiler/bddc
+          mix deps.get
+          MIX_ENV=prod mix escript.build
+          sudo install -m 0755 bdd_compiler /usr/local/bin/bdd_compiler
+          sudo ln -sfn /usr/local/bin/bdd_compiler /usr/local/bin/bddc
+
+      - name: 生成 BDD 测试
+        run: bddc compile
+
+      - name: 规范化 BDD 生成路径
+        run: ./scripts/normalize_bdd_generated_paths.sh
+
+      - name: 检查 BDD 生成文件已同步
+        run: git diff --exit-code -- test/bdd_generated docs/bdd/_generated/runtime_caps_v1.exs
+
+      - name: 编译检查
+        run: mix compile --warnings-as-errors
+
+      - name: BDD Full 测试
+        run: mix test test/bdd_generated/ --trace --exclude e2e --exclude smoke
 
   e2e:
     name: E2E 真实 LLM 测试
     runs-on: ubuntu-latest
-    needs: bdd-gate
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: bdd-full
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
 
     steps:
       - uses: actions/checkout@v4

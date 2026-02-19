@@ -118,7 +118,7 @@ THEN assert_tool_event_name expected="bash"
 GIVEN create_temp_dir
 GIVEN configure_agent
 GIVEN attach_telemetry_handler event="gong.retry"
-GIVEN mock_llm_response response_type="error" content="provider unavailable"
+GIVEN mock_llm_response response_type="error" content="fetch failed: provider unavailable"
 GIVEN mock_llm_response response_type="text" content="mock replay fallback ok"
 WHEN agent_stream prompt="外部依赖不可用时执行流式"
 THEN assert_retry_happened

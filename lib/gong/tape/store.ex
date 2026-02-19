@@ -248,6 +248,21 @@ defmodule Gong.Tape.Store do
     Index.close(conn)
   end
 
+  @doc "刷新持久化状态并重置内存态（pending）"
+  @spec flush(t()) :: {:ok, t()} | {:error, term()}
+  def flush(%__MODULE__{} = store) do
+    # 真实 flush 语义：关闭连接后重新打开同一 workspace，验证磁盘状态可恢复
+    close(store)
+
+    case init(store.workspace_path) do
+      {:ok, reopened} ->
+        {:ok, %{reopened | pending: []}}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   # ── 分支操作 ──
 
   @doc "从指定 anchor 创建分支，返回新 anchor 名"

@@ -9,11 +9,15 @@ echo "=== [1/3] bddc check（注册表 + DSL 编译检查）==="
 bddc check
 
 echo ""
-echo "=== [2/3] mix compile（确保生成的测试文件可编译）==="
+echo "=== [2/4] 规范化生成测试中的路径 ==="
+./scripts/normalize_bdd_generated_paths.sh
+
+echo ""
+echo "=== [3/4] mix compile（确保生成的测试文件可编译）==="
 mix compile --warnings-as-errors
 
 echo ""
-echo "=== [3/3] mix test（运行 BDD 生成测试）==="
+echo "=== [4/4] mix test（运行 BDD 生成测试）==="
 mix test test/bdd_generated/ --trace
 
 echo ""
