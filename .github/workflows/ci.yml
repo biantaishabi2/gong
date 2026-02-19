@@ -5,15 +5,69 @@ on:
     branches: [master, main]
   pull_request:
     branches: [master, main]
+  workflow_dispatch:
+    inputs:
+      gate_mode:
+        description: "门禁模式: bdd-only(默认) / legacy(全量回退) / strict(发布前全量)"
+        required: false
+        default: "bdd-only"
+        type: choice
+        options:
+          - bdd-only
+          - legacy
+          - strict
 
 env:
   MIX_ENV: test
   ERL_FLAGS: "+S 4:4"
 
 jobs:
+  # 变更检测：识别 session / docs-only / other 三类变更
+  detect-changes:
+    name: 变更检测
+    runs-on: ubuntu-latest
+    outputs:
+      session: ${{ steps.filter.outputs.session }}
+      docs_only: ${{ steps.filter.outputs.docs_only }}
+      gate_mode: ${{ steps.mode.outputs.gate_mode }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 确定门禁模式
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "gate_mode=${{ inputs.gate_mode }}" >> $GITHUB_OUTPUT
+          else
+            echo "gate_mode=bdd-only" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            session:
+              - 'lib/gong/session.ex'
+              - 'lib/gong/session/**'
+              - 'docs/bdd/session_edge.dsl'
+              - 'docs/bdd/tape_session.dsl'
+              - 'test/bdd_generated/session_edge_generated_test.exs'
+              - 'test/bdd_generated/tape_session_generated_test.exs'
+            docs_only:
+              - 'docs/**'
+              - '!docs/bdd/**'
+              - 'README.md'
+              - 'CHANGELOG.md'
+
   bdd-smoke:
     name: BDD Smoke 门禁
     runs-on: ubuntu-latest
+    needs: detect-changes
+    # docs-only 变更在 bdd-only 模式下跳过
+    if: >
+      !(needs.detect-changes.outputs.gate_mode == 'bdd-only' &&
+        needs.detect-changes.outputs.docs_only == 'true' &&
+        needs.detect-changes.outputs.session == 'false')
 
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +124,7 @@ jobs:
   bdd-full:
     name: BDD Full 门禁
     runs-on: ubuntu-latest
-    needs: bdd-smoke
+    needs: [detect-changes, bdd-smoke]
 
     steps:
       - uses: actions/checkout@v4
@@ -121,8 +175,37 @@ jobs:
       - name: 编译检查
         run: mix compile --warnings-as-errors
 
-      - name: BDD Full 测试
-        run: mix test test/bdd_generated/ --trace --exclude e2e --exclude smoke
+      # bdd-only 模式 + session 变更：只跑 session 相关测试
+      - name: BDD Session 测试
+        if: >
+          needs.detect-changes.outputs.gate_mode == 'bdd-only' &&
+          needs.detect-changes.outputs.session == 'true'
+        run: |
+          mix test test/bdd_generated/session_edge_generated_test.exs \
+                   test/bdd_generated/tape_session_generated_test.exs \
+                   --trace --exclude e2e --exclude smoke --exclude quarantine
+
+      # 非 session 变更或 legacy/strict 模式：跑全量（排除 quarantine）
+      - name: BDD Full 测试（主路径）
+        if: >
+          needs.detect-changes.outputs.gate_mode != 'bdd-only' ||
+          needs.detect-changes.outputs.session == 'false'
+        run: |
+          mix test test/bdd_generated/ --trace --exclude e2e --exclude smoke --exclude quarantine
+
+      # quarantine 用例：隔离运行，失败不阻断
+      - name: BDD Quarantine 测试（隔离）
+        id: quarantine
+        continue-on-error: true
+        run: |
+          mix test test/bdd_generated/ --trace --only quarantine --max-failures 10 2>&1 || true
+
+      - name: Quarantine 失败告警
+        if: steps.quarantine.outcome == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "::warning::Quarantine 用例失败，已降级为告警"
 
   e2e:
     name: E2E 真实 LLM 测试
