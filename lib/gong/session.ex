@@ -1405,8 +1405,8 @@ defmodule Gong.Session do
     |> Map.put(:subscriber_forwarders, forwarders)
   end
 
-  defp stop_subscriber_forwarder(pid) when is_pid(pid) and Process.alive?(pid) do
-    Process.exit(pid, :normal)
+  defp stop_subscriber_forwarder(pid) when is_pid(pid) do
+    if Process.alive?(pid), do: Process.exit(pid, :normal)
   end
 
   defp stop_subscriber_forwarder(_), do: :ok
