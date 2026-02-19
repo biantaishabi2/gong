@@ -4,6 +4,7 @@ defmodule Gong.Session do
 
   对外 API：
   - `start_link/1`
+  - `submit_command/3`（标准 command payload，异步）
   - `prompt/3`（异步，立即返回）
   - `subscribe/2`
   - `unsubscribe/2`
@@ -43,6 +44,7 @@ defmodule Gong.Session do
   @details_max_depth 8
   @details_max_items 32
   @default_model "deepseek:deepseek-chat"
+  @supported_command_types MapSet.new(["prompt", "steer"])
 
   @type history_entry :: %{
           required(:role) => atom(),
@@ -55,6 +57,14 @@ defmodule Gong.Session do
   @type backend_fun ::
           (String.t(), keyword(), map() ->
              {:ok, [StreamEvent.t()] | list() | String.t() | map()} | {:error, term()})
+
+  @type command_payload :: %{
+          required(:session_id) => String.t(),
+          required(:command_id) => String.t(),
+          required(:type) => String.t(),
+          required(:args) => map(),
+          required(:timestamp) => integer()
+        }
 
   @spec start_link(keyword()) :: {:ok, pid()} | {:error, error_t()}
   def start_link(opts \\ []) do
@@ -91,6 +101,25 @@ defmodule Gong.Session do
   @deprecated "请使用 prompt/3"
   @spec prompt(pid(), String.t()) :: :ok | {:error, error_t()}
   def prompt(pid, message), do: prompt(pid, message, [])
+
+  @doc """
+  提交标准 command payload。
+
+  payload 要求：
+  - `session_id`
+  - `command_id`
+  - `type`（当前支持 `prompt` / `steer`）
+  - `args`（至少包含 `message`）
+  - `timestamp`（毫秒）
+  """
+  @spec submit_command(pid(), command_payload(), keyword()) :: :ok | {:error, error_t()}
+  def submit_command(pid, command_payload, opts \\ []) do
+    case safe_genserver_call(pid, {:submit_command, command_payload, opts}) do
+      {:ok, :ok} -> :ok
+      {:ok, {:error, _} = error} -> error
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
+  end
 
   @doc """
   订阅 Session 事件流。
@@ -224,7 +253,8 @@ defmodule Gong.Session do
       metadata: %{},
       subscribers: MapSet.new(),
       monitors: %{},
-      seq_by_turn: %{},
+      session_seq: 0,
+      command_last_event_id: %{},
       turn_buffers: %{}
     }
 
@@ -279,9 +309,11 @@ defmodule Gong.Session do
           history: restored.history,
           turn_id: restored.turn_cursor,
           metadata: restored.metadata,
-          seq_by_turn: %{},
+          command_last_event_id: %{},
           turn_buffers: %{}
       }
+
+      restore_command_id = system_command_id("restore")
 
       restored_state =
         emit_event(
@@ -289,6 +321,7 @@ defmodule Gong.Session do
           "lifecycle.session_restored",
           %{restored: true},
           nil,
+          restore_command_id,
           restored.turn_cursor
         )
 
@@ -313,39 +346,34 @@ defmodule Gong.Session do
   def handle_call({:prompt, message, opts}, _from, state) do
     with :ok <- validate_prompt(message),
          :ok <- validate_prompt_opts(opts),
-         {:ok, backend} <- resolve_backend(opts, state.backend) do
-      turn_id = state.turn_id + 1
+         {:ok, backend} <- resolve_backend(opts, state.backend),
+         {:ok, new_state} <-
+           enqueue_command(
+             state,
+             %{
+               session_id: state.session_id,
+               command_id: Events.generate_command_id(),
+               type: "prompt",
+               args: %{message: message},
+               timestamp: System.os_time(:millisecond)
+             },
+             Keyword.delete(opts, :backend),
+             backend
+           ) do
+      {:reply, :ok, new_state}
+    else
+      {:error, reason} ->
+        {:reply, {:error, normalize_error(reason)}, state}
+    end
+  end
 
-      state =
-        state
-        |> Map.put(:turn_id, turn_id)
-        |> Map.update!(:history, fn history ->
-          history ++ [history_entry(:user, message, turn_id)]
-        end)
-        |> put_in([:turn_buffers, turn_id], "")
-
-      state =
-        emit_event(
-          state,
-          "lifecycle.turn_started",
-          %{async: true, delivery: "best_effort_at_least_once"},
-          nil,
-          turn_id
-        )
-
-      run_opts = Keyword.delete(opts, :backend)
-      session_pid = self()
-
-      Task.start(fn ->
-        run_turn(session_pid, backend, message, run_opts, %{
-          session_id: state.session_id,
-          turn_id: turn_id,
-          history: state.history,
-          metadata: state.metadata
-        })
-      end)
-
-      {:reply, :ok, state}
+  def handle_call({:submit_command, command_payload, opts}, _from, state) do
+    with :ok <- validate_prompt_opts(opts),
+         {:ok, normalized_payload} <- validate_command_payload(command_payload, state.session_id),
+         {:ok, backend} <- resolve_backend(opts, state.backend),
+         {:ok, new_state} <-
+           enqueue_command(state, normalized_payload, Keyword.delete(opts, :backend), backend) do
+      {:reply, :ok, new_state}
     else
       {:error, reason} ->
         {:reply, {:error, normalize_error(reason)}, state}
@@ -353,27 +381,19 @@ defmodule Gong.Session do
   end
 
   @impl true
-  def handle_info({:session_stream_event, turn_id, %StreamEvent{} = stream_event}, state) do
-    {seq, state} = next_seq(state, turn_id)
+  def handle_info(
+        {:session_stream_event, command_id, turn_id, %StreamEvent{} = stream_event},
+        state
+      ) do
+    state =
+      state
+      |> maybe_buffer_stream_delta(turn_id, stream_event)
+      |> emit_stream_event(stream_event, command_id, turn_id)
 
-    ctx = %{session_id: state.session_id, turn_id: turn_id, seq: seq}
-
-    case Events.from_stream_event(stream_event, ctx) do
-      {:ok, event} ->
-        state =
-          state
-          |> maybe_buffer_stream_delta(turn_id, stream_event)
-          |> dispatch_event(event)
-
-        {:noreply, state}
-
-      {:error, reason} ->
-        state = emit_runtime_error(state, turn_id, {:stream_error, inspect(reason), %{}})
-        {:noreply, state}
-    end
+    {:noreply, state}
   end
 
-  def handle_info({:session_turn_done, turn_id, :ok}, state) do
+  def handle_info({:session_turn_done, command_id, turn_id, :ok}, state) do
     {assistant_text, turn_buffers} = Map.pop(state.turn_buffers, turn_id, "")
     state = %{state | turn_buffers: turn_buffers}
 
@@ -389,17 +409,59 @@ defmodule Gong.Session do
     state =
       emit_event(
         state,
-        "lifecycle.turn_completed",
-        %{status: "ok"},
+        "lifecycle.result",
+        %{status: "ok", assistant_text: assistant_text},
         nil,
+        command_id,
         turn_id
       )
 
-    {:noreply, state}
+    state =
+      emit_event(
+        state,
+        "lifecycle.completed",
+        %{status: "ok"},
+        nil,
+        command_id,
+        turn_id
+      )
+
+    state =
+      emit_event(
+        state,
+        "lifecycle.turn_completed",
+        %{status: "ok"},
+        nil,
+        command_id,
+        turn_id
+      )
+
+    {:noreply, cleanup_command_chain(state, command_id)}
   end
 
-  def handle_info({:session_turn_done, turn_id, {:error, reason}}, state) do
-    state = emit_runtime_error(state, turn_id, reason)
+  def handle_info({:session_turn_done, command_id, turn_id, {:error, reason}}, state) do
+    normalized_error = normalize_error(reason)
+    state = emit_runtime_error(state, command_id, turn_id, reason)
+
+    state =
+      emit_event(
+        state,
+        "lifecycle.error",
+        %{status: "error"},
+        normalized_error,
+        command_id,
+        turn_id
+      )
+
+    state =
+      emit_event(
+        state,
+        "lifecycle.completed",
+        %{status: "error"},
+        nil,
+        command_id,
+        turn_id
+      )
 
     state =
       emit_event(
@@ -407,10 +469,16 @@ defmodule Gong.Session do
         "lifecycle.turn_completed",
         %{status: "error"},
         nil,
+        command_id,
         turn_id
       )
 
-    {:noreply, %{state | turn_buffers: Map.delete(state.turn_buffers, turn_id)}}
+    state =
+      state
+      |> Map.update!(:turn_buffers, &Map.delete(&1, turn_id))
+      |> cleanup_command_chain(command_id)
+
+    {:noreply, state}
   end
 
   def handle_info({:DOWN, ref, :process, pid, _reason}, state) do
@@ -428,12 +496,15 @@ defmodule Gong.Session do
 
   @impl true
   def terminate(reason, state) do
+    close_command_id = system_command_id("close")
+
     _ =
       emit_event(
         state,
         "lifecycle.session_closed",
         %{reason: inspect(reason)},
         nil,
+        close_command_id,
         max(state.turn_id, 0)
       )
 
@@ -511,13 +582,19 @@ defmodule Gong.Session do
     case call_backend(backend, message, opts, context) do
       {:ok, stream_events} ->
         Enum.each(stream_events, fn stream_event ->
-          send(session_pid, {:session_stream_event, context.turn_id, stream_event})
+          send(
+            session_pid,
+            {:session_stream_event, context.command_id, context.turn_id, stream_event}
+          )
         end)
 
-        send(session_pid, {:session_turn_done, context.turn_id, :ok})
+        send(session_pid, {:session_turn_done, context.command_id, context.turn_id, :ok})
 
       {:error, reason} ->
-        send(session_pid, {:session_turn_done, context.turn_id, {:error, reason}})
+        send(
+          session_pid,
+          {:session_turn_done, context.command_id, context.turn_id, {:error, reason}}
+        )
     end
   end
 
@@ -585,19 +662,59 @@ defmodule Gong.Session do
     end
   end
 
-  defp emit_runtime_error(state, turn_id, reason) do
+  defp emit_runtime_error(state, command_id, turn_id, reason) do
     envelope = normalize_error(reason)
-    emit_event(state, "error.runtime", %{}, envelope, turn_id)
+    emit_event(state, "error.runtime", %{}, envelope, command_id, turn_id)
   end
 
-  defp emit_event(state, type, payload, error, turn_id) do
-    {seq, state} = next_seq(state, turn_id)
-    ctx = %{session_id: state.session_id, turn_id: turn_id, seq: seq}
+  defp emit_stream_event(state, stream_event, command_id, turn_id) do
+    {ctx, state} = next_event_ctx(state, command_id, turn_id)
+
+    case Events.from_stream_event(stream_event, ctx) do
+      {:ok, event} ->
+        state
+        |> record_emitted_event(command_id, event)
+        |> dispatch_event(event)
+
+      {:error, reason} ->
+        emit_runtime_error(state, command_id, turn_id, {:stream_error, inspect(reason), %{}})
+    end
+  end
+
+  defp emit_event(state, type, payload, error, command_id, turn_id) do
+    {ctx, state} = next_event_ctx(state, command_id, turn_id)
 
     case Events.new(type, payload, ctx, error) do
-      {:ok, event} -> dispatch_event(state, event)
-      {:error, _reason} -> state
+      {:ok, event} ->
+        state
+        |> record_emitted_event(command_id, event)
+        |> dispatch_event(event)
+
+      {:error, _reason} ->
+        state
     end
+  end
+
+  defp next_event_ctx(state, command_id, turn_id) do
+    {seq, state} = next_seq(state)
+
+    ctx = %{
+      session_id: state.session_id,
+      command_id: command_id,
+      turn_id: turn_id,
+      seq: seq,
+      causation_id: Map.get(state.command_last_event_id, command_id)
+    }
+
+    {ctx, state}
+  end
+
+  defp record_emitted_event(state, command_id, event) do
+    put_in(state, [:command_last_event_id, command_id], event.event_id)
+  end
+
+  defp cleanup_command_chain(state, command_id) do
+    update_in(state, [:command_last_event_id], &Map.delete(&1, command_id))
   end
 
   defp dispatch_event(state, event) do
@@ -631,9 +748,9 @@ defmodule Gong.Session do
     end
   end
 
-  defp next_seq(state, turn_id) do
-    next = Map.get(state.seq_by_turn, turn_id, 0) + 1
-    {next, put_in(state, [:seq_by_turn, turn_id], next)}
+  defp next_seq(state) do
+    next = Events.next_seq(state.session_seq)
+    {next, %{state | session_seq: next}}
   end
 
   defp validate_prompt(message) when is_binary(message) do
@@ -647,6 +764,114 @@ defmodule Gong.Session do
   end
 
   defp validate_prompt_opts(_), do: {:error, :invalid_argument}
+
+  defp validate_command_payload(command_payload, expected_session_id)
+       when is_map(command_payload) do
+    with session_id when is_binary(session_id) <- payload_get(command_payload, :session_id),
+         true <- session_id == expected_session_id and session_id != "",
+         command_id when is_binary(command_id) <- payload_get(command_payload, :command_id),
+         true <- String.trim(command_id) != "",
+         type when is_binary(type) <- payload_get(command_payload, :type),
+         true <- MapSet.member?(@supported_command_types, type),
+         args when is_map(args) <- payload_get(command_payload, :args),
+         timestamp when is_integer(timestamp) <- payload_get(command_payload, :timestamp),
+         true <- timestamp > 0,
+         {:ok, _message} <- extract_command_message(args) do
+      {:ok,
+       %{
+         session_id: session_id,
+         command_id: command_id,
+         type: type,
+         args: args,
+         timestamp: timestamp
+       }}
+    else
+      _ -> {:error, :invalid_argument}
+    end
+  end
+
+  defp validate_command_payload(_command_payload, _expected_session_id),
+    do: {:error, :invalid_argument}
+
+  defp extract_command_message(args) when is_map(args) do
+    message = payload_get(args, :message)
+
+    cond do
+      is_binary(message) and String.trim(message) != "" ->
+        {:ok, message}
+
+      true ->
+        {:error, :invalid_argument}
+    end
+  end
+
+  defp extract_command_message(_args), do: {:error, :invalid_argument}
+
+  defp enqueue_command(state, command_payload, run_opts, backend) do
+    with {:ok, message} <- extract_command_message(command_payload.args) do
+      turn_id = state.turn_id + 1
+
+      state =
+        state
+        |> Map.put(:turn_id, turn_id)
+        |> Map.update!(:history, fn history ->
+          history ++ [history_entry(:user, message, turn_id)]
+        end)
+        |> put_in([:turn_buffers, turn_id], "")
+
+      state =
+        emit_event(
+          state,
+          "lifecycle.received",
+          %{
+            command_type: command_payload.type,
+            command_timestamp: command_payload.timestamp,
+            async: true
+          },
+          nil,
+          command_payload.command_id,
+          turn_id
+        )
+
+      state =
+        emit_event(
+          state,
+          "lifecycle.processing",
+          %{command_type: command_payload.type, delivery: "best_effort_at_least_once"},
+          nil,
+          command_payload.command_id,
+          turn_id
+        )
+
+      state =
+        emit_event(
+          state,
+          "lifecycle.turn_started",
+          %{async: true, delivery: "best_effort_at_least_once"},
+          nil,
+          command_payload.command_id,
+          turn_id
+        )
+
+      session_pid = self()
+
+      Task.start(fn ->
+        run_turn(session_pid, backend, message, run_opts, %{
+          session_id: state.session_id,
+          command_id: command_payload.command_id,
+          turn_id: turn_id,
+          history: state.history,
+          metadata: state.metadata
+        })
+      end)
+
+      {:ok, state}
+    end
+  end
+
+  defp payload_get(map, key) when is_map(map) and is_atom(key) do
+    Map.get(map, key) || Map.get(map, Atom.to_string(key))
+  end
 
   defp resolve_backend(opts, default_backend) do
     case Keyword.get(opts, :backend, default_backend) do
@@ -1184,6 +1409,11 @@ defmodule Gong.Session do
 
   defp default_session_id do
     "session_" <> Integer.to_string(System.unique_integer([:positive, :monotonic]))
+  end
+
+  defp system_command_id(prefix) when is_binary(prefix) do
+    "system:" <>
+      prefix <> ":" <> Integer.to_string(System.unique_integer([:positive, :monotonic]))
   end
 
   defp error(code, message, details) do
