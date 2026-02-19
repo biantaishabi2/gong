@@ -5,11 +5,13 @@ defmodule Gong.MixProject do
     [
       app: :gong,
       version: "0.1.0",
-      elixir: "~> 1.17",
+      elixir: ">= 1.14.0 and < 2.0.0",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
       aliases: aliases(),
+      escript: escript(),
+      releases: releases(),
 
       # Docs
       name: "Gong",
@@ -53,8 +55,38 @@ defmodule Gong.MixProject do
 
   defp aliases do
     [
+      {:"gong.cli", &legacy_cli_alias/1},
       setup: ["deps.get"],
       test: ["test"]
     ]
+  end
+
+  defp escript do
+    [
+      main_module: Gong.CLI
+    ]
+  end
+
+  defp releases do
+    [
+      gong: [
+        include_erts: true,
+        include_executables_for: [:unix]
+      ]
+    ]
+  end
+
+  defp legacy_cli_alias(args) do
+    Mix.Task.run("compile")
+
+    exit_code =
+      Gong.CLI.run(args,
+        entry: "mix gong.cli",
+        legacy_entry: true
+      )
+
+    if exit_code != 0 do
+      System.halt(exit_code)
+    end
   end
 end
