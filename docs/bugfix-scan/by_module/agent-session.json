@@ -1,7 +1,14 @@
 {
-  "generated_at": "2026-02-16T03:09:00+0800",
+  "generated_at": "2026-02-19T12:00:00+0800",
   "module": "agent-session",
   "spec_count": 4,
+  "coverage_matrix": {
+    "existing": 1,
+    "missing": 0,
+    "new": 3,
+    "exempt": 0,
+    "review_cycle": "quarterly"
+  },
   "specs": [
     {
       "action": "isRetryableError",
@@ -43,7 +50,10 @@
         }
       },
       "test_type": "regression",
-      "wrong_behavior": "'fetch failed' 错误不被识别为可重试"
+      "wrong_behavior": "'fetch failed' 错误不被识别为可重试",
+      "coverage_status": "new",
+      "mapped_scenario": "SESSION-RETRY-001",
+      "exemption": null
     },
     {
       "action": "isRetryableError",
@@ -85,7 +95,10 @@
         }
       },
       "test_type": "regression",
-      "wrong_behavior": "'connection error' 消息不匹配可重试模式"
+      "wrong_behavior": "'connection error' 消息不匹配可重试模式",
+      "coverage_status": "new",
+      "mapped_scenario": "SESSION-RETRY-002",
+      "exemption": null
     },
     {
       "action": "getLastAssistantMessage",
@@ -128,7 +141,10 @@
         }
       },
       "test_type": "regression",
-      "wrong_behavior": "/copy 命中 aborted 空消息，复制内容为空"
+      "wrong_behavior": "/copy 命中 aborted 空消息，复制内容为空",
+      "coverage_status": "existing",
+      "mapped_scenario": "SESSION-ERR-007",
+      "exemption": null
     },
     {
       "action": "isRetryableError",
@@ -175,7 +191,10 @@
         }
       },
       "test_type": "regression",
-      "wrong_behavior": "包含 'terminated' 的错误消息不被识别为可重试"
+      "wrong_behavior": "包含 'terminated' 的错误消息不被识别为可重试",
+      "coverage_status": "new",
+      "mapped_scenario": "SESSION-RETRY-003",
+      "exemption": null
     }
   ]
 }
