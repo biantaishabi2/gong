@@ -16,4 +16,11 @@ defmodule Gong.StreamTest do
     assert Enum.map(events, & &1.type) == [:error]
     assert Enum.at(events, 0).content == "[:bad, :reason]"
   end
+
+  test "chunks_to_events 文本流 abort 后的事件序列可通过 valid_sequence 校验" do
+    events = Stream.chunks_to_events([{:chunk, "hi"}, {:abort, :x}])
+
+    assert Enum.map(events, & &1.type) == [:text_start, :text_delta, :error, :text_end]
+    assert Stream.valid_sequence?(events)
+  end
 end

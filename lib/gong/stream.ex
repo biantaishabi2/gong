@@ -60,17 +60,11 @@ defmodule Gong.Stream do
   # 空序列合法
   defp do_validate_sequence([]), do: true
 
-  # 文本序列：text_start → text_delta* → text_end
+  # 文本序列：text_start → (text_delta|error)* → text_end
   defp do_validate_sequence([:text_start | rest]) do
-    {deltas, after_deltas} = Enum.split_while(rest, fn t -> t == :text_delta end)
-
-    case after_deltas do
-      [:text_end | remaining] ->
-        _has_content = length(deltas) >= 0
-        do_validate_sequence(remaining)
-
-      _ ->
-        false
+    case consume_text_body(rest) do
+      {:ok, remaining} -> do_validate_sequence(remaining)
+      :error -> false
     end
   end
 
@@ -90,6 +84,11 @@ defmodule Gong.Stream do
   end
 
   defp do_validate_sequence(_), do: false
+
+  defp consume_text_body([:text_delta | rest]), do: consume_text_body(rest)
+  defp consume_text_body([:error | rest]), do: consume_text_body(rest)
+  defp consume_text_body([:text_end | rest]), do: {:ok, rest}
+  defp consume_text_body(_), do: :error
 
   @doc "从 chunk 队列生成 Stream.Event 列表"
   @spec chunks_to_events([
