@@ -256,6 +256,7 @@ defmodule Gong.Session do
       subscriber_forwarders: %{},
       session_seq: 0,
       command_last_event_id: %{},
+      seen_command_ids: MapSet.new(),
       turn_buffers: %{}
     }
 
@@ -303,6 +304,7 @@ defmodule Gong.Session do
           turn_id: restored.turn_cursor,
           metadata: restored.metadata,
           command_last_event_id: %{},
+          seen_command_ids: MapSet.new(),
           turn_buffers: %{}
       }
 
@@ -364,7 +366,7 @@ defmodule Gong.Session do
 
   def handle_call({:submit_command, command_payload, opts}, _from, state) do
     with :ok <- validate_prompt_opts(opts),
-         {:ok, normalized_payload} <- validate_command_payload(command_payload, state.session_id),
+         {:ok, normalized_payload} <- validate_command_payload(command_payload, state),
          {:ok, backend} <- resolve_backend(opts, state.backend),
          {:ok, new_state} <-
            enqueue_command(state, normalized_payload, Keyword.delete(opts, :backend), backend) do
@@ -761,7 +763,7 @@ defmodule Gong.Session do
   defp validate_prompt_opts(_), do: {:error, :invalid_argument}
 
   defp validate_command_payload(command_payload, expected_session_id)
-       when is_map(command_payload) do
+       when is_map(command_payload) and is_binary(expected_session_id) do
     with session_id when is_binary(session_id) <- payload_get(command_payload, :session_id),
          true <- session_id == expected_session_id and session_id != "",
          command_id when is_binary(command_id) <- payload_get(command_payload, :command_id),
@@ -785,8 +787,22 @@ defmodule Gong.Session do
     end
   end
 
-  defp validate_command_payload(_command_payload, _expected_session_id),
-    do: {:error, :invalid_argument}
+  defp validate_command_payload(command_payload, state) when is_map(command_payload) and is_map(state) do
+    with {:ok, normalized_payload} <- validate_command_payload(command_payload, state.session_id),
+         true <- command_id_available?(state, normalized_payload.command_id) do
+      {:ok, normalized_payload}
+    else
+      false -> {:error, :invalid_argument}
+      {:error, _reason} -> {:error, :invalid_argument}
+    end
+  end
+
+  defp validate_command_payload(_command_payload, _state), do: {:error, :invalid_argument}
+
+  defp command_id_available?(state, command_id) do
+    not Map.has_key?(state.command_last_event_id, command_id) and
+      not MapSet.member?(state.seen_command_ids, command_id)
+  end
 
   defp extract_command_message(args) when is_map(args) do
     message = payload_get(args, :message)
@@ -809,6 +825,7 @@ defmodule Gong.Session do
       state =
         state
         |> Map.put(:turn_id, turn_id)
+        |> Map.put(:seen_command_ids, MapSet.put(state.seen_command_ids, command_payload.command_id))
         |> Map.update!(:history, fn history ->
           history ++ [history_entry(:user, message, turn_id)]
         end)
