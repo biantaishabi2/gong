@@ -907,11 +907,10 @@ defmodule Gong.Session do
         :error
 
       String.contains?(model, ":") ->
-        {:ok, model}
+        normalize_model_pair(model, ":")
 
       String.contains?(model, "/") ->
-        [provider, model_id] = String.split(model, "/", parts: 2)
-        {:ok, "#{provider}:#{model_id}"}
+        normalize_model_pair(model, "/")
 
       true ->
         :error
@@ -933,6 +932,23 @@ defmodule Gong.Session do
   end
 
   defp normalize_model_value(_), do: :error
+
+  defp normalize_model_pair(model, separator) when is_binary(model) and is_binary(separator) do
+    case String.split(model, separator, parts: 2) do
+      [provider, model_id] ->
+        provider = String.trim(provider)
+        model_id = String.trim(model_id)
+
+        if provider != "" and model_id != "" do
+          {:ok, "#{provider}:#{model_id}"}
+        else
+          :error
+        end
+
+      _ ->
+        :error
+    end
+  end
 
   defp normalize_non_negative_integer(value) when is_integer(value) and value >= 0,
     do: {:ok, value}

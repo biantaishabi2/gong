@@ -500,6 +500,31 @@ defmodule Gong.SessionTest do
       assert get_in(restored.metadata, ["session", "thinking", "level"]) == "off"
     end
 
+    test "模型字符串缺少 provider 或 model_id 时回退默认值" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-invalid-model-pair",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      Enum.each(["openai/", "openai:", ":gpt-4o"], fn invalid_model ->
+        snapshot = %{
+          history: [%{role: :user, content: "legacy", turn_id: 1, ts: 1}],
+          turn_cursor: 1,
+          metadata: %{
+            "session" => %{
+              "model" => invalid_model
+            }
+          }
+        }
+
+        assert {:ok, restored} = Session.restore(session, snapshot)
+        assert get_in(restored.metadata, ["session", "model"]) == "deepseek:deepseek-chat"
+      end)
+    end
+
     test "深层 thinking 嵌套结构不会中断恢复并回退默认值" do
       {:ok, session} =
         Session.start_link(
