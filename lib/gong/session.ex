@@ -685,8 +685,6 @@ defmodule Gong.Session do
     }
   end
 
-  defp retriable?(_code, _details, explicit) when is_boolean(explicit), do: explicit
-
   defp retriable?(:network_error, _details, _), do: true
   defp retriable?(:rate_limited, _details, _), do: true
   defp retriable?(:stream_error, _details, _), do: true

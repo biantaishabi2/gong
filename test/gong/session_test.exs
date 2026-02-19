@@ -127,6 +127,27 @@ defmodule Gong.SessionTest do
     assert error_event.error.retry_after == 1
   end
 
+  test "retriable 严格按 code 映射，不接受显式字段覆盖" do
+    rate_limited_error =
+      Session.normalize_error(%{
+        code: :rate_limited,
+        message: "rate limited",
+        retriable: false,
+        details: %{}
+      })
+
+    invalid_argument_error =
+      Session.normalize_error(%{
+        code: :invalid_argument,
+        message: "invalid argument",
+        retriable: true,
+        details: %{}
+      })
+
+    assert rate_limited_error.retriable == true
+    assert invalid_argument_error.retriable == false
+  end
+
   test "session API 在失效 pid 场景返回统一错误而非抛 exit" do
     {:ok, session} = Session.start_link(session_id: "session-dead-pid")
     assert :ok = Session.close(session)
