@@ -292,6 +292,68 @@ defmodule Gong.SessionTest do
     assert Process.alive?(session)
   end
 
+  test "并发 restore 与 history 读取下 Session 保持可用" do
+    {:ok, session} =
+      Session.start_link(
+        session_id: "session-concurrent-restore",
+        backend: fn message, _opts, _ctx -> {:ok, [{:chunk, "echo:" <> message}, :done]} end
+      )
+
+    on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+    snapshot = %{
+      history: [%{role: :user, content: "legacy", turn_id: 5, ts: 1}],
+      turn_cursor: 5,
+      metadata: %{
+        "session" => %{
+          "model" => "openai/gpt-4o",
+          "thinking" => %{"level" => "medium"}
+        }
+      }
+    }
+
+    results =
+      1..24
+      |> Task.async_stream(
+        fn idx ->
+          case rem(idx, 3) do
+            0 ->
+              Session.restore(session, snapshot)
+
+            1 ->
+              Session.history(session)
+
+            2 ->
+              Session.restore(
+                session,
+                snapshot
+                |> Map.put(:turn_cursor, "bad-#{idx}")
+                |> Map.put(:turn_id, 7)
+              )
+          end
+        end,
+        max_concurrency: 8,
+        timeout: 2_000,
+        ordered: false
+      )
+      |> Enum.to_list()
+
+    assert Enum.all?(results, fn
+             {:ok, {:ok, %{turn_cursor: turn_cursor, metadata: metadata}}} ->
+               is_integer(turn_cursor) and turn_cursor >= 0 and is_map(metadata)
+
+             {:ok, {:ok, history}} when is_list(history) ->
+               true
+
+             _ ->
+               false
+           end)
+
+    assert Process.alive?(session)
+    assert :ok = Session.prompt(session, "after-concurrent-restore", [])
+    assert wait_until(fn -> history_len_at_least?(session, 2) end)
+  end
+
   test "错误详情会执行深度限制，避免无限递归展开" do
     deep_details =
       Enum.reduce(1..20, %{}, fn idx, acc ->
@@ -340,6 +402,21 @@ defmodule Gong.SessionTest do
       ]
 
       assert Session.get_last_assistant_message(messages) == nil
+    end
+
+    test "超长多模态 content 列表仍可提取最后有效 text" do
+      parts =
+        Enum.map(1..300, fn idx ->
+          if rem(idx, 2) == 0 do
+            %{type: "tool_result", content: "tool://#{idx}"}
+          else
+            %{type: "image", value: "img://#{idx}"}
+          end
+        end) ++ [%{type: "text", text: "终点文本"}]
+
+      messages = [%{role: :assistant, content: parts}]
+
+      assert Session.get_last_assistant_message(messages) == "终点文本"
     end
   end
 
@@ -420,6 +497,37 @@ defmodule Gong.SessionTest do
       assert restored.history == []
       assert restored.turn_cursor == 0
       assert get_in(restored.metadata, ["session", "model"]) == "deepseek:deepseek-chat"
+      assert get_in(restored.metadata, ["session", "thinking", "level"]) == "off"
+    end
+
+    test "深层 thinking 嵌套结构不会中断恢复并回退默认值" do
+      {:ok, session} =
+        Session.start_link(
+          session_id: "session-restore-deep-thinking",
+          backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      deep_thinking =
+        Enum.reduce(1..40, %{"level" => "high"}, fn idx, acc ->
+          %{"layer_#{idx}" => acc}
+        end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "legacy", turn_id: 1, ts: 1}],
+        turn_cursor: 1,
+        metadata: %{
+          "session" => %{
+            "model" => %{"provider" => "openai", "model_id" => "gpt-4o"},
+            "thinking" => deep_thinking
+          }
+        }
+      }
+
+      assert {:ok, restored} = Session.restore(session, snapshot)
+      assert restored.turn_cursor == 1
+      assert get_in(restored.metadata, ["session", "model"]) == "openai:gpt-4o"
       assert get_in(restored.metadata, ["session", "thinking", "level"]) == "off"
     end
   end

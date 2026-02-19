@@ -900,20 +900,20 @@ defmodule Gong.Session do
   end
 
   defp normalize_model_value(value) when is_binary(value) do
-    value
-    |> String.trim()
-    |> case do
-      "" ->
+    model = String.trim(value)
+
+    cond do
+      model == "" ->
         :error
 
-      model when String.contains?(model, ":") ->
+      String.contains?(model, ":") ->
         {:ok, model}
 
-      model when String.contains?(model, "/") ->
+      String.contains?(model, "/") ->
         [provider, model_id] = String.split(model, "/", parts: 2)
         {:ok, "#{provider}:#{model_id}"}
 
-      _other ->
+      true ->
         :error
     end
   end
