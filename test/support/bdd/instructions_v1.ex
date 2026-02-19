@@ -856,9 +856,6 @@ defmodule Gong.BDD.Instructions.V1 do
       {:when, :stop_application} ->
         stop_application!(ctx, args, meta)
 
-      {:when, :init_command_registry} ->
-        init_command_registry!(ctx, args, meta)
-
       {:when, :init_model_registry} ->
         init_model_registry_extra!(ctx, args, meta)
 
@@ -877,11 +874,6 @@ defmodule Gong.BDD.Instructions.V1 do
       {:when, :mock_registry_start_failure} ->
         mock_registry_start_failure!(ctx, args, meta)
 
-      {:when, :register_command} ->
-        register_command_bdd!(ctx, args, meta)
-
-      {:when, :execute_command} ->
-        execute_command_bdd!(ctx, args, meta)
 
       {:then, :assert_registry_running} ->
         assert_registry_running!(ctx, args, meta)
@@ -916,8 +908,6 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_start_failed} ->
         assert_start_failed!(ctx, args, meta)
 
-      {:then, :assert_command_exists} ->
-        assert_command_exists!(ctx, args, meta)
 
       # ── ModelRegistry ──
 
@@ -4436,6 +4426,13 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
+  defp assert_command_exists!(ctx, %{name: name}, _meta) do
+    exists = Gong.CommandRegistry.exists?(name)
+    assert exists,
+      "期望命令 #{name} 存在，实际不存在"
+    ctx
+  end
+
   defp assert_converted_has_tool_calls!(ctx, _args, _meta) do
     converted = Map.fetch!(ctx, :converted_messages)
     msg = hd(converted)
@@ -7003,6 +7000,11 @@ defmodule Gong.BDD.Instructions.V1 do
   defp application_started!(ctx, _args, _meta) do
     # 确保 Application 已启动
     _ = Application.ensure_all_started(:gong)
+    # BDD 场景在同一 VM 串行执行，前序场景可能清理 ETS。
+    # 这里显式重建核心表，保证 application 场景断言稳定。
+    Gong.CommandRegistry.init()
+    Gong.ModelRegistry.init()
+    Gong.PromptTemplate.init()
     Map.put(ctx, :application_started, true)
   end
 
@@ -7075,24 +7077,6 @@ defmodule Gong.BDD.Instructions.V1 do
   defp mock_registry_start_failure!(ctx, _args, _meta) do
     # Mock 注册表启动失败场景
     Map.put(ctx, :mock_registry_failure, true)
-  end
-
-  defp register_command_bdd!(ctx, %{name: name, handler: handler_str, description: desc}, _meta) do
-    handler = 
-      case handler_str do
-        "&Kernel.abs/1" -> &Kernel.abs/1
-        _ -> fn _args -> {:ok, "executed"} end
-      end
-    
-    Gong.CommandRegistry.register(name, handler, description: desc)
-    ctx
-  end
-
-  defp execute_command_bdd!(ctx, %{name: name}, _meta) do
-    case Gong.CommandRegistry.execute(name) do
-      {:ok, result} -> Map.put(ctx, :command_result, result)
-      {:error, reason} -> Map.put(ctx, :command_error, reason)
-    end
   end
 
   defp assert_registry_running!(ctx, %{name: name}, _meta) do
@@ -7221,13 +7205,6 @@ defmodule Gong.BDD.Instructions.V1 do
     result = Map.get(ctx, :start_catch_result)
     assert match?({:error, _}, result) or match?({:throw, _}, result) or match?({:exit, _}, result),
       "期望启动失败，实际：#{inspect(result)}"
-    ctx
-  end
-
-  defp assert_command_exists!(ctx, %{name: name}, _meta) do
-    exists = Gong.CommandRegistry.exists?(name)
-    assert exists,
-      "期望命令 #{name} 存在，实际不存在"
     ctx
   end
 
