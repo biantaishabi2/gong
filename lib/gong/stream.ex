@@ -1,8 +1,10 @@
 defmodule Gong.Stream do
   @moduledoc """
-  流式输出 — Stream.Event 结构体和事件类型定义。
+  流式层（L0 边界）：
+  - 只负责 `chunk -> Stream.Event` 规范化
+  - 只负责流式序列合法性校验
 
-  支持流式 LLM 响应的事件化处理。
+  前端语义归一由 `Gong.Session.Events` 处理。
   """
 
   defmodule Event do
@@ -58,22 +60,18 @@ defmodule Gong.Stream do
   # 空序列合法
   defp do_validate_sequence([]), do: true
 
-  # 文本序列：text_start → text_delta* → text_end
+  # 文本序列：text_start → (text_delta|error)* → text_end
   defp do_validate_sequence([:text_start | rest]) do
-    {deltas, after_deltas} = Enum.split_while(rest, fn t -> t == :text_delta end)
-    case after_deltas do
-      [:text_end | remaining] ->
-        # 至少需要一个内容（delta 可以为 0，但一般至少 1）
-        _has_content = length(deltas) >= 0
-        do_validate_sequence(remaining)
-      _ ->
-        false
+    case consume_text_body(rest) do
+      {:ok, remaining} -> do_validate_sequence(remaining)
+      :error -> false
     end
   end
 
   # 工具序列：tool_start → tool_delta* → tool_end
   defp do_validate_sequence([:tool_start | rest]) do
     {_deltas, after_deltas} = Enum.split_while(rest, fn t -> t == :tool_delta end)
+
     case after_deltas do
       [:tool_end | remaining] -> do_validate_sequence(remaining)
       _ -> false
@@ -87,8 +85,17 @@ defmodule Gong.Stream do
 
   defp do_validate_sequence(_), do: false
 
+  defp consume_text_body([:text_delta | rest]), do: consume_text_body(rest)
+  defp consume_text_body([:error | rest]), do: consume_text_body(rest)
+  defp consume_text_body([:text_end | rest]), do: {:ok, rest}
+  defp consume_text_body(_), do: :error
+
   @doc "从 chunk 队列生成 Stream.Event 列表"
-  @spec chunks_to_events([{:chunk, String.t()} | :done | {:abort, term()}]) :: [Event.t()]
+  @spec chunks_to_events([
+          {:chunk, String.t()} | {:delay, non_neg_integer()} | :done | {:abort, term()}
+        ]) :: [
+          Event.t()
+        ]
   def chunks_to_events(chunks) do
     chunks_to_events(chunks, [], false)
   end
@@ -97,7 +104,7 @@ defmodule Gong.Stream do
     Enum.reverse(events)
   end
 
-  # delay chunk 跳过（不影响事件流）
+  # delay 只影响时间，不影响事件内容
   defp chunks_to_events([{:delay, _ms} | rest], events, started) do
     chunks_to_events(rest, events, started)
   end
@@ -124,7 +131,8 @@ defmodule Gong.Stream do
   end
 
   defp chunks_to_events([{:abort, reason} | _rest], events, started) do
-    error_event = Event.new(:error, content: to_string(reason))
+    error_event = Event.new(:error, content: safe_reason_to_string(reason))
+
     if started do
       end_event = Event.new(:text_end)
       Enum.reverse([end_event, error_event | events])
@@ -133,10 +141,20 @@ defmodule Gong.Stream do
     end
   end
 
+  defp safe_reason_to_string(reason) when is_binary(reason), do: reason
+
+  defp safe_reason_to_string(reason) do
+    try do
+      to_string(reason)
+    rescue
+      _ -> inspect(reason)
+    end
+  end
+
   # ── 并发保护 ──
 
   @doc "基于 :atomics 的流式并发保护"
-  @spec with_stream_lock((() -> term())) :: {:ok, term()} | {:error, :stream_locked}
+  @spec with_stream_lock((-> term())) :: {:ok, term()} | {:error, :stream_locked}
   def with_stream_lock(fun) when is_function(fun, 0) do
     ref = get_or_create_stream_lock()
 
@@ -155,7 +173,7 @@ defmodule Gong.Stream do
   end
 
   @doc "流式期间缓冲 tool result，避免交错"
-  @spec buffer_during_stream(term(), (() -> term())) :: {:buffered, term()}
+  @spec buffer_during_stream(term(), (-> term())) :: {:buffered, term()}
   def buffer_during_stream(tool_result, _stream_fn \\ fn -> :ok end) do
     # 将 tool result 放入缓冲区
     buffer = Process.get(:gong_stream_buffer, [])
