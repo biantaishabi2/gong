@@ -132,6 +132,23 @@ defmodule Gong.CLITest do
     assert output =~ "include_erts=true 的 release 包"
   end
 
+  test "旧入口在运行时预检失败的 help 路径仍输出 deprecation warning" do
+    {output, exit_code} =
+      run_script(@bin_gong_cli, ["help"],
+        cd: @project_root,
+        env: [
+          {"GONG_RUNTIME_OTP_OVERRIDE", "24"},
+          {"GONG_RUNTIME_ELIXIR_OVERRIDE", "1.13.4"}
+        ]
+      )
+
+    assert exit_code == 10
+    assert output =~ "[DEPRECATION]"
+    assert output =~ "旧入口 `bin/gong-cli` 已弃用"
+    assert output =~ "bin/gong help"
+    assert output =~ "运行时依赖不满足"
+  end
+
   defp run_cli(argv, opts) do
     parent = self()
 

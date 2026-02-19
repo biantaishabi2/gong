@@ -7,6 +7,31 @@ WORK_DIR="${PWD}"
 export GONG_WORKDIR="${WORK_DIR}"
 export GONG_ENTRY="${GONG_ENTRY:-bin/gong}"
 
+legacy_entry_migration_cmd() {
+  if [[ "$#" -eq 0 ]]; then
+    echo "bin/gong help"
+    return
+  fi
+
+  local args=("$@")
+
+  if [[ "${args[0]}" == "cli" ]]; then
+    if [[ "${#args[@]}" -eq 1 ]]; then
+      echo "bin/gong help"
+      return
+    fi
+
+    args=("${args[@]:1}")
+  fi
+
+  if [[ "${args[0]}" == "--help" || "${args[0]}" == "-h" ]]; then
+    echo "bin/gong help"
+    return
+  fi
+
+  echo "bin/gong ${args[*]}"
+}
+
 otp_version="${GONG_RUNTIME_OTP_OVERRIDE:-$(
   erl -noshell -eval 'io:format("~s",[erlang:system_info(otp_release)]), halt().' 2>/dev/null || true
 )}"
@@ -46,6 +71,13 @@ if [[ -z "${runtime_reason}" ]]; then
 fi
 
 if [[ -n "${runtime_reason}" ]]; then
+  if [[ "${GONG_LEGACY_ENTRY:-0}" == "1" ]]; then
+    migration_cmd="$(legacy_entry_migration_cmd "$@")"
+    legacy_entry_name="${GONG_ENTRY:-bin/gong-cli}"
+    echo "[DEPRECATION] 旧入口 \`${legacy_entry_name}\` 已弃用，将在下个主版本升级为错误。" >&2
+    echo "[DEPRECATION] 请迁移到 \`${migration_cmd}\`。" >&2
+  fi
+
   echo "[ERROR] 运行时依赖不满足。" >&2
   echo "[ERROR] 要求: Erlang/OTP >= 25，Elixir >= 1.14" >&2
   echo "[ERROR] 当前: OTP ${otp_version}，Elixir ${elixir_version}" >&2
