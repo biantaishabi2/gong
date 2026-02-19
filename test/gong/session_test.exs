@@ -197,6 +197,34 @@ defmodule Gong.SessionTest do
     assert close_error.code == :invalid_argument
   end
 
+  test "subscribe/unsubscribe 非法参数返回统一错误" do
+    {:ok, session} = Session.start_link(session_id: "session-invalid-subscriber")
+    on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+    assert {:error, subscribe_error} = Session.subscribe(session, :invalid_subscriber)
+    assert subscribe_error.code == :invalid_argument
+
+    assert {:error, unsubscribe_error} = Session.unsubscribe(session, :invalid_subscriber)
+    assert unsubscribe_error.code == :invalid_argument
+  end
+
+  test "prompt 非 keyword opts 返回统一错误且 Session 保持可用" do
+    {:ok, session} =
+      Session.start_link(
+        session_id: "session-invalid-prompt-opts",
+        backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+      )
+
+    on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+    assert {:error, prompt_error} = Session.prompt(session, "hello", %{backend: :invalid})
+    assert prompt_error.code == :invalid_argument
+    assert Process.alive?(session)
+
+    assert :ok = Session.prompt(session, "hello", [])
+    assert wait_until(fn -> history_len_at_least?(session, 2) end)
+  end
+
   test "text_delta 非字符串不会导致 Session 崩溃" do
     {:ok, session} =
       Session.start_link(

@@ -121,6 +121,8 @@ defmodule Gong.Session do
     end
   end
 
+  def subscribe(_pid, _subscriber), do: {:error, normalize_error(:invalid_argument)}
+
   @spec unsubscribe(pid(), pid()) :: :ok | {:error, error_t()}
   def unsubscribe(pid, subscriber) when is_pid(subscriber) do
     case safe_genserver_call(pid, {:unsubscribe, subscriber}) do
@@ -129,6 +131,8 @@ defmodule Gong.Session do
       {:error, reason} -> {:error, normalize_error(reason)}
     end
   end
+
+  def unsubscribe(_pid, _subscriber), do: {:error, normalize_error(:invalid_argument)}
 
   @spec history(pid()) :: {:ok, [history_entry()]} | {:error, error_t()}
   def history(pid) do
@@ -274,6 +278,7 @@ defmodule Gong.Session do
 
   def handle_call({:prompt, message, opts}, _from, state) do
     with :ok <- validate_prompt(message),
+         :ok <- validate_prompt_opts(opts),
          {:ok, backend} <- resolve_backend(opts, state.backend) do
       turn_id = state.turn_id + 1
 
@@ -600,6 +605,12 @@ defmodule Gong.Session do
   end
 
   defp validate_prompt(_), do: {:error, :invalid_argument}
+
+  defp validate_prompt_opts(opts) when is_list(opts) do
+    if Keyword.keyword?(opts), do: :ok, else: {:error, :invalid_argument}
+  end
+
+  defp validate_prompt_opts(_), do: {:error, :invalid_argument}
 
   defp resolve_backend(opts, default_backend) do
     case Keyword.get(opts, :backend, default_backend) do
