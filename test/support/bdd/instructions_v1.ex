@@ -2381,8 +2381,11 @@ defmodule Gong.BDD.Instructions.V1 do
       queue != [] ->
         agent = ctx.agent
         hooks = Map.get(ctx, :hooks, [])
-        case Gong.MockLLM.run_chat(agent, prompt, queue, hooks) do
+        opts = if sc = ctx[:steering_config], do: [steering_config: sc], else: []
+
+        case Gong.MockLLM.run_chat(agent, prompt, queue, hooks, opts) do
           {:ok, reply, updated_agent} ->
+            ctx = collect_telemetry_events(ctx)
             events = events ++ [{:stream, :delta}, {:stream, :end}]
             ctx
             |> Map.put(:agent, updated_agent)
@@ -2392,6 +2395,7 @@ defmodule Gong.BDD.Instructions.V1 do
             |> Map.put(:mock_queue, [])
 
           {:error, reason, updated_agent} ->
+            ctx = collect_telemetry_events(ctx)
             events = events ++ [{:stream, :end}]
             ctx
             |> Map.put(:agent, updated_agent)
@@ -5969,15 +5973,46 @@ defmodule Gong.BDD.Instructions.V1 do
   defp when_tape_flush!(ctx, _args, _meta) do
     store = ctx[:tape_store] || ctx[:fork_store]
     assert store != nil, "tape_store 未初始化"
-    # 模拟 flush 操作 — 标记 flushed 并重置
-    ctx
-    |> Map.put(:tape_flushed, true)
-    |> Map.put(:tape_flush_reset, true)
+
+    before_entries = Gong.Tape.Index.all_entries(store.db_conn)
+
+    case Gong.Tape.Store.flush(store) do
+      {:ok, flushed_store} ->
+        after_entries = Gong.Tape.Index.all_entries(flushed_store.db_conn)
+
+        ExUnit.Callbacks.on_exit(fn ->
+          Gong.Tape.Store.close(flushed_store)
+        end)
+
+        ctx
+        |> Map.put(:tape_store, flushed_store)
+        |> Map.put(:tape_flushed, true)
+        |> Map.put(:tape_flush_reset, true)
+        |> Map.put(:tape_flush_before_entries, before_entries)
+        |> Map.put(:tape_flush_after_entries, after_entries)
+        |> Map.put(:tape_last_error, nil)
+
+      {:error, reason} ->
+        ctx
+        |> Map.put(:tape_flushed, false)
+        |> Map.put(:tape_flush_reset, false)
+        |> Map.put(:tape_last_error, reason)
+    end
   end
 
   defp assert_flush_reset!(ctx, _args, _meta) do
     assert ctx[:tape_flush_reset] == true,
       "期望 flush 后 flushed 标记被重置"
+
+    before_entries = Map.fetch!(ctx, :tape_flush_before_entries)
+    after_entries = Map.fetch!(ctx, :tape_flush_after_entries)
+
+    before_keys = Enum.map(before_entries, fn e -> {e.id, e.kind, e.content} end)
+    after_keys = Enum.map(after_entries, fn e -> {e.id, e.kind, e.content} end)
+
+    assert before_keys == after_keys,
+      "期望 flush 前后持久化条目一致，before=#{inspect(before_keys)} after=#{inspect(after_keys)}"
+
     ctx
   end
 
