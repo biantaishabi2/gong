@@ -36,6 +36,13 @@ Gong.Retry          — 错误分类 + 重试策略
 Gong.Providers.*    — LLM Provider（DeepSeek，OpenAI 兼容）
 ```
 
+## 运行时要求
+
+- Erlang/OTP 26+
+- Elixir 1.17+（mix.exs 允许 >= 1.14）
+- ripgrep（grep 工具依赖）
+- `DEEPSEEK_API_KEY` 环境变量（实际运行需要）
+
 ## 快速开始
 
 ```bash
@@ -73,6 +80,13 @@ mix test test/bdd_generated/
 - [pi-mono](https://github.com/badlogic/pi-mono) — Mario Zechner 的 AI Agent 工具集，本项目的灵感来源
 - [Jido](https://github.com/agentjido/jido) — Elixir Agent 框架
 - [ReqLLM](https://hex.pm/packages/req_llm) — 多 Provider LLM 客户端
+
+## 文档
+
+- [架构设计](docs/架构设计.md) — 完整架构参考
+- [BDD 测试接入](docs/BDD测试接入.md) — DSL 测试体系与 CI 门禁
+- [实施计划](docs/实施计划.md) — 分阶段实施路径
+- [发布与回滚](docs/发布与回滚.md) — 安装、升级、回滚手册
 
 ## License
 
