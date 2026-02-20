@@ -20,75 +20,15 @@ jobs:
         with:
           token: ${{ secrets.NIUMA_PAT || github.token }}
 
-      - name: Close Sub/Parent Issues After Integration Merge
-        id: close_merged
+      - name: Close merged and dispatch wakeup
         env:
           GITHUB_TOKEN: ${{ secrets.NIUMA_PAT || github.token }}
           REPO: ${{ github.repository }}
           WORKSPACE: ${{ github.workspace }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          set -o pipefail
-          output_file="$(mktemp)"
           niuma control close-merged \
             --repo "$REPO" \
             --repo-dir "$WORKSPACE" \
-            --pr "$PR_NUMBER" | tee "$output_file"
-
-          source_issues_json="[]"
-          source_issue=""
-          issues_line="$(grep -Eo '目标 issues: \[[0-9 ]+\]' "$output_file" | tail -n 1 || true)"
-          if [ -n "$issues_line" ]; then
-            issues_raw="$(echo "$issues_line" | sed -E 's/.*\[([^]]*)\].*/\1/')"
-            source_issues_json="$(printf '%s\n' "$issues_raw" | tr ' ' '\n' | sed '/^$/d' | jq -Rsc 'split("\n") | map(select(length > 0) | tonumber)')"
-            source_issue="$(echo "$source_issues_json" | jq -r '.[0] // ""')"
-          fi
-
-          echo "source_issue=$source_issue" >> "$GITHUB_OUTPUT"
-          echo "source_issues=$source_issues_json" >> "$GITHUB_OUTPUT"
-
-      - name: Dispatch orchestrate wakeup
-        id: dispatch_orchestrate_wakeup
-        if: success()
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.NIUMA_PAT || github.token }}
-          REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          SOURCE_ISSUE: ${{ steps.close_merged.outputs.source_issue }}
-          SOURCE_ISSUES: ${{ steps.close_merged.outputs.source_issues }}
-        run: |
-          completed_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          event_id="pr-${PR_NUMBER}-run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          source_issues_json="$SOURCE_ISSUES"
-          if [ -z "$source_issues_json" ]; then
-            source_issues_json="[]"
-          fi
-
-          request_payload="$(jq -nc \
-            --arg source_issue "$SOURCE_ISSUE" \
-            --arg source_issues "$source_issues_json" \
-            --arg trigger_pr "$PR_NUMBER" \
-            --arg completed_at "$completed_at" \
-            --arg event_id "$event_id" \
-            '{
-              event_type: "niuma.task.completed",
-              client_payload: {
-                source_issue: (if ($source_issue | length) > 0 then ($source_issue | tonumber) else null end),
-                source_issues: (($source_issues | fromjson) // []),
-                trigger_pr: ($trigger_pr | tonumber),
-                completed_at: $completed_at,
-                event_source: "close-after-integration-merge",
-                event_id: $event_id
-              }
-            }'
-          )"
-
-          gh api "repos/$REPO/dispatches" --method POST --input - <<<"$request_payload"
-          printf '[orchestrate.dispatch] {"trigger_source":"close-after-integration-merge","issue":"%s","event_id":"%s","triggered_at":"%s","result":"dispatched"}\n' \
-            "${SOURCE_ISSUE:-$PR_NUMBER}" "$event_id" "$completed_at"
-
-      - name: Warn Dispatch Failure
-        if: steps.dispatch_orchestrate_wakeup.outcome != 'success'
-        run: |
-          echo "::warning title=orchestrate dispatch failed::niuma.task.completed dispatch failed for PR #${{ github.event.pull_request.number }}; schedule fallback remains active."
+            --pr "$PR_NUMBER" \
+            --dispatch-wakeup
