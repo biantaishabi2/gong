@@ -26,6 +26,7 @@ description: 为复杂需求生成父 issue + sub-issues 的 DAG 化写作模板
 1. 多 Issue DAG：对子 issue（通常也包括父 issue）添加 `bot:orchestrate` 进入编排队列。
 2. control 自动流转：`bot:orchestrate` → `bot:queued` → `bot:fix`（ready 后触发单 issue 流程）。
 3. 单 Issue 直跑：可直接添加 `bot:fix`，不经过 DAG 编排。
+4. `bot:*` 属于受控状态标签，统一通过 `niuma state-label` 迁移；不要直接 `gh issue edit --add-label/--remove-label bot:*`。
 
 ## 标题规范（必须）
 
@@ -120,13 +121,64 @@ depends-on: #<optional_dep_1>, #<optional_dep_2>
 - [ ] 测试通过
 ```
 
+## Mermaid DAG 图（必须）
+
+创建完所有 issue 后，在父 issue 添加一条评论，用 Mermaid 画出完整 DAG 依赖图。GitHub 会自动渲染。
+
+### 格式规范
+
+- 节点 ID 用 `I` + issue 编号：`I30`、`I31`
+- 节点标签包含：`#编号 简短描述 层级`
+- 父 issue 连接所有子 issue
+- 子 issue 之间标注 depends-on 依赖
+- 底部附跳转链接列表
+
+### 示例
+
+````markdown
+DAG 图（Mermaid）如下：
+
+```mermaid
+graph TD
+  I7["#7 feat(session): 对齐 Pi 的多 Issue DAG 编排 父"]
+  I8["#8 Session 契约与事件归一 L0"]
+  I9["#9 CLI 分发与运行时策略 L0"]
+  I10["#10 Session 核心功能对齐 Pi L1"]
+  I11["#11 Session BDD 场景补齐 L1"]
+  I12["#12 CLI 接入 Session 事件流 L1"]
+  I13["#13 CI 与集成回归收口 L2"]
+
+  I7 --> I8
+  I7 --> I9
+  I7 --> I10
+  I7 --> I11
+  I7 --> I12
+  I7 --> I13
+
+  I8 --> I10
+  I8 --> I11
+  I8 --> I12
+  I9 --> I12
+
+  I10 --> I13
+  I11 --> I13
+  I12 --> I13
+```
+
+连接（点击跳转）：
+- #7: https://github.com/<owner>/<repo>/issues/7
+- #8: https://github.com/<owner>/<repo>/issues/8
+- #9: https://github.com/<owner>/<repo>/issues/9
+````
+
 ## 创建步骤（gh CLI）
 
 1. 先创建父 issue，记录编号 `P`。
 2. 逐个创建子 issue，body 中写 `parent: #P` 与可选 `depends-on`。
 3. 回填父 issue 的 task list：`- [ ] #<sub>`。
-4. 检查 DAG 无环（无循环 depends-on），关键路径可闭合。
-5. 若走多 Issue DAG，给待编排 issue 添加 `bot:orchestrate`；若走单 Issue 直跑，添加 `bot:fix`。
+4. 在父 issue 添加评论，用 Mermaid 画 DAG 依赖图（见上方格式规范）。
+5. 检查 DAG 无环（无循环 depends-on），关键路径可闭合。
+6. 若走多 Issue DAG，将待编排 issue 迁移到 `bot:orchestrate`；若走单 Issue 直跑，迁移到 `bot:fix`。
 
 ## 快速命令示例
 
@@ -136,4 +188,10 @@ gh issue create --title "feat(<scope>): <parent-title>" --body-file /tmp/parent.
 
 # 创建子 issue（示例）
 gh issue create --title "sub(#<parent>): <task-title>" --body-file /tmp/sub1.md --label enhancement
+
+# 触发多 issue DAG 编排（父/子按需执行）
+niuma state-label set --repo <owner/repo> --issue <issue_num> --from <bot:current> --to bot:orchestrate
+
+# 触发单 issue 直跑
+niuma state-label set --repo <owner/repo> --issue <issue_num> --from <bot:current> --to bot:fix
 ```
