@@ -663,14 +663,22 @@ defmodule Gong.Session do
   end
 
   defp run_turn(session_pid, backend, message, opts, context) do
+    # 记录 callback 调用前的计数，判断 backend 是否实际通过 callback 发射了事件
+    events_before = Process.get(:gong_stream_callback_count, 0)
+
     case call_backend(backend, message, opts, context) do
       {:ok, stream_events} ->
-        Enum.each(stream_events, fn stream_event ->
-          send(
-            session_pid,
-            {:session_stream_event, context.command_id, context.turn_id, stream_event}
-          )
-        end)
+        events_after = Process.get(:gong_stream_callback_count, 0)
+
+        # 仅当 backend 未通过 callback 发射事件时，才发送 normalized 事件（避免重复）
+        if events_after == events_before do
+          Enum.each(stream_events, fn stream_event ->
+            send(
+              session_pid,
+              {:session_stream_event, context.command_id, context.turn_id, stream_event}
+            )
+          end)
+        end
 
         send(session_pid, {:session_turn_done, context.command_id, context.turn_id, :ok})
 
@@ -954,10 +962,19 @@ defmodule Gong.Session do
 
       session_pid = self()
 
+      command_id = command_payload.command_id
+
       Task.start(fn ->
+        # 桥接 AgentLoop stream 事件到 Session 进程
+        Gong.AgentLoop.set_stream_callback(fn event ->
+          count = Process.get(:gong_stream_callback_count, 0)
+          Process.put(:gong_stream_callback_count, count + 1)
+          send(session_pid, {:session_stream_event, command_id, turn_id, event})
+        end)
+
         run_turn(session_pid, backend, message, run_opts, %{
           session_id: state.session_id,
-          command_id: command_payload.command_id,
+          command_id: command_id,
           turn_id: turn_id,
           history: state.history,
           metadata: state.metadata
