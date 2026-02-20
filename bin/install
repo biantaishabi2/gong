@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+GONG_BIN="${ROOT_DIR}/bin/gong"
+INSTALL_DIR="${1:-${HOME}/.local/bin}"
+LINK="${INSTALL_DIR}/gong"
+
+# 确保安装目录存在
+mkdir -p "${INSTALL_DIR}"
+
+# 构建 release（如果不存在）
+if [[ ! -x "${ROOT_DIR}/_build/prod/rel/gong/bin/gong" ]]; then
+  echo "构建 release..."
+  cd "${ROOT_DIR}"
+  MIX_ENV=prod mix release gong --overwrite
+fi
+
+# 创建符号链接
+ln -sf "${GONG_BIN}" "${LINK}"
+echo "已安装: ${LINK} -> ${GONG_BIN}"
+
+# 检查 PATH
+if [[ ":${PATH}:" != *":${INSTALL_DIR}:"* ]]; then
+  echo ""
+  echo "[提示] ${INSTALL_DIR} 不在 PATH 中，请添加到 shell 配置:"
+  echo "  echo 'export PATH=\"${INSTALL_DIR}:\${PATH}\"' >> ~/.bashrc"
+fi

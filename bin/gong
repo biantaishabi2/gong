@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+# 解析符号链接，支持全局安装
+while [[ -L "${SCRIPT_PATH}" ]]; do
+  SCRIPT_PATH="$(readlink "${SCRIPT_PATH}")"
+done
+ROOT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")/.." && pwd)"
 WORK_DIR="${PWD}"
 
 export GONG_WORKDIR="${WORK_DIR}"
