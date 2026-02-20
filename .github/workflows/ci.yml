@@ -193,19 +193,53 @@ jobs:
         run: |
           mix test test/bdd_generated/ --trace --exclude e2e --exclude smoke --exclude quarantine
 
-      # quarantine 用例：隔离运行，失败不阻断
+      # quarantine 用例：隔离运行，重试最多 2 次
+      # strict 模式下失败阻断；其他模式下降级为告警
       - name: BDD Quarantine 测试（隔离）
         id: quarantine
-        continue-on-error: true
+        continue-on-error: ${{ needs.detect-changes.outputs.gate_mode != 'strict' }}
         run: |
-          mix test test/bdd_generated/ --trace --only quarantine --max-failures 10 2>&1 || true
+          max_retries=2
+          attempt=0
+          while [ $attempt -lt $max_retries ]; do
+            attempt=$((attempt + 1))
+            echo "::group::Quarantine 第 ${attempt} 次运行"
+            if mix test test/bdd_generated/ --trace --only quarantine --max-failures 10; then
+              echo "::endgroup::"
+              echo "quarantine_passed=true" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            echo "::endgroup::"
+            if [ $attempt -lt $max_retries ]; then
+              echo "::warning::Quarantine 第 ${attempt} 次失败，重试中..."
+            fi
+          done
+          echo "quarantine_passed=false" >> $GITHUB_OUTPUT
+          exit 1
 
-      - name: Quarantine 失败告警
+      - name: Quarantine 失败告警 & 创建追踪 issue
         if: steps.quarantine.outcome == 'failure'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "::warning::Quarantine 用例失败，已降级为告警"
+          echo "::warning::Quarantine 用例失败（重试 2 次后仍失败），已降级为告警"
+          # 检查是否已有同名 open issue，避免重复创建
+          existing=$(gh issue list --label "quarantine,P2" --state open --limit 1 --json number -q '.[0].number' 2>/dev/null || true)
+          if [ -z "$existing" ]; then
+            gh issue create \
+              --title "Quarantine 用例持续失败 (CI #${{ github.run_number }})" \
+              --label "quarantine,P2" \
+              --body "## Quarantine 用例失败
+
+          CI 运行 [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) 中 quarantine 用例重试 2 次后仍然失败。
+
+          **SLA**: 7 个工作日内修复或移除 quarantine 标记。连续 3 次迭代未修复应升级为阻断。
+
+          **触发分支**: \`${{ github.head_ref || github.ref_name }}\`
+          **触发者**: @${{ github.actor }}"
+          else
+            echo "已存在 quarantine 追踪 issue #${existing}，跳过创建"
+          fi
 
   e2e:
     name: E2E 真实 LLM 测试
