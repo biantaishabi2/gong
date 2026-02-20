@@ -8,6 +8,8 @@ defmodule Gong.AgentLoop do
   MockLLM 和 LiveLLM 变为薄包装，只需提供各自的 llm_backend 实现。
   """
 
+  Module.register_attribute(__MODULE__, :bdd_instruction, accumulate: true)
+
   alias Gong.Stream
   alias Gong.Stream.Event, as: StreamEvent
   alias Jido.Agent.Strategy.State, as: StratState
@@ -508,10 +510,14 @@ defmodule Gong.AgentLoop do
 
     llm_backend = fn agent, _call_id ->
       state = StratState.get(agent, %{})
+      config = state[:config] || %{}
+      reqllm_tools = config[:reqllm_tools] || []
       conversation = Map.get(state, :conversation, [])
       messages = format_conversation_for_reqllm(conversation)
 
-      case ReqLLM.generate_text(model_str, messages, receive_timeout: 60_000) do
+      opts = [tools: reqllm_tools, receive_timeout: 60_000]
+
+      case ReqLLM.generate_text(model_str, messages, opts) do
         {:ok, response} -> {:ok, parse_reqllm_response(response)}
         {:error, reason} -> {:ok, {:error, to_string(reason)}}
       end
