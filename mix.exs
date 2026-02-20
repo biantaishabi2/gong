@@ -10,7 +10,6 @@ defmodule Gong.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
       aliases: aliases(),
-      escript: escript(),
       releases: releases(),
 
       # Docs
@@ -58,15 +57,6 @@ defmodule Gong.MixProject do
       {:"gong.cli", &legacy_cli_alias/1},
       setup: ["deps.get"],
       test: ["test"]
-    ]
-  end
-
-  defp escript do
-    [
-      main_module: Gong.CLI,
-      # CLI 入口 main/1 中手动控制 application 启动顺序，
-      # 在启动前配置 tzdata/llm_db 避免 escript 模式下 Application.app_dir 崩溃
-      app: nil
     ]
   end
 

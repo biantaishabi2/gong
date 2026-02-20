@@ -88,10 +88,4 @@ fi
 
 cd "${ROOT_DIR}"
 
-# 优先使用 escript（零编译启动），fallback 到 mix run
-ESCRIPT="${ROOT_DIR}/gong"
-if [[ -x "${ESCRIPT}" ]]; then
-  exec "${ESCRIPT}" "$@"
-else
-  exec mix run -e 'System.halt(Gong.CLI.run(System.argv(), entry: System.get_env("GONG_ENTRY"), legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"))' -- "$@"
-fi
+exec mix run -e 'System.halt(Gong.CLI.run(System.argv(), entry: System.get_env("GONG_ENTRY"), legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"))' -- "$@"
