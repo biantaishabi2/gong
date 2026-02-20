@@ -5,6 +5,8 @@ defmodule Gong.ModelRegistry do
   注册多个 LLM provider/model 组合，运行时动态切换当前活跃模型。
   """
 
+  Module.register_attribute(__MODULE__, :bdd_instruction, accumulate: true)
+
   @table :gong_model_registry
   @current_key :__current_model__
   @default_model_name :default

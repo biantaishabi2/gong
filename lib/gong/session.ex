@@ -13,6 +13,8 @@ defmodule Gong.Session do
   - `close/1`
   """
 
+  Module.register_attribute(__MODULE__, :bdd_instruction, accumulate: true)
+
   use GenServer
 
   alias Gong.AgentLoop

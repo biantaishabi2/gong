@@ -31,8 +31,13 @@ defmodule Gong.CLI do
 
   @spec main([String.t()]) :: no_return()
   def main(argv) when is_list(argv) do
+    opts = [
+      entry: System.get_env("GONG_ENTRY"),
+      legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"
+    ]
+
     argv
-    |> run()
+    |> run(opts)
     |> System.halt()
   end
 
