@@ -44,11 +44,25 @@ defmodule Gong.CLI.Run do
   defp build_session_opts(opts) do
     session_opts = []
 
+    # 如果显式传入 backend，优先使用
     session_opts =
-      if model = Keyword.get(opts, :model) do
-        Keyword.put(session_opts, :model, model)
+      if backend = Keyword.get(opts, :backend) do
+        Keyword.put(session_opts, :backend, backend)
       else
-        session_opts
+        # 否则从 model 构建 backend
+        model = Keyword.get(opts, :model) || Gong.Settings.get("model")
+
+        if model do
+          case Gong.ModelRegistry.lookup_by_string(model) do
+            {:ok, config} ->
+              Keyword.put(session_opts, :backend, &Gong.AgentLoop.run_as_backend(&1, &2, &3, config))
+
+            {:error, _} ->
+              session_opts
+          end
+        else
+          session_opts
+        end
       end
 
     session_opts

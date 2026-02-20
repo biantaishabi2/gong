@@ -8079,63 +8079,27 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp cli_run_prompt!(ctx, %{prompt: prompt}, _meta) do
     mock_queue = Map.get(ctx, :mock_queue, [])
+    workspace = Map.get(ctx, :workspace, System.tmp_dir!())
 
-    # 使用 Session + mock backend 模拟执行
-    session_opts = [
-      backend: fn message, _opts, _context ->
-        agent = Gong.Agent.new()
+    # 构造 mock backend
+    backend = fn message, _opts, _context ->
+      agent = Gong.Agent.new()
 
-        case Gong.MockLLM.run_chat(agent, message, mock_queue) do
-          {:ok, reply, _agent} -> {:ok, reply}
-          {:error, reason, _agent} -> {:error, reason}
-        end
+      case Gong.MockLLM.run_chat(agent, message, mock_queue) do
+        {:ok, reply, _agent} -> {:ok, reply}
+        {:error, reason, _agent} -> {:error, reason}
       end
-    ]
+    end
 
-    # 捕获 IO 来获取输出
+    # 直接调用真实的 Run.run/2，捕获 IO 输出
     {output, exit_code} =
       run_with_captured_io(fn ->
-        # 创建 Session，订阅，发送 prompt，渲染事件
-        case Gong.Session.start_link(session_opts) do
-          {:ok, pid} ->
-            :ok = Gong.Session.subscribe(pid, self())
-            :ok = Gong.Session.prompt(pid, prompt, [])
-            code = run_receive_loop(pid)
-            Gong.Session.close(pid)
-            code
-
-          {:error, _reason} ->
-            IO.puts(:stderr, "[错误] 无法启动 Session")
-            1
-        end
+        Gong.CLI.Run.run(prompt, backend: backend, cwd: workspace)
       end)
 
     ctx
     |> Map.put(:cli_output, output)
     |> Map.put(:cli_exit_code, exit_code)
-  end
-
-  defp run_receive_loop(session_pid) do
-    receive do
-      {:session_event, %{type: "lifecycle.completed"}} ->
-        0
-
-      {:session_event, %{type: "lifecycle.error"}} ->
-        1
-
-      {:session_event, %{type: type} = event}
-      when type in ["error.stream", "error.runtime"] ->
-        Gong.CLI.Renderer.render(event)
-        run_receive_loop(session_pid)
-
-      {:session_event, event} ->
-        Gong.CLI.Renderer.render(event)
-        run_receive_loop(session_pid)
-    after
-      10_000 ->
-        IO.puts(:stderr, "[错误] 执行超时")
-        1
-    end
   end
 
   defp run_with_captured_io(fun) do
