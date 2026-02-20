@@ -408,6 +408,23 @@ defmodule Gong.BDD.InstructionRegistries.AgentLoop do
         assert_class: nil
       },
 
+      # ── WHEN: E2E Tape 记录轮次 ──
+
+      e2e_tape_record_turn: %{
+        name: :e2e_tape_record_turn,
+        kind: :when,
+        args: %{
+          prompt: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{},
+        rules: [],
+        boundary: :test_runtime,
+        scopes: [:e2e],
+        async?: false,
+        eventually?: false,
+        assert_class: nil
+      },
+
       # ── THEN: E2E Compaction 可触发性 ──
 
       assert_context_compactable: %{

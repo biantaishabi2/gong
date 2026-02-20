@@ -9,6 +9,7 @@ defmodule Gong.CLI do
 
   alias Gong.Session
   alias Gong.Session.Events
+  alias Gong.CLI.SessionCmd
 
   @otp_min 25
   @elixir_min Version.parse!("1.14.0")
@@ -210,13 +211,47 @@ defmodule Gong.CLI do
     Gong.CLI.Run.run(prompt, opts)
   end
 
-  defp execute(%{command: :session_list, opts: _command_opts}, _runtime, _run_opts) do
-    IO.puts("(session list 未实现)")
+  defp execute(%{command: :session_list, opts: command_opts}, _runtime, run_opts) do
+    cwd = resolve_cwd(command_opts, run_opts)
+    tape_path = Path.join(cwd, ".gong/tape")
+
+    case SessionCmd.list_sessions(tape_path) do
+      {:ok, []} ->
+        IO.puts("没有已保存的会话")
+
+      {:ok, sessions} ->
+        IO.puts("已保存的会话 (#{length(sessions)}):")
+
+        Enum.each(sessions, fn s ->
+          id = s["session_id"] || "unknown"
+          saved_at = s["saved_at"]
+          time_str = if saved_at, do: " (#{format_timestamp(saved_at)})", else: ""
+          IO.puts("  #{id}#{time_str}")
+        end)
+    end
+
     @exit_ok
   end
 
-  defp execute(%{command: :session_restore, session_id: _id, opts: _command_opts}, _runtime, _run_opts) do
-    IO.puts("(session restore 未实现)")
+  defp execute(%{command: :session_restore, session_id: id, opts: command_opts}, _runtime, run_opts) do
+    cwd = resolve_cwd(command_opts, run_opts)
+    tape_path = Path.join(cwd, ".gong/tape")
+
+    case SessionCmd.restore_session(tape_path, id) do
+      {:ok, snapshot} ->
+        history = snapshot["history"] || []
+        IO.puts("会话 #{id} 已恢复 (#{length(history)} 条消息)")
+
+        Enum.each(history, fn entry ->
+          role = entry["role"] || "?"
+          content = entry["content"] || ""
+          IO.puts("[#{role}] #{content}")
+        end)
+
+      {:error, reason} ->
+        IO.puts(:stderr, "[错误] #{reason}")
+    end
+
     @exit_ok
   end
 
@@ -467,6 +502,15 @@ defmodule Gong.CLI do
     do: invalid_argument("timestamp 必须是毫秒正整数", "请传入 Unix 毫秒时间戳")
 
   defp payload_get(map, key), do: Events.payload_get(map, key)
+
+  defp format_timestamp(ms) when is_integer(ms) do
+    case DateTime.from_unix(ms, :millisecond) do
+      {:ok, dt} -> Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S")
+      _ -> "#{ms}"
+    end
+  end
+
+  defp format_timestamp(_), do: ""
 
   defp invalid_argument(message, hint) do
     {:error,

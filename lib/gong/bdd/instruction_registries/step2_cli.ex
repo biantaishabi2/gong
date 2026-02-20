@@ -183,7 +183,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
           session_id: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       tape_save_session: %{
         name: :tape_save_session, kind: :given,
@@ -191,7 +191,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
           session_id: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       assert_session_list_count: %{
         name: :assert_session_list_count, kind: :then,
@@ -213,7 +213,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
         name: :assert_session_restored, kind: :then,
         args: %{},
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: :C
       },
       assert_session_history_contains: %{
         name: :assert_session_history_contains, kind: :then,
@@ -221,7 +221,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
           content: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: :C
       },
       assert_session_restore_error: %{
         name: :assert_session_restore_error, kind: :then,
@@ -236,6 +236,17 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
         args: %{},
         outputs: %{}, rules: [], boundary: :service,
         scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+      },
+
+      # ── Session 容错 ──
+
+      create_corrupt_session_file: %{
+        name: :create_corrupt_session_file, kind: :given,
+        args: %{
+          filename: %{type: :string, required?: true, allowed: nil}
+        },
+        outputs: %{}, rules: [], boundary: :service,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
       }
     }
   end

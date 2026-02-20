@@ -836,6 +836,9 @@ defmodule Gong.BDD.Instructions.V1 do
       {:when, :agent_chat_continue} ->
         agent_chat_continue!(ctx, args, meta)
 
+      {:when, :e2e_tape_record_turn} ->
+        e2e_tape_record_turn!(ctx, args, meta)
+
       {:then, :assert_context_compactable} ->
         assert_context_compactable!(ctx, args, meta)
 
@@ -1723,31 +1726,34 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_no_agent_call} ->
         assert_no_agent_call!(ctx, args, meta)
 
-      # ── Step3/4 占位（仅标记跳过）──
-
-      {:when, :cli_session_list} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: cli_session_list"
-
-      {:when, :cli_session_restore} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: cli_session_restore"
+      # ── Step3: Session 会话管理 ──
 
       {:given, :tape_save_session} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: tape_save_session"
+        tape_save_session!(ctx, args, meta)
+
+      {:when, :cli_session_list} ->
+        cli_session_list!(ctx, args, meta)
+
+      {:when, :cli_session_restore} ->
+        cli_session_restore!(ctx, args, meta)
 
       {:then, :assert_session_list_count} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_list_count"
+        assert_session_list_count!(ctx, args, meta)
 
       {:then, :assert_session_list_contains} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_list_contains"
+        assert_session_list_contains!(ctx, args, meta)
 
       {:then, :assert_session_restored} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_restored"
+        assert_session_restored!(ctx, args, meta)
 
       {:then, :assert_session_history_contains} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_history_contains"
+        assert_session_history_contains!(ctx, args, meta)
 
       {:then, :assert_session_restore_error} ->
-        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_restore_error"
+        assert_session_restore_error!(ctx, args, meta)
+
+      {:given, :create_corrupt_session_file} ->
+        create_corrupt_session_file!(ctx, args, meta)
 
       {:then, :assert_session_saved} ->
         raise ExUnit.AssertionError, message: "Step4 未实现: assert_session_saved"
@@ -2938,6 +2944,115 @@ defmodule Gong.BDD.Instructions.V1 do
       {:error, reason} ->
         Map.put(ctx, :tape_last_error, reason)
     end
+  end
+
+  # ── Step3: Session 会话管理实现 ──
+
+  defp tape_save_session!(ctx, args, _meta) do
+    store = ctx.tape_store
+    session_id = args.session_id
+    tape_path = ctx.tape_path
+
+    # 读取当前 anchor 范围内的所有 entries
+    anchor = Map.get(ctx, :tape_last_anchor, "session-start")
+    {:ok, entries} = Gong.Tape.Store.between_anchors(store, "session-start", anchor)
+
+    # 转为 history 格式
+    history =
+      entries
+      |> Enum.with_index(1)
+      |> Enum.map(fn {entry, idx} ->
+        turn_id = div(idx + 1, 2)
+
+        %{
+          "role" => to_string(entry.kind),
+          "content" => to_string(entry.content),
+          "turn_id" => turn_id,
+          "ts" => entry.timestamp
+        }
+      end)
+
+    snapshot = %{
+      "session_id" => session_id,
+      "history" => history,
+      "turn_cursor" => length(history),
+      "metadata" => %{}
+    }
+
+    :ok = Gong.CLI.SessionCmd.save_session(tape_path, session_id, snapshot)
+    ctx
+  end
+
+  defp cli_session_list!(ctx, _args, _meta) do
+    tape_path = ctx.tape_path
+    {:ok, sessions} = Gong.CLI.SessionCmd.list_sessions(tape_path)
+
+    ctx
+    |> Map.put(:session_list, sessions)
+    |> Map.put(:session_list_count, length(sessions))
+  end
+
+  defp cli_session_restore!(ctx, args, _meta) do
+    tape_path = ctx.tape_path
+    session_id = args.session_id
+
+    case Gong.CLI.SessionCmd.restore_session(tape_path, session_id) do
+      {:ok, snapshot} ->
+        ctx
+        |> Map.put(:session_restored, true)
+        |> Map.put(:session_snapshot, snapshot)
+
+      {:error, reason} ->
+        ctx
+        |> Map.put(:session_restored, false)
+        |> Map.put(:session_restore_error, reason)
+    end
+  end
+
+  defp assert_session_list_count!(ctx, args, _meta) do
+    expected = args.expected
+    actual = ctx.session_list_count
+    assert actual == expected, "期望 session 列表数量 #{expected}，实际 #{actual}"
+    ctx
+  end
+
+  defp assert_session_list_contains!(ctx, args, _meta) do
+    session_id = args.session_id
+    ids = Enum.map(ctx.session_list, & &1["session_id"])
+    assert session_id in ids, "session 列表不包含 #{session_id}，实际: #{inspect(ids)}"
+    ctx
+  end
+
+  defp assert_session_restored!(ctx, _args, _meta) do
+    assert ctx.session_restored == true, "期望 session 已恢复，但未恢复"
+    ctx
+  end
+
+  defp assert_session_history_contains!(ctx, args, _meta) do
+    content = args.content
+    snapshot = ctx.session_snapshot
+    history = snapshot["history"]
+    contents = Enum.map(history, & &1["content"])
+    assert content in contents, "session history 不包含 #{inspect(content)}，实际: #{inspect(contents)}"
+    ctx
+  end
+
+  defp assert_session_restore_error!(ctx, args, _meta) do
+    error_contains = args.error_contains
+    error = ctx.session_restore_error
+    assert String.contains?(to_string(error), error_contains),
+      "期望错误包含 #{inspect(error_contains)}，实际: #{inspect(error)}"
+    ctx
+  end
+
+  defp create_corrupt_session_file!(ctx, args, _meta) do
+    tape_path = ctx.tape_path
+    filename = args.filename
+    sessions_dir = Path.join(tape_path, "sessions")
+    File.mkdir_p!(sessions_dir)
+    corrupt_path = Path.join(sessions_dir, filename)
+    File.write!(corrupt_path, "{invalid json content <<<>>>")
+    ctx
   end
 
   defp tape_handoff_given!(ctx, %{name: name}, _meta) do
@@ -4821,6 +4936,20 @@ defmodule Gong.BDD.Instructions.V1 do
     end
 
     Map.put(ctx, :e2e_provider, provider)
+  end
+
+  defp e2e_tape_record_turn!(ctx, args, _meta) do
+    prompt = args.prompt
+    reply = Map.get(ctx, :last_reply, "")
+    store = ctx.tape_store
+    anchor = Map.get(ctx, :tape_last_anchor, "session-start")
+
+    # 追加 user entry
+    {:ok, store} = Gong.Tape.Store.append(store, anchor, %{kind: :user, content: prompt, metadata: %{}})
+    # 追加 assistant entry
+    {:ok, store} = Gong.Tape.Store.append(store, anchor, %{kind: :assistant, content: reply, metadata: %{}})
+
+    Map.put(ctx, :tape_store, store)
   end
 
   defp agent_chat_continue!(ctx, %{prompt: prompt}, _meta) do

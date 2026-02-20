@@ -255,6 +255,86 @@ GIVEN tape_init
 WHEN cli_session_restore session_id="nonexistent-id"
 THEN assert_session_restore_error error_contains="not_found"
 
+[SCENARIO: CLI-SESSION-005] TITLE: 多会话 list 排序 TAGS: integration cli session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="问题A"
+GIVEN tape_append kind="assistant" content="回复A"
+GIVEN tape_save_session session_id="multi-001"
+GIVEN tape_append kind="user" content="问题B"
+GIVEN tape_append kind="assistant" content="回复B"
+GIVEN tape_save_session session_id="multi-002"
+WHEN cli_session_list
+THEN assert_session_list_count expected=2
+THEN assert_session_list_contains session_id="multi-001"
+THEN assert_session_list_contains session_id="multi-002"
+
+[SCENARIO: CLI-SESSION-006] TITLE: 覆盖保存同一 session_id TAGS: integration cli session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="旧内容"
+GIVEN tape_save_session session_id="dup-001"
+GIVEN tape_append kind="user" content="新内容"
+GIVEN tape_append kind="assistant" content="新回复"
+GIVEN tape_save_session session_id="dup-001"
+WHEN cli_session_list
+THEN assert_session_list_count expected=1
+WHEN cli_session_restore session_id="dup-001"
+THEN assert_session_restored
+THEN assert_session_history_contains content="新内容"
+
+[SCENARIO: CLI-SESSION-007] TITLE: restore 验证 user + assistant 双角色 TAGS: integration cli session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="用户提问"
+GIVEN tape_append kind="assistant" content="助手回复"
+GIVEN tape_save_session session_id="dual-role-001"
+WHEN cli_session_restore session_id="dual-role-001"
+THEN assert_session_restored
+THEN assert_session_history_contains content="用户提问"
+THEN assert_session_history_contains content="助手回复"
+
+[SCENARIO: CLI-SESSION-008] TITLE: 损坏 JSON 文件容错 TAGS: integration cli session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="正常会话"
+GIVEN tape_append kind="assistant" content="正常回复"
+GIVEN tape_save_session session_id="good-session"
+GIVEN create_corrupt_session_file filename="bad-session.json"
+WHEN cli_session_list
+THEN assert_session_list_count expected=1
+THEN assert_session_list_contains session_id="good-session"
+
+[SCENARIO: CLI-SESSION-009] TITLE: save → restore 往返一致性 TAGS: integration cli session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="往返问题"
+GIVEN tape_append kind="assistant" content="往返回复"
+GIVEN tape_save_session session_id="roundtrip-001"
+WHEN cli_session_restore session_id="roundtrip-001"
+THEN assert_session_restored
+THEN assert_session_history_contains content="往返问题"
+THEN assert_session_history_contains content="往返回复"
+
+[SCENARIO: CLI-SESSION-010] TITLE: 多轮对话 history TAGS: integration cli session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN tape_append kind="user" content="第一轮问题"
+GIVEN tape_append kind="assistant" content="第一轮回复"
+GIVEN tape_append kind="user" content="第二轮问题"
+GIVEN tape_append kind="assistant" content="第二轮回复"
+GIVEN tape_append kind="user" content="第三轮问题"
+GIVEN tape_append kind="assistant" content="第三轮回复"
+GIVEN tape_save_session session_id="multi-turn-001"
+WHEN cli_session_restore session_id="multi-turn-001"
+THEN assert_session_restored
+THEN assert_session_history_contains content="第一轮问题"
+THEN assert_session_history_contains content="第一轮回复"
+THEN assert_session_history_contains content="第二轮问题"
+THEN assert_session_history_contains content="第二轮回复"
+THEN assert_session_history_contains content="第三轮问题"
+THEN assert_session_history_contains content="第三轮回复"
+
 # ══════════════════════════════════════════════
 # Group 6: 长对话压缩 CLI 集成 — Step4 (3 场景)
 # ══════════════════════════════════════════════
