@@ -373,3 +373,16 @@ WHEN chat_wait_completion
 WHEN chat_input text="/save"
 THEN assert_session_saved
 THEN assert_no_crash
+
+[SCENARIO: CLI-SESSION-011] TITLE: 关闭会话自动持久化并可恢复 TAGS: integration cli session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN start_chat_session
+GIVEN mock_llm_response response_type="text" content="自动保存测试回复"
+WHEN chat_input text="测试消息"
+WHEN chat_wait_completion
+WHEN chat_input text="/exit"
+THEN assert_session_saved
+WHEN cli_session_restore
+THEN assert_session_restored
+THEN assert_session_history_contains content="测试消息"

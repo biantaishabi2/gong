@@ -547,4 +547,38 @@ defmodule Gong.BDD.Generated.E2eLlmTest do
     :ok
   end
 
+  # Source: BDD-E2E-SESSION-002
+  @tag :e2e
+  @tag :session
+  test "[BDD-E2E-SESSION-002] Session 关闭自动持久化 + Deepseek 往返恢复" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-E2E-SESSION-002"}
+    # line 254: GIVEN check_e2e_provider provider="deepseek"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :check_e2e_provider, %{provider: "deepseek"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 254, raw: "GIVEN check_e2e_provider provider=\"deepseek\""}, 254)
+    # line 255: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 255, raw: "GIVEN create_temp_dir"}, 255)
+    # line 256: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 256, raw: "GIVEN tape_init"}, 256)
+    # line 257: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 257, raw: "GIVEN start_chat_session"}, 257)
+    # line 258: WHEN chat_input text="1+1等于几？只回答数字"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "1+1等于几？只回答数字"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 258, raw: "WHEN chat_input text=\"1+1等于几？只回答数字\""}, 258)
+    # line 259: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 259, raw: "WHEN chat_wait_completion"}, 259)
+    # line 260: WHEN chat_input text="/exit"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/exit"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 260, raw: "WHEN chat_input text=\"/exit\""}, 260)
+    # line 261: THEN assert_session_saved
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 261, raw: "THEN assert_session_saved"}, 261)
+    # line 262: WHEN cli_session_restore
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 262, raw: "WHEN cli_session_restore"}, 262)
+    # line 263: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 263, raw: "THEN assert_session_restored"}, 263)
+    # line 264: THEN assert_session_history_contains content="1+1等于几？只回答数字"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "1+1等于几？只回答数字"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 264, raw: "THEN assert_session_history_contains content=\"1+1等于几？只回答数字\""}, 264)
+    # line 265: THEN assert_session_history_contains content="2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "2"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 265, raw: "THEN assert_session_history_contains content=\"2\""}, 265)
+    _ctx = ctx
+    :ok
+  end
+
 end

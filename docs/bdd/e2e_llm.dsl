@@ -249,3 +249,17 @@ GIVEN tape_save_session session_id="e2e-session-001"
 WHEN cli_session_restore session_id="e2e-session-001"
 THEN assert_session_restored
 THEN assert_session_history_contains content="2"
+
+[SCENARIO: BDD-E2E-SESSION-002] TITLE: Session 关闭自动持久化 + Deepseek 往返恢复 TAGS: e2e session
+GIVEN check_e2e_provider provider="deepseek"
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN start_chat_session
+WHEN chat_input text="1+1等于几？只回答数字"
+WHEN chat_wait_completion
+WHEN chat_input text="/exit"
+THEN assert_session_saved
+WHEN cli_session_restore
+THEN assert_session_restored
+THEN assert_session_history_contains content="1+1等于几？只回答数字"
+THEN assert_session_history_contains content="2"
