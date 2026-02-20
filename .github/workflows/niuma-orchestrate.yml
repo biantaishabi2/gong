@@ -6,80 +6,23 @@ on:
   pull_request:
     types: [closed]
   schedule:
-    - cron: '*/5 * * * *'  # 每5分钟检查一次
+    - cron: '*/5 * * * *'
 
-concurrency:
-  group: niuma-orchestrate-${{ github.event.issue.number || github.event.pull_request.number || 'schedule' }}
-  cancel-in-progress: false
+permissions:
+  issues: write
+  contents: read
 
 jobs:
   orchestrate:
-    runs-on: self-hosted
     if: >
       (github.event_name == 'issues' && github.event.label.name == 'bot:orchestrate') ||
       github.event_name == 'schedule'
-    permissions:
-      issues: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.NIUMA_PAT }}
-
-      - name: Run Orchestration
-        id: control_run
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          WORKSPACE: ${{ github.workspace }}
-          NIUMA_INTEGRATION_GATE_MAX_RETRIES: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
-        run: |
-          niuma control run \
-            --repo "$REPO" \
-            --repo-dir "$WORKSPACE" \
-            --integration-gate-max-retries "$NIUMA_INTEGRATION_GATE_MAX_RETRIES"
-
-      - name: Collect Integration Gate Status
-        id: gate_status
-        env:
-          WORKSPACE: ${{ github.workspace }}
-        run: |
-          STORE_PATH="$WORKSPACE/.niuma/tasks.json"
-          if [ ! -f "$STORE_PATH" ]; then
-            echo "integration_gate_status=passed" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          STATUS=$(jq -r '
-            [ (.tasks // {}) | to_entries[] | .value.metadata.integration_gate_status // empty ] as $s |
-            if ($s | index("escalated")) then "escalated"
-            elif ($s | index("retrying")) then "retrying"
-            elif ($s | index("pending")) then "pending"
-            elif ($s | index("passed")) then "passed"
-            else "passed" end
-          ' "$STORE_PATH")
-          echo "integration_gate_status=$STATUS" >> "$GITHUB_OUTPUT"
-          echo "integration_gate_status=$STATUS"
-
-      - name: Gate Passed
-        if: steps.gate_status.outputs.integration_gate_status == 'passed'
-        run: |
-          echo "integration gate 全部通过，继续自动推进。"
-
-      - name: Gate Retrying
-        if: steps.gate_status.outputs.integration_gate_status == 'retrying'
-        run: |
-          echo "integration gate 失败但未超限，进入自动修复分支。"
-
-      - name: Gate Escalated
-        if: steps.gate_status.outputs.integration_gate_status == 'escalated'
-        run: |
-          echo "integration gate 已超限升级人工，终止自动推进。"
-
-      - name: Gate Pending
-        if: steps.gate_status.outputs.integration_gate_status == 'pending'
-        run: |
-          echo "integration gate 仍在等待结果，本轮不推进后续自动流程。"
+    uses: biantaishabi2/Cli/.github/workflows/niuma-orchestrate-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      build_niuma: false
+      enable_local_cleanup: true
+    secrets: inherit
 
   close-after-integration-merge:
     runs-on: self-hosted

@@ -6,71 +6,39 @@ on:
   pull_request_review:
     types: [submitted]
 
-concurrency:
-  group: niuma-iterate-${{ github.event.issue.number || github.event.pull_request.number }}
-  cancel-in-progress: false
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
 
 jobs:
   # AI 自审不通过 → 自动迭代
-  iterate-from-review:
-    runs-on: self-hosted
+  call-iterate-from-review:
     if: >
       github.event_name == 'issues' &&
-      github.event.label.name == 'bot:pr-needs-fix'
-    permissions:
-      issues: write
-      pull-requests: write
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 获取完整历史，确保可以 fetch 远程分支重建 worktree
+      github.event.label.name == 'bot:pr-needs-fix' &&
+      github.event.issue.state == 'open'
+    uses: biantaishabi2/Cli/.github/workflows/niuma-iterate-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      issue_number: ${{ format('{0}', github.event.issue.number) }}
+      trigger_source: review
+      build_niuma: false
+      gate_max_retries: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
+    secrets: inherit
 
-      - name: Find PR Number
-        id: find_pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          PR_NUMBER=$(gh api --paginate "repos/${REPO}/issues/${ISSUE_NUMBER}/comments" \
-            --jq '.[] | select(.body | contains("BOT:PR_CREATED")) | .body' \
-            | sed -n 's/.*pr=\([0-9]\+\).*/\1/p' | tail -1)
-          if [ -z "$PR_NUMBER" ]; then
-            echo "::warning::未在 issue #${ISSUE_NUMBER} 的评论中找到 PR 号"
-          fi
-          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
-
-      - name: Iterate on Review
-        if: steps.find_pr.outputs.pr_number != ''
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
-          WORKSPACE: ${{ github.workspace }}
-        run: |
-          niuma iterate \
-            --repo "$REPO" \
-            --issue "$ISSUE_NUMBER" \
-            --pr "$PR_NUMBER" \
-            --repo-dir "$WORKSPACE"
-
-  # 人工 PR review changes_requested → 迭代
-  iterate-from-human:
+  # 人工 PR review changes_requested → 提取 issue 号
+  extract-issue-from-pr:
     runs-on: self-hosted
     if: >
       github.event_name == 'pull_request_review' &&
-      github.event.review.state == 'changes_requested'
+      github.event.review.state == 'changes_requested' &&
+      github.event.pull_request.state == 'open'
+    outputs:
+      issue_number: ${{ steps.extract.outputs.issue_number }}
     permissions:
-      issues: write
-      pull-requests: write
-      contents: write
+      pull-requests: read
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 获取完整历史，确保可以 fetch 远程分支重建 worktree
-
       - name: Extract Issue Number from PR
         id: extract
         env:
@@ -80,19 +48,17 @@ jobs:
           BODY=$(gh pr view "$PR_NUMBER" --json body -q '.body')
           ISSUE_NUMBER=$(echo "$BODY" | grep -Eo 'Closes #[0-9]+' | sed 's/Closes #//' | head -1)
           echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
-          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
 
-      - name: Iterate on Review
-        if: steps.extract.outputs.issue_number != ''
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ steps.extract.outputs.issue_number }}
-          PR_NUMBER: ${{ steps.extract.outputs.pr_number }}
-          WORKSPACE: ${{ github.workspace }}
-        run: |
-          niuma iterate \
-            --repo "$REPO" \
-            --issue "$ISSUE_NUMBER" \
-            --pr "$PR_NUMBER" \
-            --repo-dir "$WORKSPACE"
+  # 人工 PR review changes_requested → 调用 reusable 迭代
+  call-iterate-from-human:
+    needs: extract-issue-from-pr
+    if: needs.extract-issue-from-pr.outputs.issue_number != ''
+    uses: biantaishabi2/Cli/.github/workflows/niuma-iterate-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      issue_number: ${{ needs.extract-issue-from-pr.outputs.issue_number }}
+      pr_number: ${{ format('{0}', github.event.pull_request.number) }}
+      trigger_source: human
+      build_niuma: false
+      gate_max_retries: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
+    secrets: inherit

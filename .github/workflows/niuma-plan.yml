@@ -4,44 +4,16 @@ on:
   issues:
     types: [labeled]
 
-concurrency:
-  group: niuma-plan-${{ github.event.issue.number }}
-  cancel-in-progress: false
+permissions:
+  issues: write
+  contents: read
 
 jobs:
   plan-draft:
-    runs-on: self-hosted
     if: github.event.label.name == 'bot:fix'
-    permissions:
-      issues: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check if issue is in orchestration queue
-        id: check_orchestration
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          WORKSPACE: ${{ github.workspace }}
-        run: |
-          # 检查 issue 是否在 taskctl 中（被编排队列管理）
-          if niuma control check --repo "$REPO" --issue "$ISSUE_NUMBER" 2>/dev/null; then
-            echo "Issue is in orchestration queue, skipping single-issue flow"
-            echo "should_skip=true" >> $GITHUB_OUTPUT
-          else
-            echo "should_skip=false" >> $GITHUB_OUTPUT
-          fi
-        continue-on-error: true
-
-      - name: Generate Plan Draft
-        if: steps.check_orchestration.outputs.should_skip != 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          niuma plan-draft \
-            --repo "$REPO" \
-            --issue "$ISSUE_NUMBER"
+    uses: biantaishabi2/Cli/.github/workflows/niuma-plan-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      issue_number: ${{ format('{0}', github.event.issue.number) }}
+      build_niuma: false
+    secrets: inherit
