@@ -31,6 +31,9 @@ defmodule Gong.CLI do
 
   @spec main([String.t()]) :: no_return()
   def main(argv) when is_list(argv) do
+    # escript 模式下 app: nil，需要手动启动 application
+    ensure_started()
+
     opts = [
       entry: System.get_env("GONG_ENTRY"),
       legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"
@@ -40,6 +43,31 @@ defmodule Gong.CLI do
     |> run(opts)
     |> System.halt()
   end
+
+  # escript 模式（app: nil）下手动启动 application，
+  # 在启动前配置 tzdata/llm_db 避免 Application.app_dir 崩溃
+  defp ensure_started do
+    # 用 primary filter 静默启动期间所有日志（比 level 可靠，不会被 app 启动重置）
+    :logger.add_primary_filter(:startup_silence, {&__MODULE__.silence_all/2, nil})
+
+    # tzdata: 数据目录指向 /tmp，禁用自动更新
+    tzdata_dir = Path.join(System.tmp_dir!(), "gong_tzdata")
+    File.mkdir_p!(tzdata_dir)
+    Application.put_env(:tzdata, :data_dir, tzdata_dir)
+    Application.put_env(:tzdata, :autoupdate, :disabled)
+
+    # llm_db: 跳过打包数据加载
+    Application.put_env(:llm_db, :skip_packaged_load, true)
+
+    # 启动完整 application tree
+    Application.ensure_all_started(:gong)
+
+    # 移除 filter，恢复正常日志
+    :logger.remove_primary_filter(:startup_silence)
+  end
+
+  @doc false
+  def silence_all(_log_event, _config), do: :stop
 
   @spec run([String.t()], keyword()) :: non_neg_integer()
   def run(argv, opts \\ []) when is_list(argv) do

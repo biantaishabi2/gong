@@ -202,9 +202,10 @@ defmodule Gong.CLITest do
   end
 
   defp normalize_cli_output(output) do
-    output
-    |> String.split("\n", trim: true)
-    |> Enum.reject(&String.starts_with?(&1, ["Compiling ", "Generated "]))
-    |> Enum.join("\n")
+    # 提取 "Gong CLI" 开头之后的内容，跳过编译输出/警告
+    case Regex.run(~r/(Gong CLI .+)/s, output) do
+      [_, body] -> String.trim(body)
+      nil -> String.trim(output)
+    end
   end
 end
