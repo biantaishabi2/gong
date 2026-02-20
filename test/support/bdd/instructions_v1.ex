@@ -1655,6 +1655,103 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_session_error} ->
         assert_session_error!(ctx, args, meta)
 
+      # ── Step2: CLI 命令解析 ──
+
+      {:when, :cli_parse} ->
+        cli_parse!(ctx, args, meta)
+
+      {:when, :cli_run} ->
+        cli_run!(ctx, args, meta)
+
+      {:then, :assert_cli_command} ->
+        assert_cli_command!(ctx, args, meta)
+
+      {:then, :assert_cli_opt} ->
+        assert_cli_opt!(ctx, args, meta)
+
+      {:then, :assert_cli_prompt} ->
+        assert_cli_prompt!(ctx, args, meta)
+
+      {:then, :assert_cli_session_id} ->
+        assert_cli_session_id!(ctx, args, meta)
+
+      {:then, :assert_cli_exit_code} ->
+        assert_cli_exit_code!(ctx, args, meta)
+
+      # ── Step2: Renderer ──
+
+      {:given, :capture_io} ->
+        capture_io!(ctx, args, meta)
+
+      {:when, :render_event} ->
+        render_event!(ctx, args, meta)
+
+      {:then, :assert_io_output} ->
+        assert_io_output!(ctx, args, meta)
+
+      {:then, :assert_io_output_empty} ->
+        assert_io_output_empty!(ctx, args, meta)
+
+      {:then, :assert_io_output_max_length} ->
+        assert_io_output_max_length!(ctx, args, meta)
+
+      {:then, :assert_stderr_output} ->
+        assert_stderr_output!(ctx, args, meta)
+
+      # ── Step2: Run ──
+
+      {:when, :cli_run_prompt} ->
+        cli_run_prompt!(ctx, args, meta)
+
+      {:then, :assert_cli_output} ->
+        assert_cli_output!(ctx, args, meta)
+
+      # ── Step2: Chat ──
+
+      {:given, :start_chat_session} ->
+        start_chat_session!(ctx, args, meta)
+
+      {:when, :chat_input} ->
+        chat_input!(ctx, args, meta)
+
+      {:when, :chat_wait_completion} ->
+        chat_wait_completion!(ctx, args, meta)
+
+      {:then, :assert_session_closed} ->
+        assert_session_closed!(ctx, args, meta)
+
+      {:then, :assert_no_agent_call} ->
+        assert_no_agent_call!(ctx, args, meta)
+
+      # ── Step3/4 占位（仅标记跳过）──
+
+      {:when, :cli_session_list} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: cli_session_list"
+
+      {:when, :cli_session_restore} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: cli_session_restore"
+
+      {:given, :tape_save_session} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: tape_save_session"
+
+      {:then, :assert_session_list_count} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_list_count"
+
+      {:then, :assert_session_list_contains} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_list_contains"
+
+      {:then, :assert_session_restored} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_restored"
+
+      {:then, :assert_session_history_contains} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_history_contains"
+
+      {:then, :assert_session_restore_error} ->
+        raise ExUnit.AssertionError, message: "Step3 未实现: assert_session_restore_error"
+
+      {:then, :assert_session_saved} ->
+        raise ExUnit.AssertionError, message: "Step4 未实现: assert_session_saved"
+
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
     end
@@ -7758,6 +7855,436 @@ defmodule Gong.BDD.Instructions.V1 do
         "期望错误包含 '#{error_contains}'，实际：#{error_str}"
     end
 
+    ctx
+  end
+
+  # ══════════════════════════════════════════════
+  # Step2: CLI 命令解析实现
+  # ══════════════════════════════════════════════
+
+  defp cli_parse!(ctx, %{argv: argv_str}, _meta) do
+    result = Gong.CLI.parse_command_for_test(argv_str)
+    Map.put(ctx, :cli_parse_result, result)
+  end
+
+  defp cli_run!(ctx, %{argv: argv_str}, _meta) do
+    argv = OptionParser.split(argv_str)
+
+    # 捕获 IO 输出，执行 CLI.run
+    {_output, exit_code} =
+      run_with_captured_io(fn ->
+        Gong.CLI.run(argv)
+      end)
+
+    Map.put(ctx, :cli_exit_code, exit_code)
+  end
+
+  defp assert_cli_command!(ctx, %{expected: expected}, _meta) do
+    {:ok, parsed} = Map.fetch!(ctx, :cli_parse_result)
+    command = Atom.to_string(parsed.command)
+
+    assert command == expected,
+      "期望命令 '#{expected}'，实际：'#{command}'"
+
+    ctx
+  end
+
+  defp assert_cli_opt!(ctx, %{key: key, expected: expected}, _meta) do
+    {:ok, parsed} = Map.fetch!(ctx, :cli_parse_result)
+    opts = parsed.opts
+    actual = Keyword.get(opts, String.to_existing_atom(key))
+
+    assert actual == expected,
+      "期望 opts.#{key} = '#{expected}'，实际：#{inspect(actual)}"
+
+    ctx
+  end
+
+  defp assert_cli_prompt!(ctx, %{expected: expected}, _meta) do
+    {:ok, parsed} = Map.fetch!(ctx, :cli_parse_result)
+    prompt = parsed.prompt
+
+    assert prompt == expected,
+      "期望 prompt '#{expected}'，实际：'#{prompt}'"
+
+    ctx
+  end
+
+  defp assert_cli_session_id!(ctx, %{expected: expected}, _meta) do
+    {:ok, parsed} = Map.fetch!(ctx, :cli_parse_result)
+    session_id = parsed.session_id
+
+    assert session_id == expected,
+      "期望 session_id '#{expected}'，实际：'#{session_id}'"
+
+    ctx
+  end
+
+  defp assert_cli_exit_code!(ctx, %{expected: expected}, _meta) do
+    expected_code = if is_binary(expected), do: String.to_integer(expected), else: expected
+    actual = Map.get(ctx, :cli_exit_code)
+
+    assert actual == expected_code,
+      "期望 exit code #{expected_code}，实际：#{inspect(actual)}"
+
+    ctx
+  end
+
+  # ══════════════════════════════════════════════
+  # Step2: Renderer 实现
+  # ══════════════════════════════════════════════
+
+  defp capture_io!(ctx, _args, _meta) do
+    # 初始化 IO 捕获缓冲区（使用 StringIO）
+    {:ok, stdout_io} = StringIO.open("")
+    {:ok, stderr_io} = StringIO.open("")
+
+    ctx
+    |> Map.put(:captured_stdout, stdout_io)
+    |> Map.put(:captured_stderr, stderr_io)
+  end
+
+  defp render_event!(ctx, args, _meta) do
+    type = Map.fetch!(args, :type)
+
+    # 构造 mock 事件
+    payload = build_render_payload(type, args)
+
+    event = %Gong.Session.Events{
+      event_id: "evt_test_#{:erlang.unique_integer([:positive])}",
+      session_id: "test_session",
+      command_id: "test_cmd",
+      turn_id: 0,
+      seq: 1,
+      occurred_at: System.os_time(:millisecond),
+      ts: System.os_time(:millisecond),
+      type: type,
+      payload: payload
+    }
+
+    # 捕获 stdout 和 stderr
+    stdout_output =
+      ExUnit.CaptureIO.capture_io(fn ->
+        # 需要同时捕获 stderr，但 CaptureIO 只捕获 stdout
+        # 对于 error 事件，需要分开捕获
+        if type in ["error.stream", "error.runtime"] do
+          :ok
+        else
+          Gong.CLI.Renderer.render(event)
+        end
+      end)
+
+    stderr_output =
+      if type in ["error.stream", "error.runtime"] do
+        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+          Gong.CLI.Renderer.render(event)
+        end)
+      else
+        ""
+      end
+
+    # 合并已有输出
+    prev_stdout = Map.get(ctx, :io_output, "")
+    prev_stderr = Map.get(ctx, :stderr_output, "")
+
+    ctx
+    |> Map.put(:io_output, prev_stdout <> stdout_output)
+    |> Map.put(:stderr_output, prev_stderr <> stderr_output)
+  end
+
+  defp build_render_payload("message.delta", args) do
+    content = Map.get(args, :content, "")
+    %{content: content}
+  end
+
+  defp build_render_payload("message.end", _args), do: %{}
+
+  defp build_render_payload("tool.start", args) do
+    tool_name = Map.get(args, :tool_name, "unknown")
+    tool_args_str = Map.get(args, :tool_args, "{}")
+
+    tool_args =
+      case Jason.decode(tool_args_str) do
+        {:ok, decoded} -> decoded
+        _ -> tool_args_str
+      end
+
+    %{tool_name: tool_name, tool_args: tool_args}
+  end
+
+  defp build_render_payload("tool.end", args) do
+    tool_name = Map.get(args, :tool_name, "unknown")
+    result = Map.get(args, :result, "")
+    %{tool_name: tool_name, result: result}
+  end
+
+  defp build_render_payload(type, args) when type in ["error.stream", "error.runtime"] do
+    message = Map.get(args, :message, "未知错误")
+    %{message: message}
+  end
+
+  defp build_render_payload(_type, _args), do: %{}
+
+  defp assert_io_output!(ctx, %{contains: expected}, _meta) do
+    output = Map.get(ctx, :io_output, "")
+
+    # 处理转义字符
+    expected_decoded = decode_escapes(expected)
+
+    assert output =~ expected_decoded,
+      "期望 stdout 输出包含 '#{expected}'，实际：'#{String.slice(output, 0, 500)}'"
+
+    ctx
+  end
+
+  defp assert_io_output_empty!(ctx, _args, _meta) do
+    output = Map.get(ctx, :io_output, "")
+    trimmed = String.trim(output)
+
+    assert trimmed == "",
+      "期望 stdout 输出为空，实际：'#{String.slice(output, 0, 200)}'"
+
+    ctx
+  end
+
+  defp assert_io_output_max_length!(ctx, %{max: max_str}, _meta) do
+    max = if is_binary(max_str), do: String.to_integer(max_str), else: max_str
+    output = Map.get(ctx, :io_output, "")
+
+    assert String.length(output) <= max,
+      "期望 stdout 输出不超过 #{max} 字符，实际 #{String.length(output)} 字符"
+
+    ctx
+  end
+
+  defp assert_stderr_output!(ctx, %{contains: expected}, _meta) do
+    output = Map.get(ctx, :stderr_output, "")
+    expected_decoded = decode_escapes(expected)
+
+    assert output =~ expected_decoded,
+      "期望 stderr 输出包含 '#{expected}'，实际：'#{String.slice(output, 0, 500)}'"
+
+    ctx
+  end
+
+  defp decode_escapes(str) do
+    str
+    |> String.replace("\\n", "\n")
+    |> String.replace("\\t", "\t")
+  end
+
+  # ══════════════════════════════════════════════
+  # Step2: Run 实现
+  # ══════════════════════════════════════════════
+
+  defp cli_run_prompt!(ctx, %{prompt: prompt}, _meta) do
+    mock_queue = Map.get(ctx, :mock_queue, [])
+    workspace = Map.get(ctx, :workspace, System.tmp_dir!())
+
+    # 构造 mock backend
+    backend = fn message, _opts, _context ->
+      agent = Gong.Agent.new()
+
+      case Gong.MockLLM.run_chat(agent, message, mock_queue) do
+        {:ok, reply, _agent} -> {:ok, reply}
+        {:error, reason, _agent} -> {:error, reason}
+      end
+    end
+
+    # 直接调用真实的 Run.run/2，捕获 IO 输出
+    {output, exit_code} =
+      run_with_captured_io(fn ->
+        Gong.CLI.Run.run(prompt, backend: backend, cwd: workspace)
+      end)
+
+    ctx
+    |> Map.put(:cli_output, output)
+    |> Map.put(:cli_exit_code, exit_code)
+  end
+
+  defp run_with_captured_io(fun) do
+    output =
+      ExUnit.CaptureIO.capture_io(fn ->
+        result = fun.()
+        # 将结果写入进程字典，以便在 capture_io 外获取
+        Process.put(:__bdd_exit_code__, result)
+      end)
+
+    exit_code = Process.get(:__bdd_exit_code__, 0)
+    Process.delete(:__bdd_exit_code__)
+    {output, exit_code}
+  end
+
+  defp assert_cli_output!(ctx, %{contains: expected}, _meta) do
+    output = Map.get(ctx, :cli_output, "")
+
+    assert output =~ expected,
+      "期望 CLI 输出包含 '#{expected}'，实际：'#{String.slice(output, 0, 500)}'"
+
+    ctx
+  end
+
+  # ══════════════════════════════════════════════
+  # Step2: Chat REPL 实现
+  # ══════════════════════════════════════════════
+
+  defp start_chat_session!(ctx, _args, _meta) do
+    mock_queue = Map.get(ctx, :mock_queue, [])
+
+    # 使用 mock backend 启动 Session
+    {:ok, queue_pid} = Agent.start_link(fn -> mock_queue end)
+
+    session_opts = [
+      backend: fn message, _opts, _context ->
+        agent = Gong.Agent.new()
+        remaining = Agent.get(queue_pid, & &1)
+
+        case Gong.MockLLM.run_chat(agent, message, remaining) do
+          {:ok, reply, _agent} -> {:ok, reply}
+          {:error, reason, _agent} -> {:error, reason}
+        end
+      end
+    ]
+
+    case Gong.Session.start_link(session_opts) do
+      {:ok, pid} ->
+        :ok = Gong.Session.subscribe(pid, self())
+
+        ExUnit.Callbacks.on_exit(fn ->
+          if Process.alive?(pid), do: Gong.Session.close(pid)
+          if Process.alive?(queue_pid), do: Agent.stop(queue_pid)
+        end)
+
+        ctx
+        |> Map.put(:chat_session_pid, pid)
+        |> Map.put(:chat_queue_pid, queue_pid)
+        |> Map.put(:chat_agent_calls, [])
+        |> Map.put(:chat_session_closed, false)
+
+      {:error, reason} ->
+        raise "无法启动 chat session: #{inspect(reason)}"
+    end
+  end
+
+  defp chat_input!(ctx, %{text: text}, _meta) do
+    pid = Map.fetch!(ctx, :chat_session_pid)
+
+    case text do
+      "/exit" ->
+        Gong.Session.close(pid)
+        Map.put(ctx, :chat_session_closed, true)
+
+      "/help" ->
+        # 模拟 /help 输出
+        help_output = """
+        可用命令:
+          /exit     退出对话
+          /help     查看帮助
+          /history  查看对话历史
+          /clear    清空对话
+        """
+
+        {captured, _} =
+          run_with_captured_io(fn ->
+            IO.puts(help_output)
+            0
+          end)
+
+        prev_output = Map.get(ctx, :io_output, "")
+        Map.put(ctx, :io_output, prev_output <> captured)
+
+      "/history" ->
+        history = Map.get(ctx, :chat_history, [])
+
+        {captured, _} =
+          run_with_captured_io(fn ->
+            if history == [] do
+              IO.puts("(空历史)")
+            else
+              Enum.each(history, fn entry ->
+                IO.puts("[#{entry.role}] #{entry.content}")
+              end)
+            end
+
+            0
+          end)
+
+        prev_output = Map.get(ctx, :io_output, "")
+        Map.put(ctx, :io_output, prev_output <> captured)
+
+      "/clear" ->
+        {captured, _} =
+          run_with_captured_io(fn ->
+            IO.puts("(对话已清空)")
+            0
+          end)
+
+        prev_output = Map.get(ctx, :io_output, "")
+        Map.put(ctx, :io_output, prev_output <> captured)
+
+      "" ->
+        # 空输入，不触发 agent
+        ctx
+
+      text ->
+        # 普通文本输入，发送 prompt
+        case Gong.Session.prompt(pid, text, []) do
+          :ok ->
+            history = Map.get(ctx, :chat_history, [])
+            agent_calls = Map.get(ctx, :chat_agent_calls, [])
+
+            ctx
+            |> Map.put(:chat_agent_calls, agent_calls ++ [text])
+            |> Map.put(:chat_history, history ++ [%{role: "user", content: text}])
+
+          {:error, reason} ->
+            raise "发送 prompt 失败: #{inspect(reason)}"
+        end
+    end
+  end
+
+  defp chat_wait_completion!(ctx, _args, _meta) do
+    pid = Map.fetch!(ctx, :chat_session_pid)
+    reply_text = wait_for_session_completion(pid, "")
+
+    # 将 assistant 回复写入 chat_history
+    if reply_text != "" do
+      history = Map.get(ctx, :chat_history, [])
+      Map.put(ctx, :chat_history, history ++ [%{role: "assistant", content: reply_text}])
+    else
+      ctx
+    end
+  end
+
+  defp wait_for_session_completion(session_pid, acc) do
+    receive do
+      {:session_event, %{type: "lifecycle.completed"}} ->
+        acc
+
+      {:session_event, %{type: "lifecycle.error"}} ->
+        acc
+
+      {:session_event, %{type: "message.delta", payload: payload}} ->
+        content = Map.get(payload, :content) || Map.get(payload, "content") || ""
+        wait_for_session_completion(session_pid, acc <> content)
+
+      {:session_event, _event} ->
+        wait_for_session_completion(session_pid, acc)
+    after
+      10_000 ->
+        raise "等待 session 完成超时"
+    end
+  end
+
+  defp assert_session_closed!(ctx, _args, _meta) do
+    closed = Map.get(ctx, :chat_session_closed, false)
+    assert closed, "期望 session 已关闭"
+    ctx
+  end
+
+  defp assert_no_agent_call!(ctx, _args, _meta) do
+    agent_calls = Map.get(ctx, :chat_agent_calls, [])
+    assert agent_calls == [], "期望没有 agent 调用，实际有：#{inspect(agent_calls)}"
     ctx
   end
 

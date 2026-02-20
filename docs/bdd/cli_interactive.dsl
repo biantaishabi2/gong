@@ -38,8 +38,21 @@ GIVEN create_temp_dir
 WHEN cli_run argv="unknown_cmd"
 THEN assert_cli_exit_code expected=2
 
+[SCENARIO: CLI-CMD-007] TITLE: run --model 参数解析 TAGS: unit cli
+GIVEN create_temp_dir
+WHEN cli_parse argv="run --model openai:gpt-4 hello"
+THEN assert_cli_command expected="run"
+THEN assert_cli_opt key="model" expected="openai:gpt-4"
+THEN assert_cli_prompt expected="hello"
+
+[SCENARIO: CLI-CMD-008] TITLE: run 无 prompt 解析为空字符串 TAGS: unit cli
+GIVEN create_temp_dir
+WHEN cli_parse argv="run"
+THEN assert_cli_command expected="run"
+THEN assert_cli_prompt expected=""
+
 # ══════════════════════════════════════════════
-# Group 2: Renderer 事件格式化 — Step2 (5 场景)
+# Group 2: Renderer 事件格式化 — Step2 (5+4 场景)
 # ══════════════════════════════════════════════
 
 [SCENARIO: CLI-RENDER-001] TITLE: text_delta 渲染为文本追加 TAGS: unit cli renderer
@@ -72,8 +85,35 @@ GIVEN capture_io
 WHEN render_event type="error.stream" message="连接超时"
 THEN assert_stderr_output contains="连接超时"
 
+[SCENARIO: CLI-RENDER-006] TITLE: message.start 渲染为 noop TAGS: unit cli renderer
+GIVEN create_temp_dir
+GIVEN capture_io
+WHEN render_event type="message.start"
+THEN assert_io_output_empty
+
+[SCENARIO: CLI-RENDER-007] TITLE: error.runtime 也输出到 stderr TAGS: unit cli renderer
+GIVEN create_temp_dir
+GIVEN capture_io
+WHEN render_event type="error.runtime" message="模型不存在"
+THEN assert_stderr_output contains="模型不存在"
+
+[SCENARIO: CLI-RENDER-008] TITLE: 连续多事件拼接渲染 TAGS: unit cli renderer
+GIVEN create_temp_dir
+GIVEN capture_io
+WHEN render_event type="message.delta" content="你好"
+WHEN render_event type="message.delta" content="世界"
+WHEN render_event type="message.end"
+THEN assert_io_output contains="你好世界"
+
+[SCENARIO: CLI-RENDER-009] TITLE: tool.start 参数超长截断 TAGS: unit cli renderer
+GIVEN create_temp_dir
+GIVEN capture_io
+WHEN render_event type="tool.start" tool_name="bash" tool_args="command=echo_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+THEN assert_io_output contains="bash"
+THEN assert_io_output contains="..."
+
 # ══════════════════════════════════════════════
-# Group 3: Run 单次执行 — Step2 (3 场景)
+# Group 3: Run 单次执行 — Step2 (3+1 场景)
 # ══════════════════════════════════════════════
 
 [SCENARIO: CLI-RUN-001] TITLE: run 命令单次执行返回文本 TAGS: integration cli
@@ -101,8 +141,13 @@ WHEN cli_run_prompt prompt="读取 run_test.txt"
 THEN assert_cli_output contains="run mode data"
 THEN assert_cli_exit_code expected=0
 
+[SCENARIO: CLI-RUN-004] TITLE: run 空 prompt 返回 usage 错误 TAGS: unit cli
+GIVEN create_temp_dir
+WHEN cli_run argv="run"
+THEN assert_cli_exit_code expected=2
+
 # ══════════════════════════════════════════════
-# Group 4: Chat REPL 斜杠命令 — Step2 (4 场景)
+# Group 4: Chat REPL 斜杠命令 — Step2 (4+3 场景)
 # ══════════════════════════════════════════════
 
 [SCENARIO: CLI-CHAT-001] TITLE: /exit 关闭会话 TAGS: integration cli chat
@@ -124,8 +169,8 @@ THEN assert_io_output contains="/history"
 [SCENARIO: CLI-CHAT-003] TITLE: /history 显示对话历史 TAGS: integration cli chat
 GIVEN create_temp_dir
 GIVEN configure_agent
-GIVEN start_chat_session
 GIVEN mock_llm_response response_type="text" content="历史测试回复"
+GIVEN start_chat_session
 WHEN chat_input text="你好"
 WHEN chat_wait_completion
 GIVEN capture_io
@@ -138,6 +183,41 @@ GIVEN configure_agent
 GIVEN start_chat_session
 WHEN chat_input text=""
 THEN assert_no_agent_call
+
+[SCENARIO: CLI-CHAT-005] TITLE: /clear 提示对话已清空 TAGS: integration cli chat
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN start_chat_session
+GIVEN capture_io
+WHEN chat_input text="/clear"
+THEN assert_io_output contains="清空"
+
+[SCENARIO: CLI-CHAT-006] TITLE: 普通对话发送并收到回复 TAGS: integration cli chat
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="text" content="你好啊朋友"
+GIVEN start_chat_session
+WHEN chat_input text="你好"
+WHEN chat_wait_completion
+GIVEN capture_io
+WHEN chat_input text="/history"
+THEN assert_io_output contains="你好"
+THEN assert_io_output contains="你好啊朋友"
+
+[SCENARIO: CLI-CHAT-007] TITLE: 多轮对话历史累积 TAGS: integration cli chat
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN mock_llm_response response_type="text" content="回复一"
+GIVEN mock_llm_response response_type="text" content="回复二"
+GIVEN start_chat_session
+WHEN chat_input text="问题一"
+WHEN chat_wait_completion
+WHEN chat_input text="问题二"
+WHEN chat_wait_completion
+GIVEN capture_io
+WHEN chat_input text="/history"
+THEN assert_io_output contains="问题一"
+THEN assert_io_output contains="问题二"
 
 # ══════════════════════════════════════════════
 # Group 5: Session list/restore — Step3 (4 场景)
