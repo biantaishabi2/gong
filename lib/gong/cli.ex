@@ -97,6 +97,26 @@ defmodule Gong.CLI do
     end
   end
 
+  @doc """
+  暴露 parse_command 给测试使用。
+
+  解析 argv 字符串，返回解析结果。
+  """
+  @spec parse_command_for_test(String.t(), keyword()) ::
+          {:ok, map()} | {:help, String.t()} | {:error, :usage, String.t()}
+  def parse_command_for_test(argv_str, opts \\ []) when is_binary(argv_str) do
+    argv = OptionParser.split(argv_str)
+
+    {parsed_opts, args, _invalid} =
+      OptionParser.parse(argv,
+        strict: [cwd: :string, help: :boolean, model: :string],
+        aliases: [h: :help]
+      )
+
+    merged_opts = Keyword.merge(opts, parsed_opts)
+    parse_command(args, merged_opts)
+  end
+
   @doc "注册 Session stream 订阅者（接收 {:session_event, event}）"
   @spec subscribe_session_stream(pid(), pid()) :: :ok | {:error, Session.error_t()}
   def subscribe_session_stream(session_pid, subscriber_pid) when is_pid(subscriber_pid) do
@@ -118,7 +138,7 @@ defmodule Gong.CLI do
   defp parse_argv(argv) do
     {opts, args, invalid} =
       OptionParser.parse(argv,
-        strict: [cwd: :string, help: :boolean],
+        strict: [cwd: :string, help: :boolean, model: :string],
         aliases: [h: :help]
       )
 
@@ -146,12 +166,53 @@ defmodule Gong.CLI do
   defp parse_command(["help"], _opts), do: {:help, usage_text()}
   defp parse_command(["--help"], _opts), do: {:help, usage_text()}
 
+  defp parse_command(["chat" | _rest], opts) do
+    {:ok, %{command: :chat, opts: opts}}
+  end
+
+  defp parse_command(["run" | rest], opts) do
+    prompt = Enum.join(rest, " ")
+    {:ok, %{command: :run, prompt: prompt, opts: opts}}
+  end
+
+  defp parse_command(["session", "list"], opts) do
+    {:ok, %{command: :session_list, opts: opts}}
+  end
+
+  defp parse_command(["session", "restore", id], opts) do
+    {:ok, %{command: :session_restore, session_id: id, opts: opts}}
+  end
+
   defp parse_command(["cli" | rest], opts) do
     {:ok, %{command: :legacy_entry_alias, legacy_rest: rest, opts: opts}}
   end
 
   defp parse_command([unknown | _rest], _opts) do
     {:error, :usage, "未知命令: #{unknown}\n\n#{usage_text()}"}
+  end
+
+  defp execute(%{command: :chat, opts: command_opts}, _runtime, run_opts) do
+    cwd = resolve_cwd(command_opts, run_opts)
+    model = command_opts[:model]
+    opts = [cwd: cwd] ++ if(model, do: [model: model], else: [])
+    Gong.CLI.Chat.start(opts)
+  end
+
+  defp execute(%{command: :run, prompt: prompt, opts: command_opts}, _runtime, run_opts) do
+    cwd = resolve_cwd(command_opts, run_opts)
+    model = command_opts[:model]
+    opts = [cwd: cwd] ++ if(model, do: [model: model], else: [])
+    Gong.CLI.Run.run(prompt, opts)
+  end
+
+  defp execute(%{command: :session_list, opts: _command_opts}, _runtime, _run_opts) do
+    IO.puts("(session list 未实现)")
+    @exit_ok
+  end
+
+  defp execute(%{command: :session_restore, session_id: _id, opts: _command_opts}, _runtime, _run_opts) do
+    IO.puts("(session restore 未实现)")
+    @exit_ok
   end
 
   defp execute(%{command: :legacy_entry_alias, legacy_rest: rest, opts: opts}, runtime, run_opts) do
@@ -292,12 +353,20 @@ defmodule Gong.CLI do
   defp usage_text do
     """
     用法:
+      bin/gong chat [--model <provider:model>] [--cwd <path>]
+      bin/gong run <prompt> [--model <provider:model>] [--cwd <path>]
+      bin/gong session list [--cwd <path>]
+      bin/gong session restore <session_id> [--cwd <path>]
       bin/gong doctor [--cwd <path>]
       bin/gong help
 
     命令:
-      doctor   检查运行时与项目上下文
-      help     查看帮助
+      chat              进入交互式对话
+      run <prompt>      单次执行 prompt
+      session list      列出已保存的会话
+      session restore   恢复指定会话
+      doctor            检查运行时与项目上下文
+      help              查看帮助
 
     运行前提:
       Erlang/OTP >= 25
