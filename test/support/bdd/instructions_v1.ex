@@ -1689,6 +1689,9 @@ defmodule Gong.BDD.Instructions.V1 do
       {:then, :assert_io_output} ->
         assert_io_output!(ctx, args, meta)
 
+      {:then, :assert_io_output_empty} ->
+        assert_io_output_empty!(ctx, args, meta)
+
       {:then, :assert_io_output_max_length} ->
         assert_io_output_max_length!(ctx, args, meta)
 
@@ -8034,6 +8037,16 @@ defmodule Gong.BDD.Instructions.V1 do
     ctx
   end
 
+  defp assert_io_output_empty!(ctx, _args, _meta) do
+    output = Map.get(ctx, :io_output, "")
+    trimmed = String.trim(output)
+
+    assert trimmed == "",
+      "期望 stdout 输出为空，实际：'#{String.slice(output, 0, 200)}'"
+
+    ctx
+  end
+
   defp assert_io_output_max_length!(ctx, %{max: max_str}, _meta) do
     max = if is_binary(max_str), do: String.to_integer(max_str), else: max_str
     output = Map.get(ctx, :io_output, "")
@@ -8217,20 +8230,28 @@ defmodule Gong.BDD.Instructions.V1 do
         Map.put(ctx, :io_output, prev_output <> captured)
 
       "/history" ->
+        history = Map.get(ctx, :chat_history, [])
+
         {captured, _} =
           run_with_captured_io(fn ->
-            case Gong.Session.history(pid) do
-              {:ok, history} ->
-                Enum.each(history, fn entry ->
-                  role = Map.get(entry, :role) || Map.get(entry, "role") || "?"
-                  content = Map.get(entry, :content) || Map.get(entry, "content") || ""
-                  IO.puts("[#{role}] #{content}")
-                end)
-
-              {:error, _} ->
-                IO.puts("(无法获取历史)")
+            if history == [] do
+              IO.puts("(空历史)")
+            else
+              Enum.each(history, fn entry ->
+                IO.puts("[#{entry.role}] #{entry.content}")
+              end)
             end
 
+            0
+          end)
+
+        prev_output = Map.get(ctx, :io_output, "")
+        Map.put(ctx, :io_output, prev_output <> captured)
+
+      "/clear" ->
+        {captured, _} =
+          run_with_captured_io(fn ->
+            IO.puts("(对话已清空)")
             0
           end)
 
@@ -8245,8 +8266,12 @@ defmodule Gong.BDD.Instructions.V1 do
         # 普通文本输入，发送 prompt
         case Gong.Session.prompt(pid, text, []) do
           :ok ->
+            history = Map.get(ctx, :chat_history, [])
             agent_calls = Map.get(ctx, :chat_agent_calls, [])
-            Map.put(ctx, :chat_agent_calls, agent_calls ++ [text])
+
+            ctx
+            |> Map.put(:chat_agent_calls, agent_calls ++ [text])
+            |> Map.put(:chat_history, history ++ [%{role: "user", content: text}])
 
           {:error, reason} ->
             raise "发送 prompt 失败: #{inspect(reason)}"
@@ -8256,20 +8281,31 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp chat_wait_completion!(ctx, _args, _meta) do
     pid = Map.fetch!(ctx, :chat_session_pid)
-    wait_for_session_completion(pid)
-    ctx
+    reply_text = wait_for_session_completion(pid, "")
+
+    # 将 assistant 回复写入 chat_history
+    if reply_text != "" do
+      history = Map.get(ctx, :chat_history, [])
+      Map.put(ctx, :chat_history, history ++ [%{role: "assistant", content: reply_text}])
+    else
+      ctx
+    end
   end
 
-  defp wait_for_session_completion(session_pid) do
+  defp wait_for_session_completion(session_pid, acc) do
     receive do
       {:session_event, %{type: "lifecycle.completed"}} ->
-        :ok
+        acc
 
       {:session_event, %{type: "lifecycle.error"}} ->
-        :ok
+        acc
+
+      {:session_event, %{type: "message.delta", payload: payload}} ->
+        content = Map.get(payload, :content) || Map.get(payload, "content") || ""
+        wait_for_session_completion(session_pid, acc <> content)
 
       {:session_event, _event} ->
-        wait_for_session_completion(session_pid)
+        wait_for_session_completion(session_pid, acc)
     after
       10_000 ->
         raise "等待 session 完成超时"

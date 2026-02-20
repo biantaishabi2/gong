@@ -92,6 +92,12 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
         outputs: %{}, rules: [], boundary: :service,
         scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
       },
+      assert_io_output_empty: %{
+        name: :assert_io_output_empty, kind: :then,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :service,
+        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+      },
       assert_io_output_max_length: %{
         name: :assert_io_output_max_length, kind: :then,
         args: %{

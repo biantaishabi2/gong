@@ -198,6 +198,11 @@ defmodule Gong.CLI do
     Gong.CLI.Chat.start(opts)
   end
 
+  defp execute(%{command: :run, prompt: "", opts: _command_opts}, _runtime, _run_opts) do
+    IO.puts(:stderr, "run 命令需要提供 prompt\n\n#{usage_text()}")
+    @exit_usage
+  end
+
   defp execute(%{command: :run, prompt: prompt, opts: command_opts}, _runtime, run_opts) do
     cwd = resolve_cwd(command_opts, run_opts)
     model = command_opts[:model]

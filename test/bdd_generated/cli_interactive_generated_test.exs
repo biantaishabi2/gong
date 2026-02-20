@@ -107,6 +107,44 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     :ok
   end
 
+  # Source: CLI-CMD-007
+  @tag :cli
+  @tag :unit
+  test "[CLI-CMD-007] run --model 参数解析" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-CMD-007"}
+    # line 42: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 42, raw: "GIVEN create_temp_dir"}, 42)
+    # line 43: WHEN cli_parse argv="run --model openai:gpt-4 hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_parse, %{argv: "run --model openai:gpt-4 hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 43, raw: "WHEN cli_parse argv=\"run --model openai:gpt-4 hello\""}, 43)
+    # line 44: THEN assert_cli_command expected="run"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_command, %{expected: "run"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 44, raw: "THEN assert_cli_command expected=\"run\""}, 44)
+    # line 45: THEN assert_cli_opt key="model" expected="openai:gpt-4"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_opt, %{expected: "openai:gpt-4", key: "model"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 45, raw: "THEN assert_cli_opt key=\"model\" expected=\"openai:gpt-4\""}, 45)
+    # line 46: THEN assert_cli_prompt expected="hello"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_prompt, %{expected: "hello"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 46, raw: "THEN assert_cli_prompt expected=\"hello\""}, 46)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-CMD-008
+  @tag :cli
+  @tag :unit
+  test "[CLI-CMD-008] run 无 prompt 解析为空字符串" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-CMD-008"}
+    # line 49: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 49, raw: "GIVEN create_temp_dir"}, 49)
+    # line 50: WHEN cli_parse argv="run"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_parse, %{argv: "run"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 50, raw: "WHEN cli_parse argv=\"run\""}, 50)
+    # line 51: THEN assert_cli_command expected="run"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_command, %{expected: "run"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 51, raw: "THEN assert_cli_command expected=\"run\""}, 51)
+    # line 52: THEN assert_cli_prompt expected=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_prompt, %{expected: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 52, raw: "THEN assert_cli_prompt expected=\"\""}, 52)
+    _ctx = ctx
+    :ok
+  end
+
   # Source: CLI-RENDER-001
   @tag :cli
   @tag :renderer
@@ -114,14 +152,14 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RENDER-001] text_delta 渲染为文本追加" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-001"}
-    # line 46: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 46, raw: "GIVEN create_temp_dir"}, 46)
-    # line 47: GIVEN capture_io
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 47, raw: "GIVEN capture_io"}, 47)
-    # line 48: WHEN render_event type="message.delta" content="你好世界"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{content: "你好世界", type: "message.delta"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 48, raw: "WHEN render_event type=\"message.delta\" content=\"你好世界\""}, 48)
-    # line 49: THEN assert_io_output contains="你好世界"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "你好世界"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 49, raw: "THEN assert_io_output contains=\"你好世界\""}, 49)
+    # line 59: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 59, raw: "GIVEN create_temp_dir"}, 59)
+    # line 60: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 60, raw: "GIVEN capture_io"}, 60)
+    # line 61: WHEN render_event type="message.delta" content="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{content: "你好世界", type: "message.delta"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 61, raw: "WHEN render_event type=\"message.delta\" content=\"你好世界\""}, 61)
+    # line 62: THEN assert_io_output contains="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "你好世界"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 62, raw: "THEN assert_io_output contains=\"你好世界\""}, 62)
     _ctx = ctx
     :ok
   end
@@ -133,14 +171,14 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RENDER-002] message.end 渲染换行" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-002"}
-    # line 52: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 52, raw: "GIVEN create_temp_dir"}, 52)
-    # line 53: GIVEN capture_io
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 53, raw: "GIVEN capture_io"}, 53)
-    # line 54: WHEN render_event type="message.end"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{type: "message.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 54, raw: "WHEN render_event type=\"message.end\""}, 54)
-    # line 55: THEN assert_io_output contains="\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "\\n"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 55, raw: "THEN assert_io_output contains=\"\\n\""}, 55)
+    # line 65: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 65, raw: "GIVEN create_temp_dir"}, 65)
+    # line 66: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 66, raw: "GIVEN capture_io"}, 66)
+    # line 67: WHEN render_event type="message.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{type: "message.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 67, raw: "WHEN render_event type=\"message.end\""}, 67)
+    # line 68: THEN assert_io_output contains="\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "\\n"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 68, raw: "THEN assert_io_output contains=\"\\n\""}, 68)
     _ctx = ctx
     :ok
   end
@@ -152,14 +190,14 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RENDER-003] tool.start 渲染工具名" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-003"}
-    # line 58: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 58, raw: "GIVEN create_temp_dir"}, 58)
-    # line 59: GIVEN capture_io
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 59, raw: "GIVEN capture_io"}, 59)
-    # line 60: WHEN render_event type="tool.start" tool_name="read_file" tool_args="{\"file_path\":\"/tmp/a.txt\"}"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{tool_args: "{\\\"file_path\\\":\\\"/tmp/a.txt\\\"}", tool_name: "read_file", type: "tool.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 60, raw: "WHEN render_event type=\"tool.start\" tool_name=\"read_file\" tool_args=\"{\\\"file_path\\\":\\\"/tmp/a.txt\\\"}\""}, 60)
-    # line 61: THEN assert_io_output contains="read_file"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 61, raw: "THEN assert_io_output contains=\"read_file\""}, 61)
+    # line 71: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 71, raw: "GIVEN create_temp_dir"}, 71)
+    # line 72: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 72, raw: "GIVEN capture_io"}, 72)
+    # line 73: WHEN render_event type="tool.start" tool_name="read_file" tool_args="{\"file_path\":\"/tmp/a.txt\"}"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{tool_args: "{\\\"file_path\\\":\\\"/tmp/a.txt\\\"}", tool_name: "read_file", type: "tool.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 73, raw: "WHEN render_event type=\"tool.start\" tool_name=\"read_file\" tool_args=\"{\\\"file_path\\\":\\\"/tmp/a.txt\\\"}\""}, 73)
+    # line 74: THEN assert_io_output contains="read_file"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "read_file"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 74, raw: "THEN assert_io_output contains=\"read_file\""}, 74)
     _ctx = ctx
     :ok
   end
@@ -171,14 +209,14 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RENDER-004] tool.end 渲染截断结果" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-004"}
-    # line 64: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 64, raw: "GIVEN create_temp_dir"}, 64)
-    # line 65: GIVEN capture_io
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 65, raw: "GIVEN capture_io"}, 65)
-    # line 66: WHEN render_event type="tool.end" tool_name="read_file" result="文件内容很长很长的一段文字用来测试截断"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{result: "文件内容很长很长的一段文字用来测试截断", tool_name: "read_file", type: "tool.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 66, raw: "WHEN render_event type=\"tool.end\" tool_name=\"read_file\" result=\"文件内容很长很长的一段文字用来测试截断\""}, 66)
-    # line 67: THEN assert_io_output_max_length max=250
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output_max_length, %{max: 250}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 67, raw: "THEN assert_io_output_max_length max=250"}, 67)
+    # line 77: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 77, raw: "GIVEN create_temp_dir"}, 77)
+    # line 78: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 78, raw: "GIVEN capture_io"}, 78)
+    # line 79: WHEN render_event type="tool.end" tool_name="read_file" result="文件内容很长很长的一段文字用来测试截断"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{result: "文件内容很长很长的一段文字用来测试截断", tool_name: "read_file", type: "tool.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 79, raw: "WHEN render_event type=\"tool.end\" tool_name=\"read_file\" result=\"文件内容很长很长的一段文字用来测试截断\""}, 79)
+    # line 80: THEN assert_io_output_max_length max=250
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output_max_length, %{max: 250}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 80, raw: "THEN assert_io_output_max_length max=250"}, 80)
     _ctx = ctx
     :ok
   end
@@ -190,14 +228,96 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RENDER-005] error 事件渲染到 stderr" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-005"}
-    # line 70: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 70, raw: "GIVEN create_temp_dir"}, 70)
-    # line 71: GIVEN capture_io
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 71, raw: "GIVEN capture_io"}, 71)
-    # line 72: WHEN render_event type="error.stream" message="连接超时"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{message: "连接超时", type: "error.stream"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 72, raw: "WHEN render_event type=\"error.stream\" message=\"连接超时\""}, 72)
-    # line 73: THEN assert_stderr_output contains="连接超时"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_stderr_output, %{contains: "连接超时"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 73, raw: "THEN assert_stderr_output contains=\"连接超时\""}, 73)
+    # line 83: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 83, raw: "GIVEN create_temp_dir"}, 83)
+    # line 84: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 84, raw: "GIVEN capture_io"}, 84)
+    # line 85: WHEN render_event type="error.stream" message="连接超时"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{message: "连接超时", type: "error.stream"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 85, raw: "WHEN render_event type=\"error.stream\" message=\"连接超时\""}, 85)
+    # line 86: THEN assert_stderr_output contains="连接超时"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_stderr_output, %{contains: "连接超时"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 86, raw: "THEN assert_stderr_output contains=\"连接超时\""}, 86)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-RENDER-006
+  @tag :cli
+  @tag :renderer
+  @tag :unit
+  test "[CLI-RENDER-006] message.start 渲染为 noop" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-006"}
+    # line 89: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 89, raw: "GIVEN create_temp_dir"}, 89)
+    # line 90: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 90, raw: "GIVEN capture_io"}, 90)
+    # line 91: WHEN render_event type="message.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{type: "message.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 91, raw: "WHEN render_event type=\"message.start\""}, 91)
+    # line 92: THEN assert_io_output_empty
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output_empty, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 92, raw: "THEN assert_io_output_empty"}, 92)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-RENDER-007
+  @tag :cli
+  @tag :renderer
+  @tag :unit
+  test "[CLI-RENDER-007] error.runtime 也输出到 stderr" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-007"}
+    # line 95: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 95, raw: "GIVEN create_temp_dir"}, 95)
+    # line 96: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 96, raw: "GIVEN capture_io"}, 96)
+    # line 97: WHEN render_event type="error.runtime" message="模型不存在"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{message: "模型不存在", type: "error.runtime"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 97, raw: "WHEN render_event type=\"error.runtime\" message=\"模型不存在\""}, 97)
+    # line 98: THEN assert_stderr_output contains="模型不存在"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_stderr_output, %{contains: "模型不存在"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 98, raw: "THEN assert_stderr_output contains=\"模型不存在\""}, 98)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-RENDER-008
+  @tag :cli
+  @tag :renderer
+  @tag :unit
+  test "[CLI-RENDER-008] 连续多事件拼接渲染" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-008"}
+    # line 101: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 101, raw: "GIVEN create_temp_dir"}, 101)
+    # line 102: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 102, raw: "GIVEN capture_io"}, 102)
+    # line 103: WHEN render_event type="message.delta" content="你好"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{content: "你好", type: "message.delta"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 103, raw: "WHEN render_event type=\"message.delta\" content=\"你好\""}, 103)
+    # line 104: WHEN render_event type="message.delta" content="世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{content: "世界", type: "message.delta"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 104, raw: "WHEN render_event type=\"message.delta\" content=\"世界\""}, 104)
+    # line 105: WHEN render_event type="message.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{type: "message.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 105, raw: "WHEN render_event type=\"message.end\""}, 105)
+    # line 106: THEN assert_io_output contains="你好世界"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "你好世界"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 106, raw: "THEN assert_io_output contains=\"你好世界\""}, 106)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-RENDER-009
+  @tag :cli
+  @tag :renderer
+  @tag :unit
+  test "[CLI-RENDER-009] tool.start 参数超长截断" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-RENDER-009"}
+    # line 109: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 109, raw: "GIVEN create_temp_dir"}, 109)
+    # line 110: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 110, raw: "GIVEN capture_io"}, 110)
+    # line 111: WHEN render_event type="tool.start" tool_name="bash" tool_args="command=echo_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{tool_args: "command=echo_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", tool_name: "bash", type: "tool.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 111, raw: "WHEN render_event type=\"tool.start\" tool_name=\"bash\" tool_args=\"command=echo_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\""}, 111)
+    # line 112: THEN assert_io_output contains="bash"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "bash"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 112, raw: "THEN assert_io_output contains=\"bash\""}, 112)
+    # line 113: THEN assert_io_output contains="..."
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "..."}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 113, raw: "THEN assert_io_output contains=\"...\""}, 113)
     _ctx = ctx
     :ok
   end
@@ -208,18 +328,18 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RUN-001] run 命令单次执行返回文本" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RUN-001"}
-    # line 80: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 80, raw: "GIVEN create_temp_dir"}, 80)
-    # line 81: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 81, raw: "GIVEN configure_agent"}, 81)
-    # line 82: GIVEN mock_llm_response response_type="text" content="单次执行结果"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "单次执行结果", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 82, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"单次执行结果\""}, 82)
-    # line 83: WHEN cli_run_prompt prompt="测试 run"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_run_prompt, %{prompt: "测试 run"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 83, raw: "WHEN cli_run_prompt prompt=\"测试 run\""}, 83)
-    # line 84: THEN assert_cli_output contains="单次执行结果"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_output, %{contains: "单次执行结果"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 84, raw: "THEN assert_cli_output contains=\"单次执行结果\""}, 84)
-    # line 85: THEN assert_cli_exit_code expected=0
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_exit_code, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 85, raw: "THEN assert_cli_exit_code expected=0"}, 85)
+    # line 120: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 120, raw: "GIVEN create_temp_dir"}, 120)
+    # line 121: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 121, raw: "GIVEN configure_agent"}, 121)
+    # line 122: GIVEN mock_llm_response response_type="text" content="单次执行结果"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "单次执行结果", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 122, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"单次执行结果\""}, 122)
+    # line 123: WHEN cli_run_prompt prompt="测试 run"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_run_prompt, %{prompt: "测试 run"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 123, raw: "WHEN cli_run_prompt prompt=\"测试 run\""}, 123)
+    # line 124: THEN assert_cli_output contains="单次执行结果"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_output, %{contains: "单次执行结果"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 124, raw: "THEN assert_cli_output contains=\"单次执行结果\""}, 124)
+    # line 125: THEN assert_cli_exit_code expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_exit_code, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 125, raw: "THEN assert_cli_exit_code expected=0"}, 125)
     _ctx = ctx
     :ok
   end
@@ -230,16 +350,16 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RUN-002] run 命令执行失败返回 exit code 1" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RUN-002"}
-    # line 88: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 88, raw: "GIVEN create_temp_dir"}, 88)
-    # line 89: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 89, raw: "GIVEN configure_agent"}, 89)
-    # line 90: GIVEN mock_llm_response response_type="error" content="permanent auth failure"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "permanent auth failure", response_type: "error"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 90, raw: "GIVEN mock_llm_response response_type=\"error\" content=\"permanent auth failure\""}, 90)
-    # line 91: WHEN cli_run_prompt prompt="触发错误"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_run_prompt, %{prompt: "触发错误"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 91, raw: "WHEN cli_run_prompt prompt=\"触发错误\""}, 91)
-    # line 92: THEN assert_cli_exit_code expected=1
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_exit_code, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 92, raw: "THEN assert_cli_exit_code expected=1"}, 92)
+    # line 128: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 128, raw: "GIVEN create_temp_dir"}, 128)
+    # line 129: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 129, raw: "GIVEN configure_agent"}, 129)
+    # line 130: GIVEN mock_llm_response response_type="error" content="permanent auth failure"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "permanent auth failure", response_type: "error"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 130, raw: "GIVEN mock_llm_response response_type=\"error\" content=\"permanent auth failure\""}, 130)
+    # line 131: WHEN cli_run_prompt prompt="触发错误"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_run_prompt, %{prompt: "触发错误"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 131, raw: "WHEN cli_run_prompt prompt=\"触发错误\""}, 131)
+    # line 132: THEN assert_cli_exit_code expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_exit_code, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 132, raw: "THEN assert_cli_exit_code expected=1"}, 132)
     _ctx = ctx
     :ok
   end
@@ -250,22 +370,38 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-RUN-003] run 命令带工具调用" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-RUN-003"}
-    # line 95: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 95, raw: "GIVEN create_temp_dir"}, 95)
-    # line 96: GIVEN create_temp_file path="run_test.txt" content="run mode data"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "run mode data", path: "run_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 96, raw: "GIVEN create_temp_file path=\"run_test.txt\" content=\"run mode data\""}, 96)
-    # line 97: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 97, raw: "GIVEN configure_agent"}, 97)
-    # line 98: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/run_test.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/run_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 98, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/run_test.txt\""}, 98)
-    # line 99: GIVEN mock_llm_response response_type="text" content="文件内容是 run mode data"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件内容是 run mode data", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 99, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件内容是 run mode data\""}, 99)
-    # line 100: WHEN cli_run_prompt prompt="读取 run_test.txt"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_run_prompt, %{prompt: "读取 run_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 100, raw: "WHEN cli_run_prompt prompt=\"读取 run_test.txt\""}, 100)
-    # line 101: THEN assert_cli_output contains="run mode data"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_output, %{contains: "run mode data"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 101, raw: "THEN assert_cli_output contains=\"run mode data\""}, 101)
-    # line 102: THEN assert_cli_exit_code expected=0
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_exit_code, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 102, raw: "THEN assert_cli_exit_code expected=0"}, 102)
+    # line 135: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 135, raw: "GIVEN create_temp_dir"}, 135)
+    # line 136: GIVEN create_temp_file path="run_test.txt" content="run mode data"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_file, %{content: "run mode data", path: "run_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 136, raw: "GIVEN create_temp_file path=\"run_test.txt\" content=\"run mode data\""}, 136)
+    # line 137: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 137, raw: "GIVEN configure_agent"}, 137)
+    # line 138: GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/run_test.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{response_type: "tool_call", tool: "read_file", tool_args: "file_path={{workspace}}/run_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 138, raw: "GIVEN mock_llm_response response_type=\"tool_call\" tool=\"read_file\" tool_args=\"file_path={{workspace}}/run_test.txt\""}, 138)
+    # line 139: GIVEN mock_llm_response response_type="text" content="文件内容是 run mode data"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "文件内容是 run mode data", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 139, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"文件内容是 run mode data\""}, 139)
+    # line 140: WHEN cli_run_prompt prompt="读取 run_test.txt"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_run_prompt, %{prompt: "读取 run_test.txt"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 140, raw: "WHEN cli_run_prompt prompt=\"读取 run_test.txt\""}, 140)
+    # line 141: THEN assert_cli_output contains="run mode data"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_output, %{contains: "run mode data"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 141, raw: "THEN assert_cli_output contains=\"run mode data\""}, 141)
+    # line 142: THEN assert_cli_exit_code expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_exit_code, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 142, raw: "THEN assert_cli_exit_code expected=0"}, 142)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-RUN-004
+  @tag :cli
+  @tag :unit
+  test "[CLI-RUN-004] run 空 prompt 返回 usage 错误" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-RUN-004"}
+    # line 145: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 145, raw: "GIVEN create_temp_dir"}, 145)
+    # line 146: WHEN cli_run argv="run"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_run, %{argv: "run"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 146, raw: "WHEN cli_run argv=\"run\""}, 146)
+    # line 147: THEN assert_cli_exit_code expected=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_cli_exit_code, %{expected: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 147, raw: "THEN assert_cli_exit_code expected=2"}, 147)
     _ctx = ctx
     :ok
   end
@@ -277,16 +413,16 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-CHAT-001] /exit 关闭会话" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-CHAT-001"}
-    # line 109: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 109, raw: "GIVEN create_temp_dir"}, 109)
-    # line 110: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 110, raw: "GIVEN configure_agent"}, 110)
-    # line 111: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 111, raw: "GIVEN start_chat_session"}, 111)
-    # line 112: WHEN chat_input text="/exit"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/exit"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 112, raw: "WHEN chat_input text=\"/exit\""}, 112)
-    # line 113: THEN assert_session_closed
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_closed, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 113, raw: "THEN assert_session_closed"}, 113)
+    # line 154: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 154, raw: "GIVEN create_temp_dir"}, 154)
+    # line 155: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 155, raw: "GIVEN configure_agent"}, 155)
+    # line 156: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 156, raw: "GIVEN start_chat_session"}, 156)
+    # line 157: WHEN chat_input text="/exit"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/exit"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 157, raw: "WHEN chat_input text=\"/exit\""}, 157)
+    # line 158: THEN assert_session_closed
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_closed, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 158, raw: "THEN assert_session_closed"}, 158)
     _ctx = ctx
     :ok
   end
@@ -298,20 +434,20 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-CHAT-002] /help 显示帮助" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-CHAT-002"}
-    # line 116: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 116, raw: "GIVEN create_temp_dir"}, 116)
-    # line 117: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 117, raw: "GIVEN configure_agent"}, 117)
-    # line 118: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 118, raw: "GIVEN start_chat_session"}, 118)
-    # line 119: GIVEN capture_io
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 119, raw: "GIVEN capture_io"}, 119)
-    # line 120: WHEN chat_input text="/help"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/help"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 120, raw: "WHEN chat_input text=\"/help\""}, 120)
-    # line 121: THEN assert_io_output contains="/exit"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "/exit"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 121, raw: "THEN assert_io_output contains=\"/exit\""}, 121)
-    # line 122: THEN assert_io_output contains="/history"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "/history"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 122, raw: "THEN assert_io_output contains=\"/history\""}, 122)
+    # line 161: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 161, raw: "GIVEN create_temp_dir"}, 161)
+    # line 162: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 162, raw: "GIVEN configure_agent"}, 162)
+    # line 163: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 163, raw: "GIVEN start_chat_session"}, 163)
+    # line 164: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 164, raw: "GIVEN capture_io"}, 164)
+    # line 165: WHEN chat_input text="/help"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/help"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 165, raw: "WHEN chat_input text=\"/help\""}, 165)
+    # line 166: THEN assert_io_output contains="/exit"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "/exit"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 166, raw: "THEN assert_io_output contains=\"/exit\""}, 166)
+    # line 167: THEN assert_io_output contains="/history"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "/history"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 167, raw: "THEN assert_io_output contains=\"/history\""}, 167)
     _ctx = ctx
     :ok
   end
@@ -323,24 +459,24 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-CHAT-003] /history 显示对话历史" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-CHAT-003"}
-    # line 125: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 125, raw: "GIVEN create_temp_dir"}, 125)
-    # line 126: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 126, raw: "GIVEN configure_agent"}, 126)
-    # line 127: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 127, raw: "GIVEN start_chat_session"}, 127)
-    # line 128: GIVEN mock_llm_response response_type="text" content="历史测试回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "历史测试回复", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 128, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"历史测试回复\""}, 128)
-    # line 129: WHEN chat_input text="你好"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 129, raw: "WHEN chat_input text=\"你好\""}, 129)
-    # line 130: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 130, raw: "WHEN chat_wait_completion"}, 130)
-    # line 131: GIVEN capture_io
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 131, raw: "GIVEN capture_io"}, 131)
-    # line 132: WHEN chat_input text="/history"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/history"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 132, raw: "WHEN chat_input text=\"/history\""}, 132)
-    # line 133: THEN assert_io_output contains="你好"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 133, raw: "THEN assert_io_output contains=\"你好\""}, 133)
+    # line 170: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 170, raw: "GIVEN create_temp_dir"}, 170)
+    # line 171: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 171, raw: "GIVEN configure_agent"}, 171)
+    # line 172: GIVEN mock_llm_response response_type="text" content="历史测试回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "历史测试回复", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 172, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"历史测试回复\""}, 172)
+    # line 173: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 173, raw: "GIVEN start_chat_session"}, 173)
+    # line 174: WHEN chat_input text="你好"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 174, raw: "WHEN chat_input text=\"你好\""}, 174)
+    # line 175: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 175, raw: "WHEN chat_wait_completion"}, 175)
+    # line 176: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 176, raw: "GIVEN capture_io"}, 176)
+    # line 177: WHEN chat_input text="/history"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/history"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 177, raw: "WHEN chat_input text=\"/history\""}, 177)
+    # line 178: THEN assert_io_output contains="你好"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 178, raw: "THEN assert_io_output contains=\"你好\""}, 178)
     _ctx = ctx
     :ok
   end
@@ -352,16 +488,107 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-CHAT-004] 空输入不触发 Agent" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-CHAT-004"}
-    # line 136: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 136, raw: "GIVEN create_temp_dir"}, 136)
-    # line 137: GIVEN configure_agent
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 137, raw: "GIVEN configure_agent"}, 137)
-    # line 138: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 138, raw: "GIVEN start_chat_session"}, 138)
-    # line 139: WHEN chat_input text=""
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 139, raw: "WHEN chat_input text=\"\""}, 139)
-    # line 140: THEN assert_no_agent_call
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_agent_call, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 140, raw: "THEN assert_no_agent_call"}, 140)
+    # line 181: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 181, raw: "GIVEN create_temp_dir"}, 181)
+    # line 182: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 182, raw: "GIVEN configure_agent"}, 182)
+    # line 183: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 183, raw: "GIVEN start_chat_session"}, 183)
+    # line 184: WHEN chat_input text=""
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: ""}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 184, raw: "WHEN chat_input text=\"\""}, 184)
+    # line 185: THEN assert_no_agent_call
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_agent_call, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 185, raw: "THEN assert_no_agent_call"}, 185)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-CHAT-005
+  @tag :chat
+  @tag :cli
+  @tag :integration
+  test "[CLI-CHAT-005] /clear 提示对话已清空" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-CHAT-005"}
+    # line 188: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 188, raw: "GIVEN create_temp_dir"}, 188)
+    # line 189: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 189, raw: "GIVEN configure_agent"}, 189)
+    # line 190: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 190, raw: "GIVEN start_chat_session"}, 190)
+    # line 191: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 191, raw: "GIVEN capture_io"}, 191)
+    # line 192: WHEN chat_input text="/clear"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/clear"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 192, raw: "WHEN chat_input text=\"/clear\""}, 192)
+    # line 193: THEN assert_io_output contains="清空"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "清空"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 193, raw: "THEN assert_io_output contains=\"清空\""}, 193)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-CHAT-006
+  @tag :chat
+  @tag :cli
+  @tag :integration
+  test "[CLI-CHAT-006] 普通对话发送并收到回复" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-CHAT-006"}
+    # line 196: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 196, raw: "GIVEN create_temp_dir"}, 196)
+    # line 197: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 197, raw: "GIVEN configure_agent"}, 197)
+    # line 198: GIVEN mock_llm_response response_type="text" content="你好啊朋友"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "你好啊朋友", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 198, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"你好啊朋友\""}, 198)
+    # line 199: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 199, raw: "GIVEN start_chat_session"}, 199)
+    # line 200: WHEN chat_input text="你好"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 200, raw: "WHEN chat_input text=\"你好\""}, 200)
+    # line 201: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 201, raw: "WHEN chat_wait_completion"}, 201)
+    # line 202: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 202, raw: "GIVEN capture_io"}, 202)
+    # line 203: WHEN chat_input text="/history"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/history"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 203, raw: "WHEN chat_input text=\"/history\""}, 203)
+    # line 204: THEN assert_io_output contains="你好"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "你好"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 204, raw: "THEN assert_io_output contains=\"你好\""}, 204)
+    # line 205: THEN assert_io_output contains="你好啊朋友"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "你好啊朋友"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 205, raw: "THEN assert_io_output contains=\"你好啊朋友\""}, 205)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-CHAT-007
+  @tag :chat
+  @tag :cli
+  @tag :integration
+  test "[CLI-CHAT-007] 多轮对话历史累积" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-CHAT-007"}
+    # line 208: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 208, raw: "GIVEN create_temp_dir"}, 208)
+    # line 209: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 209, raw: "GIVEN configure_agent"}, 209)
+    # line 210: GIVEN mock_llm_response response_type="text" content="回复一"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "回复一", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 210, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"回复一\""}, 210)
+    # line 211: GIVEN mock_llm_response response_type="text" content="回复二"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "回复二", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 211, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"回复二\""}, 211)
+    # line 212: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 212, raw: "GIVEN start_chat_session"}, 212)
+    # line 213: WHEN chat_input text="问题一"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "问题一"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 213, raw: "WHEN chat_input text=\"问题一\""}, 213)
+    # line 214: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 214, raw: "WHEN chat_wait_completion"}, 214)
+    # line 215: WHEN chat_input text="问题二"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "问题二"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 215, raw: "WHEN chat_input text=\"问题二\""}, 215)
+    # line 216: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 216, raw: "WHEN chat_wait_completion"}, 216)
+    # line 217: GIVEN capture_io
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 217, raw: "GIVEN capture_io"}, 217)
+    # line 218: WHEN chat_input text="/history"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/history"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 218, raw: "WHEN chat_input text=\"/history\""}, 218)
+    # line 219: THEN assert_io_output contains="问题一"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "问题一"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 219, raw: "THEN assert_io_output contains=\"问题一\""}, 219)
+    # line 220: THEN assert_io_output contains="问题二"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "问题二"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 220, raw: "THEN assert_io_output contains=\"问题二\""}, 220)
     _ctx = ctx
     :ok
   end
@@ -373,14 +600,14 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-SESSION-001] session list 空列表" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-001"}
-    # line 147: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 147, raw: "GIVEN create_temp_dir"}, 147)
-    # line 148: GIVEN tape_init
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 148, raw: "GIVEN tape_init"}, 148)
-    # line 149: WHEN cli_session_list
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_list, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 149, raw: "WHEN cli_session_list"}, 149)
-    # line 150: THEN assert_session_list_count expected=0
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_count, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 150, raw: "THEN assert_session_list_count expected=0"}, 150)
+    # line 227: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 227, raw: "GIVEN create_temp_dir"}, 227)
+    # line 228: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 228, raw: "GIVEN tape_init"}, 228)
+    # line 229: WHEN cli_session_list
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_list, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 229, raw: "WHEN cli_session_list"}, 229)
+    # line 230: THEN assert_session_list_count expected=0
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_count, %{expected: 0}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 230, raw: "THEN assert_session_list_count expected=0"}, 230)
     _ctx = ctx
     :ok
   end
@@ -392,22 +619,22 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-SESSION-002] session list 有已保存会话" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-002"}
-    # line 153: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 153, raw: "GIVEN create_temp_dir"}, 153)
-    # line 154: GIVEN tape_init
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 154, raw: "GIVEN tape_init"}, 154)
-    # line 155: GIVEN tape_append kind="user" content="测试消息"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "测试消息", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 155, raw: "GIVEN tape_append kind=\"user\" content=\"测试消息\""}, 155)
-    # line 156: GIVEN tape_append kind="assistant" content="测试回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "测试回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 156, raw: "GIVEN tape_append kind=\"assistant\" content=\"测试回复\""}, 156)
-    # line 157: GIVEN tape_save_session session_id="test-session-001"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "test-session-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 157, raw: "GIVEN tape_save_session session_id=\"test-session-001\""}, 157)
-    # line 158: WHEN cli_session_list
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_list, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 158, raw: "WHEN cli_session_list"}, 158)
-    # line 159: THEN assert_session_list_count expected=1
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 159, raw: "THEN assert_session_list_count expected=1"}, 159)
-    # line 160: THEN assert_session_list_contains session_id="test-session-001"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_contains, %{session_id: "test-session-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 160, raw: "THEN assert_session_list_contains session_id=\"test-session-001\""}, 160)
+    # line 233: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 233, raw: "GIVEN create_temp_dir"}, 233)
+    # line 234: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 234, raw: "GIVEN tape_init"}, 234)
+    # line 235: GIVEN tape_append kind="user" content="测试消息"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "测试消息", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 235, raw: "GIVEN tape_append kind=\"user\" content=\"测试消息\""}, 235)
+    # line 236: GIVEN tape_append kind="assistant" content="测试回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "测试回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 236, raw: "GIVEN tape_append kind=\"assistant\" content=\"测试回复\""}, 236)
+    # line 237: GIVEN tape_save_session session_id="test-session-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "test-session-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 237, raw: "GIVEN tape_save_session session_id=\"test-session-001\""}, 237)
+    # line 238: WHEN cli_session_list
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_list, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 238, raw: "WHEN cli_session_list"}, 238)
+    # line 239: THEN assert_session_list_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 239, raw: "THEN assert_session_list_count expected=1"}, 239)
+    # line 240: THEN assert_session_list_contains session_id="test-session-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_contains, %{session_id: "test-session-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 240, raw: "THEN assert_session_list_contains session_id=\"test-session-001\""}, 240)
     _ctx = ctx
     :ok
   end
@@ -419,22 +646,22 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-SESSION-003] session restore 恢复历史" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-003"}
-    # line 163: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 163, raw: "GIVEN create_temp_dir"}, 163)
-    # line 164: GIVEN tape_init
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 164, raw: "GIVEN tape_init"}, 164)
-    # line 165: GIVEN tape_append kind="user" content="历史问题"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "历史问题", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 165, raw: "GIVEN tape_append kind=\"user\" content=\"历史问题\""}, 165)
-    # line 166: GIVEN tape_append kind="assistant" content="历史回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "历史回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 166, raw: "GIVEN tape_append kind=\"assistant\" content=\"历史回复\""}, 166)
-    # line 167: GIVEN tape_save_session session_id="restore-001"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "restore-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 167, raw: "GIVEN tape_save_session session_id=\"restore-001\""}, 167)
-    # line 168: WHEN cli_session_restore session_id="restore-001"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "restore-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 168, raw: "WHEN cli_session_restore session_id=\"restore-001\""}, 168)
-    # line 169: THEN assert_session_restored
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 169, raw: "THEN assert_session_restored"}, 169)
-    # line 170: THEN assert_session_history_contains content="历史问题"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "历史问题"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 170, raw: "THEN assert_session_history_contains content=\"历史问题\""}, 170)
+    # line 243: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 243, raw: "GIVEN create_temp_dir"}, 243)
+    # line 244: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 244, raw: "GIVEN tape_init"}, 244)
+    # line 245: GIVEN tape_append kind="user" content="历史问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "历史问题", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 245, raw: "GIVEN tape_append kind=\"user\" content=\"历史问题\""}, 245)
+    # line 246: GIVEN tape_append kind="assistant" content="历史回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "历史回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 246, raw: "GIVEN tape_append kind=\"assistant\" content=\"历史回复\""}, 246)
+    # line 247: GIVEN tape_save_session session_id="restore-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "restore-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 247, raw: "GIVEN tape_save_session session_id=\"restore-001\""}, 247)
+    # line 248: WHEN cli_session_restore session_id="restore-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "restore-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 248, raw: "WHEN cli_session_restore session_id=\"restore-001\""}, 248)
+    # line 249: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 249, raw: "THEN assert_session_restored"}, 249)
+    # line 250: THEN assert_session_history_contains content="历史问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "历史问题"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 250, raw: "THEN assert_session_history_contains content=\"历史问题\""}, 250)
     _ctx = ctx
     :ok
   end
@@ -446,14 +673,14 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-SESSION-004] session restore 不存在的 ID 返回错误" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-004"}
-    # line 173: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 173, raw: "GIVEN create_temp_dir"}, 173)
-    # line 174: GIVEN tape_init
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 174, raw: "GIVEN tape_init"}, 174)
-    # line 175: WHEN cli_session_restore session_id="nonexistent-id"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "nonexistent-id"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 175, raw: "WHEN cli_session_restore session_id=\"nonexistent-id\""}, 175)
-    # line 176: THEN assert_session_restore_error error_contains="not_found"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restore_error, %{error_contains: "not_found"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 176, raw: "THEN assert_session_restore_error error_contains=\"not_found\""}, 176)
+    # line 253: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 253, raw: "GIVEN create_temp_dir"}, 253)
+    # line 254: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 254, raw: "GIVEN tape_init"}, 254)
+    # line 255: WHEN cli_session_restore session_id="nonexistent-id"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "nonexistent-id"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 255, raw: "WHEN cli_session_restore session_id=\"nonexistent-id\""}, 255)
+    # line 256: THEN assert_session_restore_error error_contains="not_found"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restore_error, %{error_contains: "not_found"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 256, raw: "THEN assert_session_restore_error error_contains=\"not_found\""}, 256)
     _ctx = ctx
     :ok
   end
@@ -465,22 +692,22 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-COMPACT-001] chat 长对话自动触发压缩" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-001"}
-    # line 183: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 183, raw: "GIVEN create_temp_dir"}, 183)
-    # line 184: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 184, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 184)
-    # line 185: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 185, raw: "GIVEN start_chat_session"}, 185)
-    # line 186: GIVEN mock_llm_response response_type="text" content="这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 186, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩\""}, 186)
-    # line 187: WHEN chat_input text="生成长回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "生成长回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 187, raw: "WHEN chat_input text=\"生成长回复\""}, 187)
-    # line 188: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 188, raw: "WHEN chat_wait_completion"}, 188)
-    # line 189: THEN assert_compaction_triggered
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compaction_triggered, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 189, raw: "THEN assert_compaction_triggered"}, 189)
-    # line 190: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 190, raw: "THEN assert_no_crash"}, 190)
+    # line 263: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 263, raw: "GIVEN create_temp_dir"}, 263)
+    # line 264: GIVEN configure_agent context_window=200 reserve_tokens=50
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 264, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 264)
+    # line 265: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 265, raw: "GIVEN start_chat_session"}, 265)
+    # line 266: GIVEN mock_llm_response response_type="text" content="这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 266, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩\""}, 266)
+    # line 267: WHEN chat_input text="生成长回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "生成长回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 267, raw: "WHEN chat_input text=\"生成长回复\""}, 267)
+    # line 268: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 268, raw: "WHEN chat_wait_completion"}, 268)
+    # line 269: THEN assert_compaction_triggered
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compaction_triggered, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 269, raw: "THEN assert_compaction_triggered"}, 269)
+    # line 270: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 270, raw: "THEN assert_no_crash"}, 270)
     _ctx = ctx
     :ok
   end
@@ -492,28 +719,28 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-COMPACT-002] 压缩后 chat 继续正常对话" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-002"}
-    # line 193: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 193, raw: "GIVEN create_temp_dir"}, 193)
-    # line 194: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 194, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 194)
-    # line 195: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 195, raw: "GIVEN start_chat_session"}, 195)
-    # line 196: GIVEN mock_llm_response response_type="text" content="超长回复触发压缩后的第一轮内容用于填充上下文窗口"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "超长回复触发压缩后的第一轮内容用于填充上下文窗口", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 196, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"超长回复触发压缩后的第一轮内容用于填充上下文窗口\""}, 196)
-    # line 197: GIVEN mock_llm_response response_type="text" content="压缩后继续正常"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩后继续正常", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 197, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩后继续正常\""}, 197)
-    # line 198: WHEN chat_input text="第一轮"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第一轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 198, raw: "WHEN chat_input text=\"第一轮\""}, 198)
-    # line 199: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 199, raw: "WHEN chat_wait_completion"}, 199)
-    # line 200: WHEN chat_input text="第二轮"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第二轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 200, raw: "WHEN chat_input text=\"第二轮\""}, 200)
-    # line 201: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 201, raw: "WHEN chat_wait_completion"}, 201)
-    # line 202: THEN assert_agent_reply contains="压缩后继续正常"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "压缩后继续正常"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 202, raw: "THEN assert_agent_reply contains=\"压缩后继续正常\""}, 202)
-    # line 203: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 203, raw: "THEN assert_no_crash"}, 203)
+    # line 273: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 273, raw: "GIVEN create_temp_dir"}, 273)
+    # line 274: GIVEN configure_agent context_window=200 reserve_tokens=50
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 274, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 274)
+    # line 275: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 275, raw: "GIVEN start_chat_session"}, 275)
+    # line 276: GIVEN mock_llm_response response_type="text" content="超长回复触发压缩后的第一轮内容用于填充上下文窗口"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "超长回复触发压缩后的第一轮内容用于填充上下文窗口", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 276, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"超长回复触发压缩后的第一轮内容用于填充上下文窗口\""}, 276)
+    # line 277: GIVEN mock_llm_response response_type="text" content="压缩后继续正常"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩后继续正常", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 277, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩后继续正常\""}, 277)
+    # line 278: WHEN chat_input text="第一轮"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第一轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 278, raw: "WHEN chat_input text=\"第一轮\""}, 278)
+    # line 279: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 279, raw: "WHEN chat_wait_completion"}, 279)
+    # line 280: WHEN chat_input text="第二轮"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第二轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 280, raw: "WHEN chat_input text=\"第二轮\""}, 280)
+    # line 281: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 281, raw: "WHEN chat_wait_completion"}, 281)
+    # line 282: THEN assert_agent_reply contains="压缩后继续正常"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "压缩后继续正常"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 282, raw: "THEN assert_agent_reply contains=\"压缩后继续正常\""}, 282)
+    # line 283: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 283, raw: "THEN assert_no_crash"}, 283)
     _ctx = ctx
     :ok
   end
@@ -526,26 +753,26 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-COMPACT-003] /save 保存压缩后的会话" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-003"}
-    # line 206: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 206, raw: "GIVEN create_temp_dir"}, 206)
-    # line 207: GIVEN tape_init
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 207, raw: "GIVEN tape_init"}, 207)
-    # line 208: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 208, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 208)
-    # line 209: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 209, raw: "GIVEN start_chat_session"}, 209)
-    # line 210: GIVEN mock_llm_response response_type="text" content="压缩前的长回复内容用于填充上下文"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩前的长回复内容用于填充上下文", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 210, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩前的长回复内容用于填充上下文\""}, 210)
-    # line 211: WHEN chat_input text="触发压缩"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "触发压缩"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 211, raw: "WHEN chat_input text=\"触发压缩\""}, 211)
-    # line 212: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 212, raw: "WHEN chat_wait_completion"}, 212)
-    # line 213: WHEN chat_input text="/save"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/save"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 213, raw: "WHEN chat_input text=\"/save\""}, 213)
-    # line 214: THEN assert_session_saved
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 214, raw: "THEN assert_session_saved"}, 214)
-    # line 215: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 215, raw: "THEN assert_no_crash"}, 215)
+    # line 286: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 286, raw: "GIVEN create_temp_dir"}, 286)
+    # line 287: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 287, raw: "GIVEN tape_init"}, 287)
+    # line 288: GIVEN configure_agent context_window=200 reserve_tokens=50
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 288, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 288)
+    # line 289: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 289, raw: "GIVEN start_chat_session"}, 289)
+    # line 290: GIVEN mock_llm_response response_type="text" content="压缩前的长回复内容用于填充上下文"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩前的长回复内容用于填充上下文", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 290, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩前的长回复内容用于填充上下文\""}, 290)
+    # line 291: WHEN chat_input text="触发压缩"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "触发压缩"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 291, raw: "WHEN chat_input text=\"触发压缩\""}, 291)
+    # line 292: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 292, raw: "WHEN chat_wait_completion"}, 292)
+    # line 293: WHEN chat_input text="/save"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/save"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 293, raw: "WHEN chat_input text=\"/save\""}, 293)
+    # line 294: THEN assert_session_saved
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 294, raw: "THEN assert_session_saved"}, 294)
+    # line 295: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 295, raw: "THEN assert_no_crash"}, 295)
     _ctx = ctx
     :ok
   end
