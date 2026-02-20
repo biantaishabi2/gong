@@ -25,11 +25,12 @@ defmodule Gong.CLI.Chat do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
     Gong.Settings.init(cwd)
 
-    session_opts = build_session_opts(opts)
+    session_opts = build_session_opts(opts, cwd)
 
     case Session.start_link(session_opts) do
       {:ok, pid} ->
         :ok = Session.subscribe(pid, self())
+        maybe_restore_latest(pid, cwd)
         IO.puts("Gong Chat (输入 /help 查看命令, /exit 退出)")
         repl_loop(pid)
 
@@ -39,8 +40,15 @@ defmodule Gong.CLI.Chat do
     end
   end
 
-  defp build_session_opts(opts) do
-    session_opts = []
+  defp build_session_opts(opts, cwd) do
+    tape_path = Path.join(cwd, ".gong/tape")
+
+    # restore_fun: 从 tape 目录按 session_id 加载快照
+    restore_fun = fn session_id ->
+      Gong.CLI.SessionCmd.restore_session(tape_path, session_id)
+    end
+
+    session_opts = [tape_path: tape_path, restore_fun: restore_fun]
 
     # 如果显式传入 backend，优先使用
     if backend = Keyword.get(opts, :backend) do
@@ -60,6 +68,28 @@ defmodule Gong.CLI.Chat do
       else
         session_opts
       end
+    end
+  end
+
+  # 自动恢复最近的 session（如果有）
+  defp maybe_restore_latest(pid, cwd) do
+    tape_path = Path.join(cwd, ".gong/tape")
+
+    case Gong.CLI.SessionCmd.list_sessions(tape_path) do
+      {:ok, [latest | _]} ->
+        session_id = latest["session_id"]
+
+        case Session.restore(pid, session_id) do
+          {:ok, info} ->
+            count = length(Map.get(info, :history, []))
+            IO.puts("已恢复会话 #{session_id} (#{count} 条消息)")
+
+          {:error, _} ->
+            :ok
+        end
+
+      _ ->
+        :ok
     end
   end
 
