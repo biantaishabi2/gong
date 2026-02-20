@@ -4,33 +4,20 @@ on:
   issues:
     types: [labeled]
 
-concurrency:
-  group: niuma-impl-${{ github.event.issue.number }}
-  cancel-in-progress: false
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
 
 jobs:
   implement:
-    runs-on: self-hosted
     if: >
       github.event.label.name == 'bot:plan-final' ||
       github.event.label.name == 'bot:plan-approved'
-    permissions:
-      issues: write
-      pull-requests: write
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 获取完整历史，确保可以 fetch 远程分支
-
-      - name: Implement Code
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          WORKSPACE: ${{ github.workspace }}
-        run: |
-          niuma fix \
-            --repo "$REPO" \
-            --issue "$ISSUE_NUMBER" \
-            --repo-dir "$WORKSPACE"
+    uses: biantaishabi2/Cli/.github/workflows/niuma-implement-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      issue_number: ${{ format('{0}', github.event.issue.number) }}
+      build_niuma: false
+      gate_max_retries: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
+    secrets: inherit

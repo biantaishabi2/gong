@@ -1,0 +1,31 @@
+name: niuma - Label Guard
+
+on:
+  issues:
+    types: [labeled, unlabeled]
+
+jobs:
+  guard:
+    runs-on: self-hosted
+    if: startsWith(github.event.label.name, 'bot:')
+    concurrency:
+      group: niuma-label-guard-${{ github.repository }}-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    permissions:
+      issues: write
+    steps:
+      - name: Run label guard
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+          ACTION: ${{ github.event.action }}
+          LABEL: ${{ github.event.label.name }}
+        run: |
+          niuma label-guard \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --actor "$ACTOR" \
+            --action "$ACTION" \
+            --label "$LABEL"

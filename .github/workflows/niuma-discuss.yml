@@ -1,33 +1,74 @@
 name: niuma - Discussion Check
 
 on:
+  issues:
+    types: [labeled]
   issue_comment:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Issue 编号"
+        required: true
+        type: number
+      max_discussion_rounds:
+        description: "最大讨论轮次（1-20）"
+        required: false
+        default: 5
+        type: number
+      visible_round_interval:
+        description: "可见评论轮次间隔"
+        required: false
+        default: 1
+        type: number
+      visible_only_on_diff:
+        description: "仅差异变化时可见评论"
+        required: false
+        default: true
+        type: boolean
 
-concurrency:
-  group: niuma-discuss-${{ github.event.issue.number }}
-  cancel-in-progress: false
+permissions:
+  issues: write
+  contents: read
 
 jobs:
-  discussion-check:
-    runs-on: self-hosted
-    if: github.event.issue.pull_request == null
-    permissions:
-      issues: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
+  # issues.labeled → bot:needs-discussion
+  call-discuss-from-label:
+    if: >
+      github.event_name == 'issues' &&
+      github.event.label.name == 'bot:needs-discussion' &&
+      github.event.issue.pull_request == null
+    uses: biantaishabi2/Cli/.github/workflows/niuma-discuss-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      issue_number: ${{ format('{0}', github.event.issue.number) }}
+      build_niuma: false
+    secrets: inherit
 
-      # 事件驱动：Issue 评论触发（仅在讨论状态）
-      - name: Check Discussion
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels -q '.labels[].name')
-          if echo "$LABELS" | grep -q "bot:needs-discussion"; then
-            niuma discuss \
-              --repo "$REPO" \
-              --issue "$ISSUE_NUMBER" || true
-          fi
+  # issue_comment.created → 非 bot 用户在非 PR 的 issue 上评论
+  call-discuss-from-comment:
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request == null &&
+      !endsWith(github.actor, '[bot]') &&
+      !contains(vars.BOT_ACTORS || '', github.actor) &&
+      !contains(github.event.comment.body || '', '<!-- BOT:')
+    uses: biantaishabi2/Cli/.github/workflows/niuma-discuss-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      issue_number: ${{ format('{0}', github.event.issue.number) }}
+      build_niuma: false
+    secrets: inherit
+
+  # workflow_dispatch → 手动触发
+  call-discuss-from-dispatch:
+    if: github.event_name == 'workflow_dispatch'
+    uses: biantaishabi2/Cli/.github/workflows/niuma-discuss-reusable.yml@master
+    with:
+      repo: ${{ github.repository }}
+      issue_number: ${{ format('{0}', inputs.issue) }}
+      max_discussion_rounds: ${{ inputs.max_discussion_rounds }}
+      visible_round_interval: ${{ inputs.visible_round_interval }}
+      visible_only_on_diff: ${{ inputs.visible_only_on_diff }}
+      build_niuma: false
+    secrets: inherit
