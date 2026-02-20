@@ -63,7 +63,10 @@ defmodule Gong.MixProject do
 
   defp escript do
     [
-      main_module: Gong.CLI
+      main_module: Gong.CLI,
+      # CLI 入口 main/1 中手动控制 application 启动顺序，
+      # 在启动前配置 tzdata/llm_db 避免 escript 模式下 Application.app_dir 崩溃
+      app: nil
     ]
   end
 

@@ -25,6 +25,9 @@ gong-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
+# escript 构建产物
+/gong
+
 # 本地工具/运行时
 .niuma/
 .tmp/
