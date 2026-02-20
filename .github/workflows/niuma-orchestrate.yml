@@ -5,8 +5,10 @@ on:
     types: [labeled]
   pull_request:
     types: [closed]
+  repository_dispatch:
+    types: [niuma.task.completed]
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: "*/5 * * * *"
 
 permissions:
   issues: write
@@ -15,38 +17,18 @@ permissions:
 jobs:
   orchestrate:
     if: >
-      (github.event_name == 'issues' && github.event.label.name == 'bot:orchestrate') ||
+      (github.event_name == 'issues' && (github.event.label.name == 'bot:queued' || github.event.label.name == 'bot:pr-reviewable')) ||
+      (github.event_name == 'repository_dispatch' && github.event.action == 'niuma.task.completed' && github.event.client_payload.event_source == 'close-after-integration-merge') ||
+      (github.event_name == 'pull_request' && github.event.action == 'closed') ||
       github.event_name == 'schedule'
     uses: biantaishabi2/Cli/.github/workflows/niuma-orchestrate-reusable.yml@master
+    secrets: inherit
     with:
       repo: ${{ github.repository }}
       build_niuma: false
+      label_whitelist: "bot:queued,bot:pr-reviewable"
+      enable_dispatch_wakeup: true
+      event_id: ${{ github.event.client_payload.event_id || '' }}
+      dedup_window_hours: 24
+      concurrency_key: "niuma-orchestrate-${repo}"
       enable_local_cleanup: true
-    secrets: inherit
-
-  close-after-integration-merge:
-    runs-on: self-hosted
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'integration/')
-    permissions:
-      issues: write
-      pull-requests: read
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.NIUMA_PAT }}
-
-      - name: Close Sub/Parent Issues After Integration Merge
-        env:
-          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
-          REPO: ${{ github.repository }}
-          WORKSPACE: ${{ github.workspace }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          niuma control close-merged \
-            --repo "$REPO" \
-            --repo-dir "$WORKSPACE" \
-            --pr "$PR_NUMBER"

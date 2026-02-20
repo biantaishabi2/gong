@@ -1,0 +1,88 @@
+name: niuma - Label Guard
+
+on:
+  issues:
+    types: [labeled, unlabeled]
+
+jobs:
+  guard:
+    runs-on: self-hosted
+    if: startsWith(github.event.label.name, 'bot:')
+    concurrency:
+      group: niuma-label-guard-${{ github.repository }}-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    permissions:
+      issues: write
+    steps:
+      - name: Validate actor allowlist
+        id: allow
+        env:
+          ACTOR: ${{ github.actor }}
+          EXTRA_ALLOWLIST: ${{ vars.NIUMA_LABEL_ALLOWLIST || '' }}
+        run: |
+          DEFAULT_ALLOWLIST="github-actions[bot],niuma-bot"
+          COMBINED="$DEFAULT_ALLOWLIST,$EXTRA_ALLOWLIST"
+          MATCHED=false
+          IFS=',' read -r -a ITEMS <<<"$COMBINED"
+          for item in "${ITEMS[@]}"; do
+            item="$(echo "$item" | xargs)"
+            if [ -z "$item" ]; then
+              continue
+            fi
+            if [ "$item" = "$ACTOR" ]; then
+              MATCHED=true
+              break
+            fi
+          done
+
+          echo "matched=$MATCHED" >> "$GITHUB_OUTPUT"
+
+      - name: Ignore allowlisted actor
+        if: steps.allow.outputs.matched == 'true'
+        run: |
+          echo "actor ${{ github.actor }} 在 allowlist 内，跳过 guard。"
+
+      - name: Dry-run comment
+        if: steps.allow.outputs.matched != 'true' && (vars.NIUMA_LABEL_GUARD_DRY_RUN || 'true') == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT || github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTION: ${{ github.event.action }}
+          LABEL: ${{ github.event.label.name }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          MARKER="<!-- BOT:LABEL_GUARD mode=dry-run issue=${ISSUE_NUMBER} action=${ACTION} label=${LABEL} actor=${ACTOR} -->"
+          EXISTING_COUNT=$(gh api "repos/${REPO}/issues/${ISSUE_NUMBER}/comments?per_page=100" \
+            --jq "[.[] | select(.body | contains(\"${MARKER}\"))] | length")
+          if [ "$EXISTING_COUNT" -gt 0 ]; then
+            echo "发现重复 dry-run guard 评论，跳过。"
+            exit 0
+          fi
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "## ⚠️ Label Guard（dry-run）\n\n检测到非授权账号 \`${ACTOR}\` 修改了状态标签 \`$LABEL\`（action=\`$ACTION\`）。\n\n当前为 dry-run 模式，仅记录不回滚。\n\n$MARKER"
+
+      - name: Enforce rollback
+        if: steps.allow.outputs.matched != 'true' && (vars.NIUMA_LABEL_GUARD_DRY_RUN || 'true') != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT || github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTION: ${{ github.event.action }}
+          LABEL: ${{ github.event.label.name }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          MARKER="<!-- BOT:LABEL_GUARD mode=enforce issue=${ISSUE_NUMBER} action=${ACTION} label=${LABEL} actor=${ACTOR} -->"
+          EXISTING_COUNT=$(gh api "repos/${REPO}/issues/${ISSUE_NUMBER}/comments?per_page=100" \
+            --jq "[.[] | select(.body | contains(\"${MARKER}\"))] | length")
+          if [ "$EXISTING_COUNT" -gt 0 ]; then
+            echo "发现重复 enforce guard 评论，跳过。"
+            exit 0
+          fi
+
+          if [ "$ACTION" = "labeled" ]; then
+            gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "$LABEL"
+          elif [ "$ACTION" = "unlabeled" ]; then
+            gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "$LABEL"
+          fi
+
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "## 🚫 Label Guard\n\n非授权账号 \`${ACTOR}\` 修改了状态标签 \`$LABEL\`（action=\`$ACTION\`），已自动回滚。\n\n请使用受控命令：\`niuma state-label\`。\n\n$MARKER"
