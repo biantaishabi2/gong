@@ -233,3 +233,19 @@ THEN assert_telemetry_received event="gong.tool.start" metadata_contains="read_f
 THEN assert_telemetry_received event="gong.tool.stop" metadata_contains="read_file"
 THEN assert_telemetry_received event="gong.agent.end"
 THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 11: Session 端到端 (1 个)
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-E2E-SESSION-001] TITLE: Deepseek 对话后保存恢复（完整 tape 链路） TAGS: e2e agent session
+GIVEN check_e2e_provider provider="deepseek"
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN configure_agent
+WHEN agent_chat_live prompt="1+1等于几？只回答数字"
+WHEN e2e_tape_record_turn prompt="1+1等于几？只回答数字"
+GIVEN tape_save_session session_id="e2e-session-001"
+WHEN cli_session_restore session_id="e2e-session-001"
+THEN assert_session_restored
+THEN assert_session_history_contains content="2"

@@ -685,6 +685,208 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     :ok
   end
 
+  # Source: CLI-SESSION-005
+  @tag :cli
+  @tag :integration
+  @tag :session
+  test "[CLI-SESSION-005] 多会话 list 排序" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-005"}
+    # line 259: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 259, raw: "GIVEN create_temp_dir"}, 259)
+    # line 260: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 260, raw: "GIVEN tape_init"}, 260)
+    # line 261: GIVEN tape_append kind="user" content="问题A"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "问题A", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 261, raw: "GIVEN tape_append kind=\"user\" content=\"问题A\""}, 261)
+    # line 262: GIVEN tape_append kind="assistant" content="回复A"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "回复A", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 262, raw: "GIVEN tape_append kind=\"assistant\" content=\"回复A\""}, 262)
+    # line 263: GIVEN tape_save_session session_id="multi-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "multi-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 263, raw: "GIVEN tape_save_session session_id=\"multi-001\""}, 263)
+    # line 264: GIVEN tape_append kind="user" content="问题B"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "问题B", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 264, raw: "GIVEN tape_append kind=\"user\" content=\"问题B\""}, 264)
+    # line 265: GIVEN tape_append kind="assistant" content="回复B"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "回复B", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 265, raw: "GIVEN tape_append kind=\"assistant\" content=\"回复B\""}, 265)
+    # line 266: GIVEN tape_save_session session_id="multi-002"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "multi-002"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 266, raw: "GIVEN tape_save_session session_id=\"multi-002\""}, 266)
+    # line 267: WHEN cli_session_list
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_list, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 267, raw: "WHEN cli_session_list"}, 267)
+    # line 268: THEN assert_session_list_count expected=2
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_count, %{expected: 2}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 268, raw: "THEN assert_session_list_count expected=2"}, 268)
+    # line 269: THEN assert_session_list_contains session_id="multi-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_contains, %{session_id: "multi-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 269, raw: "THEN assert_session_list_contains session_id=\"multi-001\""}, 269)
+    # line 270: THEN assert_session_list_contains session_id="multi-002"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_contains, %{session_id: "multi-002"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 270, raw: "THEN assert_session_list_contains session_id=\"multi-002\""}, 270)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-SESSION-006
+  @tag :cli
+  @tag :integration
+  @tag :session
+  test "[CLI-SESSION-006] 覆盖保存同一 session_id" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-006"}
+    # line 273: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 273, raw: "GIVEN create_temp_dir"}, 273)
+    # line 274: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 274, raw: "GIVEN tape_init"}, 274)
+    # line 275: GIVEN tape_append kind="user" content="旧内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "旧内容", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 275, raw: "GIVEN tape_append kind=\"user\" content=\"旧内容\""}, 275)
+    # line 276: GIVEN tape_save_session session_id="dup-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "dup-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 276, raw: "GIVEN tape_save_session session_id=\"dup-001\""}, 276)
+    # line 277: GIVEN tape_append kind="user" content="新内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "新内容", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 277, raw: "GIVEN tape_append kind=\"user\" content=\"新内容\""}, 277)
+    # line 278: GIVEN tape_append kind="assistant" content="新回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "新回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 278, raw: "GIVEN tape_append kind=\"assistant\" content=\"新回复\""}, 278)
+    # line 279: GIVEN tape_save_session session_id="dup-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "dup-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 279, raw: "GIVEN tape_save_session session_id=\"dup-001\""}, 279)
+    # line 280: WHEN cli_session_list
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_list, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 280, raw: "WHEN cli_session_list"}, 280)
+    # line 281: THEN assert_session_list_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 281, raw: "THEN assert_session_list_count expected=1"}, 281)
+    # line 282: WHEN cli_session_restore session_id="dup-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "dup-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 282, raw: "WHEN cli_session_restore session_id=\"dup-001\""}, 282)
+    # line 283: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 283, raw: "THEN assert_session_restored"}, 283)
+    # line 284: THEN assert_session_history_contains content="新内容"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "新内容"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 284, raw: "THEN assert_session_history_contains content=\"新内容\""}, 284)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-SESSION-007
+  @tag :cli
+  @tag :integration
+  @tag :session
+  test "[CLI-SESSION-007] restore 验证 user + assistant 双角色" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-007"}
+    # line 287: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 287, raw: "GIVEN create_temp_dir"}, 287)
+    # line 288: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 288, raw: "GIVEN tape_init"}, 288)
+    # line 289: GIVEN tape_append kind="user" content="用户提问"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "用户提问", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 289, raw: "GIVEN tape_append kind=\"user\" content=\"用户提问\""}, 289)
+    # line 290: GIVEN tape_append kind="assistant" content="助手回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "助手回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 290, raw: "GIVEN tape_append kind=\"assistant\" content=\"助手回复\""}, 290)
+    # line 291: GIVEN tape_save_session session_id="dual-role-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "dual-role-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 291, raw: "GIVEN tape_save_session session_id=\"dual-role-001\""}, 291)
+    # line 292: WHEN cli_session_restore session_id="dual-role-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "dual-role-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 292, raw: "WHEN cli_session_restore session_id=\"dual-role-001\""}, 292)
+    # line 293: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 293, raw: "THEN assert_session_restored"}, 293)
+    # line 294: THEN assert_session_history_contains content="用户提问"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "用户提问"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 294, raw: "THEN assert_session_history_contains content=\"用户提问\""}, 294)
+    # line 295: THEN assert_session_history_contains content="助手回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "助手回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 295, raw: "THEN assert_session_history_contains content=\"助手回复\""}, 295)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-SESSION-008
+  @tag :cli
+  @tag :integration
+  @tag :session
+  test "[CLI-SESSION-008] 损坏 JSON 文件容错" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-008"}
+    # line 298: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 298, raw: "GIVEN create_temp_dir"}, 298)
+    # line 299: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 299, raw: "GIVEN tape_init"}, 299)
+    # line 300: GIVEN tape_append kind="user" content="正常会话"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "正常会话", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 300, raw: "GIVEN tape_append kind=\"user\" content=\"正常会话\""}, 300)
+    # line 301: GIVEN tape_append kind="assistant" content="正常回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "正常回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 301, raw: "GIVEN tape_append kind=\"assistant\" content=\"正常回复\""}, 301)
+    # line 302: GIVEN tape_save_session session_id="good-session"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "good-session"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 302, raw: "GIVEN tape_save_session session_id=\"good-session\""}, 302)
+    # line 303: GIVEN create_corrupt_session_file filename="bad-session.json"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_corrupt_session_file, %{filename: "bad-session.json"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 303, raw: "GIVEN create_corrupt_session_file filename=\"bad-session.json\""}, 303)
+    # line 304: WHEN cli_session_list
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_list, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 304, raw: "WHEN cli_session_list"}, 304)
+    # line 305: THEN assert_session_list_count expected=1
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_count, %{expected: 1}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 305, raw: "THEN assert_session_list_count expected=1"}, 305)
+    # line 306: THEN assert_session_list_contains session_id="good-session"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_list_contains, %{session_id: "good-session"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 306, raw: "THEN assert_session_list_contains session_id=\"good-session\""}, 306)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-SESSION-009
+  @tag :cli
+  @tag :integration
+  @tag :session
+  test "[CLI-SESSION-009] save → restore 往返一致性" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-009"}
+    # line 309: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 309, raw: "GIVEN create_temp_dir"}, 309)
+    # line 310: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 310, raw: "GIVEN tape_init"}, 310)
+    # line 311: GIVEN tape_append kind="user" content="往返问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "往返问题", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 311, raw: "GIVEN tape_append kind=\"user\" content=\"往返问题\""}, 311)
+    # line 312: GIVEN tape_append kind="assistant" content="往返回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "往返回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 312, raw: "GIVEN tape_append kind=\"assistant\" content=\"往返回复\""}, 312)
+    # line 313: GIVEN tape_save_session session_id="roundtrip-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "roundtrip-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 313, raw: "GIVEN tape_save_session session_id=\"roundtrip-001\""}, 313)
+    # line 314: WHEN cli_session_restore session_id="roundtrip-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "roundtrip-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 314, raw: "WHEN cli_session_restore session_id=\"roundtrip-001\""}, 314)
+    # line 315: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 315, raw: "THEN assert_session_restored"}, 315)
+    # line 316: THEN assert_session_history_contains content="往返问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "往返问题"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 316, raw: "THEN assert_session_history_contains content=\"往返问题\""}, 316)
+    # line 317: THEN assert_session_history_contains content="往返回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "往返回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 317, raw: "THEN assert_session_history_contains content=\"往返回复\""}, 317)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-SESSION-010
+  @tag :cli
+  @tag :integration
+  @tag :session
+  test "[CLI-SESSION-010] 多轮对话 history" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-010"}
+    # line 320: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 320, raw: "GIVEN create_temp_dir"}, 320)
+    # line 321: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 321, raw: "GIVEN tape_init"}, 321)
+    # line 322: GIVEN tape_append kind="user" content="第一轮问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "第一轮问题", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 322, raw: "GIVEN tape_append kind=\"user\" content=\"第一轮问题\""}, 322)
+    # line 323: GIVEN tape_append kind="assistant" content="第一轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "第一轮回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 323, raw: "GIVEN tape_append kind=\"assistant\" content=\"第一轮回复\""}, 323)
+    # line 324: GIVEN tape_append kind="user" content="第二轮问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "第二轮问题", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 324, raw: "GIVEN tape_append kind=\"user\" content=\"第二轮问题\""}, 324)
+    # line 325: GIVEN tape_append kind="assistant" content="第二轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "第二轮回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 325, raw: "GIVEN tape_append kind=\"assistant\" content=\"第二轮回复\""}, 325)
+    # line 326: GIVEN tape_append kind="user" content="第三轮问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "第三轮问题", kind: "user"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 326, raw: "GIVEN tape_append kind=\"user\" content=\"第三轮问题\""}, 326)
+    # line 327: GIVEN tape_append kind="assistant" content="第三轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_append, %{content: "第三轮回复", kind: "assistant"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 327, raw: "GIVEN tape_append kind=\"assistant\" content=\"第三轮回复\""}, 327)
+    # line 328: GIVEN tape_save_session session_id="multi-turn-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "multi-turn-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 328, raw: "GIVEN tape_save_session session_id=\"multi-turn-001\""}, 328)
+    # line 329: WHEN cli_session_restore session_id="multi-turn-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "multi-turn-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 329, raw: "WHEN cli_session_restore session_id=\"multi-turn-001\""}, 329)
+    # line 330: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 330, raw: "THEN assert_session_restored"}, 330)
+    # line 331: THEN assert_session_history_contains content="第一轮问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "第一轮问题"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 331, raw: "THEN assert_session_history_contains content=\"第一轮问题\""}, 331)
+    # line 332: THEN assert_session_history_contains content="第一轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "第一轮回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 332, raw: "THEN assert_session_history_contains content=\"第一轮回复\""}, 332)
+    # line 333: THEN assert_session_history_contains content="第二轮问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "第二轮问题"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 333, raw: "THEN assert_session_history_contains content=\"第二轮问题\""}, 333)
+    # line 334: THEN assert_session_history_contains content="第二轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "第二轮回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 334, raw: "THEN assert_session_history_contains content=\"第二轮回复\""}, 334)
+    # line 335: THEN assert_session_history_contains content="第三轮问题"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "第三轮问题"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 335, raw: "THEN assert_session_history_contains content=\"第三轮问题\""}, 335)
+    # line 336: THEN assert_session_history_contains content="第三轮回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "第三轮回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 336, raw: "THEN assert_session_history_contains content=\"第三轮回复\""}, 336)
+    _ctx = ctx
+    :ok
+  end
+
   # Source: CLI-COMPACT-001
   @tag :cli
   @tag :compaction
@@ -692,22 +894,22 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-COMPACT-001] chat 长对话自动触发压缩" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-001"}
-    # line 263: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 263, raw: "GIVEN create_temp_dir"}, 263)
-    # line 264: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 264, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 264)
-    # line 265: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 265, raw: "GIVEN start_chat_session"}, 265)
-    # line 266: GIVEN mock_llm_response response_type="text" content="这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 266, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩\""}, 266)
-    # line 267: WHEN chat_input text="生成长回复"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "生成长回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 267, raw: "WHEN chat_input text=\"生成长回复\""}, 267)
-    # line 268: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 268, raw: "WHEN chat_wait_completion"}, 268)
-    # line 269: THEN assert_compaction_triggered
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compaction_triggered, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 269, raw: "THEN assert_compaction_triggered"}, 269)
-    # line 270: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 270, raw: "THEN assert_no_crash"}, 270)
+    # line 343: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 343, raw: "GIVEN create_temp_dir"}, 343)
+    # line 344: GIVEN configure_agent context_window=200 reserve_tokens=50
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 344, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 344)
+    # line 345: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 345, raw: "GIVEN start_chat_session"}, 345)
+    # line 346: GIVEN mock_llm_response response_type="text" content="这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 346, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩\""}, 346)
+    # line 347: WHEN chat_input text="生成长回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "生成长回复"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 347, raw: "WHEN chat_input text=\"生成长回复\""}, 347)
+    # line 348: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 348, raw: "WHEN chat_wait_completion"}, 348)
+    # line 349: THEN assert_compaction_triggered
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compaction_triggered, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 349, raw: "THEN assert_compaction_triggered"}, 349)
+    # line 350: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 350, raw: "THEN assert_no_crash"}, 350)
     _ctx = ctx
     :ok
   end
@@ -719,28 +921,28 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-COMPACT-002] 压缩后 chat 继续正常对话" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-002"}
-    # line 273: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 273, raw: "GIVEN create_temp_dir"}, 273)
-    # line 274: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 274, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 274)
-    # line 275: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 275, raw: "GIVEN start_chat_session"}, 275)
-    # line 276: GIVEN mock_llm_response response_type="text" content="超长回复触发压缩后的第一轮内容用于填充上下文窗口"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "超长回复触发压缩后的第一轮内容用于填充上下文窗口", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 276, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"超长回复触发压缩后的第一轮内容用于填充上下文窗口\""}, 276)
-    # line 277: GIVEN mock_llm_response response_type="text" content="压缩后继续正常"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩后继续正常", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 277, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩后继续正常\""}, 277)
-    # line 278: WHEN chat_input text="第一轮"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第一轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 278, raw: "WHEN chat_input text=\"第一轮\""}, 278)
-    # line 279: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 279, raw: "WHEN chat_wait_completion"}, 279)
-    # line 280: WHEN chat_input text="第二轮"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第二轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 280, raw: "WHEN chat_input text=\"第二轮\""}, 280)
-    # line 281: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 281, raw: "WHEN chat_wait_completion"}, 281)
-    # line 282: THEN assert_agent_reply contains="压缩后继续正常"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "压缩后继续正常"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 282, raw: "THEN assert_agent_reply contains=\"压缩后继续正常\""}, 282)
-    # line 283: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 283, raw: "THEN assert_no_crash"}, 283)
+    # line 353: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 353, raw: "GIVEN create_temp_dir"}, 353)
+    # line 354: GIVEN configure_agent context_window=200 reserve_tokens=50
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 354, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 354)
+    # line 355: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 355, raw: "GIVEN start_chat_session"}, 355)
+    # line 356: GIVEN mock_llm_response response_type="text" content="超长回复触发压缩后的第一轮内容用于填充上下文窗口"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "超长回复触发压缩后的第一轮内容用于填充上下文窗口", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 356, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"超长回复触发压缩后的第一轮内容用于填充上下文窗口\""}, 356)
+    # line 357: GIVEN mock_llm_response response_type="text" content="压缩后继续正常"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩后继续正常", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 357, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩后继续正常\""}, 357)
+    # line 358: WHEN chat_input text="第一轮"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第一轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 358, raw: "WHEN chat_input text=\"第一轮\""}, 358)
+    # line 359: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 359, raw: "WHEN chat_wait_completion"}, 359)
+    # line 360: WHEN chat_input text="第二轮"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第二轮"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 360, raw: "WHEN chat_input text=\"第二轮\""}, 360)
+    # line 361: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 361, raw: "WHEN chat_wait_completion"}, 361)
+    # line 362: THEN assert_agent_reply contains="压缩后继续正常"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "压缩后继续正常"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 362, raw: "THEN assert_agent_reply contains=\"压缩后继续正常\""}, 362)
+    # line 363: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 363, raw: "THEN assert_no_crash"}, 363)
     _ctx = ctx
     :ok
   end
@@ -753,26 +955,26 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
   test "[CLI-COMPACT-003] /save 保存压缩后的会话" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-003"}
-    # line 286: GIVEN create_temp_dir
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 286, raw: "GIVEN create_temp_dir"}, 286)
-    # line 287: GIVEN tape_init
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 287, raw: "GIVEN tape_init"}, 287)
-    # line 288: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 288, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 288)
-    # line 289: GIVEN start_chat_session
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 289, raw: "GIVEN start_chat_session"}, 289)
-    # line 290: GIVEN mock_llm_response response_type="text" content="压缩前的长回复内容用于填充上下文"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩前的长回复内容用于填充上下文", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 290, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩前的长回复内容用于填充上下文\""}, 290)
-    # line 291: WHEN chat_input text="触发压缩"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "触发压缩"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 291, raw: "WHEN chat_input text=\"触发压缩\""}, 291)
-    # line 292: WHEN chat_wait_completion
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 292, raw: "WHEN chat_wait_completion"}, 292)
-    # line 293: WHEN chat_input text="/save"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/save"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 293, raw: "WHEN chat_input text=\"/save\""}, 293)
-    # line 294: THEN assert_session_saved
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 294, raw: "THEN assert_session_saved"}, 294)
-    # line 295: THEN assert_no_crash
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 295, raw: "THEN assert_no_crash"}, 295)
+    # line 366: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 366, raw: "GIVEN create_temp_dir"}, 366)
+    # line 367: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 367, raw: "GIVEN tape_init"}, 367)
+    # line 368: GIVEN configure_agent context_window=200 reserve_tokens=50
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 368, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 368)
+    # line 369: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 369, raw: "GIVEN start_chat_session"}, 369)
+    # line 370: GIVEN mock_llm_response response_type="text" content="压缩前的长回复内容用于填充上下文"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "压缩前的长回复内容用于填充上下文", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 370, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"压缩前的长回复内容用于填充上下文\""}, 370)
+    # line 371: WHEN chat_input text="触发压缩"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "触发压缩"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 371, raw: "WHEN chat_input text=\"触发压缩\""}, 371)
+    # line 372: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 372, raw: "WHEN chat_wait_completion"}, 372)
+    # line 373: WHEN chat_input text="/save"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/save"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 373, raw: "WHEN chat_input text=\"/save\""}, 373)
+    # line 374: THEN assert_session_saved
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 374, raw: "THEN assert_session_saved"}, 374)
+    # line 375: THEN assert_no_crash
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 375, raw: "THEN assert_no_crash"}, 375)
     _ctx = ctx
     :ok
   end

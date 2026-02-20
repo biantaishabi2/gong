@@ -516,4 +516,35 @@ defmodule Gong.BDD.Generated.E2eLlmTest do
     :ok
   end
 
+  # Source: BDD-E2E-SESSION-001
+  @tag :agent
+  @tag :e2e
+  @tag :session
+  test "[BDD-E2E-SESSION-001] Deepseek 对话后保存恢复（完整 tape 链路）" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "BDD-E2E-SESSION-001"}
+    # line 242: GIVEN check_e2e_provider provider="deepseek"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :check_e2e_provider, %{provider: "deepseek"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 242, raw: "GIVEN check_e2e_provider provider=\"deepseek\""}, 242)
+    # line 243: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 243, raw: "GIVEN create_temp_dir"}, 243)
+    # line 244: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 244, raw: "GIVEN tape_init"}, 244)
+    # line 245: GIVEN configure_agent
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 245, raw: "GIVEN configure_agent"}, 245)
+    # line 246: WHEN agent_chat_live prompt="1+1等于几？只回答数字"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :agent_chat_live, %{prompt: "1+1等于几？只回答数字"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 246, raw: "WHEN agent_chat_live prompt=\"1+1等于几？只回答数字\""}, 246)
+    # line 247: WHEN e2e_tape_record_turn prompt="1+1等于几？只回答数字"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :e2e_tape_record_turn, %{prompt: "1+1等于几？只回答数字"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 247, raw: "WHEN e2e_tape_record_turn prompt=\"1+1等于几？只回答数字\""}, 247)
+    # line 248: GIVEN tape_save_session session_id="e2e-session-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_save_session, %{session_id: "e2e-session-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 248, raw: "GIVEN tape_save_session session_id=\"e2e-session-001\""}, 248)
+    # line 249: WHEN cli_session_restore session_id="e2e-session-001"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{session_id: "e2e-session-001"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 249, raw: "WHEN cli_session_restore session_id=\"e2e-session-001\""}, 249)
+    # line 250: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 250, raw: "THEN assert_session_restored"}, 250)
+    # line 251: THEN assert_session_history_contains content="2"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "2"}, %{file: "/home/wangbo/document/gong/docs/bdd/e2e_llm.dsl", line: 251, raw: "THEN assert_session_history_contains content=\"2\""}, 251)
+    _ctx = ctx
+    :ok
+  end
+
 end

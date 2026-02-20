@@ -12,7 +12,7 @@ defmodule Gong.BDD.InstructionRegistries.Tape do
         outputs: %{tape_store: :struct},
         rules: [],
         boundary: :test_runtime,
-        scopes: [:unit, :integration],
+        scopes: [:unit, :integration, :e2e],
         async?: false,
         eventually?: false,
         assert_class: nil

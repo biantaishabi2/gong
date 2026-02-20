@@ -119,6 +119,47 @@ defmodule Gong.CLI.Chat do
     repl_loop(session_pid)
   end
 
+  defp handle_input("/save", session_pid) do
+    case Session.history(session_pid) do
+      {:ok, history} ->
+        session_id = generate_session_id()
+        cwd = File.cwd!()
+        tape_path = Path.join(cwd, ".gong/tape")
+
+        # 转为快照格式
+        indexed_history =
+          history
+          |> Enum.with_index(1)
+          |> Enum.map(fn {entry, idx} ->
+            role = Map.get(entry, :role) || Map.get(entry, "role") || "?"
+            content = Map.get(entry, :content) || Map.get(entry, "content") || ""
+            turn_id = div(idx + 1, 2)
+
+            %{
+              "role" => to_string(role),
+              "content" => to_string(content),
+              "turn_id" => turn_id,
+              "ts" => System.os_time(:millisecond)
+            }
+          end)
+
+        snapshot = %{
+          "session_id" => session_id,
+          "history" => indexed_history,
+          "turn_cursor" => length(indexed_history),
+          "metadata" => %{}
+        }
+
+        :ok = Gong.CLI.SessionCmd.save_session(tape_path, session_id, snapshot)
+        IO.puts("会话已保存: #{session_id}")
+
+      {:error, _} ->
+        IO.puts("(无法获取历史，保存失败)")
+    end
+
+    repl_loop(session_pid)
+  end
+
   defp handle_input(text, session_pid) do
     # 普通输入，发送 prompt 并等待完成
     case Session.prompt(session_pid, text, []) do
@@ -149,6 +190,13 @@ defmodule Gong.CLI.Chat do
     end
   end
 
+  defp generate_session_id do
+    now = NaiveDateTime.utc_now()
+    hex = :crypto.strong_rand_bytes(4) |> Base.encode16(case: :lower)
+    ts = Calendar.strftime(now, "%Y%m%d_%H%M%S")
+    "session_#{ts}_#{hex}"
+  end
+
   defp help_text do
     """
     可用命令:
@@ -156,6 +204,7 @@ defmodule Gong.CLI.Chat do
       /help     查看帮助
       /history  查看对话历史
       /clear    清空对话
+      /save     保存当前会话
     """
   end
 end
