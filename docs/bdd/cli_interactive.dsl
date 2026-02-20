@@ -387,6 +387,7 @@ WHEN chat_input text="/save"
 THEN assert_session_saved
 WHEN cli_session_restore
 THEN assert_session_restored
+THEN assert_session_history_contains content="请生成长回复触发压缩"
 THEN assert_no_crash
 
 [SCENARIO: CLI-COMPACT-005] TITLE: restore 压缩会话后继续对话 TAGS: integration cli compaction session

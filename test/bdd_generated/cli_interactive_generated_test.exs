@@ -999,7 +999,8 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "cli_interactive.dsl", line: 387, raw: "THEN assert_session_saved"}, 387)
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{}, %{file: "cli_interactive.dsl", line: 388, raw: "WHEN cli_session_restore"}, 388)
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "cli_interactive.dsl", line: 389, raw: "THEN assert_session_restored"}, 389)
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "cli_interactive.dsl", line: 390, raw: "THEN assert_no_crash"}, 390)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "请生成长回复触发压缩"}, %{file: "cli_interactive.dsl", line: 390, raw: "THEN assert_session_history_contains content=\"请生成长回复触发压缩\""}, 390)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "cli_interactive.dsl", line: 391, raw: "THEN assert_no_crash"}, 391)
     _ctx = ctx
     :ok
   end
