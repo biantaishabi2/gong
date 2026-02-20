@@ -341,9 +341,9 @@ THEN assert_session_history_contains content="第三轮回复"
 
 [SCENARIO: CLI-COMPACT-001] TITLE: chat 长对话自动触发压缩 TAGS: integration cli compaction
 GIVEN create_temp_dir
-GIVEN configure_agent context_window=80 reserve_tokens=10
+GIVEN configure_agent context_window=200 reserve_tokens=50
 GIVEN start_chat_session
-GIVEN mock_llm_response response_type="text" content="这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩"
+GIVEN mock_llm_response response_type="text" content="这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩操作以确保对话历史不会无限膨胀导致内存溢出和性能下降同时保留关键上下文信息让后续对话能够正常继续"
 WHEN chat_input text="生成长回复"
 WHEN chat_wait_completion
 THEN assert_compaction_triggered
@@ -351,9 +351,9 @@ THEN assert_no_crash
 
 [SCENARIO: CLI-COMPACT-002] TITLE: 压缩后 chat 继续正常对话 TAGS: integration cli compaction
 GIVEN create_temp_dir
-GIVEN configure_agent context_window=80 reserve_tokens=10
+GIVEN configure_agent context_window=200 reserve_tokens=50
 GIVEN start_chat_session
-GIVEN mock_llm_response response_type="text" content="超长回复触发压缩后的第一轮内容用于填充上下文窗口"
+GIVEN mock_llm_response response_type="text" content="超长回复触发压缩后的第一轮内容用于填充上下文窗口确保令牌数超过预设阈值从而自动触发压缩流程验证压缩后系统仍然能够正常处理后续对话请求不会丢失关键信息"
 GIVEN mock_llm_response response_type="text" content="压缩后继续正常"
 WHEN chat_input text="第一轮"
 WHEN chat_wait_completion
@@ -365,9 +365,9 @@ THEN assert_no_crash
 [SCENARIO: CLI-COMPACT-003] TITLE: /save 保存压缩后的会话 TAGS: integration cli compaction session
 GIVEN create_temp_dir
 GIVEN tape_init
-GIVEN configure_agent context_window=80 reserve_tokens=10
+GIVEN configure_agent context_window=200 reserve_tokens=50
 GIVEN start_chat_session
-GIVEN mock_llm_response response_type="text" content="压缩前的长回复内容用于填充上下文"
+GIVEN mock_llm_response response_type="text" content="压缩前的长回复内容用于填充上下文窗口使得令牌总量超过压缩阈值从而在下一轮对话之前自动触发压缩操作随后通过保存命令验证压缩后的会话状态能够正确持久化到磁盘"
 WHEN chat_input text="触发压缩"
 WHEN chat_wait_completion
 WHEN chat_input text="/save"

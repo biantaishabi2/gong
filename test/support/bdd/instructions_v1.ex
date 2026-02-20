@@ -8301,18 +8301,17 @@ defmodule Gong.BDD.Instructions.V1 do
         {:ok, qpid} = Agent.start_link(fn -> mock_queue end)
 
         opts = [
-          backend: fn _message, _opts, _context ->
-            # 从队列弹出一个响应
-            response = Agent.get_and_update(qpid, fn
-              [head | tail] -> {head, tail}
-              [] -> {:queue_exhausted, []}
+          backend: fn message, _opts, _context ->
+            agent = Gong.Agent.new()
+            # get_and_update 弹出第一条，保证多轮对话逐条消费
+            remaining = Agent.get_and_update(qpid, fn
+              [head | tail] -> {[head], tail}
+              [] -> {[], []}
             end)
 
-            case response do
-              {:text, text} -> {:ok, text}
-              {:error, reason} -> {:error, reason}
-              :queue_exhausted -> {:error, "response queue exhausted"}
-              other -> {:error, "unexpected mock response: #{inspect(other)}"}
+            case Gong.MockLLM.run_chat(agent, message, remaining) do
+              {:ok, reply, _agent} -> {:ok, reply}
+              {:error, reason, _agent} -> {:error, reason}
             end
           end,
           tape_path: Map.get(ctx, :tape_path)
