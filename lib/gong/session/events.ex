@@ -34,6 +34,7 @@ defmodule Gong.Session.Events do
                  "lifecycle.result",
                  "lifecycle.error",
                  "lifecycle.completed",
+                 "lifecycle.compaction_done",
                  "message.start",
                  "message.delta",
                  "message.end",

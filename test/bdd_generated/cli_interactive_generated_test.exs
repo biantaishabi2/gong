@@ -897,7 +897,7 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     # line 343: GIVEN create_temp_dir
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 343, raw: "GIVEN create_temp_dir"}, 343)
     # line 344: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 344, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 344)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 80, reserve_tokens: 10}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 344, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 344)
     # line 345: GIVEN start_chat_session
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 345, raw: "GIVEN start_chat_session"}, 345)
     # line 346: GIVEN mock_llm_response response_type="text" content="这是一段很长的回复用于触发压缩检测当上下文令牌数超过预设预算时系统应自动执行压缩"
@@ -924,7 +924,7 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     # line 353: GIVEN create_temp_dir
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 353, raw: "GIVEN create_temp_dir"}, 353)
     # line 354: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 354, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 354)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 80, reserve_tokens: 10}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 354, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 354)
     # line 355: GIVEN start_chat_session
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 355, raw: "GIVEN start_chat_session"}, 355)
     # line 356: GIVEN mock_llm_response response_type="text" content="超长回复触发压缩后的第一轮内容用于填充上下文窗口"
@@ -960,7 +960,7 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     # line 367: GIVEN tape_init
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 367, raw: "GIVEN tape_init"}, 367)
     # line 368: GIVEN configure_agent context_window=200 reserve_tokens=50
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 368, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 368)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 80, reserve_tokens: 10}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 368, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 368)
     # line 369: GIVEN start_chat_session
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 369, raw: "GIVEN start_chat_session"}, 369)
     # line 370: GIVEN mock_llm_response response_type="text" content="压缩前的长回复内容用于填充上下文"

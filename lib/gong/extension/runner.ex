@@ -40,12 +40,27 @@ defmodule Gong.Extension.Runner do
     end)
   end
 
-  @doc "获取所有 Extension 提供的 Hook"
+  @doc "获取所有 Extension 提供的 Hook（仅保留实现了 Gong.Hook behaviour 的模块）"
   @spec collect_hooks([ext_state()]) :: [module()]
   def collect_hooks(ext_states) do
-    Enum.flat_map(ext_states, fn %{module: mod} ->
-      mod.hooks()
+    ext_states
+    |> Enum.flat_map(fn %{module: mod} -> mod.hooks() end)
+    |> Enum.filter(fn hook_mod ->
+      if implements_hook_behaviour?(hook_mod) do
+        true
+      else
+        Logger.warning("Extension hook #{inspect(hook_mod)} 未实现 Gong.Hook behaviour，已过滤")
+        false
+      end
     end)
+  end
+
+  defp implements_hook_behaviour?(mod) do
+    Code.ensure_loaded?(mod) and
+      mod.module_info(:attributes)
+      |> Keyword.get_values(:behaviour)
+      |> List.flatten()
+      |> Enum.member?(Gong.Hook)
   end
 
   @doc "清理所有 Extension"

@@ -142,6 +142,9 @@ defmodule Gong.AgentLoop do
         agent
       end
 
+    # AutoCompaction：在 on_context 之后、LLM 调用之前
+    agent = maybe_agent_compact(agent, opts)
+
     # 调用 LLM backend 获取响应
     case llm_backend.(agent, call_id) do
       {:ok, response} ->
@@ -394,6 +397,30 @@ defmodule Gong.AgentLoop do
       end
     rescue
       e -> {:error, Exception.message(e)}
+    end
+  end
+
+  # ── AutoCompaction 集成 ──
+
+  defp maybe_agent_compact(agent, opts) do
+    case Keyword.get(opts, :auto_compaction) do
+      nil ->
+        agent
+
+      compaction_opts ->
+        strategy_state = StratState.get(agent, %{})
+        conversation = Map.get(strategy_state, :conversation, [])
+
+        case Gong.AutoCompaction.auto_compact(conversation, compaction_opts) do
+          {:compacted, new_messages, _summary} ->
+            update_conversation(agent, new_messages)
+
+          {:no_action, _} ->
+            agent
+
+          {:skipped, _} ->
+            agent
+        end
     end
   end
 

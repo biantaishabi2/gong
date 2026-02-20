@@ -16,6 +16,7 @@ defmodule Gong.Session do
   use GenServer
 
   alias Gong.AgentLoop
+  alias Gong.AutoCompaction
   alias Gong.ModelRegistry
   alias Gong.Session.Events
   alias Gong.Stream
@@ -248,12 +249,14 @@ defmodule Gong.Session do
     session_id = Keyword.get(opts, :session_id, default_session_id())
 
     tape_path = Keyword.get(opts, :tape_path)
+    auto_compaction = Keyword.get(opts, :auto_compaction)
 
     state = %{
       session_id: session_id,
       backend: backend,
       restore_fun: restore_fun,
       tape_path: tape_path,
+      auto_compaction: auto_compaction,
       turn_id: 0,
       history: [],
       metadata: %{},
@@ -419,6 +422,9 @@ defmodule Gong.Session do
         command_id,
         turn_id
       )
+
+    # 自动压缩：在 result 之后、completed 之前
+    state = maybe_session_compact(state, command_id, turn_id)
 
     state =
       emit_event(
@@ -613,6 +619,44 @@ defmodule Gong.Session do
       "turn_cursor" => state.turn_id,
       "metadata" => state.metadata
     }
+  end
+
+  # 自动压缩：将 history 转为消息格式后调 AutoCompaction
+  defp maybe_session_compact(%{auto_compaction: nil} = state, _command_id, _turn_id), do: state
+  defp maybe_session_compact(%{auto_compaction: compaction_opts} = state, command_id, turn_id) do
+    messages = Enum.map(state.history, fn entry ->
+      %{role: to_string(entry.role), content: entry.content}
+    end)
+
+    case AutoCompaction.auto_compact(messages, compaction_opts) do
+      {:compacted, new_messages, summary} ->
+        # 将压缩后的消息转回 history 格式
+        compacted_history = Enum.with_index(new_messages, fn msg, idx ->
+          %{
+            role: String.to_atom(msg[:role] || msg["role"] || "system"),
+            content: msg[:content] || msg["content"] || "",
+            turn_id: idx,
+            ts: System.os_time(:millisecond)
+          }
+        end)
+
+        state = %{state | history: compacted_history}
+
+        emit_event(
+          state,
+          "lifecycle.compaction_done",
+          %{summary: summary, before_count: length(messages), after_count: length(new_messages)},
+          nil,
+          command_id,
+          turn_id
+        )
+
+      {:no_action, _} ->
+        state
+
+      {:skipped, _} ->
+        state
+    end
   end
 
   defp run_turn(session_pid, backend, message, opts, context) do

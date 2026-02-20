@@ -2366,19 +2366,26 @@ defmodule Gong.BDD.Instructions.V1 do
 
     # batch_with_previous: 将本次 tool_call 合并到队列最后一个 tool_calls 条目
     # 用于模拟 LLM 单次返回多个 tool_call 的场景（Pi#1446, Pi#1454）
-    if Map.get(args, :batch_with_previous) == "true" do
-      case {response, List.last(queue)} do
-        {{:tool_calls, new_tcs}, {:tool_calls, existing_tcs}} ->
-          updated_last = {:tool_calls, existing_tcs ++ new_tcs}
-          Map.put(ctx, :mock_queue, List.replace_at(queue, -1, updated_last))
+    new_queue =
+      if Map.get(args, :batch_with_previous) == "true" do
+        case {response, List.last(queue)} do
+          {{:tool_calls, new_tcs}, {:tool_calls, existing_tcs}} ->
+            updated_last = {:tool_calls, existing_tcs ++ new_tcs}
+            List.replace_at(queue, -1, updated_last)
 
-        _ ->
-          # 前一个条目不是 tool_calls，正常追加
-          Map.put(ctx, :mock_queue, queue ++ [response])
+          _ ->
+            queue ++ [response]
+        end
+      else
+        queue ++ [response]
       end
-    else
-      Map.put(ctx, :mock_queue, queue ++ [response])
+
+    # 同步更新 chat_queue_pid Agent（mock_llm_response 在 start_chat_session 之后调用时）
+    if qpid = ctx[:chat_queue_pid] do
+      Agent.update(qpid, fn _old -> new_queue end)
     end
+
+    Map.put(ctx, :mock_queue, new_queue)
   end
 
   # 解析管道分隔的工具参数：key1=value1|key2=value2
@@ -8294,19 +8301,32 @@ defmodule Gong.BDD.Instructions.V1 do
         {:ok, qpid} = Agent.start_link(fn -> mock_queue end)
 
         opts = [
-          backend: fn message, _opts, _context ->
-            agent = Gong.Agent.new()
-            remaining = Agent.get(qpid, & &1)
+          backend: fn _message, _opts, _context ->
+            # 从队列弹出一个响应
+            response = Agent.get_and_update(qpid, fn
+              [head | tail] -> {head, tail}
+              [] -> {:queue_exhausted, []}
+            end)
 
-            case Gong.MockLLM.run_chat(agent, message, remaining) do
-              {:ok, reply, _agent} -> {:ok, reply}
-              {:error, reason, _agent} -> {:error, reason}
+            case response do
+              {:text, text} -> {:ok, text}
+              {:error, reason} -> {:error, reason}
+              :queue_exhausted -> {:error, "response queue exhausted"}
+              other -> {:error, "unexpected mock response: #{inspect(other)}"}
             end
           end,
           tape_path: Map.get(ctx, :tape_path)
         ]
 
         {opts, qpid}
+      end
+
+    # 如果 ctx 中有 compaction_opts，传入 Session
+    session_opts =
+      if compaction_opts = ctx[:compaction_opts] do
+        Keyword.put(session_opts, :auto_compaction, compaction_opts)
+      else
+        session_opts
       end
 
     case Gong.Session.start_link(session_opts) do
@@ -8439,7 +8459,22 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp chat_wait_completion!(ctx, _args, _meta) do
     pid = Map.fetch!(ctx, :chat_session_pid)
+    # 重置压缩标记
+    Process.put(:__bdd_compaction_happened__, false)
     reply_text = wait_for_session_completion(pid, "")
+
+    # 检查是否发生了压缩
+    compaction_happened = Process.get(:__bdd_compaction_happened__, false)
+
+    ctx =
+      if compaction_happened do
+        Map.put(ctx, :compaction_happened, true)
+      else
+        ctx
+      end
+
+    # 设置 last_reply（assert_agent_reply 需要）
+    ctx = Map.put(ctx, :last_reply, reply_text)
 
     # 将 assistant 回复写入 chat_history
     if reply_text != "" do
@@ -8452,6 +8487,10 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp wait_for_session_completion(session_pid, acc) do
     receive do
+      {:session_event, %{type: "lifecycle.compaction_done"}} ->
+        Process.put(:__bdd_compaction_happened__, true)
+        wait_for_session_completion(session_pid, acc)
+
       {:session_event, %{type: "lifecycle.completed"}} ->
         acc
 
