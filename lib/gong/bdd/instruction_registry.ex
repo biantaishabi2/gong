@@ -42,6 +42,7 @@ defmodule Gong.BDD.InstructionRegistry do
     |> merge_specs!(Gong.BDD.InstructionRegistries.ToolResult.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.PartialJson.specs(:v1))
     |> merge_specs!(Gong.BDD.InstructionRegistries.Application.specs(:v1))
+    |> merge_specs!(Gong.BDD.InstructionRegistries.Step1CLI.specs(:v1))
   end
 
   def specs(:v2), do: specs(:v1)

@@ -128,6 +128,7 @@ defmodule Gong.ModelRegistry do
   通过 "provider:model_id" 字符串查找模型配置。
   先在注册表中匹配，找不到则构造默认配置。
   """
+  @bdd_instruction %{kind: :when, name: :lookup_model_by_string, params: %{model_str: :string}, returns: "{:ok, config} | {:error, atom}"}
   @spec lookup_by_string(String.t()) :: {:ok, model_config()} | {:error, :unknown_provider}
   def lookup_by_string(model_str) when is_binary(model_str) do
     ensure_table!()

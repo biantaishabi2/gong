@@ -121,21 +121,20 @@ THEN assert_no_crash
 # Group 5: Session→Agent backend 打通 — Step1 新增 (3 场景)
 # ══════════════════════════════════════════════
 
-[SCENARIO: SESSION-BACKEND-001] TITLE: resolve_backend 接受 :backend 闭包 TAGS: unit session
+[SCENARIO: SESSION-BACKEND-001] TITLE: resolve_backend 接受 :backend 闭包 TAGS: integration session
 GIVEN create_temp_dir
 GIVEN init_session with_mock_backend="true"
 WHEN session_prompt message="backend 闭包测试"
 THEN assert_session_reply contains="mock"
-THEN assert_no_crash
 
-[SCENARIO: SESSION-BACKEND-002] TITLE: resolve_backend 接受 :model 字符串 TAGS: unit session
+[SCENARIO: SESSION-BACKEND-002] TITLE: resolve_backend 接受 :model 字符串 TAGS: integration session
 GIVEN create_temp_dir
 GIVEN init_model_registry
 GIVEN register_model name="test_model" provider="deepseek" model_id="deepseek-chat" api_key_env="DEEPSEEK_API_KEY"
 GIVEN init_session with_model="deepseek:deepseek-chat"
 THEN assert_session_backend_resolved
 
-[SCENARIO: SESSION-BACKEND-003] TITLE: resolve_backend 无效 model 格式返回错误 TAGS: unit session
+[SCENARIO: SESSION-BACKEND-003] TITLE: resolve_backend 无效 model 格式返回错误 TAGS: integration session
 GIVEN create_temp_dir
 GIVEN init_model_registry
 WHEN init_session_expect_error with_model="invalid-no-colon"

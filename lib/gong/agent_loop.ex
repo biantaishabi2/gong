@@ -472,6 +472,7 @@ defmodule Gong.AgentLoop do
   model_config 包含 provider/model_id/api_key_env，用于构建 ReqLLM 调用。
   返回 `{:ok, reply}` 或 `{:error, reason}`，符合 Session.call_backend 期望的格式。
   """
+  @bdd_instruction %{kind: :when, name: :run_as_backend, params: %{message: :string, model_str: :string}, returns: "{:ok, reply} | {:error, reason}"}
   @spec run_as_backend(String.t(), keyword(), map(), map()) ::
           {:ok, String.t()} | {:error, term()}
   def run_as_backend(message, _opts, _context, model_config) do
@@ -528,6 +529,7 @@ defmodule Gong.AgentLoop do
   设置当前进程的 stream 事件回调。
   回调签名: `fn %Stream.Event{} -> :ok end`
   """
+  @bdd_instruction %{kind: :given, name: :attach_stream_callback, params: %{}, returns: ":ok"}
   @spec set_stream_callback((Stream.Event.t() -> :ok)) :: :ok
   def set_stream_callback(callback) when is_function(callback, 1) do
     Process.put(:gong_stream_callback, callback)
@@ -535,6 +537,7 @@ defmodule Gong.AgentLoop do
   end
 
   @doc "清除当前进程的 stream 回调"
+  @bdd_instruction %{kind: :given, name: :clear_stream_callback, params: %{}, returns: ":ok"}
   @spec clear_stream_callback() :: :ok
   def clear_stream_callback do
     Process.delete(:gong_stream_callback)

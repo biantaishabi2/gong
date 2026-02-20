@@ -91,6 +91,7 @@ defmodule Gong.Session do
   end
 
   @doc "异步发送 prompt，函数立即返回，结果仅通过事件流回传。"
+  @bdd_instruction %{kind: :when, name: :session_prompt_with_model, params: %{message: :string, model: :string}, returns: ":ok | {:error, error}"}
   @spec prompt(pid(), String.t(), keyword()) :: :ok | {:error, error_t()}
   def prompt(pid, message, opts) do
     case safe_genserver_call(pid, {:prompt, message, opts}) do
