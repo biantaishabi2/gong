@@ -24,3 +24,12 @@ gong-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# 本地工具/运行时
+.niuma/
+.tmp/
+.worktrees/
+COMPACTION
+
+# bddc 生成的脚手架
+priv/bdd/_generated/
