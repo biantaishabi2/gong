@@ -247,10 +247,13 @@ defmodule Gong.Session do
     restore_fun = Keyword.get(opts, :restore_fun)
     session_id = Keyword.get(opts, :session_id, default_session_id())
 
+    tape_path = Keyword.get(opts, :tape_path)
+
     state = %{
       session_id: session_id,
       backend: backend,
       restore_fun: restore_fun,
+      tape_path: tape_path,
       turn_id: 0,
       history: [],
       metadata: %{},
@@ -497,6 +500,9 @@ defmodule Gong.Session do
 
   @impl true
   def terminate(reason, state) do
+    # 自动持久化：如果有 tape_path 且 history 非空，保存快照
+    maybe_auto_save(state)
+
     close_command_id = system_command_id("close")
 
     _ =
@@ -577,6 +583,36 @@ defmodule Gong.Session do
 
   def normalize_error(other) do
     error(:internal_error, "internal error", %{raw: inspect(other)})
+  end
+
+  defp maybe_auto_save(%{tape_path: tape_path, history: history} = state)
+       when is_binary(tape_path) and tape_path != "" and history != [] do
+    snapshot = build_auto_save_snapshot(state)
+
+    try do
+      Gong.CLI.SessionCmd.save_session(tape_path, state.session_id, snapshot)
+    rescue
+      e ->
+        Logger.warning("Session auto-save 失败: #{Exception.message(e)}")
+    end
+  end
+
+  defp maybe_auto_save(_state), do: :ok
+
+  defp build_auto_save_snapshot(state) do
+    %{
+      "session_id" => state.session_id,
+      "history" => Enum.map(state.history, fn entry ->
+        %{
+          "role" => to_string(entry.role),
+          "content" => entry.content,
+          "turn_id" => entry.turn_id,
+          "ts" => entry.ts
+        }
+      end),
+      "turn_cursor" => state.turn_id,
+      "metadata" => state.metadata
+    }
   end
 
   defp run_turn(session_pid, backend, message, opts, context) do

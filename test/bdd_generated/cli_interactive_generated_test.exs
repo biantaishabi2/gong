@@ -979,4 +979,37 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     :ok
   end
 
+  # Source: CLI-SESSION-011
+  @tag :integration
+  @tag :cli
+  @tag :session
+  test "[CLI-SESSION-011] 关闭会话自动持久化并可恢复" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-SESSION-011"}
+    # line 378: GIVEN create_temp_dir
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 378, raw: "GIVEN create_temp_dir"}, 378)
+    # line 379: GIVEN tape_init
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 379, raw: "GIVEN tape_init"}, 379)
+    # line 380: GIVEN start_chat_session
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 380, raw: "GIVEN start_chat_session"}, 380)
+    # line 381: GIVEN mock_llm_response response_type="text" content="自动保存测试回复"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "自动保存测试回复", response_type: "text"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 381, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"自动保存测试回复\""}, 381)
+    # line 382: WHEN chat_input text="测试消息"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "测试消息"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 382, raw: "WHEN chat_input text=\"测试消息\""}, 382)
+    # line 383: WHEN chat_wait_completion
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 383, raw: "WHEN chat_wait_completion"}, 383)
+    # line 384: WHEN chat_input text="/exit"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/exit"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 384, raw: "WHEN chat_input text=\"/exit\""}, 384)
+    # line 385: THEN assert_session_saved
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 385, raw: "THEN assert_session_saved"}, 385)
+    # line 386: WHEN cli_session_restore
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 386, raw: "WHEN cli_session_restore"}, 386)
+    # line 387: THEN assert_session_restored
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 387, raw: "THEN assert_session_restored"}, 387)
+    # line 388: THEN assert_session_history_contains content="测试消息"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_history_contains, %{content: "测试消息"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 388, raw: "THEN assert_session_history_contains content=\"测试消息\""}, 388)
+    _ctx = ctx
+    :ok
+  end
+
 end

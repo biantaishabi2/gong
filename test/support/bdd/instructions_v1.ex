@@ -1756,7 +1756,7 @@ defmodule Gong.BDD.Instructions.V1 do
         create_corrupt_session_file!(ctx, args, meta)
 
       {:then, :assert_session_saved} ->
-        raise ExUnit.AssertionError, message: "Step4 未实现: assert_session_saved"
+        assert_session_saved!(ctx, args, meta)
 
       _ ->
         raise ArgumentError, "未实现的指令: {#{kind}, #{name}}"
@@ -2994,7 +2994,9 @@ defmodule Gong.BDD.Instructions.V1 do
 
   defp cli_session_restore!(ctx, args, _meta) do
     tape_path = ctx.tape_path
-    session_id = args.session_id
+    # 支持不传 session_id 时使用上次 assert_session_saved 记录的 id
+    session_id = Map.get(args, :session_id) || Map.get(ctx, :last_saved_session_id) ||
+      raise "cli_session_restore 需要 session_id 参数或 ctx.last_saved_session_id"
 
     case Gong.CLI.SessionCmd.restore_session(tape_path, session_id) do
       {:ok, snapshot} ->
@@ -3043,6 +3045,18 @@ defmodule Gong.BDD.Instructions.V1 do
     assert String.contains?(to_string(error), error_contains),
       "期望错误包含 #{inspect(error_contains)}，实际: #{inspect(error)}"
     ctx
+  end
+
+  defp assert_session_saved!(ctx, _args, _meta) do
+    tape_path = Map.fetch!(ctx, :tape_path)
+    {:ok, sessions} = Gong.CLI.SessionCmd.list_sessions(tape_path)
+
+    assert length(sessions) >= 1,
+      "期望至少保存 1 个 session，实际保存了 #{length(sessions)} 个（tape_path=#{tape_path}）"
+
+    # 记住最近保存的 session_id，供后续 restore 使用
+    latest = List.first(sessions)
+    Map.put(ctx, :last_saved_session_id, latest["session_id"])
   end
 
   defp create_corrupt_session_file!(ctx, args, _meta) do
@@ -4935,7 +4949,17 @@ defmodule Gong.BDD.Instructions.V1 do
       flunk("跳过 E2E 测试：环境变量 #{env_key} 未设置。请设置后重试。")
     end
 
-    Map.put(ctx, :e2e_provider, provider)
+    model =
+      case provider do
+        "deepseek" -> "deepseek:deepseek-chat"
+        "openai" -> "openai:gpt-4o-mini"
+        "anthropic" -> "anthropic:claude-3-haiku-20240307"
+        _ -> "deepseek:deepseek-chat"
+      end
+
+    ctx
+    |> Map.put(:e2e_provider, provider)
+    |> Map.put(:e2e_model, model)
   end
 
   defp e2e_tape_record_turn!(ctx, args, _meta) do
@@ -8258,22 +8282,32 @@ defmodule Gong.BDD.Instructions.V1 do
   # ══════════════════════════════════════════════
 
   defp start_chat_session!(ctx, _args, _meta) do
-    mock_queue = Map.get(ctx, :mock_queue, [])
+    e2e_model = Map.get(ctx, :e2e_model)
 
-    # 使用 mock backend 启动 Session
-    {:ok, queue_pid} = Agent.start_link(fn -> mock_queue end)
+    {session_opts, queue_pid} =
+      if e2e_model do
+        # E2E 模式：不注入 mock backend，用真实 model
+        {[tape_path: Map.get(ctx, :tape_path)], nil}
+      else
+        # Mock 模式
+        mock_queue = Map.get(ctx, :mock_queue, [])
+        {:ok, qpid} = Agent.start_link(fn -> mock_queue end)
 
-    session_opts = [
-      backend: fn message, _opts, _context ->
-        agent = Gong.Agent.new()
-        remaining = Agent.get(queue_pid, & &1)
+        opts = [
+          backend: fn message, _opts, _context ->
+            agent = Gong.Agent.new()
+            remaining = Agent.get(qpid, & &1)
 
-        case Gong.MockLLM.run_chat(agent, message, remaining) do
-          {:ok, reply, _agent} -> {:ok, reply}
-          {:error, reason, _agent} -> {:error, reason}
-        end
+            case Gong.MockLLM.run_chat(agent, message, remaining) do
+              {:ok, reply, _agent} -> {:ok, reply}
+              {:error, reason, _agent} -> {:error, reason}
+            end
+          end,
+          tape_path: Map.get(ctx, :tape_path)
+        ]
+
+        {opts, qpid}
       end
-    ]
 
     case Gong.Session.start_link(session_opts) do
       {:ok, pid} ->
@@ -8281,7 +8315,7 @@ defmodule Gong.BDD.Instructions.V1 do
 
         ExUnit.Callbacks.on_exit(fn ->
           if Process.alive?(pid), do: Gong.Session.close(pid)
-          if Process.alive?(queue_pid), do: Agent.stop(queue_pid)
+          if queue_pid && Process.alive?(queue_pid), do: Agent.stop(queue_pid)
         end)
 
         ctx
@@ -8351,13 +8385,44 @@ defmodule Gong.BDD.Instructions.V1 do
         prev_output = Map.get(ctx, :io_output, "")
         Map.put(ctx, :io_output, prev_output <> captured)
 
+      "/save" ->
+        tape_path = Map.fetch!(ctx, :tape_path)
+        {:ok, history} = Gong.Session.history(pid)
+        session_id = "session_manual_save_#{System.os_time(:millisecond)}"
+
+        snapshot = %{
+          "session_id" => session_id,
+          "history" => Enum.map(history, fn entry ->
+            %{
+              "role" => to_string(entry.role),
+              "content" => entry.content,
+              "turn_id" => entry.turn_id,
+              "ts" => entry.ts
+            }
+          end),
+          "turn_cursor" => length(history),
+          "metadata" => %{}
+        }
+
+        Gong.CLI.SessionCmd.save_session(tape_path, session_id, snapshot)
+
+        {captured, _} =
+          run_with_captured_io(fn ->
+            IO.puts("(会话已保存: #{session_id})")
+            0
+          end)
+
+        prev_output = Map.get(ctx, :io_output, "")
+        Map.put(ctx, :io_output, prev_output <> captured)
+
       "" ->
         # 空输入，不触发 agent
         ctx
 
       text ->
-        # 普通文本输入，发送 prompt
-        case Gong.Session.prompt(pid, text, []) do
+        # 普通文本输入，发送 prompt（e2e 模式带 model 参数）
+        prompt_opts = if model = Map.get(ctx, :e2e_model), do: [model: model], else: []
+        case Gong.Session.prompt(pid, text, prompt_opts) do
           :ok ->
             history = Map.get(ctx, :chat_history, [])
             agent_calls = Map.get(ctx, :chat_agent_calls, [])
