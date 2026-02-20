@@ -124,9 +124,51 @@ defmodule Gong.ModelRegistry do
     end
   end
 
+  @doc """
+  通过 "provider:model_id" 字符串查找模型配置。
+  先在注册表中匹配，找不到则构造默认配置。
+  """
+  @spec lookup_by_string(String.t()) :: {:ok, model_config()} | {:error, :unknown_provider}
+  def lookup_by_string(model_str) when is_binary(model_str) do
+    ensure_table!()
+
+    case String.split(model_str, ":", parts: 2) do
+      [provider, model_id] when provider != "" and model_id != "" ->
+        # 先在注册表里找匹配的
+        case find_by_provider_model(provider, model_id) do
+          {:ok, config} -> {:ok, config}
+          :not_found ->
+            # 构造默认配置（假设 API key 环境变量为 PROVIDER_API_KEY）
+            {:ok, %{
+              provider: provider,
+              model_id: model_id,
+              api_key_env: "#{String.upcase(provider)}_API_KEY"
+            }}
+        end
+
+      _ ->
+        {:error, :unknown_provider}
+    end
+  end
+
+  defp find_by_provider_model(provider, model_id) do
+    result =
+      :ets.tab2list(@table)
+      |> Enum.find(fn
+        {key, %{provider: p, model_id: m}} when key != @current_key ->
+          p == provider and m == model_id
+        _ -> false
+      end)
+
+    case result do
+      {_name, config} -> {:ok, config}
+      nil -> :not_found
+    end
+  end
+
   # ── 上下文窗口 ──
 
-  @default_context_window 128_000
+  @default_context_window 200_000
 
   @doc "返回模型的上下文窗口大小（默认 128000）"
   @spec get_context_window(atom()) :: non_neg_integer()

@@ -17,8 +17,8 @@ defmodule Gong.BDD.Generated.ConfigEdgeTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :init_model_registry, %{}, %{file: "docs/bdd/config_edge.dsl", line: 10, raw: "GIVEN init_model_registry"}, 10)
     # line 11: GIVEN register_model_with_defaults name="minimal" provider="openai" model_id="gpt-4"
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :register_model_with_defaults, %{model_id: "gpt-4", name: "minimal", provider: "openai"}, %{file: "docs/bdd/config_edge.dsl", line: 11, raw: "GIVEN register_model_with_defaults name=\"minimal\" provider=\"openai\" model_id=\"gpt-4\""}, 11)
-    # line 12: THEN assert_context_window_size name="minimal" expected=128000
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_context_window_size, %{expected: 128000, name: "minimal"}, %{file: "docs/bdd/config_edge.dsl", line: 12, raw: "THEN assert_context_window_size name=\"minimal\" expected=128000"}, 12)
+    # line 12: THEN assert_context_window_size name="minimal" expected=200000
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_context_window_size, %{expected: 200000, name: "minimal"}, %{file: "docs/bdd/config_edge.dsl", line: 12, raw: "THEN assert_context_window_size name=\"minimal\" expected=200000"}, 12)
     _ctx = ctx
     :ok
   end

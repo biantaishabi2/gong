@@ -9,7 +9,7 @@
 GIVEN create_temp_dir
 GIVEN init_model_registry
 GIVEN register_model_with_defaults name="minimal" provider="openai" model_id="gpt-4"
-THEN assert_context_window_size name="minimal" expected=128000
+THEN assert_context_window_size name="minimal" expected=200000
 
 [SCENARIO: CONFIG-ERR-002] TITLE: 配置热重载 TAGS: unit config
 GIVEN create_temp_dir

@@ -15,6 +15,8 @@ defmodule Gong.Session do
 
   use GenServer
 
+  alias Gong.AgentLoop
+  alias Gong.ModelRegistry
   alias Gong.Session.Events
   alias Gong.Stream
   alias Gong.Stream.Event, as: StreamEvent
@@ -885,9 +887,40 @@ defmodule Gong.Session do
   defp payload_get(map, key), do: Events.payload_get(map, key)
 
   defp resolve_backend(opts, default_backend) do
-    case Keyword.get(opts, :backend, default_backend) do
-      fun when is_function(fun, 3) -> {:ok, fun}
-      _ -> {:error, :invalid_argument}
+    case Keyword.get(opts, :backend) do
+      fun when is_function(fun, 3) ->
+        # 显式传入 backend 闭包（测试 mock 用）
+        {:ok, fun}
+
+      nil ->
+        # 尝试通过 model 参数构建 backend
+        case Keyword.get(opts, :model) do
+          nil ->
+            # 都没传，用默认 backend
+            if is_function(default_backend, 3),
+              do: {:ok, default_backend},
+              else: {:error, :invalid_argument}
+
+          model when is_binary(model) ->
+            build_backend_from_model(model)
+
+          _ ->
+            {:error, :invalid_argument}
+        end
+
+      _ ->
+        {:error, :invalid_argument}
+    end
+  end
+
+  # 通过 model 字符串（如 "deepseek:deepseek-chat"）查询 ModelRegistry 构建 backend
+  defp build_backend_from_model(model_str) do
+    case ModelRegistry.lookup_by_string(model_str) do
+      {:ok, config} ->
+        {:ok, &AgentLoop.run_as_backend(&1, &2, &3, config)}
+
+      {:error, _} = error ->
+        error
     end
   end
 

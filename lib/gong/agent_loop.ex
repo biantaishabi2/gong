@@ -8,6 +8,8 @@ defmodule Gong.AgentLoop do
   MockLLM 和 LiveLLM 变为薄包装，只需提供各自的 llm_backend 实现。
   """
 
+  alias Gong.Stream
+  alias Gong.Stream.Event, as: StreamEvent
   alias Jido.Agent.Strategy.State, as: StratState
   alias Jido.AI.Strategies.ReAct
   alias Jido.AI.Directive
@@ -203,12 +205,18 @@ defmodule Gong.AgentLoop do
 
     case state[:status] do
       :completed ->
+        reply = state[:result] || ""
+        emit_stream_event(StreamEvent.new(:text_start))
+        emit_stream_event(StreamEvent.new(:text_delta, content: reply))
+        emit_stream_event(StreamEvent.new(:text_end))
         :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
-        {:ok, state[:result] || "", agent}
+        {:ok, reply, agent}
 
       :error ->
+        error_msg = state[:result] || "unknown error"
+        emit_stream_event(StreamEvent.new(:error, content: error_msg))
         :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
-        {:error, state[:result] || "unknown error", agent}
+        {:error, error_msg, agent}
 
       :awaiting_tool ->
         pending = state[:pending_tool_calls] || []
@@ -314,11 +322,12 @@ defmodule Gong.AgentLoop do
          hooks,
          tool_idx
        ) do
-    # 发送 telemetry: tool 开始
+    # 发送 telemetry + stream 事件: tool 开始
     :telemetry.execute([:gong, :tool, :start], %{count: 1}, %{
       tool: tool_name,
       arguments: arguments
     })
+    emit_stream_event(StreamEvent.new(:tool_start, tool_name: tool_name, tool_args: arguments))
 
     # Gate: before_tool_call
     gate_result = Gong.HookRunner.gate(hooks, :before_tool_call, [tool_atom, arguments])
@@ -340,11 +349,12 @@ defmodule Gong.AgentLoop do
           {:error, "Blocked by hook: #{reason}"}
       end
 
-    # 发送 telemetry: tool 结束
+    # 发送 telemetry + stream 事件: tool 结束
     :telemetry.execute([:gong, :tool, :stop], %{count: 1}, %{
       tool: tool_name,
       result: result
     })
+    emit_stream_event(StreamEvent.new(:tool_end, tool_name: tool_name))
 
     # 发送 tool_result（从 ToolResult 提取 content 给 ReAct）
     result_for_react =
@@ -451,6 +461,91 @@ defmodule Gong.AgentLoop do
       String.to_existing_atom(key)
     rescue
       _ -> String.to_atom(key)
+    end
+  end
+
+  # ── Session backend 适配器 ──
+
+  @doc """
+  Session backend 适配器 — 将 AgentLoop 包装为 Session 期望的 backend 闭包。
+
+  model_config 包含 provider/model_id/api_key_env，用于构建 ReqLLM 调用。
+  返回 `{:ok, reply}` 或 `{:error, reason}`，符合 Session.call_backend 期望的格式。
+  """
+  @spec run_as_backend(String.t(), keyword(), map(), map()) ::
+          {:ok, String.t()} | {:error, term()}
+  def run_as_backend(message, _opts, _context, model_config) do
+    model_str = "#{model_config[:provider]}:#{model_config[:model_id]}"
+    agent = Gong.Agent.new()
+
+    llm_backend = fn agent, _call_id ->
+      state = StratState.get(agent, %{})
+      conversation = Map.get(state, :conversation, [])
+      messages = format_conversation_for_reqllm(conversation)
+
+      case ReqLLM.generate_text(model_str, messages, receive_timeout: 60_000) do
+        {:ok, response} -> {:ok, parse_reqllm_response(response)}
+        {:error, reason} -> {:ok, {:error, to_string(reason)}}
+      end
+    end
+
+    case run(agent, message, llm_backend: llm_backend) do
+      {:ok, reply, _agent} -> {:ok, reply}
+      {:error, reason, _agent} -> {:error, reason}
+    end
+  end
+
+  # 将 ReAct conversation 格式转为 ReqLLM 期望的 messages 格式
+  defp format_conversation_for_reqllm(conversation) do
+    Enum.map(conversation, fn msg ->
+      base = %{role: Map.get(msg, :role, :user)}
+      base = if c = Map.get(msg, :content), do: Map.put(base, :content, c), else: base
+      base = if tc = Map.get(msg, :tool_calls), do: Map.put(base, :tool_calls, tc), else: base
+      base = if n = Map.get(msg, :name), do: Map.put(base, :name, n), else: base
+      if tid = Map.get(msg, :tool_call_id), do: Map.put(base, :tool_call_id, tid), else: base
+    end)
+  end
+
+  # 解析 ReqLLM 响应为 AgentLoop 期望的 tuple 格式
+  defp parse_reqllm_response(response) do
+    tool_calls = ReqLLM.Response.tool_calls(response)
+
+    if tool_calls != [] do
+      formatted =
+        Enum.map(tool_calls, fn tc ->
+          tc_map = ReqLLM.ToolCall.from_map(tc)
+          %{id: tc_map.id, name: tc_map.name, arguments: tc_map.arguments}
+        end)
+      {:tool_calls, formatted}
+    else
+      {:text, ReqLLM.Response.text(response) || ""}
+    end
+  end
+
+  # ── Stream 事件发射 ──
+
+  @doc """
+  设置当前进程的 stream 事件回调。
+  回调签名: `fn %Stream.Event{} -> :ok end`
+  """
+  @spec set_stream_callback((Stream.Event.t() -> :ok)) :: :ok
+  def set_stream_callback(callback) when is_function(callback, 1) do
+    Process.put(:gong_stream_callback, callback)
+    :ok
+  end
+
+  @doc "清除当前进程的 stream 回调"
+  @spec clear_stream_callback() :: :ok
+  def clear_stream_callback do
+    Process.delete(:gong_stream_callback)
+    :ok
+  end
+
+  # 发射单个 stream 事件（如有回调则调用）
+  defp emit_stream_event(%StreamEvent{} = event) do
+    case Process.get(:gong_stream_callback) do
+      callback when is_function(callback, 1) -> callback.(event)
+      _ -> :ok
     end
   end
 end
