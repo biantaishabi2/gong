@@ -374,6 +374,49 @@ WHEN chat_input text="/save"
 THEN assert_session_saved
 THEN assert_no_crash
 
+[SCENARIO: CLI-COMPACT-004] TITLE: 压缩后 save → restore 往返验证历史 TAGS: integration cli compaction session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN configure_agent context_window=200 reserve_tokens=50
+GIVEN start_chat_session
+GIVEN mock_llm_response response_type="text" content="这段超长回复用于触发自动压缩机制当上下文令牌总量超过配置的窗口大小减去保留量的阈值时系统会自动执行压缩将旧消息替换为摘要以控制上下文长度"
+WHEN chat_input text="请生成长回复触发压缩"
+WHEN chat_wait_completion
+THEN assert_compaction_triggered
+WHEN chat_input text="/save"
+THEN assert_session_saved
+WHEN cli_session_restore
+THEN assert_session_restored
+THEN assert_no_crash
+
+[SCENARIO: CLI-COMPACT-005] TITLE: restore 压缩会话后继续对话 TAGS: integration cli compaction session
+GIVEN create_temp_dir
+GIVEN tape_init
+GIVEN configure_agent context_window=200 reserve_tokens=50
+GIVEN start_chat_session
+GIVEN mock_llm_response response_type="text" content="第一轮超长回复用于填充上下文窗口触发自动压缩流程确保令牌数量超过预设阈值以便验证压缩后保存再恢复的完整链路同时还需要足够长度确保令牌估算超过上下文窗口减去保留量的压缩触发阈值"
+GIVEN mock_llm_response response_type="text" content="恢复后的新回复"
+WHEN chat_input text="第一轮触发压缩"
+WHEN chat_wait_completion
+THEN assert_compaction_triggered
+WHEN chat_input text="/save"
+THEN assert_session_saved
+WHEN chat_session_restore
+WHEN chat_input text="恢复后继续"
+WHEN chat_wait_completion
+THEN assert_agent_reply contains="恢复后的新回复"
+THEN assert_no_crash
+
+[SCENARIO: CLI-COMPACT-006] TITLE: 短对话不触发压缩 TAGS: integration cli compaction
+GIVEN create_temp_dir
+GIVEN configure_agent context_window=200 reserve_tokens=50
+GIVEN start_chat_session
+GIVEN mock_llm_response response_type="text" content="短回复"
+WHEN chat_input text="你好"
+WHEN chat_wait_completion
+THEN assert_compaction_not_triggered
+THEN assert_no_crash
+
 [SCENARIO: CLI-SESSION-011] TITLE: 关闭会话自动持久化并可恢复 TAGS: integration cli session
 GIVEN create_temp_dir
 GIVEN tape_init

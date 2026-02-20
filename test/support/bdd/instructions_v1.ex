@@ -1720,6 +1720,9 @@ defmodule Gong.BDD.Instructions.V1 do
       {:when, :chat_wait_completion} ->
         chat_wait_completion!(ctx, args, meta)
 
+      {:when, :chat_session_restore} ->
+        chat_session_restore!(ctx, args, meta)
+
       {:then, :assert_session_closed} ->
         assert_session_closed!(ctx, args, meta)
 
@@ -8505,6 +8508,38 @@ defmodule Gong.BDD.Instructions.V1 do
     after
       10_000 ->
         raise "等待 session 完成超时"
+    end
+  end
+
+  defp chat_session_restore!(ctx, _args, _meta) do
+    pid = Map.fetch!(ctx, :chat_session_pid)
+    tape_path = Map.fetch!(ctx, :tape_path)
+    session_id = Map.get(ctx, :last_saved_session_id) ||
+      raise "chat_session_restore 需要 ctx.last_saved_session_id（先调用 assert_session_saved）"
+
+    case Gong.CLI.SessionCmd.restore_session(tape_path, session_id) do
+      {:ok, snapshot} ->
+        case Gong.Session.restore(pid, snapshot) do
+          {:ok, restored} ->
+            # restore 会清空订阅者，需要重新订阅
+            :ok = Gong.Session.subscribe(pid, self())
+
+            ctx
+            |> Map.put(:session_restored, true)
+            |> Map.put(:session_snapshot, snapshot)
+            |> Map.put(:chat_history,
+              Enum.map(restored.history, fn entry ->
+                role = Map.get(entry, :role) || Map.get(entry, "role")
+                content = Map.get(entry, :content) || Map.get(entry, "content")
+                %{role: to_string(role), content: content}
+              end))
+
+          {:error, reason} ->
+            raise "chat_session_restore 失败: #{inspect(reason)}"
+        end
+
+      {:error, reason} ->
+        raise "读取 session 快照失败: #{inspect(reason)}"
     end
   end
 

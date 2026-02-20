@@ -610,10 +610,10 @@ defmodule Gong.Session do
       "session_id" => state.session_id,
       "history" => Enum.map(state.history, fn entry ->
         %{
-          "role" => to_string(entry.role),
-          "content" => entry.content,
-          "turn_id" => entry.turn_id,
-          "ts" => entry.ts
+          "role" => to_string(snapshot_get(entry, :role) || "user"),
+          "content" => snapshot_get(entry, :content) || "",
+          "turn_id" => snapshot_get(entry, :turn_id) || 0,
+          "ts" => snapshot_get(entry, :ts) || System.os_time(:millisecond)
         }
       end),
       "turn_cursor" => state.turn_id,
@@ -625,7 +625,8 @@ defmodule Gong.Session do
   defp maybe_session_compact(%{auto_compaction: nil} = state, _command_id, _turn_id), do: state
   defp maybe_session_compact(%{auto_compaction: compaction_opts} = state, command_id, turn_id) do
     messages = Enum.map(state.history, fn entry ->
-      %{role: to_string(entry.role), content: entry.content}
+      %{role: to_string(snapshot_get(entry, :role) || "user"),
+        content: snapshot_get(entry, :content) || ""}
     end)
 
     case AutoCompaction.auto_compact(messages, compaction_opts) do

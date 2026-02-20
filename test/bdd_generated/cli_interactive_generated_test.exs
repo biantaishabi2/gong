@@ -979,6 +979,78 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     :ok
   end
 
+  # Source: CLI-COMPACT-004
+  @tag :cli
+  @tag :compaction
+  @tag :integration
+  @tag :session
+  test "[CLI-COMPACT-004] 压缩后 save → restore 往返验证历史" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-004"}
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "cli_interactive.dsl", line: 378, raw: "GIVEN create_temp_dir"}, 378)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "cli_interactive.dsl", line: 379, raw: "GIVEN tape_init"}, 379)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "cli_interactive.dsl", line: 380, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 380)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "cli_interactive.dsl", line: 381, raw: "GIVEN start_chat_session"}, 381)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "这段超长回复用于触发自动压缩机制当上下文令牌总量超过配置的窗口大小减去保留量的阈值时系统会自动执行压缩将旧消息替换为摘要以控制上下文长度", response_type: "text"}, %{file: "cli_interactive.dsl", line: 382, raw: "GIVEN mock_llm_response ..."}, 382)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "请生成长回复触发压缩"}, %{file: "cli_interactive.dsl", line: 383, raw: "WHEN chat_input text=\"请生成长回复触发压缩\""}, 383)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "cli_interactive.dsl", line: 384, raw: "WHEN chat_wait_completion"}, 384)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compaction_triggered, %{}, %{file: "cli_interactive.dsl", line: 385, raw: "THEN assert_compaction_triggered"}, 385)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/save"}, %{file: "cli_interactive.dsl", line: 386, raw: "WHEN chat_input text=\"/save\""}, 386)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "cli_interactive.dsl", line: 387, raw: "THEN assert_session_saved"}, 387)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cli_session_restore, %{}, %{file: "cli_interactive.dsl", line: 388, raw: "WHEN cli_session_restore"}, 388)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_restored, %{}, %{file: "cli_interactive.dsl", line: 389, raw: "THEN assert_session_restored"}, 389)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "cli_interactive.dsl", line: 390, raw: "THEN assert_no_crash"}, 390)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-COMPACT-005
+  @tag :cli
+  @tag :compaction
+  @tag :integration
+  @tag :session
+  test "[CLI-COMPACT-005] restore 压缩会话后继续对话" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-005"}
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "cli_interactive.dsl", line: 393, raw: "GIVEN create_temp_dir"}, 393)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :tape_init, %{}, %{file: "cli_interactive.dsl", line: 394, raw: "GIVEN tape_init"}, 394)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "cli_interactive.dsl", line: 395, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 395)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "cli_interactive.dsl", line: 396, raw: "GIVEN start_chat_session"}, 396)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "第一轮超长回复用于填充上下文窗口触发自动压缩流程确保令牌数量超过预设阈值以便验证压缩后保存再恢复的完整链路同时还需要足够长度确保令牌估算超过上下文窗口减去保留量的压缩触发阈值", response_type: "text"}, %{file: "cli_interactive.dsl", line: 397, raw: "GIVEN mock_llm_response ..."}, 397)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "恢复后的新回复", response_type: "text"}, %{file: "cli_interactive.dsl", line: 398, raw: "GIVEN mock_llm_response ..."}, 398)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "第一轮触发压缩"}, %{file: "cli_interactive.dsl", line: 399, raw: "WHEN chat_input text=\"第一轮触发压缩\""}, 399)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "cli_interactive.dsl", line: 400, raw: "WHEN chat_wait_completion"}, 400)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compaction_triggered, %{}, %{file: "cli_interactive.dsl", line: 401, raw: "THEN assert_compaction_triggered"}, 401)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "/save"}, %{file: "cli_interactive.dsl", line: 402, raw: "WHEN chat_input text=\"/save\""}, 402)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_session_saved, %{}, %{file: "cli_interactive.dsl", line: 403, raw: "THEN assert_session_saved"}, 403)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_session_restore, %{}, %{file: "cli_interactive.dsl", line: 404, raw: "WHEN chat_session_restore"}, 404)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "恢复后继续"}, %{file: "cli_interactive.dsl", line: 405, raw: "WHEN chat_input text=\"恢复后继续\""}, 405)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "cli_interactive.dsl", line: 406, raw: "WHEN chat_wait_completion"}, 406)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_agent_reply, %{contains: "恢复后的新回复"}, %{file: "cli_interactive.dsl", line: 407, raw: "THEN assert_agent_reply contains=\"恢复后的新回复\""}, 407)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "cli_interactive.dsl", line: 408, raw: "THEN assert_no_crash"}, 408)
+    _ctx = ctx
+    :ok
+  end
+
+  # Source: CLI-COMPACT-006
+  @tag :cli
+  @tag :compaction
+  @tag :integration
+  test "[CLI-COMPACT-006] 短对话不触发压缩" do
+    run_id = Gong.BDD.Instructions.V1.new_run_id()
+    ctx = %{run_id: run_id, scenario_id: "CLI-COMPACT-006"}
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "cli_interactive.dsl", line: 411, raw: "GIVEN create_temp_dir"}, 411)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :configure_agent, %{context_window: 200, reserve_tokens: 50}, %{file: "cli_interactive.dsl", line: 412, raw: "GIVEN configure_agent context_window=200 reserve_tokens=50"}, 412)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :start_chat_session, %{}, %{file: "cli_interactive.dsl", line: 413, raw: "GIVEN start_chat_session"}, 413)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :mock_llm_response, %{content: "短回复", response_type: "text"}, %{file: "cli_interactive.dsl", line: 414, raw: "GIVEN mock_llm_response response_type=\"text\" content=\"短回复\""}, 414)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_input, %{text: "你好"}, %{file: "cli_interactive.dsl", line: 415, raw: "WHEN chat_input text=\"你好\""}, 415)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :chat_wait_completion, %{}, %{file: "cli_interactive.dsl", line: 416, raw: "WHEN chat_wait_completion"}, 416)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_compaction_not_triggered, %{}, %{file: "cli_interactive.dsl", line: 417, raw: "THEN assert_compaction_not_triggered"}, 417)
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_no_crash, %{}, %{file: "cli_interactive.dsl", line: 418, raw: "THEN assert_no_crash"}, 418)
+    _ctx = ctx
+    :ok
+  end
+
   # Source: CLI-SESSION-011
   @tag :integration
   @tag :cli
