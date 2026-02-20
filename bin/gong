@@ -88,4 +88,17 @@ fi
 
 cd "${ROOT_DIR}"
 
-exec mix run -e 'System.halt(Gong.CLI.run(System.argv(), entry: System.get_env("GONG_ENTRY"), legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"))' -- "$@"
+# 优先使用 release（零编译启动），fallback 到 mix run
+RELEASE_BIN="${ROOT_DIR}/_build/prod/rel/gong/bin/gong"
+if [[ -x "${RELEASE_BIN}" ]]; then
+  # release eval 不接受 argv，通过环境变量传递 CLI 参数
+  export GONG_CLI_ARGV
+  GONG_CLI_ARGV=$(printf '%s\n' "$@")
+  exec "${RELEASE_BIN}" eval '
+    Application.ensure_all_started(:gong)
+    args = System.get_env("GONG_CLI_ARGV", "") |> String.split("\n", trim: true)
+    System.halt(Gong.CLI.run(args, entry: System.get_env("GONG_ENTRY"), legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"))
+  '
+else
+  exec mix run -e 'System.halt(Gong.CLI.run(System.argv(), entry: System.get_env("GONG_ENTRY"), legacy_entry: System.get_env("GONG_LEGACY_ENTRY") == "1"))' -- "$@"
+fi
