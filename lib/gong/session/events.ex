@@ -172,8 +172,12 @@ defmodule Gong.Session.Events do
     new("tool.delta", %{tool_name: tool_name, content: content || ""}, ctx, nil)
   end
 
-  def from_stream_event(%StreamEvent{type: :tool_end, tool_name: tool_name}, ctx, _error) do
-    new("tool.end", %{tool_name: tool_name}, ctx, nil)
+  def from_stream_event(
+        %StreamEvent{type: :tool_end, tool_name: tool_name, content: content},
+        ctx,
+        _error
+      ) do
+    new("tool.end", %{tool_name: tool_name, result: content || ""}, ctx, nil)
   end
 
   def from_stream_event(%StreamEvent{type: :error, content: content}, ctx, error) do
