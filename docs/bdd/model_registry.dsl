@@ -71,3 +71,29 @@ GIVEN init_model_registry
 GIVEN register_model name="vision_model" provider="openai" model_id="gpt-4o-vision" api_key_env="OPENAI_API_KEY"
 WHEN check_model_capability name="vision_model" capability="vision"
 THEN assert_capability_match expected="true"
+
+# ══════════════════════════════════════════════
+# Group 4: lookup_by_string — Step1 新增 (4 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: MODEL-011] TITLE: lookup_by_string 匹配已注册模型 TAGS: unit model
+GIVEN init_model_registry
+GIVEN register_model name="ds" provider="deepseek" model_id="deepseek-chat" api_key_env="DEEPSEEK_API_KEY"
+WHEN lookup_model_by_string model_str="deepseek:deepseek-chat"
+THEN assert_lookup_ok provider="deepseek" model_id="deepseek-chat"
+
+[SCENARIO: MODEL-012] TITLE: lookup_by_string 未注册时构造默认配置 TAGS: unit model
+GIVEN init_model_registry
+WHEN lookup_model_by_string model_str="anthropic:claude-3-opus"
+THEN assert_lookup_ok provider="anthropic" model_id="claude-3-opus"
+THEN assert_lookup_api_key_env expected="ANTHROPIC_API_KEY"
+
+[SCENARIO: MODEL-013] TITLE: lookup_by_string 格式错误返回 error TAGS: unit model
+GIVEN init_model_registry
+WHEN lookup_model_by_string model_str="invalid-no-colon"
+THEN assert_lookup_error error_contains="unknown_provider"
+
+[SCENARIO: MODEL-014] TITLE: lookup_by_string 空 provider 或 model_id 返回 error TAGS: unit model
+GIVEN init_model_registry
+WHEN lookup_model_by_string model_str=":empty-provider"
+THEN assert_lookup_error error_contains="unknown_provider"

@@ -507,3 +507,32 @@ WHEN agent_chat prompt="同时读取 a b c 三个文件"
 THEN assert_tool_was_called tool="read_file" times=3
 THEN assert_agent_reply contains="三个文件全部读取完成"
 THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 14: run_as_backend 适配器 — Step1 新增 (3 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: BDD-AGENT-042] TITLE: run_as_backend 返回文本回复 TAGS: integration agent backend
+GIVEN create_temp_dir
+GIVEN init_model_registry
+GIVEN register_model name="mock" provider="mock" model_id="mock-chat" api_key_env="MOCK_API_KEY"
+GIVEN mock_reqllm_response model="mock:mock-chat" response_type="text" content="backend 适配成功"
+WHEN run_as_backend message="测试适配" model_str="mock:mock-chat"
+THEN assert_backend_reply contains="backend 适配成功"
+
+[SCENARIO: BDD-AGENT-043] TITLE: run_as_backend 带工具调用 TAGS: integration agent backend
+GIVEN create_temp_dir
+GIVEN create_temp_file path="backend.txt" content="adapter data"
+GIVEN init_model_registry
+GIVEN register_model name="mock" provider="mock" model_id="mock-chat" api_key_env="MOCK_API_KEY"
+GIVEN mock_reqllm_response model="mock:mock-chat" response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/backend.txt"
+GIVEN mock_reqllm_response model="mock:mock-chat" response_type="text" content="读到了 adapter data"
+WHEN run_as_backend message="读 backend.txt" model_str="mock:mock-chat"
+THEN assert_backend_reply contains="adapter data"
+
+[SCENARIO: BDD-AGENT-044] TITLE: run_as_backend 错误传播 TAGS: integration agent backend
+GIVEN create_temp_dir
+GIVEN init_model_registry
+GIVEN mock_reqllm_response model="mock:mock-chat" response_type="error" content="auth failed permanently"
+WHEN run_as_backend message="触发错误" model_str="mock:mock-chat"
+THEN assert_backend_error error_contains="auth failed"

@@ -138,3 +138,44 @@ WHEN agent_stream prompt="第二次流式回放"
 THEN assert_stream_content expected="第二轮回放"
 THEN assert_stream_events sequence="start,delta,end"
 THEN assert_no_crash
+
+# ══════════════════════════════════════════════
+# Group 5: AgentLoop stream_callback — Step1 新增 (4 场景)
+# ══════════════════════════════════════════════
+
+[SCENARIO: STREAM-016] TITLE: set_stream_callback 注册后文本回复产生事件 TAGS: integration stream agent
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN attach_stream_callback
+GIVEN mock_llm_response response_type="text" content="回调测试"
+WHEN agent_chat prompt="测试回调"
+THEN assert_stream_callback_events sequence="text_start,text_delta,text_end"
+THEN assert_agent_reply contains="回调测试"
+
+[SCENARIO: STREAM-017] TITLE: stream_callback 工具调用产生 tool_start/tool_end 事件 TAGS: integration stream agent
+GIVEN create_temp_dir
+GIVEN create_temp_file path="cb.txt" content="callback data"
+GIVEN configure_agent
+GIVEN attach_stream_callback
+GIVEN mock_llm_response response_type="tool_call" tool="read_file" tool_args="file_path={{workspace}}/cb.txt"
+GIVEN mock_llm_response response_type="text" content="工具回调完成"
+WHEN agent_chat prompt="读 cb.txt"
+THEN assert_stream_callback_events_include type="tool_start" tool_name="read_file"
+THEN assert_stream_callback_events_include type="tool_end" tool_name="read_file"
+
+[SCENARIO: STREAM-018] TITLE: clear_stream_callback 后不再收到事件 TAGS: integration stream agent
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN attach_stream_callback
+GIVEN clear_stream_callback
+GIVEN mock_llm_response response_type="text" content="清除后无事件"
+WHEN agent_chat prompt="测试清除"
+THEN assert_stream_callback_events_empty
+
+[SCENARIO: STREAM-019] TITLE: stream_callback 错误回复产生 error 事件 TAGS: integration stream agent
+GIVEN create_temp_dir
+GIVEN configure_agent
+GIVEN attach_stream_callback
+GIVEN mock_llm_response response_type="error" content="permanent auth failure"
+WHEN agent_chat prompt="触发错误"
+THEN assert_stream_callback_events_include type="error"
