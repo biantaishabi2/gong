@@ -7699,7 +7699,7 @@ defmodule Gong.BDD.Instructions.V1 do
     # 构建 model_config
     case String.split(model_str, ":", parts: 2) do
       [provider, model_id] ->
-        model_config = %{provider: provider, model_id: model_id, api_key_env: "MOCK_API_KEY"}
+        _model_config = %{provider: provider, model_id: model_id, api_key_env: "MOCK_API_KEY"}
 
         # 创建自定义的 llm_backend 来使用 mock 响应
         mock_backend = fn agent_state, _call_id ->
@@ -7830,7 +7830,7 @@ defmodule Gong.BDD.Instructions.V1 do
   end
 
   defp assert_stream_callback_events_empty!(ctx, _args, _meta) do
-    events_ref = Map.fetch!(ctx, :stream_events_ref)
+    _events_ref = Map.fetch!(ctx, :stream_events_ref)
     # 清除回调后产生的事件应为空（注意：之前的事件仍在）
     # 实际测试场景是：先 attach → chat → clear → chat → 断言后一批为空
     # 简化处理：检查 ctx 中标记
