@@ -112,6 +112,18 @@ defmodule Gong.CLI.RendererTest do
       output = capture_io(:stderr, fn -> Renderer.render(event) end)
       assert output =~ "✗"
     end
+
+    test "error.runtime payload 为空时从 event.error 提取 message" do
+      event = %{make_event("error.runtime", %{}) | error: %{code: :network_error, message: "LLM 调用失败"}}
+      output = capture_io(:stderr, fn -> Renderer.render(event) end)
+      assert output =~ "LLM 调用失败"
+    end
+
+    test "error.runtime payload 和 error 都无 message 时显示未知错误" do
+      event = make_event("error.runtime", %{})
+      output = capture_io(:stderr, fn -> Renderer.render(event) end)
+      assert output =~ "未知错误"
+    end
   end
 
   describe "truncate/2" do
