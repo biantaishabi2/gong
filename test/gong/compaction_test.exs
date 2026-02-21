@@ -66,25 +66,40 @@ defmodule Gong.CompactionTest do
     end
 
     test "tool_call/result 配对不被拆分" do
+      # 构造 5 条消息，tool 输出短（在预算内），split 点恰好切在 tool pair 中间
+      # token 预算只够最后 2 条（assistant + user ≈ 10 tokens），
+      # 但 assistant(tool_calls) 在 recent 之前、tool 在 recent 里 → 触发配对保护
       msgs = [
-        %{role: "user", content: "请读文件"},
-        %{role: "assistant", content: "好的", tool_calls: [%{id: "c1", function: %{name: "read"}}]},
-        %{role: "tool", content: String.duplicate("内容", 100), tool_call_id: "c1"},
-        %{role: "assistant", content: "文件内容如上"},
+        %{role: "user", content: Enum.map_join(1..30, " ", fn i -> "word#{i}" end)},
+        %{role: "assistant", content: Enum.map_join(1..30, " ", fn i -> "reply#{i}" end)},
+        %{role: "assistant", content: "调用工具", tool_calls: [%{id: "c1", function: %{name: "read"}}]},
+        %{role: "tool", content: "短结果", tool_call_id: "c1"},
         %{role: "user", content: "最新问题"}
       ]
 
-      # 预算只够最后 2 条，但 tool pair 保护应把 assistant+tool 拉进 recent
-      {_old, recent} = Compaction.split_by_token_budget(msgs, 30)
+      # 预算 ~15 tokens：够最后 2 条（tool "短结果" ≈ 3 + user "最新问题" ≈ 4）
+      # token scan 会在 msg[2] "调用工具" 前停下 → split_at=2
+      # 但 msg[2] 是 assistant(tool_calls)，msg[3] 是 tool result
+      # find_safe_boundary 应把 msg[2] 也拉进 recent
+      {old, recent} = Compaction.split_by_token_budget(msgs, 15)
 
       recent_roles = Enum.map(recent, fn m -> m[:role] || m["role"] end)
+      _old_roles = Enum.map(old, fn m -> m[:role] || m["role"] end)
 
-      # recent 中如果有 tool 消息，其前面必须有 assistant 消息（配对保护）
-      if "tool" in recent_roles do
-        tool_idx = Enum.find_index(recent_roles, &(&1 == "tool"))
-        assert tool_idx > 0
-        assert Enum.at(recent_roles, tool_idx - 1) == "assistant"
-      end
+      # tool 消息在 recent 中
+      assert "tool" in recent_roles, "tool 应在 recent 中，实际 recent: #{inspect(recent_roles)}"
+
+      # tool 前面有 assistant（配对完整）
+      tool_idx = Enum.find_index(recent_roles, &(&1 == "tool"))
+      assert tool_idx > 0, "tool 不应是 recent 第一条"
+      assert Enum.at(recent_roles, tool_idx - 1) == "assistant",
+        "tool 前应为 assistant，实际: #{inspect(recent_roles)}"
+
+      # old 中不应有孤立的 assistant(tool_calls)
+      refute Enum.any?(old, fn m ->
+        (m[:tool_calls] || m["tool_calls"] || []) != [] and
+          not Enum.any?(old, fn m2 -> (m2[:role] || m2["role"]) == "tool" end)
+      end), "old 中不应有 assistant(tool_calls) 而没有对应 tool result"
     end
   end
 
