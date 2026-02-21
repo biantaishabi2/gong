@@ -4,7 +4,7 @@ defmodule Gong.Compaction.TokenEstimator do
 
   用于估算中英文混合文本的 token 数量，无外部依赖。
   规则：
-  - CJK 表意字符: 1字 ≈ 2 tokens
+  - CJK 表意字符: 1字 ≈ 1.2 tokens（deepseek tokenizer 实测校准）
   - 英文单词: 1 word ≈ 1.3 tokens
   - ASCII 标点/特殊字符: 每个 0.5 token（BPE 常与相邻字符合并）
   - 中文标点: 每个 1 token
@@ -32,18 +32,18 @@ defmodule Gong.Compaction.TokenEstimator do
   defp count_tokens([char | rest], acc, state) do
     cond do
       cjk?(char) ->
-        # CJK 表意字符：每个约 2 tokens
+        # CJK 表意字符：deepseek 实测约 1.2 tokens/字
         bonus = if state == :in_word, do: 1.3, else: 0
-        count_tokens(rest, acc + bonus + 2, :start)
+        count_tokens(rest, acc + bonus + 1.2, :start)
 
       ascii_letter?(char) ->
         # 英文字母/数字：积累单词
         count_tokens(rest, acc, :in_word)
 
       cjk_punct?(char) ->
-        # 中文标点：每个 1 token
+        # 中文标点：deepseek tokenizer 常与相邻字符合并，约 0.6 token
         bonus = if state == :in_word, do: 1.3, else: 0
-        count_tokens(rest, acc + bonus + 1, :start)
+        count_tokens(rest, acc + bonus + 0.6, :start)
 
       carriage_return?(char) ->
         # \r：跳过，避免 CRLF 重复计数

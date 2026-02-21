@@ -8,9 +8,9 @@ defmodule Gong.Compaction.TokenEstimatorTest do
 
   describe "estimate/1 基础测试" do
     test "中文纯文本精度" do
-      # "你好世界测试" 6 个中文字符，每个 2 tokens = 12
+      # "你好世界测试" 6 个中文字符，每个 1.2 tokens = 7.2 → 7
       estimate = TokenEstimator.estimate("你好世界测试")
-      assert estimate == 12
+      assert estimate == 7
     end
 
     test "英文纯文本精度" do
@@ -43,9 +43,9 @@ defmodule Gong.Compaction.TokenEstimatorTest do
     end
 
     test "中文标点计数" do
-      # "你好，世界" = 2 CJK × 2 + 1 中文标点 + 2 CJK × 2 = 4 + 1 + 4 = 9
+      # "你好，世界" = 2 CJK × 1.2 + 1 中文标点 × 0.6 + 2 CJK × 1.2 = 2.4 + 0.6 + 2.4 = 5.4 → 5
       estimate = TokenEstimator.estimate("你好，世界")
-      assert estimate == 9
+      assert estimate == 5
     end
   end
 
@@ -68,8 +68,8 @@ defmodule Gong.Compaction.TokenEstimatorTest do
       """
 
       estimate = TokenEstimator.estimate(text)
-      # tiktoken cl100k_base 基准: 约 1050 tokens
-      actual = 1050
+      # deepseek tokenizer 实测基准: 约 650 tokens
+      actual = 650
       deviation = abs(estimate - actual) / actual
       assert deviation < 0.15, "纯中文偏差率 #{Float.round(deviation * 100, 1)}% 超过 15% 阈值 (estimate=#{estimate}, actual=#{actual})"
     end
@@ -358,8 +358,8 @@ defmodule Gong.Compaction.TokenEstimatorTest do
       """
 
       estimate = TokenEstimator.estimate(text)
-      # tiktoken cl100k_base 基准: 约 950 tokens
-      actual = 950
+      # deepseek tokenizer 实测基准: 约 580 tokens
+      actual = 580
       deviation = abs(estimate - actual) / actual
       assert deviation < 0.15, "中英混合偏差率 #{Float.round(deviation * 100, 1)}% 超过 15% 阈值 (estimate=#{estimate}, actual=#{actual})"
     end
@@ -373,8 +373,8 @@ defmodule Gong.Compaction.TokenEstimatorTest do
       ]
 
       estimate = TokenEstimator.estimate_messages(messages)
-      # "你好" = 4, "hello world" = 1.3 + 1.3 = 2.6 → 3, 总计 7
-      assert estimate == 7
+      # "你好" = 2 × 1.2 = 2.4 → 2, "hello world" = 1.3 + 1.3 = 2.6 → 3, 总计 5
+      assert estimate == 5
     end
 
     test "空列表" do
