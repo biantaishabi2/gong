@@ -240,8 +240,12 @@ defmodule Gong.Utils.Truncate do
     marker_overhead = byte_size(worst_marker) + 2
 
     if max_bytes <= marker_overhead do
-      # max_bytes 太小，无法容纳内容 + marker，只返回标注
-      worst_marker
+      # max_bytes 太小，无法容纳内容 + marker，截断标注本身以满足上限
+      if max_bytes >= byte_size(worst_marker) do
+        worst_marker
+      else
+        safe_binary_slice(worst_marker, 0, max(max_bytes, 0))
+      end
     else
       available = max_bytes - marker_overhead
       half = div(available, 2)
