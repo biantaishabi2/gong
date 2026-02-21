@@ -111,8 +111,11 @@ defmodule Gong.CostTracker do
   @spec calculate_cost(String.t(), non_neg_integer(), non_neg_integer()) :: float()
   def calculate_cost(model, input_tokens, output_tokens)
       when is_binary(model) and is_integer(input_tokens) and is_integer(output_tokens) do
+    # 非负约束：防止负值导致累计 token/cost 被错误减少
+    safe_input = max(input_tokens, 0)
+    safe_output = max(output_tokens, 0)
     {input_price, output_price} = model_pricing(model)
-    input_tokens * input_price + output_tokens * output_price
+    safe_input * input_price + safe_output * output_price
   end
 
   # 模型单价表（每 token 美元）

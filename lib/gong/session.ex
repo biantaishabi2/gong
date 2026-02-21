@@ -799,8 +799,9 @@ defmodule Gong.Session do
 
   # 累加 usage 到 session stats
   defp accumulate_stats(state, usage) when is_map(usage) do
-    input = Map.get(usage, :input_tokens, 0) || 0
-    output = Map.get(usage, :output_tokens, 0) || 0
+    # 非负约束：防止异常负值导致累计 token/cost 被错误减少
+    input = max(Map.get(usage, :input_tokens, 0) || 0, 0)
+    output = max(Map.get(usage, :output_tokens, 0) || 0, 0)
 
     # 获取当前 model 用于计算成本
     model = get_in(state.metadata, ["session", "model"]) || "unknown"

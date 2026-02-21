@@ -207,6 +207,31 @@ defmodule Gong.SessionTokenStatsTest do
     assert usage.output_tokens == 60
   end
 
+  test "工具调用轮多次 LLM 调用累加" do
+    tool_calls = [%{id: "tc_1", name: "Ls", arguments: %{"path" => "."}}]
+
+    usages = [
+      %{input_tokens: 100, output_tokens: 30},
+      %{input_tokens: 120, output_tokens: 50}
+    ]
+
+    llm_fn = tool_then_text_llm(tool_calls, "done", usages)
+
+    {:ok, session} = setup_agent_session("stats-tool", llm_fn)
+    on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+    assert :ok = Session.subscribe(session, self())
+    assert :ok = Session.prompt(session, "list files", [])
+
+    _events = receive_until_turn_completed([])
+
+    {:ok, stats} = Session.stats(session)
+    assert stats.total_turns == 1
+    assert stats.total_input_tokens == 220
+    assert stats.total_output_tokens == 80
+    assert stats.total_cost > 0.0
+  end
+
   test "Session.stats/1 API 在无对话时返回初始值" do
     {:ok, session} =
       setup_agent_session("stats-empty", text_llm_no_usage("unused"))

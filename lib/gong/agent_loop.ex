@@ -575,13 +575,26 @@ defmodule Gong.AgentLoop do
   end
 
   # 从 ReqLLM Response 提取 usage 数据
+  # 优先尝试 response.usage，回退从 response body 中提取
   defp extract_usage(response) do
     usage_data =
       cond do
+        # 顶层 :usage 字段（atom key）
         is_map(response) and is_map(Map.get(response, :usage)) ->
           Map.get(response, :usage)
 
-        is_struct(response) and function_exported?(response.__struct__, :__struct__, 0) ->
+        # 顶层 "usage" 字段（string key）
+        is_map(response) and is_map(Map.get(response, "usage")) ->
+          Map.get(response, "usage")
+
+        # 回退：从 response body 中提取 usage
+        is_map(response) and is_map(Map.get(response, :body)) and is_map(Map.get(Map.get(response, :body), "usage")) ->
+          Map.get(Map.get(response, :body), "usage")
+
+        is_map(response) and is_map(Map.get(response, "body")) and is_map(Map.get(Map.get(response, "body"), "usage")) ->
+          Map.get(Map.get(response, "body"), "usage")
+
+        is_struct(response) ->
           try do
             Map.get(response, :usage, %{})
           rescue
