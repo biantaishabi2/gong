@@ -180,10 +180,16 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
       cli_session_restore: %{
         name: :cli_session_restore, kind: :when,
         args: %{
-          session_id: %{type: :string, required?: true, allowed: nil}
+          session_id: %{type: :string, required?: false, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
         scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
+      },
+      chat_session_restore: %{
+        name: :chat_session_restore, kind: :when,
+        args: %{},
+        outputs: %{}, rules: [], boundary: :service,
+        scopes: [:integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       tape_save_session: %{
         name: :tape_save_session, kind: :given,
