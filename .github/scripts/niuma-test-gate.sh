@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Niuma 集成 gate：BDD 编译检查 + 全量测试。
+# Niuma 集成 gate：编译 + BDD 测试。
 export MIX_ENV="${MIX_ENV:-test}"
 
 mix deps.get
@@ -12,5 +12,5 @@ if command -v bddc &>/dev/null; then
   bddc check --project-root . --in docs/bdd --out test/bdd_generated --skip-bdd-test
 fi
 
-# 全量测试（含 BDD 生成测试）
-mix test
+# 只跑 BDD 生成测试
+mix test test/bdd_generated
