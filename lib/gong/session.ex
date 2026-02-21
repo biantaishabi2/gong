@@ -297,7 +297,10 @@ defmodule Gong.Session do
       session_seq: 0,
       command_last_event_id: %{},
       seen_command_ids: MapSet.new(),
-      turn_buffers: %{}
+      turn_buffers: %{},
+      # Agent 路径串行化：同时只跑一个 AgentLoop.run，后续排队
+      agent_busy: false,
+      agent_queue: :queue.new()
     }
 
     {:ok, state}
@@ -493,9 +496,10 @@ defmodule Gong.Session do
     {:noreply, state}
   end
 
-  # Agent 路径：turn 完成，存回 updated_agent
+  # Agent 路径：turn 完成，存回 updated_agent，然后检查队列
   def handle_info({:session_turn_done, command_id, turn_id, {:ok_agent, updated_agent}}, state) do
     state = %{state | agent: updated_agent}
+    state = maybe_dequeue_agent(state)
     handle_turn_ok(state, command_id, turn_id)
   end
 
@@ -504,12 +508,13 @@ defmodule Gong.Session do
     handle_turn_ok(state, command_id, turn_id)
   end
 
-  # Agent 路径：turn 出错，仍存回 updated_agent（保留部分对话）
+  # Agent 路径：turn 出错，仍存回 updated_agent，然后检查队列
   def handle_info(
         {:session_turn_done, command_id, turn_id, {:error_agent, reason, updated_agent}},
         state
       ) do
     state = %{state | agent: updated_agent}
+    state = maybe_dequeue_agent(state)
     handle_turn_error(state, command_id, turn_id, reason)
   end
 
@@ -1096,38 +1101,38 @@ defmodule Gong.Session do
       session_pid = self()
       command_id = command_payload.command_id
 
-      if state.agent do
-        # Agent 直调路径：Agent 跨 turn 存活，Thread 自然累积
-        agent = state.agent
-        llm_backend_fn = state.llm_backend_fn
+      state =
+        if state.agent do
+          # Agent 直调路径：串行化，同时只跑一个 AgentLoop.run
+          queued_item = {message, command_id, turn_id}
 
-        Task.start(fn ->
-          Gong.AgentLoop.set_stream_callback(fn event ->
-            count = Process.get(:gong_stream_callback_count, 0)
-            Process.put(:gong_stream_callback_count, count + 1)
-            send(session_pid, {:session_stream_event, command_id, turn_id, event})
+          if state.agent_busy do
+            # 上一轮还在跑，排队等待
+            %{state | agent_queue: :queue.in(queued_item, state.agent_queue)}
+          else
+            # 空闲，立即启动
+            start_agent_task(state, queued_item, session_pid)
+          end
+        else
+          # Backend 闭包路径（测试 mock / 兼容旧代码）
+          Task.start(fn ->
+            Gong.AgentLoop.set_stream_callback(fn event ->
+              count = Process.get(:gong_stream_callback_count, 0)
+              Process.put(:gong_stream_callback_count, count + 1)
+              send(session_pid, {:session_stream_event, command_id, turn_id, event})
+            end)
+
+            run_turn(session_pid, backend, message, run_opts, %{
+              session_id: state.session_id,
+              command_id: command_id,
+              turn_id: turn_id,
+              history: state.history,
+              metadata: state.metadata
+            })
           end)
 
-          run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id)
-        end)
-      else
-        # Backend 闭包路径（测试 mock / 兼容旧代码）
-        Task.start(fn ->
-          Gong.AgentLoop.set_stream_callback(fn event ->
-            count = Process.get(:gong_stream_callback_count, 0)
-            Process.put(:gong_stream_callback_count, count + 1)
-            send(session_pid, {:session_stream_event, command_id, turn_id, event})
-          end)
-
-          run_turn(session_pid, backend, message, run_opts, %{
-            session_id: state.session_id,
-            command_id: command_id,
-            turn_id: turn_id,
-            history: state.history,
-            metadata: state.metadata
-          })
-        end)
-      end
+          state
+        end
 
       {:ok, state}
     end
@@ -1144,6 +1149,36 @@ defmodule Gong.Session do
           session_pid,
           {:session_turn_done, command_id, turn_id, {:error_agent, reason, updated_agent}}
         )
+    end
+  end
+
+  # 启动 Agent Task（标记 busy）
+  defp start_agent_task(state, {message, command_id, turn_id}, session_pid) do
+    agent = state.agent
+    llm_backend_fn = state.llm_backend_fn
+
+    Task.start(fn ->
+      Gong.AgentLoop.set_stream_callback(fn event ->
+        count = Process.get(:gong_stream_callback_count, 0)
+        Process.put(:gong_stream_callback_count, count + 1)
+        send(session_pid, {:session_stream_event, command_id, turn_id, event})
+      end)
+
+      run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id)
+    end)
+
+    %{state | agent_busy: true}
+  end
+
+  # 上一轮完成后，检查队列中是否有等待的任务
+  defp maybe_dequeue_agent(state) do
+    case :queue.out(state.agent_queue) do
+      {{:value, queued_item}, remaining_queue} ->
+        state = %{state | agent_queue: remaining_queue}
+        start_agent_task(state, queued_item, self())
+
+      {:empty, _} ->
+        %{state | agent_busy: false}
     end
   end
 

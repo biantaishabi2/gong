@@ -272,9 +272,8 @@ defmodule Gong.SessionTest do
 
     assert length(completed) == 8
     assert MapSet.size(MapSet.new(Enum.map(completed, & &1.turn_id))) == 8
-    # Agent Thread 并发时各 Task 基于同一快照并行运行，后完成的覆盖先完成的，
-    # 所以 Thread 不一定完整累积所有对话。只检查 Session 存活 + 事件完整。
-    assert wait_until(fn -> history_len_at_least?(session, 2) end)
+    # Agent 路径串行化：8 轮 × (user + assistant) = 16 条对话全部累积
+    assert wait_until(fn -> history_len_at_least?(session, 16) end)
     assert Process.alive?(session)
   end
 
