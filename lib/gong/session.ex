@@ -261,6 +261,15 @@ defmodule Gong.Session do
     end
   end
 
+  @doc "获取累计 Token 用量与成本统计"
+  @spec stats(pid()) :: {:ok, map()} | {:error, error_t()}
+  def stats(pid) do
+    case safe_genserver_call(pid, :stats) do
+      {:ok, stats} when is_map(stats) -> {:ok, stats}
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
+  end
+
   @spec close(pid()) :: :ok | {:error, error_t()}
   def close(pid) do
     case safe_genserver_stop(pid) do
@@ -340,7 +349,14 @@ defmodule Gong.Session do
       turn_buffers: %{},
       # Agent 路径串行化：同时只跑一个 AgentLoop.run，后续排队
       agent_busy: false,
-      agent_queue: :queue.new()
+      agent_queue: :queue.new(),
+      # Token 用量与成本累计统计
+      stats: %{
+        total_turns: 0,
+        total_input_tokens: 0,
+        total_output_tokens: 0,
+        total_cost: 0.0
+      }
     }
 
     {:ok, state}
@@ -380,6 +396,10 @@ defmodule Gong.Session do
 
   def handle_call(:metadata, _from, state) do
     {:reply, state.metadata, state}
+  end
+
+  def handle_call(:stats, _from, state) do
+    {:reply, state.stats, state}
   end
 
   def handle_call({:restore, source}, _from, state) do
@@ -488,21 +508,44 @@ defmodule Gong.Session do
     {:noreply, state}
   end
 
-  # Agent 路径：turn 完成，存回 updated_agent，然后检查队列
-  def handle_info({:session_turn_done, command_id, turn_id, {:ok_agent, updated_agent}}, state) do
+  # Agent 路径：turn 完成，存回 updated_agent，累加 usage，然后检查队列
+  def handle_info({:session_turn_done, command_id, turn_id, {:ok_agent, updated_agent, usage}}, state) do
     state = %{state | agent: updated_agent}
+    state = accumulate_stats(state, usage)
     state = maybe_dequeue_agent(state)
-    handle_turn_ok(state, command_id, turn_id)
+    handle_turn_ok(state, command_id, turn_id, usage)
   end
 
-  # Agent 路径：turn 出错，仍存回 updated_agent，然后检查队列
+  # 兼容旧格式（无 usage）
+  def handle_info({:session_turn_done, command_id, turn_id, {:ok_agent, updated_agent}}, state) do
+    state = %{state | agent: updated_agent}
+    usage = %{input_tokens: 0, output_tokens: 0}
+    state = accumulate_stats(state, usage)
+    state = maybe_dequeue_agent(state)
+    handle_turn_ok(state, command_id, turn_id, usage)
+  end
+
+  # Agent 路径：turn 出错，仍存回 updated_agent，累加 usage，然后检查队列
+  def handle_info(
+        {:session_turn_done, command_id, turn_id, {:error_agent, reason, updated_agent, usage}},
+        state
+      ) do
+    state = %{state | agent: updated_agent}
+    state = accumulate_stats(state, usage)
+    state = maybe_dequeue_agent(state)
+    handle_turn_error(state, command_id, turn_id, reason, usage)
+  end
+
+  # 兼容旧格式（无 usage）
   def handle_info(
         {:session_turn_done, command_id, turn_id, {:error_agent, reason, updated_agent}},
         state
       ) do
     state = %{state | agent: updated_agent}
+    usage = %{input_tokens: 0, output_tokens: 0}
+    state = accumulate_stats(state, usage)
     state = maybe_dequeue_agent(state)
-    handle_turn_error(state, command_id, turn_id, reason)
+    handle_turn_error(state, command_id, turn_id, reason, usage)
   end
 
   def handle_info({:DOWN, ref, :process, pid, _reason}, state) do
@@ -520,7 +563,7 @@ defmodule Gong.Session do
 
   # ── Turn 完成处理 ──
 
-  defp handle_turn_ok(state, command_id, turn_id) do
+  defp handle_turn_ok(state, command_id, turn_id, usage \\ %{input_tokens: 0, output_tokens: 0}) do
     {assistant_text, turn_buffers} = Map.pop(state.turn_buffers, turn_id, "")
     state = %{state | turn_buffers: turn_buffers}
 
@@ -551,7 +594,7 @@ defmodule Gong.Session do
       emit_event(
         state,
         "lifecycle.turn_completed",
-        %{status: "ok"},
+        %{status: "ok", usage: usage},
         nil,
         command_id,
         turn_id
@@ -563,7 +606,7 @@ defmodule Gong.Session do
     {:noreply, cleanup_command_chain(state, command_id)}
   end
 
-  defp handle_turn_error(state, command_id, turn_id, reason) do
+  defp handle_turn_error(state, command_id, turn_id, reason, usage \\ %{input_tokens: 0, output_tokens: 0}) do
     normalized_error = normalize_error(reason)
     state = emit_runtime_error(state, command_id, turn_id, reason)
 
@@ -591,7 +634,7 @@ defmodule Gong.Session do
       emit_event(
         state,
         "lifecycle.turn_completed",
-        %{status: "error"},
+        %{status: "error", usage: usage},
         nil,
         command_id,
         turn_id
@@ -753,6 +796,28 @@ defmodule Gong.Session do
         state
     end
   end
+
+  # 累加 usage 到 session stats
+  defp accumulate_stats(state, usage) when is_map(usage) do
+    input = Map.get(usage, :input_tokens, 0) || 0
+    output = Map.get(usage, :output_tokens, 0) || 0
+
+    # 获取当前 model 用于计算成本
+    model = get_in(state.metadata, ["session", "model"]) || "unknown"
+    cost = Gong.CostTracker.calculate_cost(model, input, output)
+
+    stats = state.stats
+    updated_stats = %{
+      total_turns: stats.total_turns + 1,
+      total_input_tokens: stats.total_input_tokens + input,
+      total_output_tokens: stats.total_output_tokens + output,
+      total_cost: stats.total_cost + cost
+    }
+
+    %{state | stats: updated_stats}
+  end
+
+  defp accumulate_stats(state, _usage), do: state
 
   defp emit_runtime_error(state, command_id, turn_id, reason) do
     envelope = normalize_error(reason)
@@ -979,16 +1044,18 @@ defmodule Gong.Session do
     end
   end
 
-  # Agent 直调路径：调用 AgentLoop.run，返回 updated_agent
+  # Agent 直调路径：调用 AgentLoop.run，从进程字典读取 usage
   defp run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id) do
     case AgentLoop.run(agent, message, llm_backend: llm_backend_fn) do
       {:ok, _reply, updated_agent} ->
-        send(session_pid, {:session_turn_done, command_id, turn_id, {:ok_agent, updated_agent}})
+        usage = Process.get(:gong_turn_usage, %{input_tokens: 0, output_tokens: 0})
+        send(session_pid, {:session_turn_done, command_id, turn_id, {:ok_agent, updated_agent, usage}})
 
       {:error, reason, updated_agent} ->
+        usage = Process.get(:gong_turn_usage, %{input_tokens: 0, output_tokens: 0})
         send(
           session_pid,
-          {:session_turn_done, command_id, turn_id, {:error_agent, reason, updated_agent}}
+          {:session_turn_done, command_id, turn_id, {:error_agent, reason, updated_agent, usage}}
         )
     end
   end

@@ -32,6 +32,8 @@ defmodule Gong.AgentLoop do
 
   ## 返回
     `{:ok, reply, agent}` | `{:error, reason, agent}`
+
+  当轮累计 usage 通过进程字典 `:gong_turn_usage` 暴露给同进程调用者。
   """
   @spec run(struct(), String.t(), keyword()) ::
           {:ok, String.t(), struct()} | {:error, term(), struct()}
@@ -48,6 +50,9 @@ defmodule Gong.AgentLoop do
         {:error, _reason} ->
           {[], hooks}
       end
+
+    # 初始化当轮 usage 累加器（进程字典侧通道）
+    Process.put(:gong_turn_usage, %{input_tokens: 0, output_tokens: 0})
 
     # 发送 telemetry: agent 开始
     :telemetry.execute([:gong, :agent, :start], %{count: 1}, %{prompt: prompt})
@@ -523,8 +528,14 @@ defmodule Gong.AgentLoop do
       opts = [tools: reqllm_tools, receive_timeout: 60_000]
 
       case ReqLLM.generate_text(model_str, messages, opts) do
-        {:ok, response} -> {:ok, parse_reqllm_response(response)}
-        {:error, reason} -> {:ok, {:error, to_string(reason)}}
+        {:ok, response} ->
+          {parsed, usage} = parse_reqllm_response(response)
+          # 通过进程字典累加当轮 usage
+          accumulate_turn_usage(usage)
+          {:ok, parsed}
+
+        {:error, reason} ->
+          {:ok, {:error, to_string(reason)}}
       end
     end
   end
@@ -540,20 +551,63 @@ defmodule Gong.AgentLoop do
     end)
   end
 
-  # 解析 ReqLLM 响应为 AgentLoop 期望的 tuple 格式
+  # 解析 ReqLLM 响应为 AgentLoop 期望的 tuple 格式，同时提取 usage
+  # 返回 {parsed_response, usage_map}
   defp parse_reqllm_response(response) do
     tool_calls = ReqLLM.Response.tool_calls(response)
 
-    if tool_calls != [] do
-      formatted =
-        Enum.map(tool_calls, fn tc ->
-          tc_map = ReqLLM.ToolCall.from_map(tc)
-          %{id: tc_map.id, name: tc_map.name, arguments: tc_map.arguments}
-        end)
-      {:tool_calls, formatted}
-    else
-      {:text, ReqLLM.Response.text(response) || ""}
-    end
+    parsed =
+      if tool_calls != [] do
+        formatted =
+          Enum.map(tool_calls, fn tc ->
+            tc_map = ReqLLM.ToolCall.from_map(tc)
+            %{id: tc_map.id, name: tc_map.name, arguments: tc_map.arguments}
+          end)
+        {:tool_calls, formatted}
+      else
+        {:text, ReqLLM.Response.text(response) || ""}
+      end
+
+    # 提取 usage：尝试 response.usage 或 response body
+    usage = extract_usage(response)
+
+    {parsed, usage}
+  end
+
+  # 从 ReqLLM Response 提取 usage 数据
+  defp extract_usage(response) do
+    usage_data =
+      cond do
+        is_map(response) and is_map(Map.get(response, :usage)) ->
+          Map.get(response, :usage)
+
+        is_struct(response) and function_exported?(response.__struct__, :__struct__, 0) ->
+          try do
+            Map.get(response, :usage, %{})
+          rescue
+            _ -> %{}
+          end
+
+        true ->
+          %{}
+      end
+
+    %{
+      input_tokens: Map.get(usage_data, :input_tokens, Map.get(usage_data, "input_tokens", 0)) || 0,
+      output_tokens: Map.get(usage_data, :output_tokens, Map.get(usage_data, "output_tokens", 0)) || 0
+    }
+  end
+
+  # 通过进程字典累加当轮 usage
+  defp accumulate_turn_usage(usage) do
+    current = Process.get(:gong_turn_usage, %{input_tokens: 0, output_tokens: 0})
+
+    updated = %{
+      input_tokens: current.input_tokens + (usage[:input_tokens] || 0),
+      output_tokens: current.output_tokens + (usage[:output_tokens] || 0)
+    }
+
+    Process.put(:gong_turn_usage, updated)
   end
 
   # ── Stream 事件发射 ──
