@@ -29,8 +29,8 @@ defmodule Gong.CLI.Chat do
 
     case Session.start_link(session_opts) do
       {:ok, pid} ->
-        :ok = Session.subscribe(pid, self())
         maybe_restore_latest(pid, cwd)
+        :ok = Session.subscribe(pid, self())
         IO.puts("Gong Chat (输入 /help 查看命令, /exit 退出)")
         repl_loop(pid)
 
