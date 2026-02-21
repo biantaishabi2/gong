@@ -25,7 +25,8 @@ defmodule Gong.CLI.Chat do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
     Gong.Settings.init(cwd)
 
-    session_opts = build_session_opts(opts)
+    tape_path = Path.join(cwd, ".gong/tape")
+    session_opts = build_session_opts(opts) |> Keyword.put(:tape_path, tape_path)
 
     case Session.start_link(session_opts) do
       {:ok, pid} ->
@@ -42,21 +43,16 @@ defmodule Gong.CLI.Chat do
   defp build_session_opts(opts) do
     session_opts = []
 
-    # 如果显式传入 backend，优先使用
-    if backend = Keyword.get(opts, :backend) do
-      Keyword.put(session_opts, :backend, backend)
+    # 如果显式传入 llm_backend_fn，优先使用（测试 mock）
+    if llm_backend_fn = Keyword.get(opts, :llm_backend_fn) do
+      agent = Keyword.get(opts, :agent, Gong.Agent.new())
+      session_opts |> Keyword.put(:agent, agent) |> Keyword.put(:llm_backend_fn, llm_backend_fn)
     else
-      # 否则从 model 构建 backend
+      # 传 model 给 Session，由 Session 创建持久 Agent
       model = Keyword.get(opts, :model) || Gong.Settings.get("model")
 
       if model do
-        case Gong.ModelRegistry.lookup_by_string(model) do
-          {:ok, config} ->
-            Keyword.put(session_opts, :backend, &Gong.AgentLoop.run_as_backend(&1, &2, &3, config))
-
-          {:error, _} ->
-            session_opts
-        end
+        Keyword.put(session_opts, :model, model)
       else
         session_opts
       end
@@ -120,41 +116,40 @@ defmodule Gong.CLI.Chat do
   end
 
   defp handle_input("/save", session_pid) do
-    case Session.history(session_pid) do
-      {:ok, history} ->
-        session_id = generate_session_id()
-        cwd = File.cwd!()
-        tape_path = Path.join(cwd, ".gong/tape")
+    with {:ok, history} <- Session.history(session_pid),
+         {:ok, metadata} <- Session.metadata(session_pid) do
+      session_id = generate_session_id()
+      cwd = File.cwd!()
+      tape_path = Path.join(cwd, ".gong/tape")
 
-        # 转为快照格式
-        indexed_history =
-          history
-          |> Enum.with_index(1)
-          |> Enum.map(fn {entry, idx} ->
-            role = Map.get(entry, :role) || Map.get(entry, "role") || "?"
-            content = Map.get(entry, :content) || Map.get(entry, "content") || ""
-            turn_id = div(idx + 1, 2)
+      # 转为快照格式
+      indexed_history =
+        history
+        |> Enum.with_index(1)
+        |> Enum.map(fn {entry, idx} ->
+          role = Map.get(entry, :role) || Map.get(entry, "role") || "?"
+          content = Map.get(entry, :content) || Map.get(entry, "content") || ""
+          turn_id = div(idx + 1, 2)
 
-            %{
-              "role" => to_string(role),
-              "content" => to_string(content),
-              "turn_id" => turn_id,
-              "ts" => System.os_time(:millisecond)
-            }
-          end)
+          %{
+            "role" => to_string(role),
+            "content" => to_string(content),
+            "turn_id" => turn_id,
+            "ts" => System.os_time(:millisecond)
+          }
+        end)
 
-        snapshot = %{
-          "session_id" => session_id,
-          "history" => indexed_history,
-          "turn_cursor" => length(indexed_history),
-          "metadata" => %{}
-        }
+      snapshot = %{
+        "session_id" => session_id,
+        "history" => indexed_history,
+        "turn_cursor" => length(indexed_history),
+        "metadata" => metadata
+      }
 
-        :ok = Gong.CLI.SessionCmd.save_session(tape_path, session_id, snapshot)
-        IO.puts("会话已保存: #{session_id}")
-
-      {:error, _} ->
-        IO.puts("(无法获取历史，保存失败)")
+      :ok = Gong.CLI.SessionCmd.save_session(tape_path, session_id, snapshot)
+      IO.puts("会话已保存: #{session_id}")
+    else
+      _ -> IO.puts("(无法获取历史，保存失败)")
     end
 
     repl_loop(session_pid)

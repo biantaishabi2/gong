@@ -7848,10 +7848,18 @@ defmodule Gong.BDD.Instructions.V1 do
 
     opts =
       if Map.get(args, :with_mock_backend) == "true" do
-        mock_fn = fn message, _opts, _context ->
-          {:ok, "mock reply to: #{message}"}
+        mock_fn = fn agent_state, _call_id ->
+          state = Jido.Agent.Strategy.State.get(agent_state, %{})
+          conversation = Map.get(state, :conversation, [])
+
+          message =
+            conversation
+            |> Enum.reverse()
+            |> Enum.find_value("", fn msg -> if msg[:role] == :user, do: msg[:content] end)
+
+          {:ok, {:text, "mock reply to: #{message}"}}
         end
-        Keyword.put(opts, :backend, mock_fn)
+        opts |> Keyword.put(:agent, Gong.Agent.new()) |> Keyword.put(:llm_backend_fn, mock_fn)
       else
         opts
       end
@@ -8244,20 +8252,29 @@ defmodule Gong.BDD.Instructions.V1 do
     mock_queue = Map.get(ctx, :mock_queue, [])
     workspace = Map.get(ctx, :workspace, System.tmp_dir!())
 
-    # 构造 mock backend
-    backend = fn message, _opts, _context ->
+    # 构造 mock llm_backend_fn（2-arity: agent_state, call_id）
+    llm_backend_fn = fn agent_state, _call_id ->
+      # 从 agent conversation 中提取最后一条用户消息
+      state = Jido.Agent.Strategy.State.get(agent_state, %{})
+      conversation = Map.get(state, :conversation, [])
+
+      message =
+        conversation
+        |> Enum.reverse()
+        |> Enum.find_value("", fn msg -> if msg[:role] == :user, do: msg[:content] end)
+
       agent = Gong.Agent.new()
 
       case Gong.MockLLM.run_chat(agent, message, mock_queue) do
-        {:ok, reply, _agent} -> {:ok, reply}
-        {:error, reason, _agent} -> {:error, reason}
+        {:ok, reply, _agent} -> {:ok, {:text, reply}}
+        {:error, reason, _agent} -> {:ok, {:error, reason}}
       end
     end
 
     # 直接调用真实的 Run.run/2，捕获 IO 输出
     {output, exit_code} =
       run_with_captured_io(fn ->
-        Gong.CLI.Run.run(prompt, backend: backend, cwd: workspace)
+        Gong.CLI.Run.run(prompt, llm_backend_fn: llm_backend_fn, cwd: workspace)
       end)
 
     ctx
@@ -8304,17 +8321,28 @@ defmodule Gong.BDD.Instructions.V1 do
         {:ok, qpid} = Agent.start_link(fn -> mock_queue end)
 
         opts = [
-          backend: fn message, _opts, _context ->
-            agent = Gong.Agent.new()
+          agent: Gong.Agent.new(),
+          llm_backend_fn: fn agent_state, _call_id ->
+            # 从 agent conversation 中提取最后一条用户消息
+            state = Jido.Agent.Strategy.State.get(agent_state, %{})
+            conversation = Map.get(state, :conversation, [])
+
+            message =
+              conversation
+              |> Enum.reverse()
+              |> Enum.find_value("", fn msg -> if msg[:role] == :user, do: msg[:content] end)
+
             # get_and_update 弹出第一条，保证多轮对话逐条消费
             remaining = Agent.get_and_update(qpid, fn
               [head | tail] -> {[head], tail}
               [] -> {[], []}
             end)
 
+            agent = Gong.Agent.new()
+
             case Gong.MockLLM.run_chat(agent, message, remaining) do
-              {:ok, reply, _agent} -> {:ok, reply}
-              {:error, reason, _agent} -> {:error, reason}
+              {:ok, reply, _agent} -> {:ok, {:text, reply}}
+              {:error, reason, _agent} -> {:ok, {:error, reason}}
             end
           end,
           tape_path: Map.get(ctx, :tape_path)

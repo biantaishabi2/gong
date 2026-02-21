@@ -9,9 +9,11 @@ defmodule Gong.CLISessionStreamIntegrationTest do
     {:ok, session} =
       Session.start_link(
         session_id: "session-cli-stream-order",
-        backend: fn message, _opts, _ctx ->
+        agent: Gong.Agent.new(),
+        llm_backend_fn: fn agent_state, _call_id ->
+          message = last_user_message(agent_state)
           Process.sleep(message_delay(message))
-          {:ok, [{:chunk, "echo:" <> message}, :done]}
+          {:ok, {:text, "echo:" <> message}}
         end
       )
 
@@ -71,12 +73,15 @@ defmodule Gong.CLISessionStreamIntegrationTest do
     {:ok, session} =
       Session.start_link(
         session_id: "session-cli-stream-unsubscribe",
-        backend: fn message, _opts, _ctx ->
+        agent: Gong.Agent.new(),
+        llm_backend_fn: fn agent_state, _call_id ->
+          message = last_user_message(agent_state)
+
           if message == "slow" do
             Process.sleep(120)
           end
 
-          {:ok, [{:chunk, "echo:" <> message}, :done]}
+          {:ok, {:text, "echo:" <> message}}
         end
       )
 
@@ -173,6 +178,15 @@ defmodule Gong.CLISessionStreamIntegrationTest do
 
     assert {:error, {:sequence_mismatch, %{expected: 3, actual: 1}}} =
              Events.consume_event(cursor, out_of_order_event)
+  end
+
+  defp last_user_message(agent_state) do
+    alias Jido.Agent.Strategy.State, as: StratState
+    state = StratState.get(agent_state, %{})
+    conversation = Map.get(state, :conversation, [])
+    conversation
+    |> Enum.reverse()
+    |> Enum.find_value("", fn msg -> if msg[:role] == :user, do: msg[:content] end)
   end
 
   defp message_delay("A"), do: 40
