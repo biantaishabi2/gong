@@ -20,9 +20,10 @@ defmodule Gong.Tools.Bash do
   @max_buffer_bytes 102_400
 
   @impl true
-  def run(params, _context) do
+  def run(params, context) do
+    workspace = Map.get(context, :workspace)
     with :ok <- validate_command(params.command),
-         {:ok, cwd} <- resolve_cwd(params[:cwd]) do
+         {:ok, cwd} <- resolve_cwd(params[:cwd] || workspace) do
       execute(params.command, params[:timeout] || 120, cwd)
     end
   end

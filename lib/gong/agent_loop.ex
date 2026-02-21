@@ -263,10 +263,11 @@ defmodule Gong.AgentLoop do
     config = state[:config] || %{}
     actions_by_name = config[:actions_by_name] || %{}
 
-    # 合并工具上下文
+    # 合并工具上下文（注入 workspace）
     base_ctx = config[:base_tool_context] || %{}
     run_ctx = state[:run_tool_context] || %{}
-    tool_context = Map.merge(base_ctx, run_ctx)
+    workspace = Keyword.get(opts, :workspace, ".")
+    tool_context = Map.merge(base_ctx, run_ctx) |> Map.put(:workspace, workspace)
 
     # Steering 配置
     steering_config = Keyword.get(opts, :steering_config)
