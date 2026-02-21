@@ -22,7 +22,6 @@ jobs:
     secrets: inherit
     with:
       repo: ${{ github.repository }}
-      build_niuma: false
       label_whitelist: "bot:orchestrate,bot:queued"
       enable_dispatch_wakeup: true
       event_id: ${{ github.event.client_payload.event_id || '' }}

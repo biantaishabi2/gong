@@ -23,7 +23,6 @@ jobs:
       repo: ${{ github.repository }}
       issue_number: ${{ format('{0}', github.event.issue.number) }}
       trigger_source: review
-      build_niuma: false
       gate_max_retries: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
     secrets: inherit
 
@@ -59,6 +58,5 @@ jobs:
       issue_number: ${{ needs.extract-issue-from-pr.outputs.issue_number }}
       pr_number: ${{ format('{0}', github.event.pull_request.number) }}
       trigger_source: human
-      build_niuma: false
       gate_max_retries: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
     secrets: inherit
