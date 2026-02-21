@@ -3,6 +3,91 @@ defmodule Gong.CompactionTest do
 
   alias Gong.Compaction
 
+  # ── split_by_token_budget ──
+
+  describe "split_by_token_budget/2" do
+    test "短消息全部在预算内，不拆分" do
+      msgs = [
+        %{role: "user", content: "你好"},
+        %{role: "assistant", content: "你好呀"},
+        %{role: "user", content: "谢谢"}
+      ]
+
+      # 预算足够大，全部保留
+      {old, recent} = Compaction.split_by_token_budget(msgs, 10_000)
+      assert old == []
+      assert length(recent) == 3
+    end
+
+    test "长工具输出消息按 token 预算只保留最近几条" do
+      # 每条约 130 tokens（100个英文单词）
+      long = Enum.map_join(1..100, " ", fn i -> "word#{i}" end)
+
+      msgs =
+        for i <- 1..10 do
+          role = if rem(i, 2) == 1, do: "user", else: "assistant"
+          %{role: role, content: long}
+        end
+
+      # 预算 300 tokens → 只够保留约 2 条
+      {old, recent} = Compaction.split_by_token_budget(msgs, 300)
+      assert length(old) > 0
+      assert length(recent) >= 2
+      assert length(recent) < 10
+    end
+
+    test "系统消息始终保留在 recent 中" do
+      msgs = [
+        %{role: "system", content: "你是助手"},
+        %{role: "user", content: Enum.map_join(1..50, " ", fn i -> "word#{i}" end)},
+        %{role: "assistant", content: Enum.map_join(1..50, " ", fn i -> "reply#{i}" end)},
+        %{role: "user", content: "最新问题"}
+      ]
+
+      # 预算仅够 1 条非系统消息
+      {_old, recent} = Compaction.split_by_token_budget(msgs, 20)
+
+      roles = Enum.map(recent, fn m -> m.role end)
+      assert "system" in roles
+    end
+
+    test "至少保留 1 条非系统消息即使超预算" do
+      # 单条巨大消息
+      huge = String.duplicate("测试内容", 500)
+
+      msgs = [
+        %{role: "user", content: huge}
+      ]
+
+      # 预算 10 tokens，但仍保留这 1 条
+      {old, recent} = Compaction.split_by_token_budget(msgs, 10)
+      assert old == []
+      assert length(recent) == 1
+    end
+
+    test "tool_call/result 配对不被拆分" do
+      msgs = [
+        %{role: "user", content: "请读文件"},
+        %{role: "assistant", content: "好的", tool_calls: [%{id: "c1", function: %{name: "read"}}]},
+        %{role: "tool", content: String.duplicate("内容", 100), tool_call_id: "c1"},
+        %{role: "assistant", content: "文件内容如上"},
+        %{role: "user", content: "最新问题"}
+      ]
+
+      # 预算只够最后 2 条，但 tool pair 保护应把 assistant+tool 拉进 recent
+      {_old, recent} = Compaction.split_by_token_budget(msgs, 30)
+
+      recent_roles = Enum.map(recent, fn m -> m[:role] || m["role"] end)
+
+      # recent 中如果有 tool 消息，其前面必须有 assistant 消息（配对保护）
+      if "tool" in recent_roles do
+        tool_idx = Enum.find_index(recent_roles, &(&1 == "tool"))
+        assert tool_idx > 0
+        assert Enum.at(recent_roles, tool_idx - 1) == "assistant"
+      end
+    end
+  end
+
   describe "truncate_tool_outputs/2" do
     test "工具消息被正确头尾截断" do
       # 生成超长工具输出（200行）
