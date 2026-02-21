@@ -277,6 +277,50 @@ defmodule Gong.SessionTest do
     assert Process.alive?(session)
   end
 
+  test "并发 prompt 串行化：每轮 LLM 看到前面所有对话" do
+    # 捕获每轮 LLM 收到的 conversation 长度
+    {:ok, call_log} = Agent.start_link(fn -> [] end)
+
+    alias Jido.Agent.Strategy.State, as: StratState
+
+    serialized_llm = fn agent_state, _call_id ->
+      state = StratState.get(agent_state, %{})
+      conversation = Map.get(state, :conversation, [])
+      # 记录本轮 LLM 看到的 conversation 消息数（不含 system）
+      non_system = Enum.reject(conversation, fn m -> m[:role] == :system end)
+      Agent.update(call_log, fn log -> log ++ [length(non_system)] end)
+      {:ok, {:text, "ok"}}
+    end
+
+    {:ok, session} = setup_agent_session("session-serial-verify", serialized_llm)
+
+    on_exit(fn ->
+      if Process.alive?(session), do: Session.close(session)
+      if Process.alive?(call_log), do: Agent.stop(call_log)
+    end)
+
+    assert :ok = Session.subscribe(session, self())
+
+    # 并发发 4 条 prompt
+    tasks =
+      for i <- 1..4 do
+        Task.async(fn -> Session.prompt(session, "msg#{i}", []) end)
+      end
+
+    assert Enum.all?(tasks, &(Task.await(&1, 5_000) == :ok))
+    _events = receive_until_turn_completed_count([], 4)
+
+    # 每轮 LLM 看到的消息数应该递增：
+    # 第 1 轮：1 条 user
+    # 第 2 轮：1 user + 1 assistant + 1 user = 3
+    # 第 3 轮：2 user + 2 assistant + 1 user = 5
+    # 第 4 轮：3 user + 3 assistant + 1 user = 7
+    counts = Agent.get(call_log, & &1)
+    assert length(counts) == 4, "应有 4 轮 LLM 调用，实际 #{length(counts)}"
+    assert counts == Enum.sort(counts), "每轮 LLM 看到的消息数应单调递增，实际: #{inspect(counts)}"
+    assert List.last(counts) >= 7, "最后一轮应至少看到 7 条消息，实际: #{List.last(counts)}"
+  end
+
   test "并发 restore 与 history 读取下 Session 保持可用" do
     {:ok, session} = setup_agent_session("session-concurrent-restore", text_llm("ok"))
     on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
