@@ -587,9 +587,15 @@ defmodule Gong.AgentLoop do
         is_map(response) and is_map(Map.get(response, "usage")) ->
           Map.get(response, "usage")
 
-        # 回退：从 response body 中提取 usage
+        # 回退：从 response body 中提取 usage（atom key + string key 组合）
+        is_map(response) and is_map(Map.get(response, :body)) and is_map(Map.get(Map.get(response, :body), :usage)) ->
+          Map.get(Map.get(response, :body), :usage)
+
         is_map(response) and is_map(Map.get(response, :body)) and is_map(Map.get(Map.get(response, :body), "usage")) ->
           Map.get(Map.get(response, :body), "usage")
+
+        is_map(response) and is_map(Map.get(response, "body")) and is_map(Map.get(Map.get(response, "body"), :usage)) ->
+          Map.get(Map.get(response, "body"), :usage)
 
         is_map(response) and is_map(Map.get(response, "body")) and is_map(Map.get(Map.get(response, "body"), "usage")) ->
           Map.get(Map.get(response, "body"), "usage")
