@@ -15,14 +15,14 @@ permissions:
 jobs:
   orchestrate:
     if: >
-      (github.event_name == 'issues' && (github.event.label.name == 'bot:orchestrate' || github.event.label.name == 'bot:queued')) ||
+      (github.event_name == 'issues' && (github.event.label.name == 'bot:orchestrate' || github.event.label.name == 'bot:queued' || github.event.label.name == 'bot:pr-reviewable')) ||
       (github.event_name == 'repository_dispatch' && github.event.action == 'niuma.task.completed' && github.event.client_payload.event_source == 'close-after-integration-merge') ||
       (github.event_name == 'pull_request' && github.event.action == 'closed')
     uses: biantaishabi2/Cli/.github/workflows/niuma-orchestrate-reusable.yml@master
     secrets: inherit
     with:
       repo: ${{ github.repository }}
-      label_whitelist: "bot:orchestrate,bot:queued"
+      label_whitelist: "bot:orchestrate,bot:queued,bot:pr-reviewable"
       enable_dispatch_wakeup: true
       event_id: ${{ github.event.client_payload.event_id || '' }}
       dedup_window_hours: 24
