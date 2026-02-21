@@ -139,10 +139,12 @@ defmodule Gong.CLI.Renderer do
     IO.puts("#{@cyan}✓ #{truncate(result_str, @max_result_length)}#{@reset}")
   end
 
-  def render(%Events{type: type, payload: payload}) when type in ["error.stream", "error.runtime"] do
+  def render(%Events{type: type, payload: payload, error: error}) when type in ["error.stream", "error.runtime"] do
     message =
       Map.get(payload, :message) || Map.get(payload, "message") ||
-        get_in_error(payload) || "未知错误"
+        get_in_error(payload) ||
+        extract_error_message(error) ||
+        "未知错误"
 
     IO.puts(:stderr, "#{@red}✗ #{message}#{@reset}")
   end
@@ -167,6 +169,12 @@ defmodule Gong.CLI.Renderer do
     error = Map.get(payload, :error) || Map.get(payload, "error")
     if is_map(error), do: Map.get(error, :message) || Map.get(error, "message")
   end
+
+  defp extract_error_message(nil), do: nil
+  defp extract_error_message(error) when is_map(error) do
+    Map.get(error, :message) || Map.get(error, "message")
+  end
+  defp extract_error_message(_), do: nil
 
   @doc "截断字符串到指定最大长度"
   @spec truncate(String.t(), non_neg_integer()) :: String.t()
