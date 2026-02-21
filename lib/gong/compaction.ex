@@ -3,7 +3,8 @@ defmodule Gong.Compaction do
   上下文压缩模块。
 
   当会话历史超过 token 预算时，对旧消息进行压缩：
-  - 滑动窗口保留最近 N 条消息完整内容
+  - 默认按 token 预算保留最近消息（从最新向前累积到预算上限）
+  - 也支持旧的固定条数模式（显式传 window_size）
   - 窗口外的消息由 LLM 生成摘要替代
   - 系统消息和 anchor 消息始终保留
   - LLM 摘要失败时回退到截断策略
@@ -12,24 +13,27 @@ defmodule Gong.Compaction do
   alias Gong.Compaction.TokenEstimator
   alias Gong.Utils.Truncate
 
-  @default_window_size 20
   @default_max_tokens 100_000
   @default_reserve_tokens 16_384
+  # 默认保留预算：保留最近消息的 token 上限（context_window * 0.3）
+  @default_keep_recent_ratio 0.3
 
   @doc """
   压缩消息列表，返回 {压缩后消息, 摘要 | nil}。
 
   ## 选项
 
-  - `:window_size` - 滑动窗口大小，保留最近 N 条非系统消息（默认 20）
+  - `:keep_recent_tokens` - 保留最近消息的 token 预算（token 预算模式）
+  - `:window_size` - 固定保留最近 N 条非系统消息（固定条数模式，向后兼容）
   - `:max_tokens` - 最大 token 数阈值（默认 100_000）
   - `:context_window` - 上下文窗口总 token 数（设置后 max_tokens = context_window - reserve_tokens）
   - `:reserve_tokens` - 预留 token 数（默认 16_384，仅 context_window 模式生效）
   - `:summarize_fn` - 摘要函数 `(messages -> {:ok, summary} | {:error, reason})`
+
+  优先级：keep_recent_tokens > window_size > 默认 token 预算（context_window * 0.3）
   """
   @spec compact([map()], keyword()) :: {[map()], String.t() | nil}
   def compact(messages, opts \\ []) do
-    window_size = Keyword.get(opts, :window_size, @default_window_size)
     max_tokens = resolve_max_tokens(opts)
     summarize_fn = Keyword.get(opts, :summarize_fn, &default_summarize/1)
 
@@ -39,7 +43,7 @@ defmodule Gong.Compaction do
       # 未超阈值，不需要压缩
       {messages, nil}
     else
-      {old, recent} = split_with_system_preserved(messages, window_size)
+      {old, recent} = split_messages(messages, opts)
 
       # 窗口足够大，无需压缩
       if old == [] do
@@ -97,28 +101,86 @@ defmodule Gong.Compaction do
     {compacted, summary, updated_store}
   end
 
-  @doc """
-  分割消息：系统消息始终保留在 recent 中，其余按窗口分割。
+  # 根据选项选择分割策略
+  defp split_messages(messages, opts) do
+    cond do
+      # 显式 keep_recent_tokens → token 预算模式
+      Keyword.has_key?(opts, :keep_recent_tokens) ->
+        split_by_token_budget(messages, Keyword.fetch!(opts, :keep_recent_tokens))
 
-  返回 {old_messages, recent_messages}，其中 recent 包含所有系统消息 + 最近 window_size 条非系统消息。
+      # 显式 window_size → 固定条数模式（向后兼容）
+      Keyword.has_key?(opts, :window_size) ->
+        split_with_system_preserved(messages, Keyword.fetch!(opts, :window_size))
+
+      # 默认 → token 预算模式
+      true ->
+        keep_recent = resolve_keep_recent(opts)
+        split_by_token_budget(messages, keep_recent)
+    end
+  end
+
+  @doc """
+  按 token 预算分割消息：系统消息始终保留在 recent 中，
+  其余从最新向前累积 token，直到达到 keep_recent_tokens 预算。
+
+  返回 {old_messages, recent_messages}。
+  """
+  @spec split_by_token_budget([map()], non_neg_integer()) :: {[map()], [map()]}
+  def split_by_token_budget(messages, keep_recent_tokens) do
+    {system_msgs, non_system} = split_system(messages)
+
+    # 从最新消息向前扫描，累积 token 直到预算用尽
+    reversed = Enum.reverse(non_system)
+    {recent_reversed, _budget_left} =
+      Enum.reduce_while(reversed, {[], keep_recent_tokens}, fn msg, {acc, budget} ->
+        msg_tokens = TokenEstimator.estimate(get_content(msg) || "")
+
+        if budget - msg_tokens >= 0 or acc == [] do
+          # 至少保留 1 条消息，即使超预算
+          {:cont, {[msg | acc], budget - msg_tokens}}
+        else
+          {:halt, {acc, budget}}
+        end
+      end)
+
+    recent_count = length(recent_reversed)
+    total_count = length(non_system)
+
+    if recent_count >= total_count do
+      {[], system_msgs ++ non_system}
+    else
+      split_at = total_count - recent_count
+      safe_split = find_safe_boundary(non_system, split_at)
+      {old, recent_non_system} = Enum.split(non_system, safe_split)
+      {old, system_msgs ++ recent_non_system}
+    end
+  end
+
+  @doc """
+  按固定条数分割消息（向后兼容）：系统消息始终保留在 recent 中，
+  其余按 window_size 分割。
+
+  返回 {old_messages, recent_messages}。
   """
   @spec split_with_system_preserved([map()], non_neg_integer()) :: {[map()], [map()]}
   def split_with_system_preserved(messages, window_size) do
-    # 保留 system 和 branch_summary 类型消息（不参与压缩）
-    {system_msgs, non_system} =
-      Enum.split_with(messages, fn msg ->
-        get_role(msg) in ["system", "branch_summary"]
-      end)
+    {system_msgs, non_system} = split_system(messages)
 
     if length(non_system) <= window_size do
       {[], system_msgs ++ non_system}
     else
       split_at = length(non_system) - window_size
-      # 调整分割点，确保 tool_call/result 配对不被拆分
       safe_split = find_safe_boundary(non_system, split_at)
       {old, recent_non_system} = Enum.split(non_system, safe_split)
       {old, system_msgs ++ recent_non_system}
     end
+  end
+
+  # 分离系统消息
+  defp split_system(messages) do
+    Enum.split_with(messages, fn msg ->
+      get_role(msg) in ["system", "branch_summary"]
+    end)
   end
 
   # tool_call/result 配对保护 + session header 边界检查
@@ -150,8 +212,6 @@ defmodule Gong.Compaction do
 
   # session header 边界检查：如果 split_at 正好在 session header 之后，调整到 header 之前
   defp check_session_header_boundary(messages, split_at) do
-    # 向后检查 split_at 附近是否有 session header（[会话摘要]）
-    # 如果 old 区域最后一条是 session header，将其移入 recent
     if split_at > 0 do
       prev = Enum.at(messages, split_at - 1)
       content = get_content(prev) || ""
@@ -233,6 +293,18 @@ defmodule Gong.Compaction do
         msg
       end
     end)
+  end
+
+  # 保留预算：优先用显式值，否则用 context_window * ratio
+  defp resolve_keep_recent(opts) do
+    ctx = Keyword.get(opts, :context_window)
+
+    if ctx do
+      round(ctx * @default_keep_recent_ratio)
+    else
+      max_t = Keyword.get(opts, :max_tokens, @default_max_tokens)
+      round(max_t * @default_keep_recent_ratio)
+    end
   end
 
   # 阈值计算：context_window 模式 vs 固定 max_tokens

@@ -10,14 +10,24 @@ defmodule Gong.AutoCompaction do
   @default_context_window 128_000
   @default_reserve_tokens 16_384
 
-  @doc "检查消息列表是否超过 token 预算"
+  @doc """
+  检查消息列表是否超过 token 预算。
+
+  优先使用 `:last_input_tokens`（API 返回的真实值），
+  无真实值时回退到 TokenEstimator 估算。
+  """
   @spec should_compact?([map()], keyword()) :: boolean()
   def should_compact?(messages, opts \\ []) do
     context_window = Keyword.get(opts, :context_window, @default_context_window)
     reserve_tokens = Keyword.get(opts, :reserve_tokens, @default_reserve_tokens)
     threshold = context_window - reserve_tokens
 
-    token_count = Gong.Compaction.TokenEstimator.estimate_messages(messages)
+    token_count =
+      case Keyword.get(opts, :last_input_tokens) do
+        n when is_integer(n) and n > 0 -> n
+        _ -> Gong.Compaction.TokenEstimator.estimate_messages(messages)
+      end
+
     token_count > threshold
   end
 
