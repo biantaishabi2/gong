@@ -210,17 +210,9 @@ defmodule Gong.Utils.Truncate do
     end
   end
 
-  # 单行超长：按字节头尾各保留一半（扣除 marker 预算后分配）
+  # 单行超长：按字节头尾各保留一半，确保结果 <= max_bytes
   defp truncate_single_line_bytes(line, max_bytes, total_bytes) do
-    # 预留 marker + 换行符空间（marker 最多约 60 字节）
-    marker_budget = 100
-    available = max(max_bytes - marker_budget, 0)
-    half = div(available, 2)
-    head_part = safe_binary_slice(line, 0, half)
-    tail_part = safe_binary_tail(line, half)
-    omitted = total_bytes - byte_size(head_part) - byte_size(tail_part)
-    marker = "... [省略 约#{omitted} 字节] ..."
-    result_content = head_part <> "\n" <> marker <> "\n" <> tail_part
+    result_content = do_bytes_head_tail(line, max_bytes)
 
     %Result{
       content: result_content,
@@ -228,22 +220,41 @@ defmodule Gong.Utils.Truncate do
       truncated_by: :bytes,
       total_lines: 1,
       total_bytes: total_bytes,
-      output_lines: 3,
+      output_lines: length(String.split(result_content, "\n")),
       output_bytes: byte_size(result_content),
       max_bytes: max_bytes
     }
   end
 
-  # 按字节头尾截断拼接后的文本（扣除 marker 预算后分配）
+  # 按字节头尾截断拼接后的文本，确保结果 <= max_bytes
   defp truncate_bytes_head_tail(text, max_bytes) do
+    do_bytes_head_tail(text, max_bytes)
+  end
+
+  # 通用字节头尾截断：迭代缩减确保结果严格 <= max_bytes
+  defp do_bytes_head_tail(text, max_bytes) do
     total = byte_size(text)
-    marker_budget = 100
+    # 首次估算：预留 marker 空间
+    marker_budget = 120
     available = max(max_bytes - marker_budget, 0)
     half = div(available, 2)
     head_part = safe_binary_slice(text, 0, half)
     tail_part = safe_binary_tail(text, half)
     omitted = total - byte_size(head_part) - byte_size(tail_part)
-    head_part <> "\n... [省略 约#{omitted} 字节] ...\n" <> tail_part
+    marker = "... [省略 约#{omitted} 字节] ..."
+    result = head_part <> "\n" <> marker <> "\n" <> tail_part
+
+    # 最终保障：若仍超限，从 tail_part 裁剪至合规
+    if byte_size(result) <= max_bytes do
+      result
+    else
+      overshoot = byte_size(result) - max_bytes
+      new_tail_len = max(byte_size(tail_part) - overshoot, 0)
+      trimmed_tail = safe_binary_tail(text, new_tail_len)
+      omitted2 = total - byte_size(head_part) - byte_size(trimmed_tail)
+      marker2 = "... [省略 约#{omitted2} 字节] ..."
+      head_part <> "\n" <> marker2 <> "\n" <> trimmed_tail
+    end
   end
 
   # UTF-8 安全的头部字节切片
