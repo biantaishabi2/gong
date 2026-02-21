@@ -91,14 +91,19 @@ defmodule Gong.CLI.Md do
     end
   end
 
+  @doc "计算字符串的终端显示宽度（CJK 双宽，忽略 ANSI）"
+  @spec display_width(String.t()) :: non_neg_integer()
+  def display_width(str) do
+    str |> strip_ansi() |> display_column_width()
+  end
+
   @doc "计算文本在终端中占用的显示行数"
   @spec count_display_lines(String.t(), pos_integer()) :: non_neg_integer()
   def count_display_lines(text, width) do
     text
-    |> strip_ansi()
     |> String.split("\n")
     |> Enum.map(fn line ->
-      w = display_column_width(line)
+      w = display_width(line)
       max(1, ceil(w / width))
     end)
     |> Enum.sum()

@@ -64,6 +64,26 @@ defmodule Gong.CLI.RendererTest do
       refute output =~ "**"
     end
 
+    test "长文本折行时擦除回退多行" do
+      capture_io(fn -> Renderer.render(make_event("message.start")) end)
+
+      # 写入超过 80 列的中文（40 个 CJK = 80 列 + 前缀 2 列 → 折行）
+      long_text = String.duplicate("你", 42)
+
+      capture_io(fn ->
+        Renderer.render(make_event("message.delta", %{content: long_text}))
+      end)
+
+      output =
+        capture_io(fn ->
+          Renderer.render(make_event("message.delta", %{content: "\n"}))
+        end)
+
+      # 应包含 \e[nA 回退（pending_cols = 2 + 84 = 86 > 80）
+      assert output =~ "\e[1A"
+      Process.delete(:gong_stream)
+    end
+
     test "message.end 空 buffer 只输出换行" do
       capture_io(fn -> Renderer.render(make_event("message.start")) end)
       output = capture_io(fn -> Renderer.render(make_event("message.end")) end)

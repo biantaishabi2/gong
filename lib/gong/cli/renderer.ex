@@ -2,8 +2,9 @@ defmodule Gong.CLI.Renderer do
   @moduledoc """
   终端渲染器 — 将 Session 事件流格式化输出到终端。
 
-  AI 回复逐行流式渲染：每完成一行（遇到 \\n），擦除当前行原文，
-  重新输出 Markdown 格式化版本。只擦一行（\\r\\e[J），无多行回退。
+  AI 回复逐行流式渲染：每完成一行（遇到 \\n），擦除当前未完成行原文，
+  重新输出 Markdown 格式化版本。追踪 pending 文本的显示列数，
+  当 raw 文本在终端折行时用 \\e[nA 回退多行再擦除。
   """
 
   alias Gong.Session.Events
@@ -24,14 +25,20 @@ defmodule Gong.CLI.Renderer do
   @spec render(Events.t()) :: :ok
 
   def render(%Events{type: "message.start"}) do
-    # completed: 已渲染完的行数, in_code_block: 是否在围栏代码块内
-    Process.put(:gong_stream, %{buffer: "", completed: 0, in_code_block: false})
+    # pending_cols: 当前未完成行在终端上占的显示列数（用于折行擦除）
+    Process.put(:gong_stream, %{
+      buffer: "",
+      completed: 0,
+      in_code_block: false,
+      pending_cols: Md.display_width(@prefix)
+    })
+
     IO.write("#{@blue}#{@prefix}#{@reset}")
   end
 
   def render(%Events{type: "message.delta", payload: payload}) do
     content = Map.get(payload, :content) || Map.get(payload, "content") || ""
-    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false})
+    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false, pending_cols: 0})
     new_buffer = state.buffer <> content
 
     # 分割成完成的行 + 未完成的尾部
@@ -44,8 +51,8 @@ defmodule Gong.CLI.Renderer do
       # 有新的完成行，擦除当前未完成行，渲染新完成的行
       new_lines = Enum.slice(complete_lines, prev_complete, new_complete_count - prev_complete)
 
-      # 擦除当前行的原文
-      erase = "\r\e[J"
+      # 擦除：根据 pending 文本占用的终端行数决定是否需要回退多行
+      erase = build_erase(state.pending_cols)
 
       # 渲染每一行
       {rendered_lines, in_code} =
@@ -69,17 +76,18 @@ defmodule Gong.CLI.Renderer do
       Process.put(:gong_stream, %{
         buffer: new_buffer,
         completed: new_complete_count,
-        in_code_block: in_code
+        in_code_block: in_code,
+        pending_cols: Md.display_width(pending)
       })
     else
       # 没有新行完成，直接写原文
       IO.write(content)
-      Process.put(:gong_stream, %{state | buffer: new_buffer})
+      Process.put(:gong_stream, %{state | buffer: new_buffer, pending_cols: state.pending_cols + Md.display_width(content)})
     end
   end
 
   def render(%Events{type: "message.end"}) do
-    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false})
+    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false, pending_cols: 0})
     Process.delete(:gong_stream)
 
     # 处理最后一个未完成行
@@ -89,6 +97,8 @@ defmodule Gong.CLI.Renderer do
     if pending != "" do
       {rendered, _} = Md.render_line(pending, state.in_code_block)
 
+      erase = build_erase(state.pending_cols)
+
       # 第一行需要前缀
       prefix_part =
         if state.completed == 0 do
@@ -97,7 +107,7 @@ defmodule Gong.CLI.Renderer do
           ""
         end
 
-      IO.write(["\r\e[J", prefix_part, rendered, "\n"])
+      IO.write([erase, prefix_part, rendered, "\n"])
     else
       IO.write("\n")
     end
@@ -139,6 +149,18 @@ defmodule Gong.CLI.Renderer do
 
   def render(%Events{}) do
     :ok
+  end
+
+  # 构建擦除序列：pending_cols 超过终端宽度时回退多行
+  defp build_erase(pending_cols) do
+    width = Md.terminal_width()
+    rows = max(1, ceil(pending_cols / max(width, 1)))
+
+    if rows > 1 do
+      "\e[#{rows - 1}A\r\e[J"
+    else
+      "\r\e[J"
+    end
   end
 
   defp get_in_error(payload) do

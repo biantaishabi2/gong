@@ -92,6 +92,24 @@ defmodule Gong.CLI.MdTest do
     end
   end
 
+  describe "display_width/1" do
+    test "ASCII" do
+      assert Md.display_width("hello") == 5
+    end
+
+    test "CJK 双宽" do
+      assert Md.display_width("你好") == 4
+    end
+
+    test "混合" do
+      assert Md.display_width("hi你好") == 6
+    end
+
+    test "忽略 ANSI" do
+      assert Md.display_width("\e[1mhello\e[0m") == 5
+    end
+  end
+
   describe "count_display_lines/2" do
     test "单行" do
       assert Md.count_display_lines("hello", 80) == 1
