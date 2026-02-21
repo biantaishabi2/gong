@@ -7,8 +7,6 @@ on:
     types: [closed]
   repository_dispatch:
     types: [niuma.task.completed]
-  schedule:
-    - cron: "*/5 * * * *"
 
 permissions:
   issues: write
@@ -17,16 +15,15 @@ permissions:
 jobs:
   orchestrate:
     if: >
-      (github.event_name == 'issues' && (github.event.label.name == 'bot:queued' || github.event.label.name == 'bot:pr-reviewable')) ||
+      (github.event_name == 'issues' && (github.event.label.name == 'bot:orchestrate' || github.event.label.name == 'bot:queued')) ||
       (github.event_name == 'repository_dispatch' && github.event.action == 'niuma.task.completed' && github.event.client_payload.event_source == 'close-after-integration-merge') ||
-      (github.event_name == 'pull_request' && github.event.action == 'closed') ||
-      github.event_name == 'schedule'
+      (github.event_name == 'pull_request' && github.event.action == 'closed')
     uses: biantaishabi2/Cli/.github/workflows/niuma-orchestrate-reusable.yml@master
     secrets: inherit
     with:
       repo: ${{ github.repository }}
       build_niuma: false
-      label_whitelist: "bot:queued,bot:pr-reviewable"
+      label_whitelist: "bot:orchestrate,bot:queued"
       enable_dispatch_wakeup: true
       event_id: ${{ github.event.client_payload.event_id || '' }}
       dedup_window_hours: 24
