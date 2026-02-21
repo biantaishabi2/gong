@@ -114,7 +114,69 @@ defmodule Gong.Utils.TruncateTest do
       assert %Result{truncated: true} = result
       # 先行截断再字节截断 → truncated_by 为 [:lines, :bytes]
       assert result.truncated_by == [:lines, :bytes]
-      assert byte_size(result.content) <= 30_100  # 允许 marker 额外字节
+      # P1-1 修复：字节截断后结果不超过 max_bytes
+      assert byte_size(result.content) <= 30_000
+    end
+
+    # P1-1: 字节截断严格上限验证
+    test "单行超长截断结果不超过 max_bytes" do
+      content = String.duplicate("A", 50_000)
+      result = Truncate.truncate_head_tail(content, max_bytes: 10_000)
+
+      assert result.truncated
+      assert byte_size(result.content) <= 10_000
+    end
+
+    test "二次字节截断结果不超过 max_bytes" do
+      # 200 行，每行 500 字节，max_bytes 设为 5000
+      lines = for i <- 1..200, do: "line_#{i}_" <> String.duplicate("X", 490)
+      content = Enum.join(lines, "\n")
+
+      result = Truncate.truncate_head_tail(content, max_bytes: 5_000)
+
+      assert result.truncated
+      assert byte_size(result.content) <= 5_000
+    end
+
+    # P1-2: 末尾换行边界测试
+    test "末尾换行不影响行数判断（100行+尾部换行不截断）" do
+      lines = for i <- 1..100, do: "line #{i}"
+      # 末尾加换行符
+      content = Enum.join(lines, "\n") <> "\n"
+
+      result = Truncate.truncate_head_tail(content)
+
+      # 100 行 = head 50 + tail 50，不应截断
+      assert %Result{truncated: false} = result
+      assert result.content == content
+      assert result.total_lines == 100
+    end
+
+    test "末尾换行不影响行数判断（50行+尾部换行不截断）" do
+      lines = for i <- 1..50, do: "line #{i}"
+      content = Enum.join(lines, "\n") <> "\n"
+
+      result = Truncate.truncate_head_tail(content)
+
+      assert %Result{truncated: false} = result
+      assert result.content == content
+    end
+
+    # P1-3: 负值参数校验
+    test "负值 head_lines 不抛异常" do
+      content = "line 1\nline 2\nline 3"
+      result = Truncate.truncate_head_tail(content, head_lines: -1, tail_lines: 2)
+
+      # 负值被 clamp 到 0，所以 head_lines=0 + tail_lines=2 = 2 < 3 行 → 触发截断
+      assert result.truncated
+    end
+
+    test "负值 max_bytes 不抛异常" do
+      content = "hello world"
+      result = Truncate.truncate_head_tail(content, max_bytes: -1)
+
+      # max_bytes=0 → 触发截断
+      assert result.truncated
     end
   end
 end

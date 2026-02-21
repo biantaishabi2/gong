@@ -111,12 +111,21 @@ defmodule Gong.Utils.Truncate do
   """
   @spec truncate_head_tail(String.t(), keyword()) :: %Result{}
   def truncate_head_tail(content, opts \\ []) do
-    head_lines = Keyword.get(opts, :head_lines, @default_head_lines)
-    tail_lines = Keyword.get(opts, :tail_lines, @default_tail_lines)
-    max_bytes = Keyword.get(opts, :max_bytes, @default_max_bytes)
+    head_lines = max(Keyword.get(opts, :head_lines, @default_head_lines), 0)
+    tail_lines = max(Keyword.get(opts, :tail_lines, @default_tail_lines), 0)
+    max_bytes = max(Keyword.get(opts, :max_bytes, @default_max_bytes), 0)
 
     total_bytes = byte_size(content)
-    lines = String.split(content, "\n")
+    # 处理末尾换行：split 后去除尾部空元素，避免多算一行
+    raw_lines = String.split(content, "\n")
+
+    {lines, has_trailing_newline} =
+      if content != "" and String.ends_with?(content, "\n") do
+        {List.delete_at(raw_lines, -1), true}
+      else
+        {raw_lines, false}
+      end
+
     total_line_count = length(lines)
 
     within_lines = total_line_count <= head_lines + tail_lines
@@ -134,11 +143,14 @@ defmodule Gong.Utils.Truncate do
         max_bytes: max_bytes
       }
     else
-      do_truncate_head_tail(lines, head_lines, tail_lines, max_bytes, total_line_count, total_bytes)
+      do_truncate_head_tail(lines, head_lines, tail_lines, max_bytes, total_line_count, total_bytes, has_trailing_newline)
     end
   end
 
-  defp do_truncate_head_tail(lines, head_lines, tail_lines, max_bytes, total_line_count, total_bytes) do
+  defp do_truncate_head_tail(lines, head_lines, tail_lines, max_bytes, total_line_count, total_bytes, has_trailing_newline) do
+    # 末尾换行后缀：截断时不保留，不截断的路径由调用方原样返回
+    trailing = if has_trailing_newline, do: "\n", else: ""
+
     cond do
       # 单行超长 → 按字节头尾各保留一半
       total_line_count == 1 ->
@@ -153,7 +165,7 @@ defmodule Gong.Utils.Truncate do
         omitted_bytes = byte_size(omitted_content)
 
         marker = "... [省略 #{omitted_lines} 行, 共 #{omitted_bytes} 字节] ..."
-        joined = Enum.join(head_part, "\n") <> "\n" <> marker <> "\n" <> Enum.join(tail_part, "\n")
+        joined = Enum.join(head_part, "\n") <> "\n" <> marker <> "\n" <> Enum.join(tail_part, "\n") <> trailing
 
         if byte_size(joined) > max_bytes do
           # 二次字节截断
@@ -183,7 +195,8 @@ defmodule Gong.Utils.Truncate do
 
       # 行数未超但字节超限 → 按字节头尾截断
       true ->
-        result_content = truncate_bytes_head_tail(Enum.join(lines, "\n"), max_bytes)
+        original = Enum.join(lines, "\n") <> trailing
+        result_content = truncate_bytes_head_tail(original, max_bytes)
         %Result{
           content: result_content,
           truncated: true,
@@ -197,9 +210,12 @@ defmodule Gong.Utils.Truncate do
     end
   end
 
-  # 单行超长：按字节头尾各保留一半
+  # 单行超长：按字节头尾各保留一半（扣除 marker 预算后分配）
   defp truncate_single_line_bytes(line, max_bytes, total_bytes) do
-    half = div(max_bytes, 2)
+    # 预留 marker + 换行符空间（marker 最多约 60 字节）
+    marker_budget = 100
+    available = max(max_bytes - marker_budget, 0)
+    half = div(available, 2)
     head_part = safe_binary_slice(line, 0, half)
     tail_part = safe_binary_tail(line, half)
     omitted = total_bytes - byte_size(head_part) - byte_size(tail_part)
@@ -218,10 +234,12 @@ defmodule Gong.Utils.Truncate do
     }
   end
 
-  # 按字节头尾截断拼接后的文本
+  # 按字节头尾截断拼接后的文本（扣除 marker 预算后分配）
   defp truncate_bytes_head_tail(text, max_bytes) do
     total = byte_size(text)
-    half = div(max_bytes, 2)
+    marker_budget = 100
+    available = max(max_bytes - marker_budget, 0)
+    half = div(available, 2)
     head_part = safe_binary_slice(text, 0, half)
     tail_part = safe_binary_tail(text, half)
     omitted = total - byte_size(head_part) - byte_size(tail_part)
