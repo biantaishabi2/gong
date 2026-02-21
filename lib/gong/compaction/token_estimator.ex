@@ -51,6 +51,10 @@ defmodule Gong.Compaction.TokenEstimator do
         bonus = if state == :in_word, do: 1.3, else: 0
         count_tokens(rest, acc + bonus + 1, :start)
 
+      carriage_return?(char) ->
+        # \r：跳过不计数，避免 CRLF 被重复计为 2 tokens
+        count_tokens(rest, acc, state)
+
       newline?(char) ->
         # 换行符：每个 1 token
         bonus = if state == :in_word, do: 1.3, else: 0
@@ -112,13 +116,15 @@ defmodule Gong.Compaction.TokenEstimator do
 
   defp ascii_punct?(_), do: false
 
+  defp carriage_return?("\r"), do: true
+  defp carriage_return?(_), do: false
+
   defp newline?("\r\n"), do: true
   defp newline?("\n"), do: true
   defp newline?(_), do: false
 
   defp space?(" "), do: true
   defp space?("\t"), do: true
-  defp space?("\r"), do: true
   defp space?(_), do: false
 
   @doc "估算消息列表的总 token 数"
