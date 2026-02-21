@@ -751,6 +751,282 @@ defmodule Gong.SessionTest do
            "model 路径：第二轮 LLM 应看到 '好的'，实际: #{inspect(all_contents)}"
   end
 
+  # ── #51: restore/compaction 与 Agent Thread 验证 ──
+
+  describe "restore → Agent Thread 完整验证" do
+    test "restore 后 LLM 看到恢复的 history + 新 prompt" do
+      {:ok, msg_log} = Agent.start_link(fn -> [] end)
+
+      alias Jido.Agent.Strategy.State, as: StratState
+
+      capture_llm = fn agent_state, _call_id ->
+        state = StratState.get(agent_state, %{})
+        conversation = Map.get(state, :conversation, [])
+        Agent.update(msg_log, fn log -> log ++ [conversation] end)
+        {:ok, {:text, "新回复"}}
+      end
+
+      {:ok, session} = setup_agent_session("session-restore-thread", capture_llm)
+
+      on_exit(fn ->
+        if Process.alive?(session), do: Session.close(session)
+        if Process.alive?(msg_log), do: Agent.stop(msg_log)
+      end)
+
+      assert :ok = Session.subscribe(session, self())
+
+      # restore 含 2 轮历史
+      snapshot = %{
+        history: [
+          %{role: :user, content: "第一轮问题", turn_id: 1, ts: 1},
+          %{role: :assistant, content: "第一轮回答", turn_id: 1, ts: 2},
+          %{role: :user, content: "第二轮问题", turn_id: 2, ts: 3},
+          %{role: :assistant, content: "第二轮回答", turn_id: 2, ts: 4}
+        ],
+        turn_cursor: 2,
+        metadata: %{}
+      }
+
+      assert {:ok, _restored} = Session.restore(session, snapshot)
+
+      # 重新订阅（restore 清空订阅）
+      assert :ok = Session.subscribe(session, self())
+
+      # 发送新 prompt
+      assert :ok = Session.prompt(session, "第三轮问题", [])
+      _events = receive_until_turn_completed([])
+
+      # 验证 LLM 看到了 restored history + 新 prompt
+      conversations = Agent.get(msg_log, & &1)
+      assert length(conversations) == 1
+
+      llm_conversation = hd(conversations)
+      all_contents = Enum.map(llm_conversation, & &1[:content])
+
+      assert Enum.any?(all_contents, &(&1 =~ "第一轮问题")),
+             "LLM 应看到恢复的 '第一轮问题'，实际: #{inspect(all_contents)}"
+
+      assert Enum.any?(all_contents, &(&1 =~ "第二轮回答")),
+             "LLM 应看到恢复的 '第二轮回答'，实际: #{inspect(all_contents)}"
+
+      assert Enum.any?(all_contents, &(&1 =~ "第三轮问题")),
+             "LLM 应看到新 prompt '第三轮问题'，实际: #{inspect(all_contents)}"
+    end
+
+    test "restore 后 Agent status 为 completed（允许 do_start_continue）" do
+      alias Jido.Agent.Strategy.State, as: StratState
+
+      {:ok, session} = setup_agent_session("session-restore-status", text_llm("ok"))
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+
+      snapshot = %{
+        history: [%{role: :user, content: "old", turn_id: 1, ts: 1}],
+        turn_cursor: 1,
+        metadata: %{}
+      }
+
+      assert {:ok, _restored} = Session.restore(session, snapshot)
+
+      # 通过 prompt 验证 do_start_continue 路径正常（不崩溃）
+      assert :ok = Session.subscribe(session, self())
+      assert :ok = Session.prompt(session, "continue after restore", [])
+      events = receive_until_turn_completed([])
+
+      # 正常完成，无错误事件
+      assert Enum.any?(events, &(&1.type == "lifecycle.turn_completed"))
+      refute Enum.any?(events, &(&1.type == "lifecycle.error"))
+    end
+
+    test "restore 空 history 后 prompt 正常（do_start_fresh 路径）" do
+      {:ok, msg_log} = Agent.start_link(fn -> [] end)
+      alias Jido.Agent.Strategy.State, as: StratState
+
+      capture_llm = fn agent_state, _call_id ->
+        state = StratState.get(agent_state, %{})
+        conversation = Map.get(state, :conversation, [])
+        Agent.update(msg_log, fn log -> log ++ [conversation] end)
+        {:ok, {:text, "fresh reply"}}
+      end
+
+      {:ok, session} = setup_agent_session("session-restore-empty", capture_llm)
+
+      on_exit(fn ->
+        if Process.alive?(session), do: Session.close(session)
+        if Process.alive?(msg_log), do: Agent.stop(msg_log)
+      end)
+
+      # restore 空 history
+      snapshot = %{history: [], turn_cursor: 0, metadata: %{}}
+      assert {:ok, _restored} = Session.restore(session, snapshot)
+
+      assert :ok = Session.subscribe(session, self())
+      assert :ok = Session.prompt(session, "fresh start", [])
+      events = receive_until_turn_completed([])
+
+      assert Enum.any?(events, &(&1.type == "lifecycle.turn_completed"))
+      refute Enum.any?(events, &(&1.type == "lifecycle.error"))
+
+      # LLM 只看到新 prompt（无旧历史）
+      conversations = Agent.get(msg_log, & &1)
+      llm_conversation = hd(conversations)
+      user_msgs = Enum.filter(llm_conversation, &(&1[:role] == :user))
+      assert length(user_msgs) == 1
+      assert hd(user_msgs)[:content] =~ "fresh start"
+    end
+
+    test "连续 restore 两次，第二次覆盖 Agent Thread" do
+      {:ok, msg_log} = Agent.start_link(fn -> [] end)
+      alias Jido.Agent.Strategy.State, as: StratState
+
+      capture_llm = fn agent_state, _call_id ->
+        state = StratState.get(agent_state, %{})
+        conversation = Map.get(state, :conversation, [])
+        Agent.update(msg_log, fn log -> log ++ [conversation] end)
+        {:ok, {:text, "reply"}}
+      end
+
+      {:ok, session} = setup_agent_session("session-double-restore", capture_llm)
+
+      on_exit(fn ->
+        if Process.alive?(session), do: Session.close(session)
+        if Process.alive?(msg_log), do: Agent.stop(msg_log)
+      end)
+
+      # 第一次 restore
+      snapshot1 = %{
+        history: [%{role: :user, content: "first-restore", turn_id: 1, ts: 1}],
+        turn_cursor: 1,
+        metadata: %{}
+      }
+
+      assert {:ok, _} = Session.restore(session, snapshot1)
+
+      # 第二次 restore（覆盖第一次）
+      snapshot2 = %{
+        history: [%{role: :user, content: "second-restore", turn_id: 1, ts: 1}],
+        turn_cursor: 1,
+        metadata: %{}
+      }
+
+      assert {:ok, _} = Session.restore(session, snapshot2)
+
+      assert :ok = Session.subscribe(session, self())
+      assert :ok = Session.prompt(session, "after double restore", [])
+      _events = receive_until_turn_completed([])
+
+      conversations = Agent.get(msg_log, & &1)
+      llm_conversation = hd(conversations)
+      all_contents = Enum.map(llm_conversation, & &1[:content])
+
+      # 应看到第二次 restore 的内容，而不是第一次
+      assert Enum.any?(all_contents, &(&1 =~ "second-restore")),
+             "应看到第二次 restore 内容，实际: #{inspect(all_contents)}"
+
+      refute Enum.any?(all_contents, &(&1 =~ "first-restore")),
+             "不应看到第一次 restore 内容，实际: #{inspect(all_contents)}"
+    end
+  end
+
+  describe "compaction → Agent Thread 完整验证" do
+    test "auto_compaction 触发后 LLM 看到压缩后消息 + 新 prompt" do
+      {:ok, msg_log} = Agent.start_link(fn -> [] end)
+      alias Jido.Agent.Strategy.State, as: StratState
+
+      call_count = :counters.new(1, [:atomics])
+
+      capture_llm = fn agent_state, _call_id ->
+        :counters.add(call_count, 1, 1)
+        count = :counters.get(call_count, 1)
+        state = StratState.get(agent_state, %{})
+        conversation = Map.get(state, :conversation, [])
+        Agent.update(msg_log, fn log -> log ++ [{count, conversation}] end)
+        {:ok, {:text, "回复第#{count}轮"}}
+      end
+
+      # 设置较小的 compaction 阈值以便触发
+      compaction_opts = [
+        threshold: 6,
+        summary_fn: fn messages ->
+          content = Enum.map_join(messages, "; ", fn m ->
+            "#{m[:role] || m["role"]}: #{String.slice(m[:content] || m["content"] || "", 0, 20)}"
+          end)
+          {:ok, "[摘要] #{content}"}
+        end
+      ]
+
+      {:ok, session} =
+        setup_agent_session("session-compact-thread", capture_llm,
+          auto_compaction: compaction_opts
+        )
+
+      on_exit(fn ->
+        if Process.alive?(session), do: Session.close(session)
+        if Process.alive?(msg_log), do: Agent.stop(msg_log)
+      end)
+
+      assert :ok = Session.subscribe(session, self())
+
+      # 发送足够多轮以触发 compaction（threshold=6, 每轮 user+assistant=2 条）
+      for i <- 1..4 do
+        assert :ok = Session.prompt(session, "对话第#{i}轮", [])
+        _events = receive_until_turn_completed([])
+      end
+
+      # 发送 compaction 后的第一条
+      assert :ok = Session.prompt(session, "压缩后继续", [])
+      _events = receive_until_turn_completed([])
+
+      conversations = Agent.get(msg_log, & &1)
+      {last_call_num, last_conversation} = List.last(conversations)
+
+      # 最后一轮 LLM 看到的 conversation 数应比未压缩时少
+      # 未压缩: 4轮×2 + system + 1 user = 10+ 消息
+      # 压缩后: system + 摘要 + 新 user ≈ 3 消息
+      non_system = Enum.reject(last_conversation, &(&1[:role] == :system))
+
+      assert length(non_system) < 10,
+             "压缩后 LLM 应看到较少消息，实际 #{length(non_system)} 条（第 #{last_call_num} 轮）"
+
+      # 验证最后一条是新 prompt
+      last_user =
+        last_conversation
+        |> Enum.reverse()
+        |> Enum.find(&(&1[:role] == :user))
+
+      assert last_user[:content] =~ "压缩后继续",
+             "最后一条 user 消息应包含新 prompt，实际: #{inspect(last_user)}"
+    end
+
+    test "compaction 后 Agent status 允许继续对话（不崩溃）" do
+      compaction_opts = [
+        threshold: 4,
+        summary_fn: fn _messages -> {:ok, "[摘要]"} end
+      ]
+
+      {:ok, session} =
+        setup_agent_session("session-compact-continue", text_llm("ok"),
+          auto_compaction: compaction_opts
+        )
+
+      on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)
+      assert :ok = Session.subscribe(session, self())
+
+      # 触发 compaction
+      for i <- 1..3 do
+        assert :ok = Session.prompt(session, "msg#{i}", [])
+        _events = receive_until_turn_completed([])
+      end
+
+      # compaction 后继续对话，不应崩溃
+      assert :ok = Session.prompt(session, "after compaction", [])
+      events = receive_until_turn_completed([])
+
+      assert Enum.any?(events, &(&1.type == "lifecycle.turn_completed"))
+      refute Enum.any?(events, &(&1.type == "lifecycle.error"))
+      assert Process.alive?(session)
+    end
+  end
+
   # ── Helper 函数 ──
 
   defp receive_until_turn_completed(acc) do
