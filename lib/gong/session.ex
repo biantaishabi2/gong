@@ -95,6 +95,19 @@ defmodule Gong.Session do
     end
   end
 
+  @doc """
+  通过 DynamicSupervisor 启动 Session，并注册到 SessionRegistry。
+
+  由 SessionManager.create_session/1 调用，不影响 start_link/1 的现有行为。
+  """
+  @spec start_supervised(keyword()) :: {:ok, pid()} | {:error, error_t()}
+  def start_supervised(opts) do
+    session_id = Keyword.get(opts, :session_id, "session_#{System.unique_integer([:positive, :monotonic])}")
+    via_name = {:via, Registry, {Gong.SessionRegistry, session_id}}
+    opts = Keyword.put(opts, :name, via_name) |> Keyword.put(:session_id, session_id)
+    start_link(opts)
+  end
+
   defp validate_model_opts(opts) do
     model = Keyword.get(opts, :model)
     direct_agent = Keyword.get(opts, :agent)
@@ -365,23 +378,20 @@ defmodule Gong.Session do
 
   @impl true
   def handle_call({:subscribe, subscriber}, _from, state) do
-    if Process.alive?(subscriber) do
-      if MapSet.member?(state.subscribers, subscriber) do
-        {:reply, :ok, state}
-      else
-        ref = Process.monitor(subscriber)
-        forwarder = spawn(fn -> subscriber_forwarder_loop(subscriber) end)
-
-        new_state =
-          state
-          |> Map.update!(:subscribers, &MapSet.put(&1, subscriber))
-          |> Map.update!(:monitors, &Map.put(&1, subscriber, ref))
-          |> Map.update!(:subscriber_forwarders, &Map.put(&1, subscriber, forwarder))
-
-        {:reply, :ok, new_state}
-      end
+    if MapSet.member?(state.subscribers, subscriber) do
+      {:reply, :ok, state}
     else
-      {:reply, {:error, normalize_error(:invalid_argument)}, state}
+      # Process.monitor 支持远程 PID，若进程已死会立即收到 :DOWN
+      ref = Process.monitor(subscriber)
+      forwarder = spawn(fn -> subscriber_forwarder_loop(subscriber) end)
+
+      new_state =
+        state
+        |> Map.update!(:subscribers, &MapSet.put(&1, subscriber))
+        |> Map.update!(:monitors, &Map.put(&1, subscriber, ref))
+        |> Map.update!(:subscriber_forwarders, &Map.put(&1, subscriber, forwarder))
+
+      {:reply, :ok, new_state}
     end
   end
 
