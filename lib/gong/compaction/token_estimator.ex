@@ -6,10 +6,10 @@ defmodule Gong.Compaction.TokenEstimator do
   规则：
   - CJK 表意字符: 1字 ≈ 2 tokens
   - 英文单词: 1 word ≈ 1.3 tokens
-  - ASCII 标点/特殊字符: 每个 1 token
-  - 中文标点（U+3000-303F, U+FF00-FFEF）: 每个 1 token
+  - ASCII 标点/特殊字符: 每个 0.5 token（BPE 常与相邻字符合并）
+  - 中文标点: 每个 1 token
   - 换行符: 每个 1 token
-  - 连续空格: 折叠为 1 token
+  - 空格: 仅作为单词分隔符，不单独计 token
   """
 
   @doc "估算单段文本的 token 数"
@@ -26,19 +26,13 @@ defmodule Gong.Compaction.TokenEstimator do
   end
 
   # 遍历 graphemes 分类计数
-  # CJK 表意字符每个 2 tokens
-  # 连续英文字母序列视为单词，每个单词 1.3 tokens
-  # ASCII 标点/运算符每个 1 token
-  # 中文标点每个 1 token
-  # 换行符每个 1 token
-  # 连续空格折叠为 1 token
   defp count_tokens([], acc, :in_word), do: acc + 1.3
   defp count_tokens([], acc, _state), do: acc
 
   defp count_tokens([char | rest], acc, state) do
     cond do
       cjk?(char) ->
-        # CJK 表意字符：每个约 2 tokens；如果之前在英文单词中，先结算
+        # CJK 表意字符：每个约 2 tokens
         bonus = if state == :in_word, do: 1.3, else: 0
         count_tokens(rest, acc + bonus + 2, :start)
 
@@ -52,31 +46,26 @@ defmodule Gong.Compaction.TokenEstimator do
         count_tokens(rest, acc + bonus + 1, :start)
 
       carriage_return?(char) ->
-        # \r：跳过不计数，避免 CRLF 被重复计为 2 tokens
+        # \r：跳过，避免 CRLF 重复计数
         count_tokens(rest, acc, state)
 
       newline?(char) ->
-        # 换行符：每个 1 token
+        # 换行符：BPE 中常与缩进合并，每个约 0.5 token
         bonus = if state == :in_word, do: 1.3, else: 0
-        count_tokens(rest, acc + bonus + 1, :start)
+        count_tokens(rest, acc + bonus + 0.5, :start)
 
       space?(char) ->
-        # 空格：折叠连续空格为 1 token
+        # 空格：仅作为单词分隔符，结算前一个单词，不单独计 token
         bonus = if state == :in_word, do: 1.3, else: 0
-        if state == :in_space do
-          # 已经在空格状态，不额外计数
-          count_tokens(rest, acc, :in_space)
-        else
-          count_tokens(rest, acc + bonus + 1, :in_space)
-        end
+        count_tokens(rest, acc + bonus, :start)
 
       ascii_punct?(char) ->
-        # ASCII 标点/运算符：每个 1 token
+        # ASCII 标点：BPE 中常与相邻字符合并，每个约 0.5 token
         bonus = if state == :in_word, do: 1.3, else: 0
-        count_tokens(rest, acc + bonus + 1, :start)
+        count_tokens(rest, acc + bonus + 0.5, :start)
 
       true ->
-        # 其他字符（如 emoji 等）：每个 1 token
+        # 其他字符（emoji 等）：每个 1 token
         bonus = if state == :in_word, do: 1.3, else: 0
         count_tokens(rest, acc + bonus + 1, :start)
     end

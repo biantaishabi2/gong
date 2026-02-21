@@ -14,9 +14,9 @@ defmodule Gong.Compaction.TokenEstimatorTest do
     end
 
     test "英文纯文本精度" do
-      # "hello world test" 3 个英文单词 × 1.3 = 3.9，2 个空格 × 1 = 2，总计 5.9 → 6
+      # "hello world test" 3 个英文单词 × 1.3 = 3.9 → 4
       estimate = TokenEstimator.estimate("hello world test")
-      assert estimate == 6
+      assert estimate == 4
     end
 
     test "nil 和空字符串" do
@@ -25,21 +25,21 @@ defmodule Gong.Compaction.TokenEstimatorTest do
     end
 
     test "连续空格折叠" do
-      # "a   b" = 2 words × 1.3 + 1 space group = 2.6 + 1 = 3.6 → 4
+      # "a   b" = 2 words × 1.3 = 2.6 → 3（空格仅分隔单词）
       estimate = TokenEstimator.estimate("a   b")
-      assert estimate == 4
+      assert estimate == 3
     end
 
     test "换行符单独计数" do
-      # "a\nb" = 2 words × 1.3 + 1 newline = 2.6 + 1 = 3.6 → 4
+      # "a\nb" = 2 words × 1.3 + 1 newline × 0.5 = 2.6 + 0.5 = 3.1 → 3
       estimate = TokenEstimator.estimate("a\nb")
-      assert estimate == 4
+      assert estimate == 3
     end
 
     test "ASCII 标点计数" do
-      # "a+b" = 2 words × 1.3 + 1 punct = 2.6 + 1 = 3.6 → 4
+      # "a+b" = 2 words × 1.3 + 1 punct × 0.5 = 2.6 + 0.5 = 3.1 → 3
       estimate = TokenEstimator.estimate("a+b")
-      assert estimate == 4
+      assert estimate == 3
     end
 
     test "中文标点计数" do
@@ -373,8 +373,8 @@ defmodule Gong.Compaction.TokenEstimatorTest do
       ]
 
       estimate = TokenEstimator.estimate_messages(messages)
-      # "你好" = 4, "hello world" = 1.3 + 1 + 1.3 = 3.6 → 4, 总计 8
-      assert estimate == 8
+      # "你好" = 4, "hello world" = 1.3 + 1.3 = 2.6 → 3, 总计 7
+      assert estimate == 7
     end
 
     test "空列表" do
