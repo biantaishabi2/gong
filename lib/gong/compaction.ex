@@ -10,11 +10,11 @@ defmodule Gong.Compaction do
   """
 
   alias Gong.Compaction.TokenEstimator
+  alias Gong.Utils.Truncate
 
   @default_window_size 20
   @default_max_tokens 100_000
   @default_reserve_tokens 16_384
-  @truncate_tool_max_chars 200
 
   @doc """
   压缩消息列表，返回 {压缩后消息, 摘要 | nil}。
@@ -218,12 +218,14 @@ defmodule Gong.Compaction do
       if role == "tool" do
         content = get_content(msg)
 
-        if is_binary(content) and String.length(content) > @truncate_tool_max_chars do
-          truncated =
-            String.slice(content, 0, @truncate_tool_max_chars) <>
-              "\n...[输出已截断]"
+        if is_binary(content) do
+          result = Truncate.truncate_head_tail(content)
 
-          put_content(msg, truncated)
+          if result.truncated do
+            put_content(msg, result.content)
+          else
+            msg
+          end
         else
           msg
         end
