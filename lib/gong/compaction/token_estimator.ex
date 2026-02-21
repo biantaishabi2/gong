@@ -112,12 +112,13 @@ defmodule Gong.Compaction.TokenEstimator do
 
   defp ascii_punct?(_), do: false
 
+  defp newline?("\r\n"), do: true
   defp newline?("\n"), do: true
-  defp newline?("\r"), do: true
   defp newline?(_), do: false
 
   defp space?(" "), do: true
   defp space?("\t"), do: true
+  defp space?("\r"), do: true
   defp space?(_), do: false
 
   @doc "估算消息列表的总 token 数"
