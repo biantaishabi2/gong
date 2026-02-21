@@ -605,10 +605,20 @@ defmodule Gong.AgentLoop do
           %{}
       end
 
-    %{
-      input_tokens: Map.get(usage_data, :input_tokens, Map.get(usage_data, "input_tokens", 0)) || 0,
-      output_tokens: Map.get(usage_data, :output_tokens, Map.get(usage_data, "output_tokens", 0)) || 0
-    }
+    # 归一化：支持 input_tokens/output_tokens 和 OpenAI 命名 prompt_tokens/completion_tokens
+    input =
+      Map.get(usage_data, :input_tokens,
+        Map.get(usage_data, "input_tokens",
+          Map.get(usage_data, :prompt_tokens,
+            Map.get(usage_data, "prompt_tokens", 0)))) || 0
+
+    output =
+      Map.get(usage_data, :output_tokens,
+        Map.get(usage_data, "output_tokens",
+          Map.get(usage_data, :completion_tokens,
+            Map.get(usage_data, "completion_tokens", 0)))) || 0
+
+    %{input_tokens: input, output_tokens: output}
   end
 
   # 通过进程字典累加当轮 usage
