@@ -25,7 +25,7 @@ defmodule Gong.CLI.Run do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
     Gong.Settings.init(cwd)
 
-    session_opts = build_session_opts(opts)
+    session_opts = build_session_opts(opts) |> Keyword.put(:workspace, cwd)
 
     case Session.start_link(session_opts) do
       {:ok, pid} ->

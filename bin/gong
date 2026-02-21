@@ -9,7 +9,7 @@ done
 ROOT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")/.." && pwd)"
 WORK_DIR="${PWD}"
 
-export GONG_WORKDIR="${WORK_DIR}"
+export GONG_WORKDIR="${GONG_WORKDIR:-${WORK_DIR}}"
 export GONG_ENTRY="${GONG_ENTRY:-bin/gong}"
 
 legacy_entry_migration_cmd() {

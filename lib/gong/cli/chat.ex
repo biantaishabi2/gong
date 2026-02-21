@@ -26,7 +26,7 @@ defmodule Gong.CLI.Chat do
     Gong.Settings.init(cwd)
 
     tape_path = Path.join(cwd, ".gong/tape")
-    session_opts = build_session_opts(opts) |> Keyword.put(:tape_path, tape_path)
+    session_opts = build_session_opts(opts) |> Keyword.put(:tape_path, tape_path) |> Keyword.put(:workspace, cwd)
 
     case Session.start_link(session_opts) do
       {:ok, pid} ->

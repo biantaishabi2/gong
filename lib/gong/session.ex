@@ -299,6 +299,7 @@ defmodule Gong.Session do
 
     tape_path = Keyword.get(opts, :tape_path)
     auto_compaction = Keyword.get(opts, :auto_compaction)
+    workspace = Keyword.get(opts, :workspace, File.cwd!())
 
     # Agent 路径：model（生产）/ agent+llm_backend_fn（测试直传）/ model+llm_backend_fn（测试覆盖）
     direct_agent = Keyword.get(opts, :agent)
@@ -351,6 +352,7 @@ defmodule Gong.Session do
       restore_fun: restore_fun,
       tape_path: tape_path,
       auto_compaction: auto_compaction,
+      workspace: workspace,
       turn_id: 0,
       metadata: init_metadata,
       subscribers: MapSet.new(),
@@ -1056,8 +1058,9 @@ defmodule Gong.Session do
   end
 
   # Agent 直调路径：调用 AgentLoop.run，从进程字典读取 usage
-  defp run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id) do
-    case AgentLoop.run(agent, message, llm_backend: llm_backend_fn) do
+  defp run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id, opts \\ []) do
+    agent_opts = [llm_backend: llm_backend_fn] ++ opts
+    case AgentLoop.run(agent, message, agent_opts) do
       {:ok, _reply, updated_agent} ->
         usage = Process.get(:gong_turn_usage, %{input_tokens: 0, output_tokens: 0})
         send(session_pid, {:session_turn_done, command_id, turn_id, {:ok_agent, updated_agent, usage}})
@@ -1075,6 +1078,7 @@ defmodule Gong.Session do
   defp start_agent_task(state, {message, command_id, turn_id}, session_pid) do
     agent = state.agent
     llm_backend_fn = state.llm_backend_fn
+    workspace = state.workspace
 
     Task.start(fn ->
       Gong.AgentLoop.set_stream_callback(fn event ->
@@ -1083,7 +1087,7 @@ defmodule Gong.Session do
         send(session_pid, {:session_stream_event, command_id, turn_id, event})
       end)
 
-      run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id)
+      run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id, workspace: workspace)
     end)
 
     %{state | agent_busy: true}
