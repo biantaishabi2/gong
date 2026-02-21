@@ -22,6 +22,7 @@ jobs:
     secrets: inherit
     with:
       repo: ${{ github.repository }}
+      store_dir: /home/wangbo/.niuma/stores/gong
       label_whitelist: "bot:orchestrate,bot:queued,bot:pr-reviewable"
       enable_dispatch_wakeup: true
       event_id: ${{ github.event.client_payload.event_id || '' }}
