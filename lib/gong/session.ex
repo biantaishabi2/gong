@@ -199,6 +199,14 @@ defmodule Gong.Session do
     end
   end
 
+  @spec metadata(pid()) :: {:ok, map()} | {:error, error_t()}
+  def metadata(pid) do
+    case safe_genserver_call(pid, :metadata) do
+      {:ok, metadata} when is_map(metadata) -> {:ok, metadata}
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
+  end
+
   @doc """
   查找最后一条有效 assistant 消息文本。
 
@@ -299,6 +307,21 @@ defmodule Gong.Session do
           {Gong.Agent.new(), nil}
       end
 
+    # 初始化 metadata：记录当前 model 和 thinking level
+    init_metadata =
+      if is_binary(model) do
+        case ModelRegistry.lookup_by_string(model) do
+          {:ok, config} ->
+            thinking_level = Map.get(config, :thinking_level, "off") |> to_string()
+            %{"session" => %{"model" => model, "thinking" => %{"level" => thinking_level}}}
+
+          _ ->
+            %{"session" => %{"model" => model, "thinking" => %{"level" => "off"}}}
+        end
+      else
+        %{}
+      end
+
     state = %{
       session_id: session_id,
       agent: agent,
@@ -307,7 +330,7 @@ defmodule Gong.Session do
       tape_path: tape_path,
       auto_compaction: auto_compaction,
       turn_id: 0,
-      metadata: %{},
+      metadata: init_metadata,
       subscribers: MapSet.new(),
       monitors: %{},
       subscriber_forwarders: %{},
@@ -353,6 +376,10 @@ defmodule Gong.Session do
 
   def handle_call(:history, _from, state) do
     {:reply, get_history(state), state}
+  end
+
+  def handle_call(:metadata, _from, state) do
+    {:reply, state.metadata, state}
   end
 
   def handle_call({:restore, source}, _from, state) do
@@ -529,6 +556,9 @@ defmodule Gong.Session do
         command_id,
         turn_id
       )
+
+    # 每轮完成后自动保存
+    maybe_auto_save(state)
 
     {:noreply, cleanup_command_chain(state, command_id)}
   end

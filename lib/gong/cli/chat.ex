@@ -25,7 +25,8 @@ defmodule Gong.CLI.Chat do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
     Gong.Settings.init(cwd)
 
-    session_opts = build_session_opts(opts)
+    tape_path = Path.join(cwd, ".gong/tape")
+    session_opts = build_session_opts(opts) |> Keyword.put(:tape_path, tape_path)
 
     case Session.start_link(session_opts) do
       {:ok, pid} ->
@@ -115,41 +116,40 @@ defmodule Gong.CLI.Chat do
   end
 
   defp handle_input("/save", session_pid) do
-    case Session.history(session_pid) do
-      {:ok, history} ->
-        session_id = generate_session_id()
-        cwd = File.cwd!()
-        tape_path = Path.join(cwd, ".gong/tape")
+    with {:ok, history} <- Session.history(session_pid),
+         {:ok, metadata} <- Session.metadata(session_pid) do
+      session_id = generate_session_id()
+      cwd = File.cwd!()
+      tape_path = Path.join(cwd, ".gong/tape")
 
-        # 转为快照格式
-        indexed_history =
-          history
-          |> Enum.with_index(1)
-          |> Enum.map(fn {entry, idx} ->
-            role = Map.get(entry, :role) || Map.get(entry, "role") || "?"
-            content = Map.get(entry, :content) || Map.get(entry, "content") || ""
-            turn_id = div(idx + 1, 2)
+      # 转为快照格式
+      indexed_history =
+        history
+        |> Enum.with_index(1)
+        |> Enum.map(fn {entry, idx} ->
+          role = Map.get(entry, :role) || Map.get(entry, "role") || "?"
+          content = Map.get(entry, :content) || Map.get(entry, "content") || ""
+          turn_id = div(idx + 1, 2)
 
-            %{
-              "role" => to_string(role),
-              "content" => to_string(content),
-              "turn_id" => turn_id,
-              "ts" => System.os_time(:millisecond)
-            }
-          end)
+          %{
+            "role" => to_string(role),
+            "content" => to_string(content),
+            "turn_id" => turn_id,
+            "ts" => System.os_time(:millisecond)
+          }
+        end)
 
-        snapshot = %{
-          "session_id" => session_id,
-          "history" => indexed_history,
-          "turn_cursor" => length(indexed_history),
-          "metadata" => %{}
-        }
+      snapshot = %{
+        "session_id" => session_id,
+        "history" => indexed_history,
+        "turn_cursor" => length(indexed_history),
+        "metadata" => metadata
+      }
 
-        :ok = Gong.CLI.SessionCmd.save_session(tape_path, session_id, snapshot)
-        IO.puts("会话已保存: #{session_id}")
-
-      {:error, _} ->
-        IO.puts("(无法获取历史，保存失败)")
+      :ok = Gong.CLI.SessionCmd.save_session(tape_path, session_id, snapshot)
+      IO.puts("会话已保存: #{session_id}")
+    else
+      _ -> IO.puts("(无法获取历史，保存失败)")
     end
 
     repl_loop(session_pid)
