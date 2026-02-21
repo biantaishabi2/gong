@@ -44,28 +44,19 @@ defmodule Gong.CLI.Run do
   defp build_session_opts(opts) do
     session_opts = []
 
-    # 如果显式传入 backend，优先使用
-    session_opts =
-      if backend = Keyword.get(opts, :backend) do
-        Keyword.put(session_opts, :backend, backend)
+    # 如果显式传入 backend，优先使用（测试 mock）
+    if backend = Keyword.get(opts, :backend) do
+      Keyword.put(session_opts, :backend, backend)
+    else
+      # 传 model 给 Session，由 Session 创建持久 Agent
+      model = Keyword.get(opts, :model) || Gong.Settings.get("model")
+
+      if model do
+        Keyword.put(session_opts, :model, model)
       else
-        # 否则从 model 构建 backend
-        model = Keyword.get(opts, :model) || Gong.Settings.get("model")
-
-        if model do
-          case Gong.ModelRegistry.lookup_by_string(model) do
-            {:ok, config} ->
-              Keyword.put(session_opts, :backend, &Gong.AgentLoop.run_as_backend(&1, &2, &3, config))
-
-            {:error, _} ->
-              session_opts
-          end
-        else
-          session_opts
-        end
+        session_opts
       end
-
-    session_opts
+    end
   end
 
   defp receive_loop(session_pid) do

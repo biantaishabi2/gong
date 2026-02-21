@@ -504,20 +504,17 @@ defmodule Gong.AgentLoop do
   # ── Session backend 适配器 ──
 
   @doc """
-  Session backend 适配器 — 将 AgentLoop 包装为 Session 期望的 backend 闭包。
+  构建 LLM backend 闭包，供 Session 持有的 Agent 跨 turn 使用。
 
-  model_config 包含 provider/model_id/api_key_env，用于构建 ReqLLM 调用。
-  返回 `{:ok, reply}` 或 `{:error, reason}`，符合 Session.call_backend 期望的格式。
+  model_config 包含 provider/model_id/api_key_env，返回的闭包签名为
+  `fn agent_state, call_id -> {:ok, response} | {:error, reason}`。
   """
-  @bdd_instruction %{kind: :when, name: :run_as_backend, params: %{message: :string, model_str: :string}, returns: "{:ok, reply} | {:error, reason}"}
-  @spec run_as_backend(String.t(), keyword(), map(), map()) ::
-          {:ok, String.t()} | {:error, term()}
-  def run_as_backend(message, _opts, _context, model_config) do
+  @spec build_llm_backend(map()) :: (struct(), String.t() -> {:ok, term()} | {:error, term()})
+  def build_llm_backend(model_config) do
     model_str = "#{model_config[:provider]}:#{model_config[:model_id]}"
-    agent = Gong.Agent.new()
 
-    llm_backend = fn agent, _call_id ->
-      state = StratState.get(agent, %{})
+    fn agent_state, _call_id ->
+      state = StratState.get(agent_state, %{})
       config = state[:config] || %{}
       reqllm_tools = config[:reqllm_tools] || []
       conversation = Map.get(state, :conversation, [])
@@ -530,6 +527,21 @@ defmodule Gong.AgentLoop do
         {:error, reason} -> {:ok, {:error, to_string(reason)}}
       end
     end
+  end
+
+  @doc """
+  Session backend 适配器（兼容旧路径）。
+
+  将 AgentLoop 包装为 Session 期望的 backend 闭包。
+  注意：每次调用创建新 Agent，不保留跨 turn 历史。
+  推荐使用 Session 的 agent 直调路径（传 :model 选项）。
+  """
+  @bdd_instruction %{kind: :when, name: :run_as_backend, params: %{message: :string, model_str: :string}, returns: "{:ok, reply} | {:error, reason}"}
+  @spec run_as_backend(String.t(), keyword(), map(), map()) ::
+          {:ok, String.t()} | {:error, term()}
+  def run_as_backend(message, _opts, _context, model_config) do
+    agent = Gong.Agent.new()
+    llm_backend = build_llm_backend(model_config)
 
     case run(agent, message, llm_backend: llm_backend) do
       {:ok, reply, _agent} -> {:ok, reply}
