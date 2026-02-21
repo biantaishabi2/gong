@@ -216,9 +216,15 @@ defmodule Gong.AgentLoop do
     case state[:status] do
       :completed ->
         reply = state[:result] || ""
-        emit_stream_event(StreamEvent.new(:text_start))
-        emit_stream_event(StreamEvent.new(:text_delta, content: reply))
-        emit_stream_event(StreamEvent.new(:text_end))
+
+        # 仅当 backend 未流式输出时才补发事件（兼容 MockLLM）
+        unless Process.get(:gong_streamed) do
+          emit_stream_event(StreamEvent.new(:text_start))
+          emit_stream_event(StreamEvent.new(:text_delta, content: reply))
+          emit_stream_event(StreamEvent.new(:text_end))
+        end
+
+        Process.delete(:gong_streamed)
         :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
         {:ok, reply, agent}
 
@@ -229,6 +235,7 @@ defmodule Gong.AgentLoop do
         {:error, error_msg, agent}
 
       :awaiting_tool ->
+        Process.delete(:gong_streamed)
         pending = state[:pending_tool_calls] || []
         tool_names = Enum.map(pending, & &1.name)
         :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: tool_names})
@@ -238,6 +245,7 @@ defmodule Gong.AgentLoop do
         drive_loop(agent, new_call_id, llm_backend, hooks, opts, turn + 1, max_turns)
 
       :awaiting_llm ->
+        Process.delete(:gong_streamed)
         :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
         new_call_id = extract_call_id(directives) || call_id
         drive_loop(agent, new_call_id, llm_backend, hooks, opts, turn + 1, max_turns)
@@ -537,10 +545,24 @@ defmodule Gong.AgentLoop do
 
       opts = [tools: reqllm_tools, receive_timeout: 60_000]
 
-      case ReqLLM.generate_text(model_str, messages, opts) do
-        {:ok, response} ->
+      case ReqLLM.stream_text(model_str, messages, opts) do
+        {:ok, stream_response} ->
+          # 流式输出：每 chunk 通过进程字典回调实时发出
+          # 标记已流式输出，避免 process_response 重复发送
+          Process.put(:gong_streamed, true)
+          emit_stream_event(StreamEvent.new(:text_start))
+
+          {:ok, response} =
+            ReqLLM.StreamResponse.process_stream(stream_response,
+              on_result: fn chunk ->
+                emit_stream_event(StreamEvent.new(:text_delta, content: chunk))
+              end
+            )
+
+          emit_stream_event(StreamEvent.new(:text_end))
+
+          # 从 Response 解析结果 + 提取 usage
           {parsed, usage} = parse_reqllm_response(response)
-          # 通过进程字典累加当轮 usage
           accumulate_turn_usage(usage)
           {:ok, parsed}
 
