@@ -42,22 +42,19 @@ defmodule Gong.CLI.Renderer do
     if buffer != "" do
       # 擦除已输出的纯文本（含前缀行），重渲染带格式版本
       width = Md.terminal_width()
-      # 流式输出的完整文本 = 前缀 + buffer
       raw_output = @prefix <> buffer
       lines = Md.count_display_lines(raw_output, width)
 
-      # 光标当前在最后一行末尾，先回到行首
-      IO.write("\r")
-      # 往上移 lines-1 行（当前行算一行）
-      if lines > 1 do
-        IO.write("\e[#{lines - 1}A")
-      end
-      # 清除从光标到屏幕末尾
-      IO.write("\e[J")
+      # 构建完整的擦除+重绘序列，一次性写入避免 buffer 分裂
+      erase =
+        if lines > 1 do
+          "\r\e[#{lines - 1}A\e[J"
+        else
+          "\r\e[J"
+        end
 
-      # 重新输出带格式的版本
       rendered = Md.render_inline(buffer)
-      IO.write("#{@blue}#{@prefix}#{@reset}#{rendered}\n")
+      IO.write([erase, @blue, @prefix, @reset, rendered, "\n"])
     else
       IO.write("\n")
     end
