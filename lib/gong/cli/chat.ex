@@ -31,7 +31,7 @@ defmodule Gong.CLI.Chat do
     case Session.start_link(session_opts) do
       {:ok, pid} ->
         :ok = Session.subscribe(pid, self())
-        IO.puts("Gong Chat (输入 /help 查看命令, /exit 退出)")
+        IO.puts("#{IO.ANSI.bright()}Gong Chat#{IO.ANSI.reset()} #{IO.ANSI.faint()}(输入 /help 查看命令, /exit 退出)#{IO.ANSI.reset()}")
         repl_loop(pid)
 
       {:error, _reason} ->
@@ -60,7 +60,7 @@ defmodule Gong.CLI.Chat do
   end
 
   defp repl_loop(session_pid) do
-    case IO.gets("> ") do
+    case IO.gets("#{IO.ANSI.green()}❯ #{IO.ANSI.reset()}") do
       :eof ->
         Session.close(session_pid)
         @exit_ok
