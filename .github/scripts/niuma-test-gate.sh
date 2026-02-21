@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# niuma test gate: 运行测试套件作为 PR 合并门禁
-echo "=== Niuma Test Gate ==="
-echo "Running mix test..."
+# Niuma 集成 gate：BDD 编译检查 + 全量测试。
+export MIX_ENV="${MIX_ENV:-test}"
 
-mix test --color
+mix deps.get
+mix compile --warnings-as-errors
+
+# BDD 门禁（DSL 编译 + 注解检查）
+if command -v bddc &>/dev/null; then
+  bddc check --project-root . --in docs/bdd --out test/bdd_generated --skip-bdd-test
+fi
+
+# 全量测试（含 BDD 生成测试）
+mix test
