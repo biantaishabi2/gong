@@ -426,6 +426,16 @@ defmodule Gong.AgentLoop do
         strategy_state = StratState.get(agent, %{})
         conversation = Map.get(strategy_state, :conversation, [])
 
+        # 优先用 API 返回的真实 input_tokens 判断是否需要压缩
+        last_usage = Process.get(:gong_turn_usage, %{})
+        last_input = Map.get(last_usage, :input_tokens, 0)
+        compaction_opts =
+          if last_input > 0 do
+            Keyword.put(compaction_opts, :last_input_tokens, last_input)
+          else
+            compaction_opts
+          end
+
         case Gong.AutoCompaction.auto_compact(conversation, compaction_opts) do
           {:compacted, new_messages, _summary} ->
             update_conversation(agent, new_messages)
