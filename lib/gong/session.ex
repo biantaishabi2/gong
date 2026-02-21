@@ -563,7 +563,7 @@ defmodule Gong.Session do
 
   # ── Turn 完成处理 ──
 
-  defp handle_turn_ok(state, command_id, turn_id, usage \\ %{input_tokens: 0, output_tokens: 0}) do
+  defp handle_turn_ok(state, command_id, turn_id, usage) do
     {assistant_text, turn_buffers} = Map.pop(state.turn_buffers, turn_id, "")
     state = %{state | turn_buffers: turn_buffers}
 
@@ -606,7 +606,7 @@ defmodule Gong.Session do
     {:noreply, cleanup_command_chain(state, command_id)}
   end
 
-  defp handle_turn_error(state, command_id, turn_id, reason, usage \\ %{input_tokens: 0, output_tokens: 0}) do
+  defp handle_turn_error(state, command_id, turn_id, reason, usage) do
     normalized_error = normalize_error(reason)
     state = emit_runtime_error(state, command_id, turn_id, reason)
 

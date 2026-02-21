@@ -65,25 +65,6 @@ defmodule Gong.SessionTokenStatsTest do
     Session.start_link(opts)
   end
 
-  # 等待条件满足
-  defp wait_until(fun, timeout \\ 2000) do
-    deadline = System.monotonic_time(:millisecond) + timeout
-
-    Stream.repeatedly(fn ->
-      if fun.() do
-        :done
-      else
-        if System.monotonic_time(:millisecond) > deadline do
-          :timeout
-        else
-          Process.sleep(50)
-          :retry
-        end
-      end
-    end)
-    |> Enum.find(&(&1 != :retry)) == :done
-  end
-
   defp receive_until_turn_completed(acc) do
     receive do
       {:session_event, %{type: "lifecycle.turn_completed"} = event} ->
