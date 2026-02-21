@@ -1,9 +1,6 @@
 defmodule Gong.CLI.Md do
   @moduledoc """
-  Markdown ANSI 渲染 — 纯自研，不依赖 IO.ANSI.Docs。
-
-  流式阶段：`render_inline/1` 对完整 buffer 做格式替换，
-  renderer 通过 diff flushed 长度只输出新增部分。
+  Markdown ANSI 渲染 — 逐行渲染，追踪代码块状态。
   """
 
   @bold IO.ANSI.bright()
@@ -14,18 +11,75 @@ defmodule Gong.CLI.Md do
   @reset IO.ANSI.reset()
 
   @doc """
-  对 Markdown 文本做 ANSI 渲染，返回带格式的字符串。
+  渲染单行 Markdown，返回 {rendered_string, new_in_code_block}。
+
+  `in_code_block` 追踪是否在围栏代码块内。
+  """
+  @spec render_line(String.t(), boolean()) :: {String.t(), boolean()}
+  def render_line(line, in_code_block) do
+    cond do
+      # 围栏代码块边界
+      String.starts_with?(String.trim_leading(line), "```") ->
+        if in_code_block do
+          # 关闭代码块，不输出 ``` 行
+          {"", false}
+        else
+          # 打开代码块，不输出 ``` 行
+          {"", true}
+        end
+
+      # 代码块内部 — 青色缩进
+      in_code_block ->
+        {"  #{@cyan}#{line}#{@reset}", true}
+
+      # 标题
+      Regex.match?(~r/^\#{1,6}\s+/, line) ->
+        heading = Regex.replace(~r/^\#{1,6}\s+/, line, "")
+        {"#{@bold}#{@yellow}#{do_inline(heading)}#{@reset}", false}
+
+      # 无序列表
+      Regex.match?(~r/^(\s*)[-*+]\s+/, line) ->
+        [_, indent, content] = Regex.run(~r/^(\s*)[-*+]\s+(.*)$/, line)
+        {"#{indent}  • #{do_inline(content)}", false}
+
+      # 有序列表
+      Regex.match?(~r/^(\s*)\d+\.\s+/, line) ->
+        [_, indent, num, content] = Regex.run(~r/^(\s*)(\d+)\.\s+(.*)$/, line)
+        {"#{indent}  #{num}. #{do_inline(content)}", false}
+
+      # 引用
+      String.starts_with?(line, ">") ->
+        content = String.replace_prefix(line, "> ", "") |> String.replace_prefix(">", "")
+        {"#{@faint}│ #{do_inline(content)}#{@reset}", false}
+
+      # 水平线
+      Regex.match?(~r/^---+$/, line) ->
+        {"#{@faint}────────#{@reset}", false}
+
+      # 空行
+      String.trim(line) == "" ->
+        {"", false}
+
+      # 普通行
+      true ->
+        {do_inline(line), false}
+    end
+  end
+
+  @doc """
+  对完整文本做 Markdown ANSI 渲染（非流式场景用）。
   """
   @spec render_inline(String.t()) :: String.t()
   def render_inline(text) do
-    {chunks, code_blocks} = extract_code_blocks(text)
+    {lines, _in_code} =
+      text
+      |> String.split("\n")
+      |> Enum.reduce({[], false}, fn line, {acc, in_code} ->
+        {rendered, new_in_code} = render_line(line, in_code)
+        {acc ++ [rendered], new_in_code}
+      end)
 
-    chunks
-    |> Enum.map(fn
-      {:text, t} -> render_text(t)
-      {:code_block, idx} -> render_code_block(Enum.at(code_blocks, idx))
-    end)
-    |> Enum.join()
+    Enum.join(lines, "\n")
   end
 
   @doc "获取终端宽度，fallback 80"
@@ -50,89 +104,8 @@ defmodule Gong.CLI.Md do
     |> Enum.sum()
   end
 
-  # --- 内部 ---
+  # --- 行内格式 ---
 
-  # 提取围栏代码块保护（支持未闭合的代码块 — 流式场景）
-  defp extract_code_blocks(text) do
-    # 匹配已闭合和未闭合的代码块
-    regex = ~r/(```[^\n]*\n(?:.*?```|.*))/s
-    parts = Regex.split(regex, text, include_captures: true)
-
-    {chunks, blocks, _idx} =
-      Enum.reduce(parts, {[], [], 0}, fn part, {chunks, blocks, idx} ->
-        if Regex.match?(~r/\A```/, part) do
-          {chunks ++ [{:code_block, idx}], blocks ++ [part], idx + 1}
-        else
-          {chunks ++ [{:text, part}], blocks, idx}
-        end
-      end)
-
-    {chunks, blocks}
-  end
-
-  # 渲染围栏代码块 — 青色缩进，去掉 ``` 行
-  defp render_code_block(block) do
-    lines = String.split(block, "\n")
-
-    rendered =
-      lines
-      |> Enum.map(fn line ->
-        if String.starts_with?(line, "```") do
-          nil
-        else
-          "  #{@cyan}#{line}#{@reset}"
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-      |> Enum.join("\n")
-
-    "\n#{rendered}\n"
-  end
-
-  # 渲染非代码块文本：逐行处理
-  defp render_text(text) do
-    text
-    |> String.split("\n")
-    |> Enum.map(&render_line/1)
-    |> Enum.join("\n")
-  end
-
-  defp render_line(line) do
-    cond do
-      # 标题：1-6 个 # + 空格
-      Regex.match?(~r/^\#{1,6}\s+/, line) ->
-        heading = Regex.replace(~r/^\#{1,6}\s+/, line, "")
-        "#{@bold}#{@yellow}#{do_inline(heading)}#{@reset}"
-
-      # 无序列表
-      match_list_unordered?(line) ->
-        [_, indent, content] = Regex.run(~r/^(\s*)[-*+]\s+(.*)$/, line)
-        "#{indent}  • #{do_inline(content)}"
-
-      # 有序列表
-      match_list_ordered?(line) ->
-        [_, indent, num, content] = Regex.run(~r/^(\s*)(\d+)\.\s+(.*)$/, line)
-        "#{indent}  #{num}. #{do_inline(content)}"
-
-      # 引用
-      String.starts_with?(line, ">") ->
-        content = String.replace_prefix(line, "> ", "") |> String.replace_prefix(">", "")
-        "#{@faint}│ #{do_inline(content)}#{@reset}"
-
-      # 水平线
-      Regex.match?(~r/^---+$/, line) ->
-        "#{@faint}────────#{@reset}"
-
-      # 普通行
-      true ->
-        do_inline(line)
-    end
-  end
-
-  defp match_list_unordered?(line), do: Regex.match?(~r/^(\s*)[-*+]\s+/, line)
-  defp match_list_ordered?(line), do: Regex.match?(~r/^(\s*)\d+\.\s+/, line)
-
-  # 行内格式替换
   defp do_inline(text) do
     text
     |> replace_inline_code()

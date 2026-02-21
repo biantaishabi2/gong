@@ -2,8 +2,8 @@ defmodule Gong.CLI.Renderer do
   @moduledoc """
   终端渲染器 — 将 Session 事件流格式化输出到终端。
 
-  AI 回复：流式阶段原样输出，message.end 擦除重渲染 Markdown。
-  工具调用/错误用颜色区分。
+  AI 回复逐行流式渲染：每完成一行（遇到 \\n），擦除当前行原文，
+  重新输出 Markdown 格式化版本。只擦一行（\\r\\e[J），无多行回退。
   """
 
   alias Gong.Session.Events
@@ -24,37 +24,80 @@ defmodule Gong.CLI.Renderer do
   @spec render(Events.t()) :: :ok
 
   def render(%Events{type: "message.start"}) do
-    Process.put(:gong_stream_buffer, "")
+    # completed: 已渲染完的行数, in_code_block: 是否在围栏代码块内
+    Process.put(:gong_stream, %{buffer: "", completed: 0, in_code_block: false})
     IO.write("#{@blue}#{@prefix}#{@reset}")
   end
 
   def render(%Events{type: "message.delta", payload: payload}) do
     content = Map.get(payload, :content) || Map.get(payload, "content") || ""
-    IO.write(content)
-    buffer = Process.get(:gong_stream_buffer, "")
-    Process.put(:gong_stream_buffer, buffer <> content)
+    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false})
+    new_buffer = state.buffer <> content
+
+    # 分割成完成的行 + 未完成的尾部
+    parts = String.split(new_buffer, "\n")
+    {complete_lines, [pending]} = Enum.split(parts, length(parts) - 1)
+    new_complete_count = length(complete_lines)
+    prev_complete = state.completed
+
+    if new_complete_count > prev_complete do
+      # 有新的完成行，擦除当前未完成行，渲染新完成的行
+      new_lines = Enum.slice(complete_lines, prev_complete, new_complete_count - prev_complete)
+
+      # 擦除当前行的原文
+      erase = "\r\e[J"
+
+      # 渲染每一行
+      {rendered_lines, in_code} =
+        Enum.reduce(new_lines, {[], state.in_code_block}, fn line, {acc, in_code} ->
+          {rendered, new_in_code} = Md.render_line(line, in_code)
+          {acc ++ [rendered], new_in_code}
+        end)
+
+      output = Enum.join(rendered_lines, "\n") <> "\n"
+
+      # 前缀：第一行需要加 ◆（如果是首批完成行）
+      prefix_part =
+        if prev_complete == 0 do
+          "#{@blue}#{@prefix}#{@reset}"
+        else
+          ""
+        end
+
+      IO.write([erase, prefix_part, output, pending])
+
+      Process.put(:gong_stream, %{
+        buffer: new_buffer,
+        completed: new_complete_count,
+        in_code_block: in_code
+      })
+    else
+      # 没有新行完成，直接写原文
+      IO.write(content)
+      Process.put(:gong_stream, %{state | buffer: new_buffer})
+    end
   end
 
   def render(%Events{type: "message.end"}) do
-    buffer = Process.get(:gong_stream_buffer, "")
-    Process.delete(:gong_stream_buffer)
+    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false})
+    Process.delete(:gong_stream)
 
-    if buffer != "" do
-      # 擦除已输出的纯文本（含前缀行），重渲染带格式版本
-      width = Md.terminal_width()
-      raw_output = @prefix <> buffer
-      lines = Md.count_display_lines(raw_output, width)
+    # 处理最后一个未完成行
+    parts = String.split(state.buffer, "\n")
+    pending = List.last(parts) || ""
 
-      # 构建完整的擦除+重绘序列，一次性写入避免 buffer 分裂
-      erase =
-        if lines > 1 do
-          "\r\e[#{lines - 1}A\e[J"
+    if pending != "" do
+      {rendered, _} = Md.render_line(pending, state.in_code_block)
+
+      # 第一行需要前缀
+      prefix_part =
+        if state.completed == 0 do
+          "#{@blue}#{@prefix}#{@reset}"
         else
-          "\r\e[J"
+          ""
         end
 
-      rendered = Md.render_inline(buffer)
-      IO.write([erase, @blue, @prefix, @reset, rendered, "\n"])
+      IO.write(["\r\e[J", prefix_part, rendered, "\n"])
     else
       IO.write("\n")
     end
