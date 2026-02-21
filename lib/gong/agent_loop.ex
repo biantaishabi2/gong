@@ -529,26 +529,6 @@ defmodule Gong.AgentLoop do
     end
   end
 
-  @doc """
-  Session backend 适配器（兼容旧路径）。
-
-  将 AgentLoop 包装为 Session 期望的 backend 闭包。
-  注意：每次调用创建新 Agent，不保留跨 turn 历史。
-  推荐使用 Session 的 agent 直调路径（传 :model 选项）。
-  """
-  @bdd_instruction %{kind: :when, name: :run_as_backend, params: %{message: :string, model_str: :string}, returns: "{:ok, reply} | {:error, reason}"}
-  @spec run_as_backend(String.t(), keyword(), map(), map()) ::
-          {:ok, String.t()} | {:error, term()}
-  def run_as_backend(message, _opts, _context, model_config) do
-    agent = Gong.Agent.new()
-    llm_backend = build_llm_backend(model_config)
-
-    case run(agent, message, llm_backend: llm_backend) do
-      {:ok, reply, _agent} -> {:ok, reply}
-      {:error, reason, _agent} -> {:error, reason}
-    end
-  end
-
   # 将 ReAct conversation 格式转为 ReqLLM 期望的 messages 格式
   defp format_conversation_for_reqllm(conversation) do
     Enum.map(conversation, fn msg ->

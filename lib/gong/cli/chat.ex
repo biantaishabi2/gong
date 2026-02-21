@@ -42,9 +42,10 @@ defmodule Gong.CLI.Chat do
   defp build_session_opts(opts) do
     session_opts = []
 
-    # 如果显式传入 backend，优先使用（测试 mock）
-    if backend = Keyword.get(opts, :backend) do
-      Keyword.put(session_opts, :backend, backend)
+    # 如果显式传入 llm_backend_fn，优先使用（测试 mock）
+    if llm_backend_fn = Keyword.get(opts, :llm_backend_fn) do
+      agent = Keyword.get(opts, :agent, Gong.Agent.new())
+      session_opts |> Keyword.put(:agent, agent) |> Keyword.put(:llm_backend_fn, llm_backend_fn)
     else
       # 传 model 给 Session，由 Session 创建持久 Agent
       model = Keyword.get(opts, :model) || Gong.Settings.get("model")

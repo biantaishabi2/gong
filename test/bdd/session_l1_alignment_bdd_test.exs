@@ -52,7 +52,8 @@ defmodule Gong.BDD.SessionL1AlignmentBDDTest do
     {:ok, session} =
       Session.start_link(
         session_id: "session-l1-bdd",
-        backend: fn _message, _opts, _ctx -> {:ok, [{:chunk, "ok"}, :done]} end
+        agent: Gong.Agent.new(),
+        llm_backend_fn: fn _agent_state, _call_id -> {:ok, {:text, "ok"}} end
       )
 
     on_exit(fn -> if Process.alive?(session), do: Session.close(session) end)

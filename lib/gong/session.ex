@@ -21,7 +21,6 @@ defmodule Gong.Session do
   alias Gong.AutoCompaction
   alias Gong.ModelRegistry
   alias Gong.Session.Events
-  alias Gong.Stream
   alias Gong.Stream.Event, as: StreamEvent
   alias Gong.Thinking
 
@@ -58,10 +57,6 @@ defmodule Gong.Session do
           required(:ts) => integer()
         }
 
-  @typedoc "Backend 回调：返回 stream chunks / stream events / 文本"
-  @type backend_fun ::
-          (String.t(), keyword(), map() ->
-             {:ok, [StreamEvent.t()] | list() | String.t() | map()} | {:error, term()})
 
   @type command_payload :: %{
           required(:session_id) => String.t(),
@@ -73,23 +68,45 @@ defmodule Gong.Session do
 
   @spec start_link(keyword()) :: {:ok, pid()} | {:error, error_t()}
   def start_link(opts \\ []) do
-    name = Keyword.get(opts, :name)
-    genserver_opts = if name, do: [name: name], else: []
+    # 提前校验 model，避免 init 中 {:stop, reason} 导致 EXIT 信号
+    case validate_model_opts(opts) do
+      {:error, reason} ->
+        {:error, normalize_error(reason)}
 
-    try do
-      case GenServer.start_link(__MODULE__, opts, genserver_opts) do
-        {:ok, pid} -> {:ok, pid}
-        {:error, reason} -> {:error, normalize_error(reason)}
-      end
-    rescue
-      FunctionClauseError ->
-        {:error, normalize_error(:invalid_argument)}
+      :ok ->
+        name = Keyword.get(opts, :name)
+        genserver_opts = if name, do: [name: name], else: []
 
-      ArgumentError ->
-        {:error, normalize_error(:invalid_argument)}
-    catch
-      :exit, reason ->
-        {:error, normalize_error(normalize_genserver_exit(reason))}
+        try do
+          case GenServer.start_link(__MODULE__, opts, genserver_opts) do
+            {:ok, pid} -> {:ok, pid}
+            {:error, reason} -> {:error, normalize_error(reason)}
+          end
+        rescue
+          FunctionClauseError ->
+            {:error, normalize_error(:invalid_argument)}
+
+          ArgumentError ->
+            {:error, normalize_error(:invalid_argument)}
+        catch
+          :exit, reason ->
+            {:error, normalize_error(normalize_genserver_exit(reason))}
+        end
+    end
+  end
+
+  defp validate_model_opts(opts) do
+    model = Keyword.get(opts, :model)
+    direct_agent = Keyword.get(opts, :agent)
+
+    cond do
+      direct_agent != nil -> :ok
+      is_binary(model) ->
+        case ModelRegistry.lookup_by_string(model) do
+          {:ok, _} -> :ok
+          {:error, reason} -> {:error, reason}
+        end
+      true -> :ok
     end
   end
 
@@ -246,7 +263,6 @@ defmodule Gong.Session do
 
   @impl true
   def init(opts) do
-    backend = Keyword.get(opts, :backend)
     model = Keyword.get(opts, :model)
     restore_fun = Keyword.get(opts, :restore_fun)
     session_id = Keyword.get(opts, :session_id, default_session_id())
@@ -254,42 +270,43 @@ defmodule Gong.Session do
     tape_path = Keyword.get(opts, :tape_path)
     auto_compaction = Keyword.get(opts, :auto_compaction)
 
-    # Agent 路径 vs Backend 闭包路径
-    # 支持：model（生产）/ agent+llm_backend_fn（测试直传）/ model+llm_backend_fn（测试覆盖）
+    # Agent 路径：model（生产）/ agent+llm_backend_fn（测试直传）/ model+llm_backend_fn（测试覆盖）
     direct_agent = Keyword.get(opts, :agent)
     llm_backend_fn_override = Keyword.get(opts, :llm_backend_fn)
 
-    {agent, llm_backend_fn, backend} =
+    {agent, llm_backend_fn} =
       cond do
         # 直传 agent（测试用）
         direct_agent != nil ->
-          {direct_agent, llm_backend_fn_override, nil}
+          {direct_agent, llm_backend_fn_override}
 
         # model + llm_backend_fn 覆盖（测试生产 init 路径但 mock LLM）
         is_binary(model) and is_function(llm_backend_fn_override) ->
           case ModelRegistry.lookup_by_string(model) do
-            {:ok, _config} ->
-              {Gong.Agent.new(), llm_backend_fn_override, nil}
-
-            {:error, _} ->
-              {nil, nil, &__MODULE__.default_backend/3}
+            {:ok, _config} -> {Gong.Agent.new(), llm_backend_fn_override}
+            {:error, _} -> {Gong.Agent.new(), nil}
           end
 
-        # 正常路径
+        # 正常 model 路径（生产）— 已在 start_link 中校验过
+        is_binary(model) ->
+          case ModelRegistry.lookup_by_string(model) do
+            {:ok, config} -> {Gong.Agent.new(), AgentLoop.build_llm_backend(config)}
+            {:error, _} -> {Gong.Agent.new(), nil}
+          end
+
+        # 无 model 无 agent（最小启动，如 restore 测试）
         true ->
-          resolve_init_mode(backend, model)
+          {Gong.Agent.new(), nil}
       end
 
     state = %{
       session_id: session_id,
       agent: agent,
       llm_backend_fn: llm_backend_fn,
-      backend: backend,
       restore_fun: restore_fun,
       tape_path: tape_path,
       auto_compaction: auto_compaction,
       turn_id: 0,
-      history: [],
       metadata: %{},
       subscribers: MapSet.new(),
       monitors: %{},
@@ -306,27 +323,6 @@ defmodule Gong.Session do
     {:ok, state}
   end
 
-  # 根据 init 参数决定使用 Agent 直调还是 Backend 闭包
-  defp resolve_init_mode(backend, _model) when is_function(backend, 3) do
-    # 显式传入 backend（测试 mock 用）
-    {nil, nil, backend}
-  end
-
-  defp resolve_init_mode(_backend, model) when is_binary(model) do
-    case ModelRegistry.lookup_by_string(model) do
-      {:ok, config} ->
-        agent = Gong.Agent.new()
-        llm_backend_fn = AgentLoop.build_llm_backend(config)
-        {agent, llm_backend_fn, nil}
-
-      {:error, _} ->
-        {nil, nil, &__MODULE__.default_backend/3}
-    end
-  end
-
-  defp resolve_init_mode(_backend, _model) do
-    {nil, nil, &__MODULE__.default_backend/3}
-  end
 
   @impl true
   def handle_call({:subscribe, subscriber}, _from, state) do
@@ -365,7 +361,6 @@ defmodule Gong.Session do
       restored_state = %{
         state
         | session_id: restored.session_id,
-          history: restored.history,
           turn_id: restored.turn_cursor,
           metadata: restored.metadata,
           command_last_event_id: %{},
@@ -373,21 +368,16 @@ defmodule Gong.Session do
           turn_buffers: %{}
       }
 
-      # Agent 路径：将恢复的 history 同步到 Agent Thread
-      restored_state =
-        if restored_state.agent do
-          history_messages =
-            Enum.map(restored.history, fn entry ->
-              %{
-                role: to_string(snapshot_get(entry, :role) || "user"),
-                content: snapshot_get(entry, :content) || ""
-              }
-            end)
+      # 将恢复的 history 同步到 Agent Thread
+      history_messages =
+        Enum.map(restored.history, fn entry ->
+          %{
+            role: to_string(snapshot_get(entry, :role) || "user"),
+            content: snapshot_get(entry, :content) || ""
+          }
+        end)
 
-          replace_agent_conversation(restored_state, history_messages)
-        else
-          restored_state
-        end
+      restored_state = replace_agent_conversation(restored_state, history_messages)
 
       restore_command_id = system_command_id("restore")
 
@@ -424,18 +414,8 @@ defmodule Gong.Session do
 
   def handle_call({:prompt, message, opts}, _from, state) do
     with :ok <- validate_prompt(message),
-         :ok <- validate_prompt_opts(opts) do
-      # Agent 路径不需要 resolve_backend
-      backend =
-        if state.agent do
-          nil
-        else
-          case resolve_backend(opts, state.backend) do
-            {:ok, b} -> b
-            {:error, reason} -> throw({:resolve_error, reason})
-          end
-        end
-
+         :ok <- validate_prompt_opts(opts),
+         :ok <- validate_backend_available(state) do
       command_payload = %{
         session_id: state.session_id,
         command_id: Events.generate_command_id(),
@@ -444,7 +424,7 @@ defmodule Gong.Session do
         timestamp: System.os_time(:millisecond)
       }
 
-      case enqueue_command(state, command_payload, Keyword.delete(opts, :backend), backend) do
+      case enqueue_command(state, command_payload, opts) do
         {:ok, new_state} -> {:reply, :ok, new_state}
         {:error, reason} -> {:reply, {:error, normalize_error(reason)}, state}
       end
@@ -452,25 +432,13 @@ defmodule Gong.Session do
       {:error, reason} ->
         {:reply, {:error, normalize_error(reason)}, state}
     end
-  catch
-    {:resolve_error, reason} ->
-      {:reply, {:error, normalize_error(reason)}, state}
   end
 
   def handle_call({:submit_command, command_payload, opts}, _from, state) do
     with :ok <- validate_prompt_opts(opts),
-         {:ok, normalized_payload} <- validate_command_payload(command_payload, state) do
-      backend =
-        if state.agent do
-          nil
-        else
-          case resolve_backend(opts, state.backend) do
-            {:ok, b} -> b
-            {:error, reason} -> throw({:resolve_error, reason})
-          end
-        end
-
-      case enqueue_command(state, normalized_payload, Keyword.delete(opts, :backend), backend) do
+         {:ok, normalized_payload} <- validate_command_payload(command_payload, state),
+         :ok <- validate_backend_available(state) do
+      case enqueue_command(state, normalized_payload, opts) do
         {:ok, new_state} -> {:reply, :ok, new_state}
         {:error, reason} -> {:reply, {:error, normalize_error(reason)}, state}
       end
@@ -478,9 +446,6 @@ defmodule Gong.Session do
       {:error, reason} ->
         {:reply, {:error, normalize_error(reason)}, state}
     end
-  catch
-    {:resolve_error, reason} ->
-      {:reply, {:error, normalize_error(reason)}, state}
   end
 
   @impl true
@@ -503,11 +468,6 @@ defmodule Gong.Session do
     handle_turn_ok(state, command_id, turn_id)
   end
 
-  # Backend 闭包路径：turn 完成
-  def handle_info({:session_turn_done, command_id, turn_id, :ok}, state) do
-    handle_turn_ok(state, command_id, turn_id)
-  end
-
   # Agent 路径：turn 出错，仍存回 updated_agent，然后检查队列
   def handle_info(
         {:session_turn_done, command_id, turn_id, {:error_agent, reason, updated_agent}},
@@ -515,10 +475,6 @@ defmodule Gong.Session do
       ) do
     state = %{state | agent: updated_agent}
     state = maybe_dequeue_agent(state)
-    handle_turn_error(state, command_id, turn_id, reason)
-  end
-
-  def handle_info({:session_turn_done, command_id, turn_id, {:error, reason}}, state) do
     handle_turn_error(state, command_id, turn_id, reason)
   end
 
@@ -535,21 +491,11 @@ defmodule Gong.Session do
 
   def handle_info(_message, state), do: {:noreply, state}
 
-  # ── Turn 完成处理（Agent 路径和 Backend 路径共用） ──
+  # ── Turn 完成处理 ──
 
   defp handle_turn_ok(state, command_id, turn_id) do
     {assistant_text, turn_buffers} = Map.pop(state.turn_buffers, turn_id, "")
     state = %{state | turn_buffers: turn_buffers}
-
-    state =
-      if assistant_text == "" or state.agent != nil do
-        # Agent 路径：assistant 回复已在 Agent Thread 中，不写 state.history
-        state
-      else
-        Map.update!(state, :history, fn history ->
-          history ++ [history_entry(:assistant, assistant_text, turn_id)]
-        end)
-      end
 
     state =
       emit_event(
@@ -647,12 +593,6 @@ defmodule Gong.Session do
       )
 
     :ok
-  end
-
-  @doc false
-  @spec default_backend(String.t(), keyword(), map()) :: {:error, error_t()}
-  def default_backend(_message, _opts, _ctx) do
-    {:error, normalize_error(:unauthorized)}
   end
 
   @doc false
@@ -764,23 +704,8 @@ defmodule Gong.Session do
 
     case AutoCompaction.auto_compact(messages, compaction_opts) do
       {:compacted, new_messages, summary} ->
-        state =
-          if state.agent do
-            # Agent 路径：将压缩后消息写回 Agent Thread
-            replace_agent_conversation(state, new_messages)
-          else
-            # Backend 路径：将压缩后的消息转回 history 格式
-            compacted_history = Enum.with_index(new_messages, fn msg, idx ->
-              %{
-                role: String.to_atom(msg[:role] || msg["role"] || "system"),
-                content: msg[:content] || msg["content"] || "",
-                turn_id: idx,
-                ts: System.os_time(:millisecond)
-              }
-            end)
-
-            %{state | history: compacted_history}
-          end
+        # 将压缩后消息写回 Agent Thread
+        state = replace_agent_conversation(state, new_messages)
 
         emit_event(
           state,
@@ -796,98 +721,6 @@ defmodule Gong.Session do
 
       {:skipped, _} ->
         state
-    end
-  end
-
-  defp run_turn(session_pid, backend, message, opts, context) do
-    # 记录 callback 调用前的计数，判断 backend 是否实际通过 callback 发射了事件
-    events_before = Process.get(:gong_stream_callback_count, 0)
-
-    case call_backend(backend, message, opts, context) do
-      {:ok, stream_events} ->
-        events_after = Process.get(:gong_stream_callback_count, 0)
-
-        # 仅当 backend 未通过 callback 发射事件时，才发送 normalized 事件（避免重复）
-        if events_after == events_before do
-          Enum.each(stream_events, fn stream_event ->
-            send(
-              session_pid,
-              {:session_stream_event, context.command_id, context.turn_id, stream_event}
-            )
-          end)
-        end
-
-        send(session_pid, {:session_turn_done, context.command_id, context.turn_id, :ok})
-
-      {:error, reason} ->
-        send(
-          session_pid,
-          {:session_turn_done, context.command_id, context.turn_id, {:error, reason}}
-        )
-    end
-  end
-
-  defp call_backend(backend, message, opts, context) do
-    try do
-      case backend.(message, opts, context) do
-        {:ok, result} ->
-          normalize_backend_result(result)
-
-        {:error, _} = error ->
-          error
-
-        other ->
-          {:error, {:internal_error, :invalid_backend_response, inspect(other)}}
-      end
-    rescue
-      e ->
-        {:error, {:internal_error, :backend_exception, Exception.message(e)}}
-    catch
-      kind, reason ->
-        {:error, {:internal_error, :backend_exception, "#{kind}: #{inspect(reason)}"}}
-    end
-  end
-
-  defp normalize_backend_result(result) when is_binary(result) do
-    {:ok,
-     [
-       StreamEvent.new(:text_start),
-       StreamEvent.new(:text_delta, content: result),
-       StreamEvent.new(:text_end)
-     ]}
-  end
-
-  defp normalize_backend_result(%{events: events}) when is_list(events) do
-    normalize_stream_events(events)
-  end
-
-  defp normalize_backend_result(%{chunks: chunks}) when is_list(chunks) do
-    chunks
-    |> Stream.chunks_to_events()
-    |> normalize_stream_events()
-  end
-
-  defp normalize_backend_result(result) when is_list(result) do
-    cond do
-      Enum.all?(result, &match?(%StreamEvent{}, &1)) ->
-        normalize_stream_events(result)
-
-      true ->
-        result
-        |> Stream.chunks_to_events()
-        |> normalize_stream_events()
-    end
-  end
-
-  defp normalize_backend_result(other) do
-    {:error, {:internal_error, :invalid_backend_response, inspect(other)}}
-  end
-
-  defp normalize_stream_events(events) do
-    if Stream.valid_sequence?(events) do
-      {:ok, events}
-    else
-      {:error, {:stream_error, "invalid stream sequence", %{}}}
     end
   end
 
@@ -988,6 +821,9 @@ defmodule Gong.Session do
 
   defp validate_prompt(_), do: {:error, :invalid_argument}
 
+  defp validate_backend_available(%{llm_backend_fn: nil}), do: {:error, :unauthorized}
+  defp validate_backend_available(_state), do: :ok
+
   defp validate_prompt_opts(opts) when is_list(opts) do
     if Keyword.keyword?(opts), do: :ok, else: {:error, :invalid_argument}
   end
@@ -1050,7 +886,7 @@ defmodule Gong.Session do
 
   defp extract_command_message(_args), do: {:error, :invalid_argument}
 
-  defp enqueue_command(state, command_payload, run_opts, backend) do
+  defp enqueue_command(state, command_payload, _run_opts) do
     with {:ok, message} <- extract_command_message(command_payload.args) do
       turn_id = state.turn_id + 1
 
@@ -1058,10 +894,6 @@ defmodule Gong.Session do
         state
         |> Map.put(:turn_id, turn_id)
         |> Map.put(:seen_command_ids, MapSet.put(state.seen_command_ids, command_payload.command_id))
-        |> then(fn s ->
-          # Agent 路径：history 由 Agent Thread 维护，不写 state.history
-          if s.agent, do: s, else: Map.update!(s, :history, fn h -> h ++ [history_entry(:user, message, turn_id)] end)
-        end)
         |> put_in([:turn_buffers, turn_id], "")
 
       state =
@@ -1101,37 +933,16 @@ defmodule Gong.Session do
       session_pid = self()
       command_id = command_payload.command_id
 
+      # Agent 直调路径：串行化，同时只跑一个 AgentLoop.run
+      queued_item = {message, command_id, turn_id}
+
       state =
-        if state.agent do
-          # Agent 直调路径：串行化，同时只跑一个 AgentLoop.run
-          queued_item = {message, command_id, turn_id}
-
-          if state.agent_busy do
-            # 上一轮还在跑，排队等待
-            %{state | agent_queue: :queue.in(queued_item, state.agent_queue)}
-          else
-            # 空闲，立即启动
-            start_agent_task(state, queued_item, session_pid)
-          end
+        if state.agent_busy do
+          # 上一轮还在跑，排队等待
+          %{state | agent_queue: :queue.in(queued_item, state.agent_queue)}
         else
-          # Backend 闭包路径（测试 mock / 兼容旧代码）
-          Task.start(fn ->
-            Gong.AgentLoop.set_stream_callback(fn event ->
-              count = Process.get(:gong_stream_callback_count, 0)
-              Process.put(:gong_stream_callback_count, count + 1)
-              send(session_pid, {:session_stream_event, command_id, turn_id, event})
-            end)
-
-            run_turn(session_pid, backend, message, run_opts, %{
-              session_id: state.session_id,
-              command_id: command_id,
-              turn_id: turn_id,
-              history: state.history,
-              metadata: state.metadata
-            })
-          end)
-
-          state
+          # 空闲，立即启动
+          start_agent_task(state, queued_item, session_pid)
         end
 
       {:ok, state}
@@ -1183,44 +994,6 @@ defmodule Gong.Session do
   end
 
   defp payload_get(map, key), do: Events.payload_get(map, key)
-
-  defp resolve_backend(opts, default_backend) do
-    case Keyword.get(opts, :backend) do
-      fun when is_function(fun, 3) ->
-        # 显式传入 backend 闭包（测试 mock 用）
-        {:ok, fun}
-
-      nil ->
-        # 尝试通过 model 参数构建 backend
-        case Keyword.get(opts, :model) do
-          nil ->
-            # 都没传，用默认 backend
-            if is_function(default_backend, 3),
-              do: {:ok, default_backend},
-              else: {:error, :invalid_argument}
-
-          model when is_binary(model) ->
-            build_backend_from_model(model)
-
-          _ ->
-            {:error, :invalid_argument}
-        end
-
-      _ ->
-        {:error, :invalid_argument}
-    end
-  end
-
-  # 通过 model 字符串（如 "deepseek:deepseek-chat"）查询 ModelRegistry 构建 backend
-  defp build_backend_from_model(model_str) do
-    case ModelRegistry.lookup_by_string(model_str) do
-      {:ok, config} ->
-        {:ok, &AgentLoop.run_as_backend(&1, &2, &3, config)}
-
-      {:error, _} = error ->
-        error
-    end
-  end
 
   defp load_snapshot(snapshot, _state) when is_map(snapshot) do
     {:ok, snapshot}
@@ -1776,15 +1549,6 @@ defmodule Gong.Session do
     end)
   end
 
-  defp history_entry(role, content, turn_id) do
-    %{
-      role: role,
-      content: content,
-      turn_id: turn_id,
-      ts: System.os_time(:millisecond)
-    }
-  end
-
   # 替换 Agent 的对话内容（用于压缩/恢复）
   defp replace_agent_conversation(state, messages) do
     alias Jido.Agent.Strategy.State, as: StratState
@@ -1831,13 +1595,9 @@ defmodule Gong.Session do
     |> Thread.append_messages(rest)
   end
 
-  # 从 state 获取对话历史：agent 路径从 Agent Thread 取，backend 路径从 state.history 取
+  # 从 Agent Thread 获取对话历史
   defp get_history(state) do
-    if state.agent do
-      agent_conversation(state.agent)
-    else
-      state.history
-    end
+    agent_conversation(state.agent)
   end
 
   # 从 Agent 提取 conversation 并转为 history 格式
