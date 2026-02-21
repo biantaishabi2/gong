@@ -231,29 +231,27 @@ defmodule Gong.Utils.Truncate do
     do_bytes_head_tail(text, max_bytes)
   end
 
-  # 通用字节头尾截断：迭代缩减确保结果严格 <= max_bytes
+  # 通用字节头尾截断：确保结果严格 <= max_bytes
   defp do_bytes_head_tail(text, max_bytes) do
     total = byte_size(text)
-    # 首次估算：预留 marker 空间
-    marker_budget = 120
-    available = max(max_bytes - marker_budget, 0)
-    half = div(available, 2)
-    head_part = safe_binary_slice(text, 0, half)
-    tail_part = safe_binary_tail(text, half)
-    omitted = total - byte_size(head_part) - byte_size(tail_part)
-    marker = "... [省略 约#{omitted} 字节] ..."
-    result = head_part <> "\n" <> marker <> "\n" <> tail_part
+    # 使用最大可能的省略值（= total）计算 marker 大小上限，确保结果不超限
+    worst_marker = "... [省略 约#{total} 字节] ..."
+    # marker 加两个换行分隔符的总开销
+    marker_overhead = byte_size(worst_marker) + 2
 
-    # 最终保障：若仍超限，从 tail_part 裁剪至合规
-    if byte_size(result) <= max_bytes do
-      result
+    if max_bytes <= marker_overhead do
+      # max_bytes 太小，无法容纳内容 + marker，只返回标注
+      worst_marker
     else
-      overshoot = byte_size(result) - max_bytes
-      new_tail_len = max(byte_size(tail_part) - overshoot, 0)
-      trimmed_tail = safe_binary_tail(text, new_tail_len)
-      omitted2 = total - byte_size(head_part) - byte_size(trimmed_tail)
-      marker2 = "... [省略 约#{omitted2} 字节] ..."
-      head_part <> "\n" <> marker2 <> "\n" <> trimmed_tail
+      available = max_bytes - marker_overhead
+      half = div(available, 2)
+      head_part = safe_binary_slice(text, 0, half)
+      tail_part = safe_binary_tail(text, half)
+      omitted = total - byte_size(head_part) - byte_size(tail_part)
+      marker = "... [省略 约#{omitted} 字节] ..."
+      # 因为 omitted <= total，所以 byte_size(marker) <= byte_size(worst_marker)
+      # 因此 byte_size(result) <= available + marker_overhead = max_bytes
+      head_part <> "\n" <> marker <> "\n" <> tail_part
     end
   end
 
