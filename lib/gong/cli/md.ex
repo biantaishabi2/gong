@@ -22,10 +22,10 @@ defmodule Gong.CLI.Md do
     table_bottom =
       if Process.get(:gong_md_in_table, false) and not is_table_line do
         Process.put(:gong_md_in_table, false)
-        col_count = Process.get(:gong_md_table_cols, 3)
-        seg = String.duplicate("─", 12)
-        inner = List.duplicate(seg, col_count) |> Enum.join("┴")
-        "  #{@faint}└#{inner}┘#{@reset}\n"
+        col_widths = Process.get(:gong_md_table_widths, [])
+        Process.delete(:gong_md_table_widths)
+        bottom = build_table_border(col_widths, "└", "┴", "┘")
+        "#{bottom}\n"
       else
         ""
       end
@@ -70,12 +70,17 @@ defmodule Gong.CLI.Md do
         content = String.replace_prefix(line, "> ", "") |> String.replace_prefix(">", "")
         {"#{@faint}│ #{do_inline(content)}#{@reset}", false}
 
-      # 表格分隔线（|---|---|）— 渲染为横线边框
+      # 表格分隔线（|---|---|）— 渲染为横线边框，用已记录的列宽
       Regex.match?(~r/^\|[\s\-:|]+\|$/, line) ->
-        col_count = line |> String.split("|") |> length() |> Kernel.-(2)
-        seg = String.duplicate("─", 12)
-        inner = List.duplicate(seg, col_count) |> Enum.join("┼")
-        {"  #{@faint}├#{inner}┤#{@reset}", false}
+        col_widths = Process.get(:gong_md_table_widths, [])
+        col_widths =
+          if col_widths == [] do
+            col_count = line |> String.split("|") |> length() |> Kernel.-(2)
+            List.duplicate(10, col_count)
+          else
+            col_widths
+          end
+        {build_table_border(col_widths, "├", "┼", "┤"), false}
 
       # 表格数据行（| cell | cell |）
       Regex.match?(~r/^\|.+\|$/, line) ->
@@ -87,7 +92,13 @@ defmodule Gong.CLI.Md do
           |> Enum.map(&String.trim/1)
           |> Enum.map(&do_inline/1)
 
-        padded = Enum.map(cells, fn cell -> pad_cell(cell, 10) end)
+        # 计算每列显示宽度，更新已记录的最大列宽
+        cell_widths = Enum.map(cells, fn c -> c |> strip_ansi() |> display_column_width() end)
+        prev_widths = Process.get(:gong_md_table_widths, [])
+        col_widths = merge_col_widths(cell_widths, prev_widths)
+        Process.put(:gong_md_table_widths, col_widths)
+
+        padded = Enum.zip(cells, col_widths) |> Enum.map(fn {cell, w} -> pad_cell(cell, w) end)
         row = "  #{@faint}│#{@reset}#{Enum.join(padded, "#{@faint}│#{@reset}")}#{@faint}│#{@reset}"
 
         # 表格首行前加顶边框
@@ -96,9 +107,7 @@ defmodule Gong.CLI.Md do
         if not in_table do
           Process.put(:gong_md_in_table, true)
           Process.put(:gong_md_table_cols, col_count)
-          seg = String.duplicate("─", 12)
-          inner = List.duplicate(seg, col_count) |> Enum.join("┬")
-          top = "  #{@faint}┌#{inner}┐#{@reset}"
+          top = build_table_border(col_widths, "┌", "┬", "┐")
           {"#{top}\n#{row}", false}
         else
           {row, false}
@@ -123,10 +132,16 @@ defmodule Gong.CLI.Md do
   """
   @spec render_inline(String.t()) :: String.t()
   def render_inline(text) do
-    {lines, _in_code} =
-      text
-      |> String.split("\n")
-      |> Enum.reduce({[], false}, fn line, {acc, in_code} ->
+    lines = String.split(text, "\n")
+
+    # 第一遍：预扫描表格列宽
+    col_widths = prescan_table_widths(lines)
+    if col_widths != [] do
+      Process.put(:gong_md_table_widths, col_widths)
+    end
+
+    {rendered_lines, _in_code} =
+      Enum.reduce(lines, {[], false}, fn line, {acc, in_code} ->
         {rendered, new_in_code} = render_line(line, in_code)
         {acc ++ [rendered], new_in_code}
       end)
@@ -135,15 +150,15 @@ defmodule Gong.CLI.Md do
     trailing =
       if Process.get(:gong_md_in_table, false) do
         Process.put(:gong_md_in_table, false)
-        col_count = Process.get(:gong_md_table_cols, 3)
-        seg = String.duplicate("─", 12)
-        inner = List.duplicate(seg, col_count) |> Enum.join("┴")
-        "\n  #{@faint}└#{inner}┘#{@reset}"
+        widths = Process.get(:gong_md_table_widths, [])
+        Process.delete(:gong_md_table_widths)
+        "\n" <> build_table_border(widths, "└", "┴", "┘")
       else
+        Process.delete(:gong_md_table_widths)
         ""
       end
 
-    Enum.join(lines, "\n") <> trailing
+    Enum.join(rendered_lines, "\n") <> trailing
   end
 
   @doc "获取终端宽度，fallback 80"
@@ -212,7 +227,42 @@ defmodule Gong.CLI.Md do
     Regex.replace(~r/(?<![:\/\w])[~]?\/[\w\-.\/@]+\.\w+/, text, "#{@underline}\\0#{@reset}")
   end
 
-  # 单元格填充到固定显示宽度
+  # 预扫描表格数据行，计算所有列的最大显示宽度
+  defp prescan_table_widths(lines) do
+    lines
+    |> Enum.filter(fn line ->
+      Regex.match?(~r/^\|.+\|$/, line) and not Regex.match?(~r/^\|[\s\-:|]+\|$/, line)
+    end)
+    |> Enum.reduce([], fn line, acc ->
+      widths =
+        line
+        |> String.trim_leading("|")
+        |> String.trim_trailing("|")
+        |> String.split("|")
+        |> Enum.map(fn cell ->
+          cell |> String.trim() |> do_inline() |> strip_ansi() |> display_column_width()
+        end)
+      merge_col_widths(widths, acc)
+    end)
+  end
+
+  # 合并列宽：取每列的最大值
+  defp merge_col_widths(new_widths, []), do: new_widths
+  defp merge_col_widths(new_widths, prev_widths) do
+    max_len = max(length(new_widths), length(prev_widths))
+    nw = new_widths ++ List.duplicate(0, max_len - length(new_widths))
+    pw = prev_widths ++ List.duplicate(0, max_len - length(prev_widths))
+    Enum.zip(nw, pw) |> Enum.map(fn {a, b} -> max(a, b) end)
+  end
+
+  # 构建表格边框行（顶/底）
+  defp build_table_border(col_widths, left, mid, right) do
+    segs = Enum.map(col_widths, fn w -> String.duplicate("─", w + 2) end)
+    inner = Enum.join(segs, mid)
+    "  #{@faint}#{left}#{inner}#{right}#{@reset}"
+  end
+
+  # 单元格填充到指定显示宽度
   defp pad_cell(text, width) do
     visible_width = text |> strip_ansi() |> display_column_width()
     padding = max(0, width - visible_width)
