@@ -326,7 +326,9 @@ defmodule Gong.Session do
         # 正常 model 路径（生产）— 已在 start_link 中校验过
         is_binary(model) ->
           case ModelRegistry.lookup_by_string(model) do
-            {:ok, config} -> {Gong.Agent.new(), AgentLoop.build_llm_backend(config)}
+            {:ok, config} ->
+              config = ModelRegistry.apply_defaults(config)
+              {Gong.Agent.new(), AgentLoop.build_llm_backend(config)}
             {:error, _} -> {Gong.Agent.new(), nil}
           end
 

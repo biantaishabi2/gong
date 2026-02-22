@@ -10,4 +10,7 @@ defmodule Gong.Providers.DeepSeek do
     id: :deepseek,
     default_base_url: "https://api.deepseek.com",
     default_env_key: "DEEPSEEK_API_KEY"
+
+  @doc "满足 Gong.ProviderRegistry.register/4 调用契约"
+  def validate_config(_config), do: :ok
 end
