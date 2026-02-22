@@ -24,10 +24,11 @@ defmodule Gong.Stream do
             content: String.t() | nil,
             tool_name: String.t() | nil,
             tool_args: map() | nil,
+            success: boolean() | nil,
             timestamp: integer()
           }
 
-    defstruct [:type, :content, :tool_name, :tool_args, :timestamp]
+    defstruct [:type, :content, :tool_name, :tool_args, :success, :timestamp]
 
     @doc "创建事件，自动添加时间戳"
     def new(type, opts \\ []) do
@@ -36,6 +37,7 @@ defmodule Gong.Stream do
         content: Keyword.get(opts, :content),
         tool_name: Keyword.get(opts, :tool_name),
         tool_args: Keyword.get(opts, :tool_args),
+        success: Keyword.get(opts, :success),
         timestamp: System.monotonic_time(:millisecond)
       }
     end

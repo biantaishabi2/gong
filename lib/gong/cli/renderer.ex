@@ -11,7 +11,6 @@ defmodule Gong.CLI.Renderer do
   alias Gong.CLI.Md
 
   @max_tool_args_length 80
-  @max_result_length 200
 
   @blue IO.ANSI.blue()
   @yellow IO.ANSI.yellow()
@@ -118,19 +117,18 @@ defmodule Gong.CLI.Renderer do
     tool_args = Map.get(payload, :tool_args) || Map.get(payload, "tool_args") || %{}
     args_str = Gong.CLI.ToolDisplay.format(tool_name, tool_args)
 
-    IO.puts("#{@yellow}⚡ #{tool_name}#{@reset} #{@faint}#{truncate(args_str, @max_tool_args_length)}#{@reset}")
+    # 不换行，等 tool.end 追加状态标记
+    IO.write("#{@yellow}⚡ #{tool_name}#{@reset} #{@faint}#{truncate(args_str, @max_tool_args_length)}#{@reset}")
   end
 
   def render(%Events{type: "tool.end", payload: payload}) do
-    result = Map.get(payload, :result) || Map.get(payload, "result") || ""
+    success = Map.get(payload, :success, Map.get(payload, "success", true))
 
-    result_str =
-      case result do
-        s when is_binary(s) -> s
-        other -> inspect(other)
-      end
-
-    IO.puts("#{@cyan}✓ #{truncate(result_str, @max_result_length)}#{@reset}")
+    if success do
+      IO.puts(" #{@cyan}✓#{@reset}")
+    else
+      IO.puts(" #{@red}✗#{@reset}")
+    end
   end
 
   def render(%Events{type: type, payload: payload, error: error}) when type in ["error.stream", "error.runtime"] do

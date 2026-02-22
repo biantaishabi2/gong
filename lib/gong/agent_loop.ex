@@ -378,15 +378,15 @@ defmodule Gong.AgentLoop do
       tool: tool_name,
       result: result
     })
-    tool_result_str =
+    {tool_success, tool_result_str} =
       case result do
-        {:ok, %Gong.ToolResult{content: content}} -> content
-        {:ok, content} when is_binary(content) -> content
-        {:error, reason} -> "错误: #{inspect(reason)}"
-        other -> inspect(other)
+        {:ok, %Gong.ToolResult{content: content}} -> {true, content}
+        {:ok, content} when is_binary(content) -> {true, content}
+        {:error, reason} -> {false, "错误: #{inspect(reason)}"}
+        other -> {false, inspect(other)}
       end
 
-    emit_stream_event(StreamEvent.new(:tool_end, tool_name: tool_name, content: tool_result_str))
+    emit_stream_event(StreamEvent.new(:tool_end, tool_name: tool_name, content: tool_result_str, success: tool_success))
 
     # 发送 tool_result（从 ToolResult 提取 content 给 ReAct）
     result_for_react =

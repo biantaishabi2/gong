@@ -92,17 +92,43 @@ defmodule Gong.CLI.RendererTest do
   end
 
   describe "tool 事件" do
-    test "tool.start 输出黄色工具名" do
+    test "tool.start 输出工具名（不换行）" do
       event = make_event("tool.start", %{tool_name: "search", tool_args: %{q: "test"}})
       output = capture_io(fn -> Renderer.render(event) end)
       assert output =~ "⚡"
       assert output =~ "search"
+      # 不以换行结尾，等 tool.end 追加
+      refute String.ends_with?(output, "\n")
     end
 
-    test "tool.end 输出青色结果" do
-      event = make_event("tool.end", %{result: "found 3 items"})
+    test "tool.end 成功显示 ✓" do
+      event = make_event("tool.end", %{success: true})
       output = capture_io(fn -> Renderer.render(event) end)
       assert output =~ "✓"
+      refute output =~ "✗"
+    end
+
+    test "tool.end 失败显示 ✗" do
+      event = make_event("tool.end", %{success: false})
+      output = capture_io(fn -> Renderer.render(event) end)
+      assert output =~ "✗"
+      refute output =~ "✓"
+    end
+
+    test "tool.start + tool.end 同行显示" do
+      start_event = make_event("tool.start", %{tool_name: "bash", tool_args: %{command: "ls"}})
+      end_event = make_event("tool.end", %{success: true})
+
+      output = capture_io(fn ->
+        Renderer.render(start_event)
+        Renderer.render(end_event)
+      end)
+
+      # 整体只有一个换行（来自 tool.end 的 IO.puts）
+      lines = String.split(output, "\n", trim: true)
+      assert length(lines) == 1
+      assert hd(lines) =~ "bash"
+      assert hd(lines) =~ "✓"
     end
   end
 

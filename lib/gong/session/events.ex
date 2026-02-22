@@ -173,11 +173,11 @@ defmodule Gong.Session.Events do
   end
 
   def from_stream_event(
-        %StreamEvent{type: :tool_end, tool_name: tool_name, content: content},
+        %StreamEvent{type: :tool_end, tool_name: tool_name, content: content, success: success},
         ctx,
         _error
       ) do
-    new("tool.end", %{tool_name: tool_name, result: content || ""}, ctx, nil)
+    new("tool.end", %{tool_name: tool_name, result: content || "", success: success != false}, ctx, nil)
   end
 
   def from_stream_event(%StreamEvent{type: :error, content: content}, ctx, error) do
