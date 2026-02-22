@@ -115,8 +115,8 @@ defmodule Gong.BDD.Generated.SettingsTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :cleanup_settings, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 48, raw: "WHEN cleanup_settings"}, 48)
     # line 49: WHEN get_setting_safe key="model"
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :get_setting_safe, %{key: "model"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 49, raw: "WHEN get_setting_safe key=\"model\""}, 49)
-    # line 50: THEN assert_setting_nil
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_setting_nil, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 50, raw: "THEN assert_setting_nil"}, 50)
+    # line 50: THEN assert_setting_value expected="deepseek:deepseek-chat"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_setting_value, %{expected: "deepseek:deepseek-chat"}, %{file: "/home/wangbo/document/gong/docs/bdd/settings.dsl", line: 50, raw: "THEN assert_setting_value expected=\"deepseek:deepseek-chat\""}, 50)
     _ctx = ctx
     :ok
   end
