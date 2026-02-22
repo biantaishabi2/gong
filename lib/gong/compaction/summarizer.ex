@@ -14,7 +14,13 @@ defmodule Gong.Compaction.Summarizer do
   @spec summarize([map()]) :: {:ok, String.t()} | {:error, term()}
   def summarize(messages) do
     {type, prompt_text} = Gong.Prompt.build_summarize_prompt(messages)
-    model = Gong.ModelRegistry.current_model_string()
+
+    # 从 ModelRegistry 获取完整 model config，走 LLMRouter 统一路由
+    model_config =
+      case Gong.ModelRegistry.current_model() do
+        {_name, config} -> config
+        nil -> %{provider: "deepseek", model_id: "deepseek-chat", api_key_env: "DEEPSEEK_API_KEY"}
+      end
 
     system_content =
       case type do
@@ -27,7 +33,7 @@ defmodule Gong.Compaction.Summarizer do
       %{role: "user", content: prompt_text}
     ]
 
-    case ReqLLM.generate_text(model, request_messages, receive_timeout: 30_000) do
+    case Gong.LLMRouter.generate_text(model_config, request_messages, receive_timeout: 30_000) do
       {:ok, response} ->
         text = ReqLLM.Response.text(response)
         {:ok, text}

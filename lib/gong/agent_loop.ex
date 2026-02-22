@@ -541,8 +541,6 @@ defmodule Gong.AgentLoop do
   """
   @spec build_llm_backend(map()) :: (struct(), String.t() -> {:ok, term()} | {:error, term()})
   def build_llm_backend(model_config) do
-    model_str = "#{model_config[:provider]}:#{model_config[:model_id]}"
-
     fn agent_state, _call_id ->
       state = StratState.get(agent_state, %{})
       config = state[:config] || %{}
@@ -552,7 +550,7 @@ defmodule Gong.AgentLoop do
 
       opts = [tools: reqllm_tools, receive_timeout: 60_000]
 
-      case ReqLLM.stream_text(model_str, messages, opts) do
+      case Gong.LLMRouter.stream_text(model_config, messages, opts) do
         {:ok, stream_response} ->
           # 流式输出：每 chunk 通过进程字典回调实时发出
           # 标记已流式输出，避免 process_response 重复发送

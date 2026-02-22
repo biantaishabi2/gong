@@ -191,7 +191,7 @@ defmodule Gong.ModelRegistry do
   @spec apply_defaults(model_config()) :: model_config()
   def apply_defaults(config) when is_map(config) do
     Map.merge(
-      %{api_key_env: "", context_window: @default_context_window},
+      %{api_key_env: "", context_window: @default_context_window, base_url: nil, headers: %{}},
       config
     )
   end

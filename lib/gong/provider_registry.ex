@@ -133,6 +133,46 @@ defmodule Gong.ProviderRegistry do
     end
   end
 
+  @doc "根据 provider name 返回完整配置（base_url/api_key_env/headers/timeout）"
+  @spec resolve_provider_config(String.t()) :: {:ok, map()} | {:error, :not_found}
+  def resolve_provider_config(name) when is_binary(name) do
+    ensure_table!()
+
+    case :ets.lookup(@table, name) do
+      [{^name, entry}] ->
+        provider_config =
+          entry.config
+          |> Map.put(:timeout, entry.timeout)
+          |> Map.put(:module, entry.module)
+          |> Map.put(:priority, entry.priority)
+
+        {:ok, provider_config}
+
+      [] ->
+        {:error, :not_found}
+    end
+  end
+
+  @doc "返回按优先级排列的所有可用 provider 列表，供 Router 依次尝试"
+  @spec fallback_chain() :: [String.t()]
+  def fallback_chain do
+    list()
+    |> Enum.map(fn {name, _entry} -> name end)
+  end
+
+  @doc "根据 model_config 中的 :provider 字段查找对应 ProviderRegistry entry"
+  @spec get_provider_for_model(map()) :: {:ok, {String.t(), provider_entry()}} | {:error, :not_found}
+  def get_provider_for_model(%{provider: provider_name}) when is_binary(provider_name) do
+    ensure_table!()
+
+    case :ets.lookup(@table, provider_name) do
+      [{^provider_name, entry}] -> {:ok, {provider_name, entry}}
+      [] -> {:error, :not_found}
+    end
+  end
+
+  def get_provider_for_model(_), do: {:error, :not_found}
+
   @spec cleanup() :: :ok
   def cleanup do
     if :ets.whereis(@table) != :undefined do

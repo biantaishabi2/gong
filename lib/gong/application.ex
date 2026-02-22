@@ -22,6 +22,17 @@ defmodule Gong.Application do
     Gong.PromptTemplate.init()
     Gong.ModelRegistry.init()
 
+    # 初始化 Provider 注册表并注册 DeepSeek
+    Gong.ProviderRegistry.init()
+
+    Gong.ProviderRegistry.register(
+      "deepseek",
+      Gong.Providers.DeepSeek,
+      %{},
+      priority: 10,
+      timeout: 60_000
+    )
+
     opts = [strategy: :one_for_one, name: Gong.Supervisor]
     Supervisor.start_link(children, opts)
   end
