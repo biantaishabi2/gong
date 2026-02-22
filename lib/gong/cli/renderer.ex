@@ -13,6 +13,7 @@ defmodule Gong.CLI.Renderer do
   @max_tool_args_length 80
 
   @blue IO.ANSI.blue()
+  @green IO.ANSI.green()
   @yellow IO.ANSI.yellow()
   @cyan IO.ANSI.cyan()
   @red IO.ANSI.red()
@@ -140,7 +141,7 @@ defmodule Gong.CLI.Renderer do
     success = Map.get(payload, :success, Map.get(payload, "success", true))
 
     if success do
-      IO.puts(" #{@cyan}✓#{@reset}")
+      IO.puts(" #{@green}✓#{@reset}")
     else
       IO.puts(" #{@red}✗#{@reset}")
     end
