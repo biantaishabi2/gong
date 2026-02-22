@@ -27,7 +27,7 @@ defmodule Gong.AgentLoop do
       - :llm_backend — `fn agent, call_id -> {:ok, response} | {:error, reason}` 闭包，
         每次需要 LLM 响应时调用。response 格式同 MockLLM 的 {:text, _} | {:tool_calls, _} | {:error, _}
       - :hooks — Hook 模块列表，默认 []
-      - :max_turns — 最大轮数，默认 25
+      - :max_turns — 最大轮数，默认从设置读取，支持 :infinity
       - :steering_config — Steering 配置（可选）
 
   ## 返回
@@ -116,7 +116,11 @@ defmodule Gong.AgentLoop do
     {agent, directives} = ReAct.cmd(agent, [start_instruction], %{})
     call_id = extract_call_id(directives)
 
-    max_turns = Keyword.get(opts, :max_turns, 25)
+    max_turns = 
+      case Keyword.get(opts, :max_turns, :from_settings) do
+        :from_settings -> Gong.Settings.get_integer("max_iterations", 25)
+        value -> value
+      end
 
     # 驱动 ReAct 循环
     drive_loop(agent, call_id, llm_backend, hooks, opts, 0, max_turns)
@@ -124,9 +128,10 @@ defmodule Gong.AgentLoop do
 
   # ── 循环驱动 ──
 
+  # :infinity 时 guard 不匹配，永不触发迭代限制
   defp drive_loop(agent, _call_id, _llm_backend, _hooks, _opts, turn, max_turns)
-       when turn >= max_turns do
-    {:error, "达到最大迭代次数 #{max_turns}", agent}
+       when is_integer(max_turns) and turn >= max_turns do
+    {:error, {:iteration_limit_reached, %{max_iterations: max_turns, current_turn: turn}}, agent}
   end
 
   defp drive_loop(agent, call_id, llm_backend, hooks, opts, turn, max_turns) do

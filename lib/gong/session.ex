@@ -737,6 +737,17 @@ defmodule Gong.Session do
   def normalize_error(:cancelled), do: error(:cancelled, "cancelled", %{})
   def normalize_error(:unauthorized), do: error(:unauthorized, "unauthorized", %{})
 
+  def normalize_error({:iteration_limit_reached, details}) when is_map(details) do
+    max = Map.get(details, :max_iterations, "?")
+    %{
+      code: :iteration_limit_reached,
+      message: "达到最大迭代次数 #{max}",
+      retriable: false,
+      retry_after: nil,
+      details: details
+    }
+  end
+
   def normalize_error(other) do
     error(:internal_error, "internal error", %{raw: inspect(other)})
   end
@@ -1058,7 +1069,7 @@ defmodule Gong.Session do
   end
 
   # Agent 直调路径：调用 AgentLoop.run，从进程字典读取 usage
-  defp run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id, opts \\ []) do
+  defp run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id, opts) do
     agent_opts = [llm_backend: llm_backend_fn] ++ opts
     case AgentLoop.run(agent, message, agent_opts) do
       {:ok, _reply, updated_agent} ->
@@ -1772,6 +1783,7 @@ defmodule Gong.Session do
          timeout
          cancelled
          unauthorized
+         iteration_limit_reached
        )a,
     do: code
 

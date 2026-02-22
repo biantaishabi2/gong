@@ -42,12 +42,12 @@ WHEN list_settings
 THEN assert_settings_list contains="model"
 THEN assert_settings_list contains="temperature"
 
-[SCENARIO: SETTINGS-006] TITLE: cleanup 清除 ETS 表 TAGS: unit settings
+[SCENARIO: SETTINGS-006] TITLE: cleanup 后回退到编译期默认值 TAGS: unit settings
 GIVEN create_temp_dir
 GIVEN init_settings
 WHEN cleanup_settings
 WHEN get_setting_safe key="model"
-THEN assert_setting_nil
+THEN assert_setting_value expected="deepseek:deepseek-chat"
 
 [SCENARIO: SETTINGS-007] TITLE: 畸形 JSON 配置文件不崩溃 TAGS: unit settings
 GIVEN create_temp_dir

@@ -11,7 +11,8 @@ defmodule Gong.Settings do
   @default_settings %{
     "model" => "deepseek:deepseek-chat",
     "max_tokens" => "8192",
-    "temperature" => "0.7"
+    "temperature" => "0.7",
+    "max_iterations" => "25"
   }
 
   @doc "初始化设置管理器"
@@ -40,9 +41,28 @@ defmodule Gong.Settings do
   @doc "获取设置值"
   @spec get(String.t()) :: term()
   def get(key) do
-    case :ets.lookup(@table, key) do
-      [{^key, value}] -> value
-      [] -> Map.get(@default_settings, key)
+    if :ets.info(@table) == :undefined do
+      Map.get(@default_settings, key)
+    else
+      case :ets.lookup(@table, key) do
+        [{^key, value}] -> value
+        [] -> Map.get(@default_settings, key)
+      end
+    end
+  end
+
+  @doc "获取整数值设置，支持 :infinity 特殊值"
+  @spec get_integer(String.t(), integer() | :infinity) :: integer() | :infinity
+  def get_integer(key, default) do
+    case get(key) do
+      "infinity" -> :infinity
+      value when is_binary(value) ->
+        case Integer.parse(value) do
+          {int, ""} -> int
+          _ -> default
+        end
+      value when is_integer(value) -> value
+      _ -> default
     end
   end
 

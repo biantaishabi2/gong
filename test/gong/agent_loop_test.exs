@@ -89,7 +89,57 @@ defmodule Gong.AgentLoopTest do
           {:tool_calls, tool_calls}
         ])
 
-      assert {:error, "达到最大迭代次数 2", _agent} =
+      assert {:error, {:iteration_limit_reached, %{max_iterations: 2, current_turn: 2}}, _agent} =
+               Gong.AgentLoop.run(agent, "无限循环",
+                 llm_backend: backend,
+                 max_turns: 2
+               )
+
+      Agent.stop(pid)
+    end
+
+    test "从 Settings 读取 max_iterations 默认值", %{agent: agent} do
+      # 初始化 Settings 并设置较小的 max_iterations
+      tmp = System.tmp_dir!()
+      Gong.Settings.init(tmp)
+      Gong.Settings.set("max_iterations", "3")
+
+      tool_calls = [%{name: "list_directory", arguments: %{"path" => "/tmp"}}]
+
+      {backend, pid} =
+        queue_backend([
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls}
+        ])
+
+      # 不传 max_turns，应从 Settings 读取 max_iterations=3
+      assert {:error, {:iteration_limit_reached, %{max_iterations: 3, current_turn: 3}}, _agent} =
+               Gong.AgentLoop.run(agent, "无限循环", llm_backend: backend)
+
+      Agent.stop(pid)
+    end
+
+    test "max_turns 参数优先于 Settings", %{agent: agent} do
+      tmp = System.tmp_dir!()
+      Gong.Settings.init(tmp)
+      Gong.Settings.set("max_iterations", "10")
+
+      tool_calls = [%{name: "list_directory", arguments: %{"path" => "/tmp"}}]
+
+      {backend, pid} =
+        queue_backend([
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls},
+          {:tool_calls, tool_calls}
+        ])
+
+      # 显式传 max_turns=2 应覆盖 Settings 的 max_iterations=10
+      assert {:error, {:iteration_limit_reached, %{max_iterations: 2, current_turn: 2}}, _agent} =
                Gong.AgentLoop.run(agent, "无限循环",
                  llm_backend: backend,
                  max_turns: 2
