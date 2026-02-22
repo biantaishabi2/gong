@@ -52,6 +52,22 @@ defmodule Gong.CLI.Md do
         content = String.replace_prefix(line, "> ", "") |> String.replace_prefix(">", "")
         {"#{@faint}│ #{do_inline(content)}#{@reset}", false}
 
+      # 表格分隔线（|---|---|）— 静默
+      Regex.match?(~r/^\|[\s\-:|]+\|$/, line) ->
+        {"", false}
+
+      # 表格数据行（| cell | cell |）
+      Regex.match?(~r/^\|.+\|$/, line) ->
+        cells =
+          line
+          |> String.trim_leading("|")
+          |> String.trim_trailing("|")
+          |> String.split("|")
+          |> Enum.map(&String.trim/1)
+          |> Enum.map(&do_inline/1)
+
+        {"  #{Enum.join(cells, "#{@faint}  │  #{@reset}")}", false}
+
       # 水平线
       Regex.match?(~r/^---+$/, line) ->
         {"#{@faint}────────#{@reset}", false}
