@@ -64,6 +64,8 @@ THEN assert_io_output contains="你好世界"
 [SCENARIO: CLI-RENDER-002] TITLE: message.end 渲染换行 TAGS: unit cli renderer
 GIVEN create_temp_dir
 GIVEN capture_io
+WHEN render_event type="message.start"
+WHEN render_event type="message.delta" content="test"
 WHEN render_event type="message.end"
 THEN assert_io_output contains="\n"
 

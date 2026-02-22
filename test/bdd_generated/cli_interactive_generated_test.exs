@@ -175,10 +175,14 @@ defmodule Gong.BDD.Generated.CliInteractiveTest do
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :create_temp_dir, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 65, raw: "GIVEN create_temp_dir"}, 65)
     # line 66: GIVEN capture_io
     ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :given, :capture_io, %{}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 66, raw: "GIVEN capture_io"}, 66)
-    # line 67: WHEN render_event type="message.end"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{type: "message.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 67, raw: "WHEN render_event type=\"message.end\""}, 67)
-    # line 68: THEN assert_io_output contains="\n"
-    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "\\n"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 68, raw: "THEN assert_io_output contains=\"\\n\""}, 68)
+    # line 67: WHEN render_event type="message.start"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{type: "message.start"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 67, raw: "WHEN render_event type=\"message.start\""}, 67)
+    # line 68: WHEN render_event type="message.delta" content="test"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{content: "test", type: "message.delta"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 68, raw: "WHEN render_event type=\"message.delta\" content=\"test\""}, 68)
+    # line 69: WHEN render_event type="message.end"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :when, :render_event, %{type: "message.end"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 69, raw: "WHEN render_event type=\"message.end\""}, 69)
+    # line 70: THEN assert_io_output contains="\n"
+    ctx = Gong.BDD.Instructions.V1.run_step!(ctx, :then, :assert_io_output, %{contains: "\\n"}, %{file: "/home/wangbo/document/gong/docs/bdd/cli_interactive.dsl", line: 70, raw: "THEN assert_io_output contains=\"\\n\""}, 70)
     _ctx = ctx
     :ok
   end

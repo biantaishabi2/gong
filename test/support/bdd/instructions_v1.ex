@@ -2478,7 +2478,8 @@ defmodule Gong.BDD.Instructions.V1 do
     if queue != [] do
       # Mock 模式：策略层驱动（传入 hooks + steering）
       agent = ctx.agent
-      opts = if sc = ctx[:steering_config], do: [steering_config: sc], else: []
+      base_opts = [workspace: Map.get(ctx, :workspace, ".")]
+      opts = if sc = ctx[:steering_config], do: [steering_config: sc] ++ base_opts, else: base_opts
       case Gong.MockLLM.run_chat(agent, prompt, queue, hooks, opts) do
         {:ok, reply, updated_agent} ->
           ctx = collect_telemetry_events(ctx)
