@@ -71,6 +71,10 @@ defmodule Gong.CLI.Chat do
 
       input when is_binary(input) ->
         line = String.trim(input)
+        # 回退擦除原始输入，重写为蓝色加粗
+        if line != "" do
+          IO.write("\e[1A\r\e[J#{IO.ANSI.green()}❯ #{IO.ANSI.reset()}#{IO.ANSI.bright()}#{IO.ANSI.blue()}#{line}#{IO.ANSI.reset()}\n")
+        end
         handle_input(line, session_pid)
     end
   end
