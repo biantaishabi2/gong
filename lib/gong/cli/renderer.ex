@@ -116,13 +116,7 @@ defmodule Gong.CLI.Renderer do
   def render(%Events{type: "tool.start", payload: payload}) do
     tool_name = Map.get(payload, :tool_name) || Map.get(payload, "tool_name") || "unknown"
     tool_args = Map.get(payload, :tool_args) || Map.get(payload, "tool_args") || %{}
-
-    args_str =
-      case tool_args do
-        s when is_binary(s) -> s
-        m when is_map(m) -> Jason.encode!(m)
-        other -> inspect(other)
-      end
+    args_str = Gong.CLI.ToolDisplay.format(tool_name, tool_args)
 
     IO.puts("#{@yellow}⚡ #{tool_name}#{@reset} #{@faint}#{truncate(args_str, @max_tool_args_length)}#{@reset}")
   end
