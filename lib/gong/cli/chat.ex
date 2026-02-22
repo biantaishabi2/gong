@@ -31,6 +31,14 @@ defmodule Gong.CLI.Chat do
     case Session.start_link(session_opts) do
       {:ok, pid} ->
         :ok = Session.subscribe(pid, self())
+        # 提前获取 session_id，Ctrl+C 退出时直接用
+        sid = case Session.session_id(pid) do
+          {:ok, id} -> id
+          _ -> nil
+        end
+        System.at_exit(fn _status ->
+          if sid, do: IO.puts("\n#{IO.ANSI.faint()}恢复会话: bin/gong session restore #{sid}#{IO.ANSI.reset()}")
+        end)
         IO.puts("#{IO.ANSI.bright()}Gong Chat#{IO.ANSI.reset()} #{IO.ANSI.faint()}(输入 /help 查看命令, /exit 退出)#{IO.ANSI.reset()}")
         repl_loop(pid)
 
