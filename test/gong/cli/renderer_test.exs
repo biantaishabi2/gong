@@ -21,26 +21,36 @@ defmodule Gong.CLI.RendererTest do
   end
 
   describe "逐行流式渲染" do
-    test "message.start 输出前缀" do
+    test "message.start 延迟前缀（不立即输出）" do
       output = capture_io(fn -> Renderer.render(make_event("message.start")) end)
-      assert output =~ "◆"
+      assert output == ""
       Process.delete(:gong_stream)
     end
 
-    test "delta 无换行直接输出原文" do
-      capture_io(fn -> Renderer.render(make_event("message.start")) end)
+    test "空 message（start→end 无 delta）静默" do
+      output = capture_io(fn ->
+        Renderer.render(make_event("message.start"))
+        Renderer.render(make_event("message.end"))
+      end)
+      assert output == ""
+    end
+
+    test "delta 无换行输出前缀+原文" do
+      Renderer.render(make_event("message.start"))
 
       output =
         capture_io(fn ->
           Renderer.render(make_event("message.delta", %{content: "Hello"}))
         end)
 
-      assert output == "Hello"
+      # 首个 delta 触发前缀输出
+      assert output =~ "◆"
+      assert output =~ "Hello"
       Process.delete(:gong_stream)
     end
 
     test "delta 有换行触发擦除+渲染" do
-      capture_io(fn -> Renderer.render(make_event("message.start")) end)
+      Renderer.render(make_event("message.start"))
 
       output =
         capture_io(fn ->
@@ -55,7 +65,7 @@ defmodule Gong.CLI.RendererTest do
     end
 
     test "message.end 处理最后未完成行" do
-      capture_io(fn -> Renderer.render(make_event("message.start")) end)
+      Renderer.render(make_event("message.start"))
       capture_io(fn -> Renderer.render(make_event("message.delta", %{content: "**bold**"})) end)
 
       output = capture_io(fn -> Renderer.render(make_event("message.end")) end)
@@ -65,7 +75,7 @@ defmodule Gong.CLI.RendererTest do
     end
 
     test "长文本折行时擦除回退多行" do
-      capture_io(fn -> Renderer.render(make_event("message.start")) end)
+      Renderer.render(make_event("message.start"))
 
       # 写入超过 80 列的中文（40 个 CJK = 80 列 + 前缀 2 列 → 折行）
       long_text = String.duplicate("你", 42)
@@ -84,8 +94,9 @@ defmodule Gong.CLI.RendererTest do
       Process.delete(:gong_stream)
     end
 
-    test "message.end 空 buffer 只输出换行" do
-      capture_io(fn -> Renderer.render(make_event("message.start")) end)
+    test "message.end 有 delta 后正常换行" do
+      Renderer.render(make_event("message.start"))
+      capture_io(fn -> Renderer.render(make_event("message.delta", %{content: "line\n"})) end)
       output = capture_io(fn -> Renderer.render(make_event("message.end")) end)
       assert output == "\n"
     end

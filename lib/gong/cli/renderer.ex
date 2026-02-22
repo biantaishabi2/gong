@@ -24,20 +24,29 @@ defmodule Gong.CLI.Renderer do
   @spec render(Events.t()) :: :ok
 
   def render(%Events{type: "message.start"}) do
-    # pending_cols: 当前未完成行在终端上占的显示列数（用于折行擦除）
+    # 延迟写前缀：等首个 delta 到达再输出，避免空 message 产生孤立 ◆
     Process.put(:gong_stream, %{
       buffer: "",
       completed: 0,
       in_code_block: false,
-      pending_cols: Md.display_width(@prefix)
+      pending_cols: 0,
+      prefix_written: false
     })
-
-    IO.write("#{@blue}#{@prefix}#{@reset}")
   end
 
   def render(%Events{type: "message.delta", payload: payload}) do
     content = Map.get(payload, :content) || Map.get(payload, "content") || ""
-    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false, pending_cols: 0})
+    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false, pending_cols: 0, prefix_written: false})
+
+    # 首个 delta 到达时写前缀
+    state =
+      if not Map.get(state, :prefix_written, false) do
+        IO.write("#{@blue}#{@prefix}#{@reset}")
+        %{state | prefix_written: true, pending_cols: Md.display_width(@prefix)}
+      else
+        state
+      end
+
     new_buffer = state.buffer <> content
 
     # 分割成完成的行 + 未完成的尾部
@@ -76,7 +85,8 @@ defmodule Gong.CLI.Renderer do
         buffer: new_buffer,
         completed: new_complete_count,
         in_code_block: in_code,
-        pending_cols: Md.display_width(pending)
+        pending_cols: Md.display_width(pending),
+        prefix_written: true
       })
     else
       # 没有新行完成，直接写原文
@@ -86,29 +96,34 @@ defmodule Gong.CLI.Renderer do
   end
 
   def render(%Events{type: "message.end"}) do
-    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false, pending_cols: 0})
+    state = Process.get(:gong_stream, %{buffer: "", completed: 0, in_code_block: false, pending_cols: 0, prefix_written: false})
     Process.delete(:gong_stream)
 
-    # 处理最后一个未完成行
-    parts = String.split(state.buffer, "\n")
-    pending = List.last(parts) || ""
-
-    if pending != "" do
-      {rendered, _} = Md.render_line(pending, state.in_code_block)
-
-      erase = build_erase(state.pending_cols)
-
-      # 第一行需要前缀
-      prefix_part =
-        if state.completed == 0 do
-          "#{@blue}#{@prefix}#{@reset}"
-        else
-          ""
-        end
-
-      IO.write([erase, prefix_part, rendered, "\n"])
+    # 空 message（没有任何 delta）静默跳过，不输出孤立的 ◆
+    if not Map.get(state, :prefix_written, false) do
+      :ok
     else
-      IO.write("\n")
+      # 处理最后一个未完成行
+      parts = String.split(state.buffer, "\n")
+      pending = List.last(parts) || ""
+
+      if pending != "" do
+        {rendered, _} = Md.render_line(pending, state.in_code_block)
+
+        erase = build_erase(state.pending_cols)
+
+        # 第一行需要前缀
+        prefix_part =
+          if state.completed == 0 do
+            "#{@blue}#{@prefix}#{@reset}"
+          else
+            ""
+          end
+
+        IO.write([erase, prefix_part, rendered, "\n"])
+      else
+        IO.write("\n")
+      end
     end
   end
 
