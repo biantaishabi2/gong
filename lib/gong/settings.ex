@@ -12,7 +12,7 @@ defmodule Gong.Settings do
     "model" => "deepseek:deepseek-chat",
     "max_tokens" => "8192",
     "temperature" => "0.7",
-    "max_iterations" => "25"
+    "max_iterations" => "infinity"
   }
 
   @doc "初始化设置管理器"

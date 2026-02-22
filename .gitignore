@@ -30,6 +30,7 @@ gong-*.tar
 
 # 本地工具/运行时
 .niuma/
+.gong/
 .tmp/
 .worktrees/
 COMPACTION

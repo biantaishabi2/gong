@@ -116,9 +116,10 @@ defmodule Gong.AgentLoop do
     {agent, directives} = ReAct.cmd(agent, [start_instruction], %{})
     call_id = extract_call_id(directives)
 
-    max_turns = 
+    max_turns =
       case Keyword.get(opts, :max_turns, :from_settings) do
-        :from_settings -> Gong.Settings.get_integer("max_iterations", 25)
+        # 默认无限次，只有显式配置数字时才限制轮数。
+        :from_settings -> Gong.Settings.get_integer("max_iterations", :infinity)
         value -> value
       end
 
