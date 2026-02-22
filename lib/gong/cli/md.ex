@@ -156,19 +156,33 @@ defmodule Gong.CLI.Md do
   def render_inline(text) do
     lines = String.split(text, "\n")
 
-    # 第一遍：预扫描表格列宽
-    col_widths = prescan_table_widths(lines)
-    if col_widths != [] do
-      Process.put(:gong_md_table_widths, col_widths)
-    end
+    # 第一遍：预扫描表格列宽（按表格分组，每个表格独立计算）
+    table_widths_queue = prescan_table_widths_grouped(lines)
+    Process.put(:gong_md_table_widths_queue, table_widths_queue)
 
     {rendered_lines, _in_code} =
       Enum.reduce(lines, {[], false}, fn line, {acc, in_code} ->
+        # 表格首行到达时，从队列中取出该表格的预扫描宽度
+        is_table_line = Regex.match?(~r/^\|.+\|$/, line) or Regex.match?(~r/^\|[\s\-:|]+\|$/, line)
+        if is_table_line and not Process.get(:gong_md_in_table, false) do
+          queue = Process.get(:gong_md_table_widths_queue, [])
+          case queue do
+            [widths | rest] ->
+              Process.put(:gong_md_table_widths, widths)
+              Process.put(:gong_md_table_widths_queue, rest)
+            _ ->
+              :ok
+          end
+        end
+
         case render_line(line, in_code) do
           {:buffered, true} -> {acc, true}
           {rendered, new_in_code} -> {acc ++ [rendered], new_in_code}
         end
       end)
+
+    # 清理队列
+    Process.delete(:gong_md_table_widths_queue)
 
     # 文本结束时如果还在表格内，追加底边框
     trailing =
@@ -273,22 +287,61 @@ defmodule Gong.CLI.Md do
     non_empty != [] and Enum.all?(non_empty, fn l -> Regex.match?(~r/^\|.+\|$/, String.trim(l)) end)
   end
 
-  # 预扫描表格数据行，计算所有列的最大显示宽度
-  defp prescan_table_widths(lines) do
-    lines
-    |> Enum.filter(fn line ->
-      Regex.match?(~r/^\|.+\|$/, line) and not Regex.match?(~r/^\|[\s\-:|]+\|$/, line)
+  # 预扫描表格列宽，按表格分组（遇到非表格行分隔），跳过代码块内的行
+  defp prescan_table_widths_grouped(lines) do
+    {groups, current, _in_code} =
+      Enum.reduce(lines, {[], [], false}, fn line, {groups, current, in_code} ->
+        trimmed = String.trim_leading(line)
+        cond do
+          String.starts_with?(trimmed, "```") ->
+            # 代码块边界：关闭当前分组
+            if current != [] do
+              {groups ++ [current], [], not in_code}
+            else
+              {groups, [], not in_code}
+            end
+
+          in_code ->
+            {groups, current, in_code}
+
+          is_table_data_line?(line) ->
+            widths = compute_line_widths(line)
+            {groups, [widths | current], in_code}
+
+          # 分隔线也属于当前表格，跳过不计入宽度
+          Regex.match?(~r/^\|[\s\-:|]+\|$/, line) ->
+            {groups, current, in_code}
+
+          true ->
+            # 非表格行，关闭当前分组
+            if current != [] do
+              {groups ++ [current], [], in_code}
+            else
+              {groups, [], in_code}
+            end
+        end
+      end)
+
+    # 处理末尾未关闭的分组
+    all_groups = if current != [], do: groups ++ [current], else: groups
+
+    # 每组 merge 出最大列宽
+    Enum.map(all_groups, fn width_list ->
+      Enum.reduce(width_list, [], &merge_col_widths/2)
     end)
-    |> Enum.reduce([], fn line, acc ->
-      widths =
-        line
-        |> String.trim_leading("|")
-        |> String.trim_trailing("|")
-        |> String.split("|")
-        |> Enum.map(fn cell ->
-          cell |> String.trim() |> do_inline() |> strip_ansi() |> display_column_width()
-        end)
-      merge_col_widths(widths, acc)
+  end
+
+  defp is_table_data_line?(line) do
+    Regex.match?(~r/^\|.+\|$/, line) and not Regex.match?(~r/^\|[\s\-:|]+\|$/, line)
+  end
+
+  defp compute_line_widths(line) do
+    line
+    |> String.trim_leading("|")
+    |> String.trim_trailing("|")
+    |> String.split("|")
+    |> Enum.map(fn cell ->
+      cell |> String.trim() |> do_inline() |> strip_ansi() |> display_column_width()
     end)
   end
 

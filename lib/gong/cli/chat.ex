@@ -33,7 +33,8 @@ defmodule Gong.CLI.Chat do
         :ok = Session.subscribe(pid, self())
         # 提前获取 session_id，Ctrl+C 退出时直接用
         sid = case Session.session_id(pid) do
-          {:ok, id} -> id
+          {:ok, {:ok, id}} when is_binary(id) -> id
+          {:ok, id} when is_binary(id) -> id
           _ -> nil
         end
         System.at_exit(fn _status ->
@@ -202,7 +203,9 @@ defmodule Gong.CLI.Chat do
 
   defp print_resume_hint(session_pid) do
     case Session.session_id(session_pid) do
-      {:ok, sid} ->
+      {:ok, {:ok, sid}} when is_binary(sid) ->
+        IO.puts("\n#{IO.ANSI.faint()}恢复会话: bin/gong session restore #{sid}#{IO.ANSI.reset()}")
+      {:ok, sid} when is_binary(sid) ->
         IO.puts("\n#{IO.ANSI.faint()}恢复会话: bin/gong session restore #{sid}#{IO.ANSI.reset()}")
       _ ->
         :ok

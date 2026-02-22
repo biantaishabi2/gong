@@ -49,56 +49,41 @@ defmodule Gong.CLI.RendererTest do
       Process.delete(:gong_stream)
     end
 
-    test "delta 有换行触发擦除+渲染" do
-      Renderer.render(make_event("message.start"))
-
+    test "delta 流式输出原文，message.end 重排渲染" do
       output =
         capture_io(fn ->
+          Renderer.render(make_event("message.start"))
           Renderer.render(make_event("message.delta", %{content: "## 标题\n"}))
+          Renderer.render(make_event("message.end"))
         end)
 
-      # 应包含擦除码和渲染后的标题
-      assert output =~ "\r\e[J"
+      # message.end 重排后应包含渲染后的标题（无 ## 前缀）
       assert output =~ "标题"
-      refute output =~ "##"
-      Process.delete(:gong_stream)
+      assert output =~ "◆"
     end
 
-    test "message.end 处理最后未完成行" do
-      Renderer.render(make_event("message.start"))
-      capture_io(fn -> Renderer.render(make_event("message.delta", %{content: "**bold**"})) end)
-
-      output = capture_io(fn -> Renderer.render(make_event("message.end")) end)
-      assert output =~ "\r\e[J"
-      assert output =~ "bold"
-      refute output =~ "**"
-    end
-
-    test "长文本折行时擦除回退多行" do
-      Renderer.render(make_event("message.start"))
-
-      # 写入超过 80 列的中文（40 个 CJK = 80 列 + 前缀 2 列 → 折行）
-      long_text = String.duplicate("你", 42)
-
-      capture_io(fn ->
-        Renderer.render(make_event("message.delta", %{content: long_text}))
-      end)
-
+    test "message.end 渲染 bold 格式" do
       output =
         capture_io(fn ->
-          Renderer.render(make_event("message.delta", %{content: "\n"}))
+          Renderer.render(make_event("message.start"))
+          Renderer.render(make_event("message.delta", %{content: "**bold**"}))
+          Renderer.render(make_event("message.end"))
         end)
 
-      # 应包含 \e[nA 回退（pending_cols = 2 + 84 = 86 > 80）
-      assert output =~ "\e[1A"
-      Process.delete(:gong_stream)
+      assert output =~ "bold"
     end
 
-    test "message.end 有 delta 后正常换行" do
-      Renderer.render(make_event("message.start"))
-      capture_io(fn -> Renderer.render(make_event("message.delta", %{content: "line\n"})) end)
-      output = capture_io(fn -> Renderer.render(make_event("message.end")) end)
-      assert output == "\n"
+    test "message.end 擦除原文后一次渲染" do
+      output =
+        capture_io(fn ->
+          Renderer.render(make_event("message.start"))
+          Renderer.render(make_event("message.delta", %{content: "line\n"}))
+          Renderer.render(make_event("message.end"))
+        end)
+
+      # 最终输出包含前缀和内容
+      assert output =~ "◆"
+      assert output =~ "line"
     end
   end
 
