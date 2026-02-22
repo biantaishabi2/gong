@@ -31,3 +31,10 @@ workflow:
   max_iterate_rounds: 10
   allowed_prefixes:
     - "automation/"
+
+label_guard:
+  allowlist:
+    - "github-actions[bot]"
+    - "niuma-bot"
+    - "biantaishabi2"
+  mode: "dry-run"
