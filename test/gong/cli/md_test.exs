@@ -46,26 +46,31 @@ defmodule Gong.CLI.MdTest do
     end
 
     test "围栏代码块开启" do
-      {result, in_code} = Md.render_line("```elixir", false)
-      assert result == ""
-      assert in_code == true
+      assert {:buffered, true} = Md.render_line("```elixir", false)
     end
 
-    test "代码块内容青色" do
-      {result, in_code} = Md.render_line("def hello, do: :world", true)
+    test "代码块内容缓冲" do
+      # 开启代码块
+      Md.render_line("```", false)
+      # 代码块内容被缓冲
+      assert {:buffered, true} = Md.render_line("def hello, do: :world", true)
+    end
+
+    test "围栏代码块关闭后输出青色" do
+      # 完整流程：开启 → 内容 → 关闭
+      Md.render_line("```", false)
+      Md.render_line("def hello, do: :world", true)
+      {result, in_code} = Md.render_line("```", true)
       assert result =~ "\e[36m"
       assert result =~ "def hello"
-      assert in_code == true
-    end
-
-    test "围栏代码块关闭" do
-      {result, in_code} = Md.render_line("```", true)
-      assert result == ""
       assert in_code == false
     end
 
     test "代码块内不做行内替换" do
-      {result, _} = Md.render_line("**not bold** `not code`", true)
+      # 完整流程：开启 → 内容 → 关闭
+      Md.render_line("```", false)
+      Md.render_line("**not bold** `not code`", true)
+      {result, _} = Md.render_line("```", true)
       assert result =~ "**not bold**"
       assert result =~ "`not code`"
     end

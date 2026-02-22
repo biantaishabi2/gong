@@ -30,8 +30,12 @@ defmodule Gong.CLI.Md do
         ""
       end
 
-    {rendered, new_in_code} = do_render_line(line, in_code_block)
-    {table_bottom <> rendered, new_in_code}
+    case do_render_line(line, in_code_block) do
+      {:buffered, true} ->
+        {:buffered, true}
+      {rendered, new_in_code} ->
+        {table_bottom <> rendered, new_in_code}
+    end
   end
 
   defp do_render_line(line, in_code_block) do
@@ -39,16 +43,34 @@ defmodule Gong.CLI.Md do
       # 围栏代码块边界
       String.starts_with?(String.trim_leading(line), "```") ->
         if in_code_block do
-          # 关闭代码块，不输出 ``` 行
-          {"", false}
+          # 关闭代码块 — 检查缓冲内容是否为表格
+          buffered = Process.get(:gong_md_code_buffer, [])
+          Process.delete(:gong_md_code_buffer)
+
+          if table_lines?(buffered) do
+            # 内容是表格，按表格渲染
+            {rendered, _} =
+              Enum.reduce(buffered, {[], false}, fn l, {acc, ic} ->
+                {r, nic} = do_render_line(l, ic)
+                {acc ++ [r], nic}
+              end)
+            {Enum.join(rendered, "\n"), false}
+          else
+            # 普通代码块，青色输出
+            code = Enum.map(buffered, fn l -> "  #{@cyan}#{l}#{@reset}" end)
+            {Enum.join(code, "\n"), false}
+          end
         else
-          # 打开代码块，不输出 ``` 行
-          {"", true}
+          # 打开代码块，开始缓冲
+          Process.put(:gong_md_code_buffer, [])
+          {:buffered, true}
         end
 
-      # 代码块内部 — 青色缩进
+      # 代码块内部 — 缓冲，不立即输出
       in_code_block ->
-        {"  #{@cyan}#{line}#{@reset}", true}
+        buffer = Process.get(:gong_md_code_buffer, [])
+        Process.put(:gong_md_code_buffer, buffer ++ [line])
+        {:buffered, true}
 
       # 标题
       Regex.match?(~r/^\#{1,6}\s+/, line) ->
@@ -142,8 +164,10 @@ defmodule Gong.CLI.Md do
 
     {rendered_lines, _in_code} =
       Enum.reduce(lines, {[], false}, fn line, {acc, in_code} ->
-        {rendered, new_in_code} = render_line(line, in_code)
-        {acc ++ [rendered], new_in_code}
+        case render_line(line, in_code) do
+          {:buffered, true} -> {acc, true}
+          {rendered, new_in_code} -> {acc ++ [rendered], new_in_code}
+        end
       end)
 
     # 文本结束时如果还在表格内，追加底边框
@@ -159,6 +183,21 @@ defmodule Gong.CLI.Md do
       end
 
     Enum.join(rendered_lines, "\n") <> trailing
+  end
+
+  @doc "消息结束时刷出未闭合的表格底边框"
+  @spec flush_table_bottom() :: :ok
+  def flush_table_bottom do
+    if Process.get(:gong_md_in_table, false) do
+      Process.put(:gong_md_in_table, false)
+      col_widths = Process.get(:gong_md_table_widths, [])
+      Process.delete(:gong_md_table_widths)
+      IO.write(build_table_border(col_widths, "└", "┴", "┘") <> "\n")
+    end
+
+    # 清理代码块缓冲
+    Process.delete(:gong_md_code_buffer)
+    :ok
   end
 
   @doc "获取终端宽度，fallback 80"
@@ -225,6 +264,13 @@ defmodule Gong.CLI.Md do
   # 文件路径（以 / 或 ~/ 开头，含 . 扩展名，排除 URL 内的路径）
   defp replace_file_paths(text) do
     Regex.replace(~r/(?<![:\/\w])[~]?\/[\w\-.\/@]+\.\w+/, text, "#{@underline}\\0#{@reset}")
+  end
+
+  # 判断缓冲的代码块内容是否全为表格行
+  defp table_lines?([]), do: false
+  defp table_lines?(lines) do
+    non_empty = Enum.reject(lines, fn l -> String.trim(l) == "" end)
+    non_empty != [] and Enum.all?(non_empty, fn l -> Regex.match?(~r/^\|.+\|$/, String.trim(l)) end)
   end
 
   # 预扫描表格数据行，计算所有列的最大显示宽度

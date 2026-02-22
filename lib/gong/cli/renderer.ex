@@ -62,11 +62,13 @@ defmodule Gong.CLI.Renderer do
       # 擦除：根据 pending 文本占用的终端行数决定是否需要回退多行
       erase = build_erase(state.pending_cols)
 
-      # 渲染每一行
+      # 渲染每一行（跳过代码块缓冲行）
       {rendered_lines, in_code} =
         Enum.reduce(new_lines, {[], state.in_code_block}, fn line, {acc, in_code} ->
-          {rendered, new_in_code} = Md.render_line(line, in_code)
-          {acc ++ [rendered], new_in_code}
+          case Md.render_line(line, in_code) do
+            {:buffered, true} -> {acc, true}
+            {rendered, new_in_code} -> {acc ++ [rendered], new_in_code}
+          end
         end)
 
       output = Enum.join(rendered_lines, "\n") <> "\n"
@@ -108,22 +110,28 @@ defmodule Gong.CLI.Renderer do
       pending = List.last(parts) || ""
 
       if pending != "" do
-        {rendered, _} = Md.render_line(pending, state.in_code_block)
+        case Md.render_line(pending, state.in_code_block) do
+          {:buffered, _} ->
+            # 最后一行还在缓冲中，不输出
+            :ok
+          {rendered, _} ->
+            erase = build_erase(state.pending_cols)
 
-        erase = build_erase(state.pending_cols)
+            prefix_part =
+              if state.completed == 0 do
+                "#{@blue}#{@prefix}#{@reset}"
+              else
+                ""
+              end
 
-        # 第一行需要前缀
-        prefix_part =
-          if state.completed == 0 do
-            "#{@blue}#{@prefix}#{@reset}"
-          else
-            ""
-          end
-
-        IO.write([erase, prefix_part, rendered, "\n"])
+            IO.write([erase, prefix_part, rendered, "\n"])
+        end
       else
         IO.write("\n")
       end
+
+      # 消息结束时关闭未闭合的表格，追加底边框
+      Md.flush_table_bottom()
     end
   end
 
