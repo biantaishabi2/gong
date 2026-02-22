@@ -52,9 +52,9 @@ defmodule Gong.CLI.Md do
         content = String.replace_prefix(line, "> ", "") |> String.replace_prefix(">", "")
         {"#{@faint}│ #{do_inline(content)}#{@reset}", false}
 
-      # 表格分隔线（|---|---|）— 静默
+      # 表格分隔线（|---|---|）— 渲染为横线
       Regex.match?(~r/^\|[\s\-:|]+\|$/, line) ->
-        {"", false}
+        {"  #{@faint}#{String.duplicate("─", 40)}#{@reset}", false}
 
       # 表格数据行（| cell | cell |）
       Regex.match?(~r/^\|.+\|$/, line) ->

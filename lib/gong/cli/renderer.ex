@@ -15,7 +15,6 @@ defmodule Gong.CLI.Renderer do
   @blue IO.ANSI.blue()
   @green IO.ANSI.green()
   @yellow IO.ANSI.yellow()
-  @cyan IO.ANSI.cyan()
   @red IO.ANSI.red()
   @faint IO.ANSI.faint()
   @reset IO.ANSI.reset()
