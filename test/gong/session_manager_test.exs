@@ -63,4 +63,32 @@ defmodule Gong.SessionManagerTest do
   test "close 不存在的 session → :not_found" do
     assert {:error, :not_found} = SessionManager.close_session("no-such-session-#{System.unique_integer()}")
   end
+
+  test "close_session with reason 参数" do
+    {:ok, pid, session_id} = SessionManager.create_session(create_opts())
+    assert :ok = SessionManager.close_session(session_id, :ttl_idle_expired)
+
+    ref = Process.monitor(pid)
+    assert_receive {:DOWN, ^ref, :process, ^pid, _}, 1000
+
+    assert {:error, :not_found} = SessionManager.get_session(session_id)
+  end
+
+  test "get_or_create_session 基本功能" do
+    ext_key = "mgr-test-key-#{System.unique_integer([:positive])}"
+    {:ok, pid1, sid1} = SessionManager.get_or_create_session(ext_key, create_opts())
+    on_exit(fn -> if Process.alive?(pid1), do: Gong.Session.close(pid1) end)
+
+    {:ok, pid2, sid2} = SessionManager.get_or_create_session(ext_key, create_opts())
+    assert pid1 == pid2
+    assert sid1 == sid2
+  end
+
+  test "session_count 返回正确数量" do
+    before = SessionManager.session_count()
+    {:ok, pid, _sid} = SessionManager.create_session(create_opts())
+    on_exit(fn -> if Process.alive?(pid), do: Gong.Session.close(pid) end)
+
+    assert SessionManager.session_count() >= before + 1
+  end
 end

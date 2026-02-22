@@ -1,7 +1,17 @@
 defmodule Gong.Session.State do
   @moduledoc """
   Session 进程状态。
+
+  注意：Session GenServer 实际使用 plain map 作为状态，
+  此模块仅作为类型定义参考。
   """
+
+  @type close_reason ::
+          :manual
+          | :ttl_idle_expired
+          | :ttl_absolute_expired
+          | :lru_evicted
+          | :fatal_error
 
   @type runner_result ::
           {:ok, String.t()}
@@ -30,7 +40,11 @@ defmodule Gong.Session.State do
           model: String.t() | nil,
           history: [map()],
           inflight_call: GenServer.from() | nil,
-          inflight_task_ref: reference() | nil
+          inflight_task_ref: reference() | nil,
+          external_session_key: String.t() | nil,
+          created_at: integer() | nil,
+          last_active_at: integer() | nil,
+          close_reason: close_reason() | nil
         }
 
   defstruct [
@@ -52,6 +66,10 @@ defmodule Gong.Session.State do
     model: nil,
     history: [],
     inflight_call: nil,
-    inflight_task_ref: nil
+    inflight_task_ref: nil,
+    external_session_key: nil,
+    created_at: nil,
+    last_active_at: nil,
+    close_reason: nil
   ]
 end

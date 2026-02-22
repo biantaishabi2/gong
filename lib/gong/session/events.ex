@@ -24,6 +24,10 @@ defmodule Gong.Session.Events do
   @schema_version "1.0.0"
   @uuid_v7_regex ~r/\A[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/
 
+  # lifecycle.session_closed payload 字段：
+  #   - reason :: String.t() — 关闭原因（manual | ttl_idle_expired | ttl_absolute_expired | lru_evicted | fatal_error）
+  #   - duration_ms :: integer() — 会话存活时长（毫秒）
+
   @event_types MapSet.new([
                  "lifecycle.session_restored",
                  "lifecycle.session_closed",

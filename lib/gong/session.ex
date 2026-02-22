@@ -288,11 +288,15 @@ defmodule Gong.Session do
     end
   end
 
-  @spec close(pid()) :: :ok | {:error, error_t()}
-  def close(pid) do
-    case safe_genserver_stop(pid) do
-      :ok -> :ok
-      {:error, reason} -> {:error, normalize_error(reason)}
+  @spec close(pid(), atom()) :: :ok | {:error, error_t()}
+  def close(pid, reason \\ :manual) do
+    case safe_genserver_call(pid, {:close, reason}) do
+      {:ok, :ok} ->
+        case safe_genserver_stop(pid) do
+          :ok -> :ok
+          {:error, r} -> {:error, normalize_error(r)}
+        end
+      {:error, r} -> {:error, normalize_error(r)}
     end
   end
 
@@ -350,6 +354,9 @@ defmodule Gong.Session do
         %{}
       end
 
+    now = System.monotonic_time(:millisecond)
+    external_session_key = Keyword.get(opts, :external_session_key)
+
     state = %{
       session_id: session_id,
       agent: agent,
@@ -376,15 +383,41 @@ defmodule Gong.Session do
         total_input_tokens: 0,
         total_output_tokens: 0,
         total_cost: 0.0
-      }
+      },
+      # 生命周期增强字段
+      external_session_key: external_session_key,
+      created_at: now,
+      last_active_at: now,
+      close_reason: nil
     }
+
+    # 写入 ETS 索引
+    register_session_index(state)
+
+    # Telemetry: session 创建
+    :telemetry.execute(
+      [:gong, :session, :create],
+      %{system_time: System.system_time(:millisecond)},
+      %{session_id: session_id, external_session_key: external_session_key}
+    )
+
+    Logger.info("Session 创建",
+      session_id: session_id,
+      external_session_key: external_session_key
+    )
 
     {:ok, state}
   end
 
 
   @impl true
+  def handle_call({:close, reason}, _from, state) do
+    {:reply, :ok, %{state | close_reason: reason}}
+  end
+
   def handle_call({:subscribe, subscriber}, _from, state) do
+    state = refresh_activity(state)
+
     if MapSet.member?(state.subscribers, subscriber) do
       {:reply, :ok, state}
     else
@@ -424,6 +457,8 @@ defmodule Gong.Session do
   end
 
   def handle_call({:restore, source}, _from, state) do
+    state = refresh_activity(state)
+
     with {:ok, snapshot} <- load_snapshot(source, state),
          {:ok, restored} <- normalize_snapshot(snapshot, state.session_id) do
       restored_state = %{
@@ -481,6 +516,8 @@ defmodule Gong.Session do
   end
 
   def handle_call({:prompt, message, opts}, _from, state) do
+    state = refresh_activity(state)
+
     with :ok <- validate_prompt(message),
          :ok <- validate_prompt_opts(opts),
          :ok <- validate_backend_available(state) do
@@ -674,17 +711,42 @@ defmodule Gong.Session do
     # 自动持久化：如果有 tape_path 且 history 非空，保存快照
     maybe_auto_save(state)
 
+    close_reason = state.close_reason || reason_to_close_reason(reason)
+    now = System.monotonic_time(:millisecond)
+    duration_ms = now - (state.created_at || now)
+
     close_command_id = system_command_id("close")
 
     _ =
       emit_event(
         state,
         "lifecycle.session_closed",
-        %{reason: inspect(reason)},
+        %{reason: to_string(close_reason), duration_ms: duration_ms},
         nil,
         close_command_id,
         max(state.turn_id, 0)
       )
+
+    # 删除 ETS 索引
+    unregister_session_index(state.session_id)
+
+    # Telemetry: session 关闭
+    :telemetry.execute(
+      [:gong, :session, :close],
+      %{duration_ms: duration_ms},
+      %{
+        session_id: state.session_id,
+        external_session_key: state.external_session_key,
+        reason: close_reason
+      }
+    )
+
+    Logger.info("Session 关闭",
+      session_id: state.session_id,
+      external_session_key: state.external_session_key,
+      reason: close_reason,
+      duration_ms: duration_ms
+    )
 
     :ok
   end
@@ -760,6 +822,56 @@ defmodule Gong.Session do
   def normalize_error(other) do
     error(:internal_error, "internal error", %{raw: inspect(other)})
   end
+
+  # 刷新活动时间戳并同步 ETS 索引
+  defp refresh_activity(state) do
+    now = System.monotonic_time(:millisecond)
+    state = %{state | last_active_at: now}
+    update_session_index_activity(state)
+    state
+  end
+
+  # ETS 索引操作
+  defp register_session_index(state) do
+    try do
+      :ets.insert(Gong.SessionIndex, {
+        state.session_id,
+        state.external_session_key,
+        state.created_at,
+        state.last_active_at,
+        self()
+      })
+    rescue
+      ArgumentError -> :ok
+    end
+  end
+
+  defp update_session_index_activity(state) do
+    try do
+      :ets.insert(Gong.SessionIndex, {
+        state.session_id,
+        state.external_session_key,
+        state.created_at,
+        state.last_active_at,
+        self()
+      })
+    rescue
+      ArgumentError -> :ok
+    end
+  end
+
+  defp unregister_session_index(session_id) do
+    try do
+      :ets.delete(Gong.SessionIndex, session_id)
+    rescue
+      ArgumentError -> :ok
+    end
+  end
+
+  defp reason_to_close_reason(:normal), do: :manual
+  defp reason_to_close_reason(:shutdown), do: :manual
+  defp reason_to_close_reason({:shutdown, _}), do: :manual
+  defp reason_to_close_reason(_), do: :fatal_error
 
   defp maybe_auto_save(%{tape_path: tape_path} = state)
        when is_binary(tape_path) and tape_path != "" do
