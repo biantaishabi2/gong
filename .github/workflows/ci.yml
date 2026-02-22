@@ -23,6 +23,8 @@ env:
   # 防止 git fetch 挂起：10 秒内速度低于 1000 bytes/s 则中断
   GIT_HTTP_LOW_SPEED_LIMIT: "1000"
   GIT_HTTP_LOW_SPEED_TIME: "10"
+  # 使用 git protocol v2 加速大仓库克隆协商
+  GIT_PROTOCOL_VERSION: "2"
 
 jobs:
   # 变更检测：识别 session / docs-only / other 三类变更
@@ -96,9 +98,11 @@ jobs:
       - name: 安装依赖
         timeout-minutes: 5
         run: |
+          git config --global protocol.version 2
           for i in 1 2 3; do
-            mix deps.get && break
-            echo "::warning::mix deps.get 第 ${i} 次失败，重试..."
+            timeout 120 mix deps.get && break
+            echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
+            rm -rf deps/jido_ai
             sleep 5
           done
 
@@ -159,9 +163,11 @@ jobs:
       - name: 安装依赖
         timeout-minutes: 5
         run: |
+          git config --global protocol.version 2
           for i in 1 2 3; do
-            mix deps.get && break
-            echo "::warning::mix deps.get 第 ${i} 次失败，重试..."
+            timeout 120 mix deps.get && break
+            echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
+            rm -rf deps/jido_ai
             sleep 5
           done
 
@@ -249,9 +255,11 @@ jobs:
       - name: 安装依赖
         timeout-minutes: 5
         run: |
+          git config --global protocol.version 2
           for i in 1 2 3; do
-            mix deps.get && break
-            echo "::warning::mix deps.get 第 ${i} 次失败，重试..."
+            timeout 120 mix deps.get && break
+            echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
+            rm -rf deps/jido_ai
             sleep 5
           done
 
