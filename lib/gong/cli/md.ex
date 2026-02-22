@@ -17,6 +17,24 @@ defmodule Gong.CLI.Md do
   """
   @spec render_line(String.t(), boolean()) :: {String.t(), boolean()}
   def render_line(line, in_code_block) do
+    # 检测是否离开表格，输出底边框
+    is_table_line = Regex.match?(~r/^\|.+\|$/, line) or Regex.match?(~r/^\|[\s\-:|]+\|$/, line)
+    table_bottom =
+      if Process.get(:gong_md_in_table, false) and not is_table_line do
+        Process.put(:gong_md_in_table, false)
+        col_count = Process.get(:gong_md_table_cols, 3)
+        seg = String.duplicate("─", 12)
+        inner = List.duplicate(seg, col_count) |> Enum.join("┴")
+        "  #{@faint}└#{inner}┘#{@reset}\n"
+      else
+        ""
+      end
+
+    {rendered, new_in_code} = do_render_line(line, in_code_block)
+    {table_bottom <> rendered, new_in_code}
+  end
+
+  defp do_render_line(line, in_code_block) do
     cond do
       # 围栏代码块边界
       String.starts_with?(String.trim_leading(line), "```") ->
@@ -52,9 +70,12 @@ defmodule Gong.CLI.Md do
         content = String.replace_prefix(line, "> ", "") |> String.replace_prefix(">", "")
         {"#{@faint}│ #{do_inline(content)}#{@reset}", false}
 
-      # 表格分隔线（|---|---|）— 渲染为横线
+      # 表格分隔线（|---|---|）— 渲染为横线边框
       Regex.match?(~r/^\|[\s\-:|]+\|$/, line) ->
-        {"  #{@faint}#{String.duplicate("─", 40)}#{@reset}", false}
+        col_count = line |> String.split("|") |> length() |> Kernel.-(2)
+        seg = String.duplicate("─", 12)
+        inner = List.duplicate(seg, col_count) |> Enum.join("┼")
+        {"  #{@faint}├#{inner}┤#{@reset}", false}
 
       # 表格数据行（| cell | cell |）
       Regex.match?(~r/^\|.+\|$/, line) ->
@@ -66,7 +87,22 @@ defmodule Gong.CLI.Md do
           |> Enum.map(&String.trim/1)
           |> Enum.map(&do_inline/1)
 
-        {"  #{Enum.join(cells, "#{@faint}  │  #{@reset}")}", false}
+        padded = Enum.map(cells, fn cell -> pad_cell(cell, 10) end)
+        row = "  #{@faint}│#{@reset}#{Enum.join(padded, "#{@faint}│#{@reset}")}#{@faint}│#{@reset}"
+
+        # 表格首行前加顶边框
+        in_table = Process.get(:gong_md_in_table, false)
+        col_count = length(cells)
+        if not in_table do
+          Process.put(:gong_md_in_table, true)
+          Process.put(:gong_md_table_cols, col_count)
+          seg = String.duplicate("─", 12)
+          inner = List.duplicate(seg, col_count) |> Enum.join("┬")
+          top = "  #{@faint}┌#{inner}┐#{@reset}"
+          {"#{top}\n#{row}", false}
+        else
+          {row, false}
+        end
 
       # 水平线
       Regex.match?(~r/^---+$/, line) ->
@@ -95,7 +131,19 @@ defmodule Gong.CLI.Md do
         {acc ++ [rendered], new_in_code}
       end)
 
-    Enum.join(lines, "\n")
+    # 文本结束时如果还在表格内，追加底边框
+    trailing =
+      if Process.get(:gong_md_in_table, false) do
+        Process.put(:gong_md_in_table, false)
+        col_count = Process.get(:gong_md_table_cols, 3)
+        seg = String.duplicate("─", 12)
+        inner = List.duplicate(seg, col_count) |> Enum.join("┴")
+        "\n  #{@faint}└#{inner}┘#{@reset}"
+      else
+        ""
+      end
+
+    Enum.join(lines, "\n") <> trailing
   end
 
   @doc "获取终端宽度，fallback 80"
@@ -162,6 +210,13 @@ defmodule Gong.CLI.Md do
   # 文件路径（以 / 或 ~/ 开头，含 . 扩展名，排除 URL 内的路径）
   defp replace_file_paths(text) do
     Regex.replace(~r/(?<![:\/\w])[~]?\/[\w\-.\/@]+\.\w+/, text, "#{@underline}\\0#{@reset}")
+  end
+
+  # 单元格填充到固定显示宽度
+  defp pad_cell(text, width) do
+    visible_width = text |> strip_ansi() |> display_column_width()
+    padding = max(0, width - visible_width)
+    " #{text}#{String.duplicate(" ", padding)} "
   end
 
   defp strip_ansi(text) do
