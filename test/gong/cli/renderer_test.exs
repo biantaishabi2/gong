@@ -49,41 +49,51 @@ defmodule Gong.CLI.RendererTest do
       Process.delete(:gong_stream)
     end
 
-    test "delta 流式输出原文，message.end 重排渲染" do
+    test "delta 有换行触发擦除+渲染" do
+      Renderer.render(make_event("message.start"))
+
       output =
         capture_io(fn ->
-          Renderer.render(make_event("message.start"))
           Renderer.render(make_event("message.delta", %{content: "## 标题\n"}))
-          Renderer.render(make_event("message.end"))
         end)
 
-      # message.end 重排后应包含渲染后的标题（无 ## 前缀）
+      # 应包含擦除码和渲染后的标题
+      assert output =~ "\r\e[J"
       assert output =~ "标题"
-      assert output =~ "◆"
+      refute output =~ "##"
+      Process.delete(:gong_stream)
     end
 
-    test "message.end 渲染 bold 格式" do
-      output =
-        capture_io(fn ->
-          Renderer.render(make_event("message.start"))
-          Renderer.render(make_event("message.delta", %{content: "**bold**"}))
-          Renderer.render(make_event("message.end"))
-        end)
+    test "message.end 处理最后未完成行" do
+      Renderer.render(make_event("message.start"))
+      capture_io(fn -> Renderer.render(make_event("message.delta", %{content: "**bold**"})) end)
 
+      output = capture_io(fn -> Renderer.render(make_event("message.end")) end)
+      assert output =~ "\r\e[J"
       assert output =~ "bold"
+      refute output =~ "**"
     end
 
-    test "message.end 擦除原文后一次渲染" do
+    test "message.end 有 delta 后正常换行" do
+      Renderer.render(make_event("message.start"))
+      capture_io(fn -> Renderer.render(make_event("message.delta", %{content: "line\n"})) end)
+      output = capture_io(fn -> Renderer.render(make_event("message.end")) end)
+      assert output == "\n"
+    end
+
+    test "表格行攒缓冲，结束时一次性渲染对齐" do
       output =
         capture_io(fn ->
           Renderer.render(make_event("message.start"))
-          Renderer.render(make_event("message.delta", %{content: "line\n"}))
+          Renderer.render(make_event("message.delta", %{content: "| 名称 | 描述 |\n|---|---|\n| 短 | 很长很长的描述 |\n\n"}))
           Renderer.render(make_event("message.end"))
         end)
 
-      # 最终输出包含前缀和内容
-      assert output =~ "◆"
-      assert output =~ "line"
+      # 表格应包含边框
+      assert output =~ "┌"
+      assert output =~ "┘"
+      assert output =~ "短"
+      assert output =~ "很长很长的描述"
     end
   end
 
