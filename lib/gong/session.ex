@@ -220,6 +220,11 @@ defmodule Gong.Session do
     end
   end
 
+  @spec session_id(pid()) :: {:ok, String.t()} | {:error, error_t()}
+  def session_id(pid) do
+    safe_genserver_call(pid, :session_id)
+  end
+
   @doc """
   查找最后一条有效 assistant 消息文本。
 
@@ -408,6 +413,10 @@ defmodule Gong.Session do
 
   def handle_call(:metadata, _from, state) do
     {:reply, state.metadata, state}
+  end
+
+  def handle_call(:session_id, _from, state) do
+    {:reply, {:ok, state.session_id}, state}
   end
 
   def handle_call(:stats, _from, state) do

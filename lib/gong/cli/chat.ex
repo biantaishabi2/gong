@@ -62,10 +62,12 @@ defmodule Gong.CLI.Chat do
   defp repl_loop(session_pid) do
     case IO.gets("#{IO.ANSI.green()}❯ #{IO.ANSI.reset()}") do
       :eof ->
+        print_resume_hint(session_pid)
         Session.close(session_pid)
         @exit_ok
 
       {:error, _} ->
+        print_resume_hint(session_pid)
         Session.close(session_pid)
         @exit_error
 
@@ -85,6 +87,7 @@ defmodule Gong.CLI.Chat do
   end
 
   defp handle_input("/exit", session_pid) do
+    print_resume_hint(session_pid)
     Session.close(session_pid)
     @exit_ok
   end
@@ -186,6 +189,15 @@ defmodule Gong.CLI.Chat do
     after
       60_000 ->
         IO.puts(:stderr, "[错误] 等待回复超时")
+    end
+  end
+
+  defp print_resume_hint(session_pid) do
+    case Session.session_id(session_pid) do
+      {:ok, sid} ->
+        IO.puts("\n#{IO.ANSI.faint()}恢复会话: bin/gong session restore #{sid}#{IO.ANSI.reset()}")
+      _ ->
+        :ok
     end
   end
 
