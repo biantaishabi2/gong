@@ -376,15 +376,35 @@ defmodule Gong.CLI.Md do
     str
     |> String.to_charlist()
     |> Enum.reduce(0, fn cp, acc ->
-      acc + if cjk?(cp), do: 2, else: 1
+      acc + char_width(cp)
     end)
   end
 
-  defp cjk?(cp) when cp >= 0x4E00 and cp <= 0x9FFF, do: true
-  defp cjk?(cp) when cp >= 0x3400 and cp <= 0x4DBF, do: true
-  defp cjk?(cp) when cp >= 0x3000 and cp <= 0x303F, do: true
-  defp cjk?(cp) when cp >= 0xFF00 and cp <= 0xFFEF, do: true
-  defp cjk?(cp) when cp >= 0xF900 and cp <= 0xFAFF, do: true
-  defp cjk?(cp) when cp >= 0x20000 and cp <= 0x2A6DF, do: true
-  defp cjk?(_), do: false
+  # 零宽字符：变体选择符、ZWJ、组合标记等
+  defp char_width(0xFE0F), do: 0
+  defp char_width(0xFE0E), do: 0
+  defp char_width(0x200D), do: 0
+  defp char_width(cp) when cp >= 0x0300 and cp <= 0x036F, do: 0
+  defp char_width(cp) when cp >= 0x1AB0 and cp <= 0x1AFF, do: 0
+  defp char_width(cp) when cp >= 0x20D0 and cp <= 0x20FF, do: 0
+  defp char_width(cp) when cp >= 0xE0100 and cp <= 0xE01EF, do: 0
+
+  # CJK 字符（双宽）
+  defp char_width(cp) when cp >= 0x4E00 and cp <= 0x9FFF, do: 2
+  defp char_width(cp) when cp >= 0x3400 and cp <= 0x4DBF, do: 2
+  defp char_width(cp) when cp >= 0x3000 and cp <= 0x303F, do: 2
+  defp char_width(cp) when cp >= 0xFF00 and cp <= 0xFFEF, do: 2
+  defp char_width(cp) when cp >= 0xF900 and cp <= 0xFAFF, do: 2
+  defp char_width(cp) when cp >= 0x20000 and cp <= 0x2A6DF, do: 2
+
+  # Emoji（双宽）
+  defp char_width(cp) when cp >= 0x2600 and cp <= 0x27BF, do: 2
+  defp char_width(cp) when cp >= 0x2B50 and cp <= 0x2B55, do: 2
+  defp char_width(cp) when cp >= 0x23E9 and cp <= 0x23F3, do: 2
+  defp char_width(cp) when cp >= 0x231A and cp <= 0x231B, do: 2
+  defp char_width(cp) when cp >= 0x1F300 and cp <= 0x1F9FF, do: 2
+  defp char_width(cp) when cp >= 0x1FA00 and cp <= 0x1FA6F, do: 2
+  defp char_width(cp) when cp >= 0x1FA70 and cp <= 0x1FAFF, do: 2
+
+  defp char_width(_), do: 1
 end
