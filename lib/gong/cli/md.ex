@@ -116,6 +116,9 @@ defmodule Gong.CLI.Md do
     |> replace_inline_code()
     |> replace_bold()
     |> replace_italic()
+    |> replace_links()
+    |> replace_urls()
+    |> replace_file_paths()
   end
 
   defp replace_inline_code(text) do
@@ -128,6 +131,21 @@ defmodule Gong.CLI.Md do
 
   defp replace_italic(text) do
     Regex.replace(~r/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/, text, "#{@underline}\\1#{@reset}")
+  end
+
+  # Markdown 链接 [text](url) → 下划线文本 + 暗色 URL
+  defp replace_links(text) do
+    Regex.replace(~r/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/, text, "#{@underline}\\1#{@reset} #{@faint}\\2#{@reset}")
+  end
+
+  # 裸 URL（未被其他格式包裹的）
+  defp replace_urls(text) do
+    Regex.replace(~r/(?<![(\w])https?:\/\/[^\s)<>]+/, text, "#{@underline}\\0#{@reset}")
+  end
+
+  # 文件路径（以 / 或 ~/ 开头，含 . 扩展名，排除 URL 内的路径）
+  defp replace_file_paths(text) do
+    Regex.replace(~r/(?<![:\/\w])[~]?\/[\w\-.\/@]+\.\w+/, text, "#{@underline}\\0#{@reset}")
   end
 
   defp strip_ansi(text) do
