@@ -22,6 +22,31 @@ defmodule Gong.Application do
     Gong.PromptTemplate.init()
     Gong.ModelRegistry.init()
 
+    # 注册 Kimi/MiniMax/GLM 模型配置
+    Gong.ModelRegistry.register(:kimi, %{
+      provider: "kimi",
+      model_id: "moonshot-v1-auto",
+      base_url: "https://api.moonshot.cn",
+      api_key_env: "KIMI_API_KEY",
+      auth_mode: :anthropic_header
+    })
+
+    Gong.ModelRegistry.register(:minimax, %{
+      provider: "minimax",
+      model_id: "minimax-text-01",
+      base_url: "https://api.minimax.chat",
+      api_key_env: "MINIMAX_API_KEY",
+      auth_mode: :anthropic_header
+    })
+
+    Gong.ModelRegistry.register(:glm, %{
+      provider: "glm",
+      model_id: "glm-4",
+      base_url: "https://open.bigmodel.cn/api/paas/v4",
+      api_key_env: "GLM_API_KEY",
+      auth_mode: :bearer
+    })
+
     # 初始化 Provider 注册表并注册 DeepSeek
     Gong.ProviderRegistry.init()
 

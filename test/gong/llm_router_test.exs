@@ -114,6 +114,81 @@ defmodule Gong.LLMRouterTest do
     end
   end
 
+  # ── auth_mode 鉴权头注入测试 ──
+
+  describe "auth_mode 鉴权头注入" do
+    test "auth_mode: :anthropic_header 注入 x-api-key" do
+      System.put_env("TEST_ANTHRO_KEY", "anthro-key-123")
+      on_exit(fn -> System.delete_env("TEST_ANTHRO_KEY") end)
+
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        api_key_env: "TEST_ANTHRO_KEY",
+        auth_mode: :anthropic_header
+      }
+
+      resolved = LLMRouter.resolve_config(model_config)
+      assert resolved.headers["x-api-key"] == "anthro-key-123"
+    end
+
+    test "auth_mode: :bearer 注入 Authorization: Bearer" do
+      System.put_env("TEST_BEARER_KEY", "bearer-key-456")
+      on_exit(fn -> System.delete_env("TEST_BEARER_KEY") end)
+
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        api_key_env: "TEST_BEARER_KEY",
+        auth_mode: :bearer
+      }
+
+      resolved = LLMRouter.resolve_config(model_config)
+      assert resolved.headers["authorization"] == "Bearer bearer-key-456"
+    end
+
+    test "无 auth_mode 字段（默认）不注入额外 header" do
+      model_config = %{provider: "deepseek", model_id: "deepseek-chat"}
+      resolved = LLMRouter.resolve_config(model_config)
+
+      # DeepSeek 默认配置不应包含鉴权头（由 ReqLLM.Provider 处理）
+      refute Map.has_key?(resolved.headers, "x-api-key")
+      refute Map.has_key?(resolved.headers, "authorization")
+    end
+
+    test "已有自定义 header 不被 auth_mode 覆盖" do
+      System.put_env("TEST_NOCOVER_KEY", "should-not-appear")
+      on_exit(fn -> System.delete_env("TEST_NOCOVER_KEY") end)
+
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        api_key_env: "TEST_NOCOVER_KEY",
+        auth_mode: :anthropic_header,
+        headers: %{"x-api-key" => "custom-key"}
+      }
+
+      resolved = LLMRouter.resolve_config(model_config)
+      # 已有的自定义 key 不应被覆盖
+      assert resolved.headers["x-api-key"] == "custom-key"
+    end
+
+    test "API key 环境变量缺失时不注入 header 也不抛异常" do
+      # 确保环境变量不存在
+      System.delete_env("NONEXISTENT_API_KEY")
+
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        api_key_env: "NONEXISTENT_API_KEY",
+        auth_mode: :anthropic_header
+      }
+
+      resolved = LLMRouter.resolve_config(model_config)
+      refute Map.has_key?(resolved.headers, "x-api-key")
+    end
+  end
+
   # ── fallback 触发测试 ──
 
   describe "fallback 逻辑" do

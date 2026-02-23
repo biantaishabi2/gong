@@ -181,6 +181,88 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
   end
 
+  # ── 多模型 auth_mode 路由 ──
+
+  describe "多模型 auth_mode 路由" do
+    setup do
+      Gong.ModelRegistry.init()
+
+      Gong.ModelRegistry.register(:kimi, %{
+        provider: "kimi",
+        model_id: "moonshot-v1-auto",
+        base_url: "https://api.moonshot.cn",
+        api_key_env: "KIMI_API_KEY",
+        auth_mode: :anthropic_header
+      })
+
+      Gong.ModelRegistry.register(:minimax, %{
+        provider: "minimax",
+        model_id: "minimax-text-01",
+        base_url: "https://api.minimax.chat",
+        api_key_env: "MINIMAX_API_KEY",
+        auth_mode: :anthropic_header
+      })
+
+      Gong.ModelRegistry.register(:glm, %{
+        provider: "glm",
+        model_id: "glm-4",
+        base_url: "https://open.bigmodel.cn/api/paas/v4",
+        api_key_env: "GLM_API_KEY",
+        auth_mode: :bearer
+      })
+
+      # 注册对应的 provider 以便 resolve_config 能获取 provider 配置
+      ProviderRegistry.register("kimi", Gong.Test.MockProvider, %{}, priority: 5, timeout: 60_000)
+      ProviderRegistry.register("minimax", Gong.Test.MockProvider, %{}, priority: 5, timeout: 60_000)
+      ProviderRegistry.register("glm", Gong.Test.MockProvider, %{}, priority: 5, timeout: 60_000)
+
+      on_exit(fn -> Gong.ModelRegistry.cleanup() end)
+      :ok
+    end
+
+    test "Kimi resolve_config 包含 x-api-key header 和正确 base_url" do
+      System.put_env("KIMI_API_KEY", "test123")
+      on_exit(fn -> System.delete_env("KIMI_API_KEY") end)
+
+      :ok = Gong.ModelRegistry.switch(:kimi)
+      {_name, kimi_config} = Gong.ModelRegistry.current_model()
+
+      resolved = LLMRouter.resolve_config(kimi_config)
+
+      assert resolved.headers["x-api-key"] == "test123"
+      assert resolved.base_url == "https://api.moonshot.cn"
+      assert resolved.model_str == "kimi:moonshot-v1-auto"
+    end
+
+    test "MiniMax resolve_config 包含 x-api-key header 和正确 base_url" do
+      System.put_env("MINIMAX_API_KEY", "test456")
+      on_exit(fn -> System.delete_env("MINIMAX_API_KEY") end)
+
+      :ok = Gong.ModelRegistry.switch(:minimax)
+      {_name, minimax_config} = Gong.ModelRegistry.current_model()
+
+      resolved = LLMRouter.resolve_config(minimax_config)
+
+      assert resolved.headers["x-api-key"] == "test456"
+      assert resolved.base_url == "https://api.minimax.chat"
+      assert resolved.model_str == "minimax:minimax-text-01"
+    end
+
+    test "GLM resolve_config 包含 Bearer header 和正确 base_url" do
+      System.put_env("GLM_API_KEY", "test789")
+      on_exit(fn -> System.delete_env("GLM_API_KEY") end)
+
+      :ok = Gong.ModelRegistry.switch(:glm)
+      {_name, glm_config} = Gong.ModelRegistry.current_model()
+
+      resolved = LLMRouter.resolve_config(glm_config)
+
+      assert resolved.headers["authorization"] == "Bearer test789"
+      assert resolved.base_url == "https://open.bigmodel.cn/api/paas/v4"
+      assert resolved.model_str == "glm:glm-4"
+    end
+  end
+
   # ── AgentLoop 与 Compaction 使用同一 Router 断言 ──
 
   describe "AgentLoop 与 Summarizer 统一路由" do

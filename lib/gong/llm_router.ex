@@ -74,6 +74,9 @@ defmodule Gong.LLMRouter do
       |> Map.merge(model_headers || %{})
       |> Map.merge(runtime_headers || %{})
 
+    # auth_mode 鉴权头注入：仅当 model_config 显式声明 auth_mode 时才注入
+    final_headers = inject_auth_header(final_headers, model_config)
+
     model_str = "#{provider_name}:#{Map.get(model_config, :model_id, "deepseek-chat")}"
 
     %{
@@ -148,4 +151,26 @@ defmodule Gong.LLMRouter do
   defp maybe_put_headers(opts, nil), do: opts
   defp maybe_put_headers(opts, headers) when headers == %{}, do: opts
   defp maybe_put_headers(opts, headers), do: Keyword.put(opts, :headers, headers)
+
+  # 根据 auth_mode 注入鉴权头，仅当 model_config 显式包含 auth_mode 字段时生效
+  defp inject_auth_header(headers, %{auth_mode: auth_mode, api_key_env: env_var})
+       when is_atom(auth_mode) and is_binary(env_var) do
+    case System.get_env(env_var) do
+      nil ->
+        headers
+
+      api_key ->
+        case auth_mode do
+          :anthropic_header ->
+            # 不覆盖已有的 x-api-key
+            Map.put_new(headers, "x-api-key", api_key)
+
+          :bearer ->
+            # 不覆盖已有的 authorization
+            Map.put_new(headers, "authorization", "Bearer #{api_key}")
+        end
+    end
+  end
+
+  defp inject_auth_header(headers, _model_config), do: headers
 end

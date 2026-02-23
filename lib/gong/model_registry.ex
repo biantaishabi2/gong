@@ -11,11 +11,14 @@ defmodule Gong.ModelRegistry do
   @current_key :__current_model__
   @default_model_name :default
 
+  @type auth_mode :: :bearer | :anthropic_header
+
   @type model_config :: %{
           provider: String.t(),
           model_id: String.t(),
           api_key_env: String.t(),
-          context_window: non_neg_integer() | nil
+          context_window: non_neg_integer() | nil,
+          auth_mode: auth_mode() | nil
         }
 
   # ── 初始化 ──
@@ -191,7 +194,7 @@ defmodule Gong.ModelRegistry do
   @spec apply_defaults(model_config()) :: model_config()
   def apply_defaults(config) when is_map(config) do
     Map.merge(
-      %{api_key_env: "", context_window: @default_context_window, base_url: nil, headers: %{}},
+      %{api_key_env: "", context_window: @default_context_window, base_url: nil, headers: %{}, auth_mode: :bearer},
       config
     )
   end
