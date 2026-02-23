@@ -11,12 +11,11 @@ permissions:
 
 jobs:
   implement:
-    if: >
-      github.event.label.name == 'bot:plan-final' ||
-      github.event.label.name == 'bot:plan-approved'
-    uses: biantaishabi2/Cli/.github/workflows/niuma-implement-reusable.yml@master
+    if: github.event.label.name == 'bot:plan-final' || github.event.label.name == 'bot:plan-approved'
+    uses: ./.github/workflows/niuma-implement-reusable.yml
     with:
       repo: ${{ github.repository }}
       issue_number: ${{ format('{0}', github.event.issue.number) }}
       gate_max_retries: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
+      trigger_label: ${{ github.event.label.name }}
     secrets: inherit
