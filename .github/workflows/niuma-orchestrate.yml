@@ -18,11 +18,14 @@ jobs:
       (github.event_name == 'issues' && (github.event.label.name == 'bot:orchestrate' || github.event.label.name == 'bot:queued' || github.event.label.name == 'bot:pr-reviewable')) ||
       (github.event_name == 'repository_dispatch' && github.event.action == 'niuma.task.completed' && github.event.client_payload.event_source == 'close-after-integration-merge') ||
       (github.event_name == 'pull_request' && github.event.action == 'closed')
-    uses: biantaishabi2/Cli/.github/workflows/niuma-orchestrate-reusable.yml@master
+    uses: ./.github/workflows/niuma-orchestrate-reusable.yml
     secrets: inherit
     with:
       repo: ${{ github.repository }}
-      store_dir: /home/wangbo/.niuma/stores/gong
+      store_dir: /home/wangbo/.niuma/stores/Cli
+      workflow_source_repo: ${{ github.repository }}
+      workflow_source_ref: ${{ github.event.repository.default_branch }}
+      repo_dir: "."
       label_whitelist: "bot:orchestrate,bot:queued,bot:pr-reviewable"
       enable_dispatch_wakeup: true
       event_id: ${{ github.event.client_payload.event_id || '' }}
