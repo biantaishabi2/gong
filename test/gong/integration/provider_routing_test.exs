@@ -14,8 +14,15 @@ defmodule Gong.Integration.ProviderRoutingTest do
 
   describe "provider 切换路由" do
     test "注册两个 provider，switch 后 Router 路由到新 provider" do
-      ProviderRegistry.register("provider_a", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
-      ProviderRegistry.register("provider_b", Gong.Test.MockProvider, %{}, priority: 5, timeout: 30_000)
+      ProviderRegistry.register("provider_a", Gong.Test.MockProvider, %{},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      ProviderRegistry.register("provider_b", Gong.Test.MockProvider, %{},
+        priority: 5,
+        timeout: 30_000
+      )
 
       model_config = %{provider: "provider_a", model_id: "model-1"}
 
@@ -41,8 +48,15 @@ defmodule Gong.Integration.ProviderRoutingTest do
 
   describe "fallback 降级" do
     test "主 provider 失败后 fallback 到次优先级 provider" do
-      ProviderRegistry.register("primary", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
-      ProviderRegistry.register("secondary", Gong.Test.MockProvider, %{}, priority: 5, timeout: 30_000)
+      ProviderRegistry.register("primary", Gong.Test.MockProvider, %{},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      ProviderRegistry.register("secondary", Gong.Test.MockProvider, %{},
+        priority: 5,
+        timeout: 30_000
+      )
 
       # 验证 fallback chain
       chain = ProviderRegistry.fallback_chain()
@@ -58,7 +72,10 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
 
     test "所有 provider 耗尽时返回 :no_fallback" do
-      ProviderRegistry.register("only", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
+      ProviderRegistry.register("only", Gong.Test.MockProvider, %{},
+        priority: 10,
+        timeout: 60_000
+      )
 
       assert {:error, :no_fallback} = ProviderRegistry.fallback("only")
     end
@@ -91,7 +108,10 @@ defmodule Gong.Integration.ProviderRoutingTest do
 
   describe "ProviderRegistry 新接口" do
     test "resolve_provider_config/1 返回完整配置" do
-      ProviderRegistry.register("test_p", Gong.Test.MockProvider, %{base_url: "https://test.com"}, priority: 8, timeout: 50_000)
+      ProviderRegistry.register("test_p", Gong.Test.MockProvider, %{base_url: "https://test.com"},
+        priority: 8,
+        timeout: 50_000
+      )
 
       assert {:ok, config} = ProviderRegistry.resolve_provider_config("test_p")
       assert config.timeout == 50_000
@@ -105,7 +125,11 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
 
     test "fallback_chain/0 按优先级排列" do
-      ProviderRegistry.register("high", Gong.Test.MockProvider, %{}, priority: 20, timeout: 60_000)
+      ProviderRegistry.register("high", Gong.Test.MockProvider, %{},
+        priority: 20,
+        timeout: 60_000
+      )
+
       ProviderRegistry.register("low", Gong.Test.MockProvider, %{}, priority: 1, timeout: 30_000)
       ProviderRegistry.register("mid", Gong.Test.MockProvider, %{}, priority: 10, timeout: 45_000)
 
@@ -114,7 +138,10 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
 
     test "get_provider_for_model/1 根据 provider 字段查找" do
-      ProviderRegistry.register("my_provider", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
+      ProviderRegistry.register("my_provider", Gong.Test.MockProvider, %{},
+        priority: 10,
+        timeout: 60_000
+      )
 
       assert {:ok, {"my_provider", entry}} =
                ProviderRegistry.get_provider_for_model(%{provider: "my_provider", model_id: "m1"})
@@ -123,7 +150,8 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
 
     test "get_provider_for_model/1 不存在返回 :not_found" do
-      assert {:error, :not_found} = ProviderRegistry.get_provider_for_model(%{provider: "missing"})
+      assert {:error, :not_found} =
+               ProviderRegistry.get_provider_for_model(%{provider: "missing"})
     end
   end
 
@@ -145,7 +173,8 @@ defmodule Gong.Integration.ProviderRoutingTest do
         headers: %{"Auth" => "mk", "X-Custom" => "cv"}
       }
 
-      resolved = LLMRouter.resolve_config(model_config, headers: %{"X-Custom" => "rv", "X-New" => "nv"})
+      resolved =
+        LLMRouter.resolve_config(model_config, headers: %{"X-Custom" => "rv", "X-New" => "nv"})
 
       assert resolved.headers == %{
                "Auth" => "mk",
@@ -156,7 +185,10 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
 
     test "base_url runtime 覆盖 model" do
-      ProviderRegistry.register("base_test", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
+      ProviderRegistry.register("base_test", Gong.Test.MockProvider, %{},
+        priority: 10,
+        timeout: 60_000
+      )
 
       model_config = %{
         provider: "base_test",
@@ -169,7 +201,10 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
 
     test "deepseek 路由回归：默认路由在 headers 透传后行为不变" do
-      ProviderRegistry.register("deepseek", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
+      ProviderRegistry.register("deepseek", Gong.Test.MockProvider, %{},
+        priority: 10,
+        timeout: 60_000
+      )
 
       model_config = %{provider: "deepseek", model_id: "deepseek-chat"}
       resolved = LLMRouter.resolve_config(model_config)
@@ -353,23 +388,23 @@ defmodule Gong.Integration.ProviderRoutingTest do
 
       Gong.ModelRegistry.register(:kimi, %{
         provider: "kimi",
-        model_id: "moonshot-v1-auto",
-        base_url: "https://api.moonshot.cn",
+        model_id: "k2p5",
+        base_url: "https://api.kimi.com/coding",
         api_key_env: "KIMI_API_KEY",
         auth_mode: :anthropic_header
       })
 
       Gong.ModelRegistry.register(:minimax, %{
         provider: "minimax",
-        model_id: "minimax-text-01",
-        base_url: "https://api.minimax.chat",
+        model_id: "MiniMax-M2.5",
+        base_url: "https://api.minimaxi.com/anthropic",
         api_key_env: "MINIMAX_API_KEY",
         auth_mode: :anthropic_header
       })
 
       Gong.ModelRegistry.register(:glm, %{
         provider: "glm",
-        model_id: "glm-4",
+        model_id: "glm-4.7",
         base_url: "https://open.bigmodel.cn/api/paas/v4",
         api_key_env: "GLM_API_KEY",
         auth_mode: :bearer
@@ -377,7 +412,12 @@ defmodule Gong.Integration.ProviderRoutingTest do
 
       # 注册对应的 provider 以便 resolve_config 能获取 provider 配置
       ProviderRegistry.register("kimi", Gong.Test.MockProvider, %{}, priority: 5, timeout: 60_000)
-      ProviderRegistry.register("minimax", Gong.Test.MockProvider, %{}, priority: 5, timeout: 60_000)
+
+      ProviderRegistry.register("minimax", Gong.Test.MockProvider, %{},
+        priority: 5,
+        timeout: 60_000
+      )
+
       ProviderRegistry.register("glm", Gong.Test.MockProvider, %{}, priority: 5, timeout: 60_000)
 
       on_exit(fn -> Gong.ModelRegistry.cleanup() end)
@@ -394,8 +434,8 @@ defmodule Gong.Integration.ProviderRoutingTest do
       resolved = LLMRouter.resolve_config(kimi_config)
 
       assert resolved.headers["x-api-key"] == "test123"
-      assert resolved.base_url == "https://api.moonshot.cn"
-      assert resolved.model_str == "kimi:moonshot-v1-auto"
+      assert resolved.base_url == "https://api.kimi.com/coding"
+      assert resolved.model_str == "kimi:k2p5"
     end
 
     test "MiniMax resolve_config 包含 x-api-key header 和正确 base_url" do
@@ -408,8 +448,8 @@ defmodule Gong.Integration.ProviderRoutingTest do
       resolved = LLMRouter.resolve_config(minimax_config)
 
       assert resolved.headers["x-api-key"] == "test456"
-      assert resolved.base_url == "https://api.minimax.chat"
-      assert resolved.model_str == "minimax:minimax-text-01"
+      assert resolved.base_url == "https://api.minimaxi.com/anthropic"
+      assert resolved.model_str == "minimax:MiniMax-M2.5"
     end
 
     test "GLM resolve_config 包含 Bearer header 和正确 base_url" do
@@ -423,7 +463,7 @@ defmodule Gong.Integration.ProviderRoutingTest do
 
       assert resolved.headers["authorization"] == "Bearer test789"
       assert resolved.base_url == "https://open.bigmodel.cn/api/paas/v4"
-      assert resolved.model_str == "glm:glm-4"
+      assert resolved.model_str == "glm:glm-4.7"
     end
   end
 
@@ -431,9 +471,16 @@ defmodule Gong.Integration.ProviderRoutingTest do
 
   describe "AgentLoop 与 Summarizer 统一路由" do
     test "build_llm_backend 使用的闭包内部走 LLMRouter" do
-      ProviderRegistry.register("deepseek", Gong.Providers.DeepSeek, %{}, priority: 10, timeout: 60_000)
+      ProviderRegistry.register("deepseek", Gong.Providers.DeepSeek, %{},
+        priority: 10,
+        timeout: 60_000
+      )
 
-      model_config = %{provider: "deepseek", model_id: "deepseek-chat", api_key_env: "DEEPSEEK_API_KEY"}
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        api_key_env: "DEEPSEEK_API_KEY"
+      }
 
       # 验证 resolve_config 对 AgentLoop 和 Summarizer 的输入产生一致结果
       agent_resolved = LLMRouter.resolve_config(model_config, tools: [], receive_timeout: 60_000)

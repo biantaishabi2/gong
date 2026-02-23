@@ -7,7 +7,11 @@ defmodule Gong.LLMRouterTest do
   setup do
     ProviderRegistry.init()
 
-    ProviderRegistry.register("deepseek", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
+    ProviderRegistry.register("deepseek", Gong.Test.MockProvider, %{},
+      priority: 10,
+      timeout: 60_000
+    )
+
     ProviderRegistry.register("openai", Gong.Test.MockProvider, %{}, priority: 5, timeout: 30_000)
 
     on_exit(fn -> ProviderRegistry.cleanup() end)
@@ -34,14 +38,24 @@ defmodule Gong.LLMRouterTest do
     end
 
     test "runtime opts 覆盖 base_url" do
-      model_config = %{provider: "deepseek", model_id: "deepseek-chat", base_url: "https://default.example.com"}
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        base_url: "https://default.example.com"
+      }
+
       resolved = LLMRouter.resolve_config(model_config, base_url: "http://localhost:8080")
 
       assert resolved.base_url == "http://localhost:8080"
     end
 
     test "model 级 base_url 覆盖 provider 级" do
-      model_config = %{provider: "deepseek", model_id: "deepseek-chat", base_url: "https://model.example.com"}
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        base_url: "https://model.example.com"
+      }
+
       resolved = LLMRouter.resolve_config(model_config)
 
       assert resolved.base_url == "https://model.example.com"
@@ -63,21 +77,26 @@ defmodule Gong.LLMRouterTest do
       ProviderRegistry.register_compat(
         :anthropic_compat,
         "kimi",
-        %{base_url: "https://api.moonshot.cn/anthropic", api_key_env: "KIMI_API_KEY"},
+        %{base_url: "https://api.kimi.com/coding", api_key_env: "KIMI_API_KEY"},
         priority: 10,
         timeout: 60_000
       )
 
-      model_config = %{provider: "kimi", model_id: "moonshot-v1-auto"}
+      model_config = %{provider: "kimi", model_id: "k2p5"}
       resolved = LLMRouter.resolve_config(model_config)
 
       assert resolved.req_provider == :anthropic
-      assert resolved.req_model_spec == %{provider: :anthropic, id: "moonshot-v1-auto"}
-      assert resolved.model_str == "kimi:moonshot-v1-auto"
+      assert resolved.req_model_spec == %{provider: :anthropic, id: "k2p5"}
+      assert resolved.model_str == "kimi:k2p5"
     end
 
     test "model headers 合并到最终配置" do
-      model_config = %{provider: "deepseek", model_id: "deepseek-chat", headers: %{"X-Custom" => "value"}}
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        headers: %{"X-Custom" => "value"}
+      }
+
       resolved = LLMRouter.resolve_config(model_config)
 
       assert resolved.headers == %{"X-Custom" => "value"}
@@ -260,7 +279,11 @@ defmodule Gong.LLMRouterTest do
       # 使用一个不存在的 provider，没有 fallback
       ProviderRegistry.cleanup()
       ProviderRegistry.init()
-      ProviderRegistry.register("only_one", Gong.Test.MockProvider, %{}, priority: 10, timeout: 5_000)
+
+      ProviderRegistry.register("only_one", Gong.Test.MockProvider, %{},
+        priority: 10,
+        timeout: 5_000
+      )
 
       model_config = %{provider: "only_one", model_id: "test"}
 
@@ -283,7 +306,9 @@ defmodule Gong.LLMRouterTest do
     end
 
     test "不同 provider 有不同 timeout" do
-      deepseek_resolved = LLMRouter.resolve_config(%{provider: "deepseek", model_id: "deepseek-chat"})
+      deepseek_resolved =
+        LLMRouter.resolve_config(%{provider: "deepseek", model_id: "deepseek-chat"})
+
       openai_resolved = LLMRouter.resolve_config(%{provider: "openai", model_id: "gpt-4"})
 
       assert deepseek_resolved.receive_timeout == 60_000

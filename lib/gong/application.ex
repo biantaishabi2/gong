@@ -29,23 +29,23 @@ defmodule Gong.Application do
     # 注册 Kimi/MiniMax/GLM 模型配置
     Gong.ModelRegistry.register(:kimi, %{
       provider: "kimi",
-      model_id: "moonshot-v1-auto",
-      base_url: "https://api.moonshot.cn",
+      model_id: "k2p5",
+      base_url: "https://api.kimi.com/coding",
       api_key_env: "KIMI_API_KEY",
       auth_mode: :anthropic_header
     })
 
     Gong.ModelRegistry.register(:minimax, %{
       provider: "minimax",
-      model_id: "minimax-text-01",
-      base_url: "https://api.minimax.chat",
+      model_id: "MiniMax-M2.5",
+      base_url: "https://api.minimaxi.com/anthropic",
       api_key_env: "MINIMAX_API_KEY",
       auth_mode: :anthropic_header
     })
 
     Gong.ModelRegistry.register(:glm, %{
       provider: "glm",
-      model_id: "glm-4",
+      model_id: "glm-4.7",
       base_url: "https://open.bigmodel.cn/api/paas/v4",
       api_key_env: "GLM_API_KEY",
       auth_mode: :bearer
@@ -72,7 +72,7 @@ defmodule Gong.Application do
       :anthropic_compat,
       "kimi",
       %{
-        base_url: "https://api.moonshot.cn/anthropic",
+        base_url: "https://api.kimi.com/coding",
         api_key_env: "KIMI_API_KEY"
       },
       priority: 9,

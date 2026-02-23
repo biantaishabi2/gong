@@ -10,6 +10,16 @@ defmodule Gong.ModelRegistry do
   @table :gong_model_registry
   @current_key :__current_model__
   @default_model_name :default
+  @short_name_aliases %{
+    "deepseek" => :deepseek,
+    "minimax" => :minimax,
+    "kimi" => :kimi,
+    "kimi-2.5" => :kimi,
+    "kimi2.5" => :kimi,
+    "kimi-k2.5" => :kimi,
+    "k2p5" => :kimi,
+    "glm" => :glm
+  }
 
   @type auth_mode :: :bearer | :anthropic_header
 
@@ -32,11 +42,13 @@ defmodule Gong.ModelRegistry do
 
     :ets.new(@table, [:named_table, :set, :public])
 
-    config = default_config || %{
-      provider: "deepseek",
-      model_id: "deepseek-chat",
-      api_key_env: "DEEPSEEK_API_KEY"
-    }
+    config =
+      default_config ||
+        %{
+          provider: "deepseek",
+          model_id: "deepseek-chat",
+          api_key_env: "DEEPSEEK_API_KEY"
+        }
 
     :ets.insert(@table, {@default_model_name, config})
     :ets.insert(@table, {@current_key, @default_model_name})
@@ -133,11 +145,31 @@ defmodule Gong.ModelRegistry do
   通过 "provider:model_id" 字符串查找模型配置。
   先在注册表中匹配，找不到则构造默认配置。
   """
-  @bdd_instruction %{kind: :when, name: :lookup_model_by_string, params: %{model_str: :string}, returns: "{:ok, config} | {:error, atom}"}
+  @bdd_instruction %{
+    kind: :when,
+    name: :lookup_model_by_string,
+    params: %{model_str: :string},
+    returns: "{:ok, config} | {:error, atom}"
+  }
   @spec lookup_by_string(String.t()) :: {:ok, model_config()} | {:error, :unknown_provider}
   def lookup_by_string(model_str) when is_binary(model_str) do
     ensure_table!()
 
+    model_str = String.trim(model_str)
+
+    cond do
+      model_str == "" ->
+        {:error, :unknown_provider}
+
+      String.contains?(model_str, ":") ->
+        lookup_provider_model(model_str)
+
+      true ->
+        lookup_short_name(model_str)
+    end
+  end
+
+  defp lookup_provider_model(model_str) do
     case String.split(model_str, ":", parts: 2) do
       [provider, model_id] when provider != "" and model_id != "" ->
         # 通过 alias 解析 provider 名称（如 "deepseek" → "openai_compat:deepseek"）
@@ -155,16 +187,38 @@ defmodule Gong.ModelRegistry do
 
               :not_found ->
                 # 构造默认配置，使用解析后的 provider 名称
-                {:ok, %{
-                  provider: resolved_provider,
-                  model_id: model_id,
-                  api_key_env: "#{String.upcase(provider)}_API_KEY"
-                }}
+                {:ok,
+                 %{
+                   provider: resolved_provider,
+                   model_id: model_id,
+                   api_key_env: "#{String.upcase(provider)}_API_KEY"
+                 }}
             end
         end
 
       _ ->
         {:error, :unknown_provider}
+    end
+  end
+
+  defp lookup_short_name(model_str) do
+    normalized = String.downcase(model_str)
+
+    case Map.get(@short_name_aliases, normalized) do
+      nil ->
+        {:error, :unknown_provider}
+
+      :deepseek ->
+        {:ok, %{provider: "deepseek", model_id: "deepseek-chat", api_key_env: "DEEPSEEK_API_KEY"}}
+
+      name ->
+        case :ets.lookup(@table, name) do
+          [{^name, config}] ->
+            {:ok, config}
+
+          [] ->
+            {:error, :unknown_provider}
+        end
     end
   end
 
@@ -174,7 +228,9 @@ defmodule Gong.ModelRegistry do
       |> Enum.find(fn
         {key, %{provider: p, model_id: m}} when key != @current_key ->
           p == provider and m == model_id
-        _ -> false
+
+        _ ->
+          false
       end)
 
     case result do
@@ -205,7 +261,13 @@ defmodule Gong.ModelRegistry do
   @spec apply_defaults(model_config()) :: model_config()
   def apply_defaults(config) when is_map(config) do
     Map.merge(
-      %{api_key_env: "", context_window: @default_context_window, base_url: nil, headers: %{}, auth_mode: :bearer},
+      %{
+        api_key_env: "",
+        context_window: @default_context_window,
+        base_url: nil,
+        headers: %{},
+        auth_mode: :bearer
+      },
       config
     )
   end
@@ -217,12 +279,16 @@ defmodule Gong.ModelRegistry do
 
     :ets.tab2list(@table)
     |> Enum.each(fn
-      {@current_key, _} -> :ok
+      {@current_key, _} ->
+        :ok
+
       {name, config} when is_map(config) ->
         if Map.has_key?(config, :auth_ref) do
           :ets.delete(@table, name)
         end
-      _ -> :ok
+
+      _ ->
+        :ok
     end)
 
     :ok

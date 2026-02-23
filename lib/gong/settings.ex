@@ -9,7 +9,7 @@ defmodule Gong.Settings do
   @table :gong_settings
 
   @default_settings %{
-    "model" => "deepseek:deepseek-chat",
+    "model" => "minimax",
     "max_tokens" => "8192",
     "temperature" => "0.7",
     "max_iterations" => "infinity"
@@ -55,14 +55,20 @@ defmodule Gong.Settings do
   @spec get_integer(String.t(), integer() | :infinity) :: integer() | :infinity
   def get_integer(key, default) do
     case get(key) do
-      "infinity" -> :infinity
+      "infinity" ->
+        :infinity
+
       value when is_binary(value) ->
         case Integer.parse(value) do
           {int, ""} -> int
           _ -> default
         end
-      value when is_integer(value) -> value
-      _ -> default
+
+      value when is_integer(value) ->
+        value
+
+      _ ->
+        default
     end
   end
 
@@ -133,6 +139,7 @@ defmodule Gong.Settings do
     if :ets.info(@table) != :undefined do
       :ets.delete(@table)
     end
+
     :ok
   end
 
@@ -147,6 +154,7 @@ defmodule Gong.Settings do
               for {k, v} <- map do
                 :ets.insert(@table, {k, to_string(v)})
               end
+
               :ok
 
             _ ->
