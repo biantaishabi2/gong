@@ -1,0 +1,91 @@
+name: niuma - Discussion Check Reusable
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "目标仓库（owner/repo）"
+        required: true
+        type: string
+      issue_number:
+        description: "Issue 编号"
+        required: true
+        type: string
+      max_discussion_rounds:
+        description: "最大讨论轮次（1-20）"
+        required: false
+        default: 5
+        type: number
+      visible_round_interval:
+        description: "可见评论轮次间隔"
+        required: false
+        default: 1
+        type: number
+      visible_only_on_diff:
+        description: "仅差异变化时可见评论"
+        required: false
+        default: true
+        type: boolean
+      workflow_source_repo:
+        description: "reusable workflow 源仓库（owner/repo）"
+        required: false
+        default: ""
+        type: string
+      workflow_source_ref:
+        description: "reusable workflow 源 ref（分支、tag 或 SHA）"
+        required: false
+        default: ""
+        type: string
+      repo_dir:
+        description: "仓库目录（相对 GITHUB_WORKSPACE 或绝对路径）"
+        required: false
+        default: "."
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  discussion-check:
+    runs-on: self-hosted
+    timeout-minutes: 30
+    concurrency:
+      group: niuma-discuss-${{ inputs.repo }}-${{ inputs.issue_number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup niuma binary
+        run: |
+          niuma_path="$(command -v niuma || true)"
+          if [ -z "$niuma_path" ] && [ -x "/usr/local/bin/niuma" ]; then
+            niuma_path="/usr/local/bin/niuma"
+          fi
+          if [ -z "$niuma_path" ]; then
+            echo "::error::找不到 niuma 二进制，请确保 runner 上已安装 niuma（PATH=$PATH）"
+            exit 1
+          fi
+          echo "NIUMA_BIN=$niuma_path" >> "$GITHUB_ENV"
+
+      # 事件驱动启动一次 discuss，后续轮次在进程内循环推进
+      - name: Check Discussion
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          MAX_DISCUSSION_ROUNDS: ${{ inputs.max_discussion_rounds }}
+          NIUMA_VISIBLE_ROUND_INTERVAL: ${{ inputs.visible_round_interval }}
+          NIUMA_VISIBLE_ONLY_ON_DIFF: ${{ inputs.visible_only_on_diff }}
+        run: |
+          LABELS=$(gh issue view "$ISSUE_NUMBER" --repo "$REPO" --json labels -q '.labels[].name')
+          if echo "$LABELS" | grep -q "bot:needs-discussion"; then
+            EXTRA_ARGS=()
+            if [ -n "$MAX_DISCUSSION_ROUNDS" ]; then
+              EXTRA_ARGS+=(--max-discussion-rounds "$MAX_DISCUSSION_ROUNDS")
+            fi
+            "$NIUMA_BIN" discuss \
+              --repo "$REPO" \
+              --issue "$ISSUE_NUMBER" \
+              "${EXTRA_ARGS[@]}"
+          fi
