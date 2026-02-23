@@ -32,7 +32,8 @@ defmodule Gong.MixProject do
     [
       # Agent 框架
       {:jido, "~> 2.0.0-rc.4"},
-      {:jido_ai, github: "agentjido/jido_ai", branch: "main"},
+      # 固定到已验证提交，降低 CI 中 git 依赖协商抖动
+      {:jido_ai, github: "agentjido/jido_ai", ref: "2e42e09621f5532933acc15443eb5051932a6b15"},
 
       # LLM 客户端
       {:req_llm, "~> 1.5"},
