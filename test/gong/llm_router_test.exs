@@ -61,6 +61,57 @@ defmodule Gong.LLMRouterTest do
 
       assert resolved.headers == %{"X-Custom" => "value"}
     end
+
+    test "runtime headers 覆盖 model headers" do
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        headers: %{"X-Custom" => "model-value", "X-Keep" => "kept"}
+      }
+
+      resolved = LLMRouter.resolve_config(model_config, headers: %{"X-Custom" => "runtime-value"})
+
+      assert resolved.headers["X-Custom"] == "runtime-value"
+      assert resolved.headers["X-Keep"] == "kept"
+    end
+
+    test "三层 headers 合并优先级：runtime > model > provider" do
+      # 注册带 headers 的 provider
+      ProviderRegistry.cleanup()
+      ProviderRegistry.init()
+
+      ProviderRegistry.register(
+        "with_headers",
+        Gong.Test.MockProvider,
+        %{headers: %{"Auth" => "pk", "X-Provider" => "pv"}},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      model_config = %{
+        provider: "with_headers",
+        model_id: "test-model",
+        headers: %{"Auth" => "mk", "X-Custom" => "cv"}
+      }
+
+      runtime_opts = [headers: %{"X-Custom" => "rv", "X-New" => "nv"}]
+      resolved = LLMRouter.resolve_config(model_config, runtime_opts)
+
+      # runtime > model > provider
+      assert resolved.headers == %{
+               "Auth" => "mk",
+               "X-Provider" => "pv",
+               "X-Custom" => "rv",
+               "X-New" => "nv"
+             }
+    end
+
+    test "未配置 headers 时返回空 map 不报错" do
+      model_config = %{provider: "deepseek", model_id: "deepseek-chat"}
+      resolved = LLMRouter.resolve_config(model_config)
+
+      assert resolved.headers == %{}
+    end
   end
 
   # ── fallback 触发测试 ──
