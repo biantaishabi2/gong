@@ -238,7 +238,11 @@ defmodule Gong.CLI do
     @exit_ok
   end
 
-  defp execute(%{command: :session_restore, session_id: id, opts: command_opts}, _runtime, run_opts) do
+  defp execute(
+         %{command: :session_restore, session_id: id, opts: command_opts},
+         _runtime,
+         run_opts
+       ) do
     cwd = resolve_cwd(command_opts, run_opts)
     tape_path = Path.join(cwd, ".gong/tape")
 
@@ -398,8 +402,8 @@ defmodule Gong.CLI do
   defp usage_text do
     """
     用法:
-      bin/gong chat [--model <provider:model>] [--cwd <path>]
-      bin/gong run <prompt> [--model <provider:model>] [--cwd <path>]
+      bin/gong chat [--model <provider:model|short-name>] [--cwd <path>]
+      bin/gong run <prompt> [--model <provider:model|short-name>] [--cwd <path>]
       bin/gong session list [--cwd <path>]
       bin/gong session restore <session_id> [--cwd <path>]
       bin/gong doctor [--cwd <path>]
@@ -412,6 +416,10 @@ defmodule Gong.CLI do
       session restore   恢复指定会话
       doctor            检查运行时与项目上下文
       help              查看帮助
+
+    模型参数:
+      支持完整格式 provider:model，例如 minimax:MiniMax-M2.5
+      也支持短名: minimax | kimi | deepseek | glm
 
     运行前提:
       Erlang/OTP >= 25
