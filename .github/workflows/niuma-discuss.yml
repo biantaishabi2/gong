@@ -38,7 +38,7 @@ jobs:
       github.event_name == 'issues' &&
       github.event.label.name == 'bot:needs-discussion' &&
       github.event.issue.pull_request == null
-    uses: biantaishabi2/Cli/.github/workflows/niuma-discuss-reusable.yml@master
+    uses: ./.github/workflows/niuma-discuss-reusable.yml
     with:
       repo: ${{ github.repository }}
       issue_number: ${{ format('{0}', github.event.issue.number) }}
@@ -52,7 +52,7 @@ jobs:
       !endsWith(github.actor, '[bot]') &&
       !contains(vars.BOT_ACTORS || '', github.actor) &&
       !contains(github.event.comment.body || '', '<!-- BOT:')
-    uses: biantaishabi2/Cli/.github/workflows/niuma-discuss-reusable.yml@master
+    uses: ./.github/workflows/niuma-discuss-reusable.yml
     with:
       repo: ${{ github.repository }}
       issue_number: ${{ format('{0}', github.event.issue.number) }}
@@ -61,11 +61,11 @@ jobs:
   # workflow_dispatch → 手动触发
   call-discuss-from-dispatch:
     if: github.event_name == 'workflow_dispatch'
-    uses: biantaishabi2/Cli/.github/workflows/niuma-discuss-reusable.yml@master
+    uses: ./.github/workflows/niuma-discuss-reusable.yml
     with:
       repo: ${{ github.repository }}
       issue_number: ${{ format('{0}', inputs.issue) }}
-      max_discussion_rounds: ${{ inputs.max_discussion_rounds }}
-      visible_round_interval: ${{ inputs.visible_round_interval }}
-      visible_only_on_diff: ${{ inputs.visible_only_on_diff }}
+      max_discussion_rounds: ${{ fromJSON(inputs.max_discussion_rounds) }}
+      visible_round_interval: ${{ fromJSON(inputs.visible_round_interval) }}
+      visible_only_on_diff: ${{ fromJSON(inputs.visible_only_on_diff) }}
     secrets: inherit
