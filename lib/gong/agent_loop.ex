@@ -557,19 +557,22 @@ defmodule Gong.AgentLoop do
           Process.put(:gong_streamed, true)
           emit_stream_event(StreamEvent.new(:text_start))
 
-          {:ok, response} =
-            ReqLLM.StreamResponse.process_stream(stream_response,
-              on_result: fn chunk ->
-                emit_stream_event(StreamEvent.new(:text_delta, content: chunk))
-              end
-            )
+          case ReqLLM.StreamResponse.process_stream(stream_response,
+                 on_result: fn chunk ->
+                   emit_stream_event(StreamEvent.new(:text_delta, content: chunk))
+                 end
+               ) do
+            {:ok, response} ->
+              emit_stream_event(StreamEvent.new(:text_end))
 
-          emit_stream_event(StreamEvent.new(:text_end))
+              # 从 Response 解析结果 + 提取 usage
+              {parsed, usage} = parse_reqllm_response(response)
+              accumulate_turn_usage(usage)
+              {:ok, parsed}
 
-          # 从 Response 解析结果 + 提取 usage
-          {parsed, usage} = parse_reqllm_response(response)
-          accumulate_turn_usage(usage)
-          {:ok, parsed}
+            {:error, reason} ->
+              {:ok, {:error, to_string(reason)}}
+          end
 
         {:error, reason} ->
           {:ok, {:error, to_string(reason)}}

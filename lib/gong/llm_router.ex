@@ -84,12 +84,30 @@ defmodule Gong.LLMRouter do
     # auth_mode 鉴权头注入：仅当 model_config 显式声明 auth_mode 时才注入
     final_headers = inject_auth_header(final_headers, model_config)
 
+    model_id = Map.get(model_config, :model_id, "deepseek-chat")
     model_str = "#{provider_name}:#{Map.get(model_config, :model_id, "deepseek-chat")}"
+    req_provider = resolve_req_provider(provider_name, provider_config)
+
+    req_model_spec =
+      if req_provider do
+        %{provider: req_provider, id: model_id}
+      else
+        nil
+      end
+
+    api_key =
+      case Map.get(model_config, :api_key_env) || Map.get(provider_config, :api_key_env) do
+        env when is_binary(env) and env != "" -> System.get_env(env)
+        _ -> nil
+      end
 
     %{
       model_str: model_str,
+      req_model_spec: req_model_spec,
+      req_provider: req_provider,
       base_url: final_base_url,
       headers: final_headers,
+      api_key: api_key,
       receive_timeout: final_timeout,
       provider_name: provider_name
     }
@@ -104,7 +122,9 @@ defmodule Gong.LLMRouter do
     # 构建最终 opts：注入 timeout，保留原有 opts（如 tools）
     final_opts = build_final_opts(resolved, opts)
 
-    case do_call(method, resolved.model_str, messages, final_opts) do
+    model_input = resolved.req_model_spec || resolved.model_str
+
+    case do_call(method, model_input, messages, final_opts) do
       {:ok, _} = success ->
         success
 
@@ -122,7 +142,9 @@ defmodule Gong.LLMRouter do
         resolved = resolve_config(fallback_config, opts)
         final_opts = build_final_opts(resolved, opts)
 
-        case do_call(method, resolved.model_str, messages, final_opts) do
+        model_input = resolved.req_model_spec || resolved.model_str
+
+        case do_call(method, model_input, messages, final_opts) do
           {:ok, _} = success -> success
           {:error, _} -> {:error, :all_providers_exhausted}
         end
@@ -132,12 +154,12 @@ defmodule Gong.LLMRouter do
     end
   end
 
-  defp do_call(:stream_text, model_str, messages, opts) do
-    ReqLLM.stream_text(model_str, messages, opts)
+  defp do_call(:stream_text, model_input, messages, opts) do
+    ReqLLM.stream_text(model_input, messages, opts)
   end
 
-  defp do_call(:generate_text, model_str, messages, opts) do
-    ReqLLM.generate_text(model_str, messages, opts)
+  defp do_call(:generate_text, model_input, messages, opts) do
+    ReqLLM.generate_text(model_input, messages, opts)
   end
 
   defp build_final_opts(resolved, runtime_opts) do
@@ -149,15 +171,66 @@ defmodule Gong.LLMRouter do
     base_opts
     |> Keyword.put(:receive_timeout, resolved.receive_timeout)
     |> maybe_put_base_url(resolved.base_url)
-    |> maybe_put_headers(resolved.headers)
+    |> maybe_put_api_key(resolved.api_key)
+    |> maybe_put_req_http_headers(resolved.headers)
   end
 
   defp maybe_put_base_url(opts, nil), do: opts
   defp maybe_put_base_url(opts, base_url), do: Keyword.put(opts, :base_url, base_url)
 
-  defp maybe_put_headers(opts, nil), do: opts
-  defp maybe_put_headers(opts, headers) when headers == %{}, do: opts
-  defp maybe_put_headers(opts, headers), do: Keyword.put(opts, :headers, headers)
+  defp maybe_put_api_key(opts, nil), do: opts
+  defp maybe_put_api_key(opts, ""), do: opts
+  defp maybe_put_api_key(opts, api_key), do: Keyword.put(opts, :api_key, api_key)
+
+  defp maybe_put_req_http_headers(opts, nil), do: opts
+  defp maybe_put_req_http_headers(opts, headers) when headers == %{}, do: opts
+
+  defp maybe_put_req_http_headers(opts, headers) do
+    req_http_options = Keyword.get(opts, :req_http_options, [])
+    existing_headers = req_http_options |> Keyword.get(:headers, []) |> normalize_headers()
+    merged_headers = Map.merge(existing_headers, normalize_headers(headers))
+
+    merged_header_list =
+      merged_headers
+      |> Enum.map(fn {k, v} -> {k, v} end)
+
+    opts
+    |> Keyword.put(:req_http_options, Keyword.put(req_http_options, :headers, merged_header_list))
+  end
+
+  defp normalize_headers(headers) when is_map(headers) do
+    Enum.reduce(headers, %{}, fn {k, v}, acc -> Map.put(acc, to_string(k), v) end)
+  end
+
+  defp normalize_headers(headers) when is_list(headers) do
+    Enum.reduce(headers, %{}, fn
+      {k, v}, acc -> Map.put(acc, to_string(k), v)
+      _other, acc -> acc
+    end)
+  end
+
+  defp normalize_headers(_), do: %{}
+
+  defp resolve_req_provider(provider_name, provider_config) do
+    candidate =
+      case Map.get(provider_config, :module) do
+        Gong.Providers.OpenaiCompatProvider -> "openai_compat"
+        # anthropic_compat 厂商实例实际走 ReqLLM 内置 anthropic provider，
+        # 以确保使用 /v1/messages 端点与 x-api-key 鉴权。
+        Gong.Providers.AnthropicCompatProvider -> "anthropic"
+        Gong.Providers.DeepSeek -> "deepseek"
+        _ -> provider_name
+      end
+
+    candidate_prefix =
+      candidate
+      |> String.split(":", parts: 2)
+      |> hd()
+
+    Enum.find(ReqLLM.Providers.list(), fn provider_id ->
+      Atom.to_string(provider_id) == candidate_prefix
+    end)
+  end
 
   # 根据 auth_mode 注入鉴权头，仅当 model_config 显式包含 auth_mode 字段时生效
   defp inject_auth_header(headers, %{auth_mode: auth_mode, api_key_env: env_var})

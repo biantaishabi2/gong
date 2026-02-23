@@ -53,6 +53,27 @@ defmodule Gong.LLMRouterTest do
 
       assert resolved.model_str == "unknown_provider:some-model"
       assert resolved.receive_timeout == 60_000
+      assert resolved.req_model_spec == nil
+    end
+
+    test "协议型 provider 解析为 ReqLLM map 模型" do
+      ProviderRegistry.cleanup()
+      ProviderRegistry.init()
+
+      ProviderRegistry.register_compat(
+        :anthropic_compat,
+        "kimi",
+        %{base_url: "https://api.moonshot.cn/anthropic", api_key_env: "KIMI_API_KEY"},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      model_config = %{provider: "kimi", model_id: "moonshot-v1-auto"}
+      resolved = LLMRouter.resolve_config(model_config)
+
+      assert resolved.req_provider == :anthropic
+      assert resolved.req_model_spec == %{provider: :anthropic, id: "moonshot-v1-auto"}
+      assert resolved.model_str == "kimi:moonshot-v1-auto"
     end
 
     test "model headers 合并到最终配置" do

@@ -67,6 +67,42 @@ defmodule Gong.Application do
       timeout: 60_000
     )
 
+    # 注册 Kimi 为 anthropic_compat 协议实例
+    Gong.ProviderRegistry.register_compat(
+      :anthropic_compat,
+      "kimi",
+      %{
+        base_url: "https://api.moonshot.cn/anthropic",
+        api_key_env: "KIMI_API_KEY"
+      },
+      priority: 9,
+      timeout: 60_000
+    )
+
+    # 注册 MiniMax 为 anthropic_compat 协议实例
+    Gong.ProviderRegistry.register_compat(
+      :anthropic_compat,
+      "minimax",
+      %{
+        base_url: "https://api.minimaxi.com/anthropic",
+        api_key_env: "MINIMAX_API_KEY"
+      },
+      priority: 8,
+      timeout: 60_000
+    )
+
+    # 注册 GLM 为 openai_compat 协议实例
+    Gong.ProviderRegistry.register_compat(
+      :openai_compat,
+      "glm",
+      %{
+        base_url: "https://open.bigmodel.cn/api/paas/v4",
+        api_key_env: "GLM_API_KEY"
+      },
+      priority: 7,
+      timeout: 60_000
+    )
+
     opts = [strategy: :one_for_one, name: Gong.Supervisor]
     Supervisor.start_link(children, opts)
   end
