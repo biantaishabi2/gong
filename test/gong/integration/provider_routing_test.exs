@@ -181,6 +181,67 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
   end
 
+  # ── header_profile 端到端合并测试 ──
+
+  describe "header_profile 三层合并" do
+    test "profile + provider + model 三层合并优先级正确" do
+      ProviderRegistry.register(
+        "hp_test",
+        Gong.Test.MockProvider,
+        %{headers: %{"X-Provider" => "pv", "Accept" => "text/plain"}},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      model_config = %{
+        provider: "hp_test",
+        model_id: "test-model",
+        header_profile: :opencode,
+        headers: %{"X-Model" => "mv"}
+      }
+
+      resolved = LLMRouter.resolve_config(model_config)
+
+      # profile 基底
+      assert resolved.headers["User-Agent"] == "OpenCode/1.0"
+      assert resolved.headers["X-Client-Name"] == "opencode"
+      # provider 覆盖 profile 的 Accept
+      assert resolved.headers["Accept"] == "text/plain"
+      # provider 独有头保留
+      assert resolved.headers["X-Provider"] == "pv"
+      # model 独有头保留
+      assert resolved.headers["X-Model"] == "mv"
+    end
+
+    test "profile + provider + model + runtime 四层合并" do
+      ProviderRegistry.register(
+        "hp_full",
+        Gong.Test.MockProvider,
+        %{headers: %{"X-Provider" => "pv"}},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      model_config = %{
+        provider: "hp_full",
+        model_id: "test-model",
+        header_profile: :opencode,
+        headers: %{"Accept" => "text/html"}
+      }
+
+      resolved = LLMRouter.resolve_config(model_config, headers: %{"User-Agent" => "RuntimeUA"})
+
+      # runtime 覆盖 profile 的 User-Agent
+      assert resolved.headers["User-Agent"] == "RuntimeUA"
+      # model 覆盖 profile 的 Accept
+      assert resolved.headers["Accept"] == "text/html"
+      # profile 独有头保留
+      assert resolved.headers["X-Client-Name"] == "opencode"
+      # provider 独有头保留
+      assert resolved.headers["X-Provider"] == "pv"
+    end
+  end
+
   # ── AgentLoop 与 Compaction 使用同一 Router 断言 ──
 
   describe "AgentLoop 与 Summarizer 统一路由" do

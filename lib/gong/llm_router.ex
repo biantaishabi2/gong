@@ -7,6 +7,7 @@ defmodule Gong.LLMRouter do
   通过 ProviderRegistry 获取运行时策略后委托 ReqLLM 执行。
   """
 
+  alias Gong.HeaderProfile
   alias Gong.ProviderRegistry
 
   @default_timeout 60_000
@@ -69,8 +70,14 @@ defmodule Gong.LLMRouter do
     final_base_url = runtime_base_url || model_base_url || provider_base_url
     final_timeout = runtime_timeout || provider_timeout || @default_timeout
 
+    # profile 级 headers（最低优先级基底）
+    header_profile = Map.get(model_config, :header_profile, :default)
+    profile_headers = HeaderProfile.resolve(header_profile)
+
+    # 合并：runtime > model > provider > profile
     final_headers =
-      (provider_headers || %{})
+      profile_headers
+      |> Map.merge(provider_headers || %{})
       |> Map.merge(model_headers || %{})
       |> Map.merge(runtime_headers || %{})
 
