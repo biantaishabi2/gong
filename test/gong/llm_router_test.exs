@@ -114,6 +114,49 @@ defmodule Gong.LLMRouterTest do
     end
   end
 
+  # ── header_profile 注入测试 ──
+
+  describe "header_profile 注入" do
+    test "无 header_profile 字段时行为不变" do
+      model_config = %{provider: "deepseek", model_id: "deepseek-chat"}
+      resolved = LLMRouter.resolve_config(model_config)
+
+      assert resolved.headers == %{}
+    end
+
+    test "header_profile: :opencode 注入指纹头" do
+      model_config = %{provider: "deepseek", model_id: "deepseek-chat", header_profile: :opencode}
+      resolved = LLMRouter.resolve_config(model_config)
+
+      assert resolved.headers["User-Agent"] == "OpenCode/1.0"
+      assert resolved.headers["X-Client-Name"] == "opencode"
+      assert resolved.headers["Accept"] == "application/json"
+    end
+
+    test "model headers 与 profile headers 同名时 model 优先覆盖" do
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        header_profile: :opencode,
+        headers: %{"User-Agent" => "CustomAgent"}
+      }
+
+      resolved = LLMRouter.resolve_config(model_config)
+
+      assert resolved.headers["User-Agent"] == "CustomAgent"
+      # profile 的其他头仍保留
+      assert resolved.headers["X-Client-Name"] == "opencode"
+      assert resolved.headers["Accept"] == "application/json"
+    end
+
+    test "header_profile: :default 不注入额外头" do
+      model_config = %{provider: "deepseek", model_id: "deepseek-chat", header_profile: :default}
+      resolved = LLMRouter.resolve_config(model_config)
+
+      assert resolved.headers == %{}
+    end
+  end
+
   # ── fallback 触发测试 ──
 
   describe "fallback 逻辑" do
