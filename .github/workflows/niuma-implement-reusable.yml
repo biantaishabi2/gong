@@ -1,0 +1,163 @@
+name: niuma - Implement Reusable
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "目标仓库（owner/repo）"
+        required: true
+        type: string
+      issue_number:
+        description: "Issue 编号"
+        required: true
+        type: string
+      workflow_source_repo:
+        description: "reusable workflow 源仓库（owner/repo）"
+        required: false
+        default: ""
+        type: string
+      workflow_source_ref:
+        description: "reusable workflow 源 ref（分支、tag 或 SHA）"
+        required: false
+        default: ""
+        type: string
+      repo_dir:
+        description: "仓库目录（相对 GITHUB_WORKSPACE 或绝对路径）"
+        required: false
+        default: "."
+        type: string
+      gate_max_retries:
+        description: "Gate 最大重试次数"
+        required: false
+        default: "2"
+        type: string
+      trigger_label:
+        description: "触发本次实现的标签名（用于 gate label 校验）"
+        required: false
+        default: "bot:plan-final"
+        type: string
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  implement:
+    runs-on: self-hosted
+    concurrency:
+      group: niuma-impl-${{ inputs.issue_number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NIUMA_PAT }}
+          fetch-depth: 0
+
+      - name: Setup niuma binary
+        run: |
+          niuma_path="$(command -v niuma || true)"
+          if [ -z "$niuma_path" ] && [ -x "/usr/local/bin/niuma" ]; then
+            niuma_path="/usr/local/bin/niuma"
+          fi
+          if [ -z "$niuma_path" ]; then
+            echo "::error::找不到 niuma 二进制，请确保 runner 上已安装 niuma（PATH=$PATH）"
+            exit 1
+          fi
+          echo "NIUMA_BIN=$niuma_path" >> "$GITHUB_ENV"
+
+      - name: Resolve repo directory
+        id: resolve_dir
+        env:
+          REPO_DIR: ${{ inputs.repo_dir }}
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          resolved_repo_dir="$REPO_DIR"
+          if [ -z "$resolved_repo_dir" ]; then
+            resolved_repo_dir="."
+          fi
+          if [[ "$resolved_repo_dir" != /* ]]; then
+            resolved_repo_dir="$WORKSPACE/$resolved_repo_dir"
+          fi
+          echo "repo_dir=$resolved_repo_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Gate label check
+        id: gate_label
+        continue-on-error: true
+        env:
+          TRIGGER_LABEL: ${{ inputs.trigger_label }}
+          WORKSPACE: ${{ steps.resolve_dir.outputs.repo_dir }}
+        run: |
+          "$NIUMA_BIN" gate label \
+            --label "$TRIGGER_LABEL" \
+            --type implement \
+            --repo-dir "$WORKSPACE"
+
+      - name: Implement Code
+        if: steps.gate_label.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          WORKSPACE: ${{ steps.resolve_dir.outputs.repo_dir }}
+        run: |
+          "$NIUMA_BIN" fix \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --repo-dir "$WORKSPACE"
+
+      - name: Find PR Number
+        if: steps.gate_label.outcome == 'success'
+        id: find_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          # 分页解析 BOT:PR_CREATED marker，取最新 open PR 号
+          if PR_NUMBER=$("$NIUMA_BIN" resolve-pr --repo "$REPO" --issue "$ISSUE_NUMBER"); then
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::未在 issue #${ISSUE_NUMBER} 的评论中找到可用 PR 号"
+            echo "pr_number=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Self-check loop (gate + iterate)
+        if: steps.gate_label.outcome == 'success' && steps.find_pr.outputs.pr_number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+          WORKSPACE: ${{ steps.resolve_dir.outputs.repo_dir }}
+        run: |
+          MAX_RETRIES=2
+          if [[ "${{ inputs.gate_max_retries }}" =~ ^[0-9]+$ ]]; then
+            MAX_RETRIES="${{ inputs.gate_max_retries }}"
+          else
+            echo "::warning::gate_max_retries 非法: '${{ inputs.gate_max_retries }}'，回退为 2"
+          fi
+
+          for ATTEMPT in $(seq 1 $((MAX_RETRIES + 1))); do
+            if "$NIUMA_BIN" gate run \
+                 --repo "$REPO" --issue "$ISSUE_NUMBER" \
+                 --pr "$PR_NUMBER" --repo-dir "$WORKSPACE" \
+                 --max-retries "$MAX_RETRIES" --self-check; then
+              echo "Gate passed on attempt $ATTEMPT"
+              exit 0
+            fi
+
+            if [ "$ATTEMPT" -gt "$MAX_RETRIES" ]; then
+              echo "Gate failed after $MAX_RETRIES retries, running final escalation gate..."
+              "$NIUMA_BIN" gate run \
+                --repo "$REPO" --issue "$ISSUE_NUMBER" \
+                --pr "$PR_NUMBER" --repo-dir "$WORKSPACE" \
+                --max-retries 0
+              exit 1
+            fi
+
+            echo "Gate failed (attempt $ATTEMPT/$MAX_RETRIES), running iterate..."
+            "$NIUMA_BIN" iterate \
+              --repo "$REPO" --issue "$ISSUE_NUMBER" \
+              --pr "$PR_NUMBER" --repo-dir "$WORKSPACE" || true
+          done
