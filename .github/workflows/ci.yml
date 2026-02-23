@@ -96,11 +96,16 @@ jobs:
           restore-keys: mix-${{ runner.os }}-
 
       - name: 安装依赖
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: |
           git config --global protocol.version 2
+          # 预先 shallow clone jido_ai（38k+ objects），避免 mix deps.get 全量拉取超时
+          if [ ! -d deps/jido_ai/.git ]; then
+            mkdir -p deps
+            git clone --depth 1 --branch main https://github.com/agentjido/jido_ai.git deps/jido_ai || rm -rf deps/jido_ai
+          fi
           for i in 1 2 3; do
-            timeout 120 mix deps.get && break
+            timeout 300 mix deps.get && break
             echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
             rm -rf deps/jido_ai
             sleep 5
@@ -161,11 +166,16 @@ jobs:
           restore-keys: mix-${{ runner.os }}-
 
       - name: 安装依赖
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: |
           git config --global protocol.version 2
+          # 预先 shallow clone jido_ai（38k+ objects），避免 mix deps.get 全量拉取超时
+          if [ ! -d deps/jido_ai/.git ]; then
+            mkdir -p deps
+            git clone --depth 1 --branch main https://github.com/agentjido/jido_ai.git deps/jido_ai || rm -rf deps/jido_ai
+          fi
           for i in 1 2 3; do
-            timeout 120 mix deps.get && break
+            timeout 300 mix deps.get && break
             echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
             rm -rf deps/jido_ai
             sleep 5
@@ -253,11 +263,16 @@ jobs:
           restore-keys: mix-${{ runner.os }}-
 
       - name: 安装依赖
-        timeout-minutes: 5
+        timeout-minutes: 8
         run: |
           git config --global protocol.version 2
+          # 预先 shallow clone jido_ai（38k+ objects），避免 mix deps.get 全量拉取超时
+          if [ ! -d deps/jido_ai/.git ]; then
+            mkdir -p deps
+            git clone --depth 1 --branch main https://github.com/agentjido/jido_ai.git deps/jido_ai || rm -rf deps/jido_ai
+          fi
           for i in 1 2 3; do
-            timeout 120 mix deps.get && break
+            timeout 300 mix deps.get && break
             echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
             rm -rf deps/jido_ai
             sleep 5
