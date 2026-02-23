@@ -1,0 +1,203 @@
+name: niuma - Iterate Reusable
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "目标仓库（owner/repo）"
+        required: true
+        type: string
+      issue_number:
+        description: "Issue 编号"
+        required: true
+        type: string
+      pr_number:
+        description: "PR 编号（human 路径传入，review 路径自动解析）"
+        required: false
+        default: ""
+        type: string
+      trigger_source:
+        description: "触发来源：review（AI 自审不通过）或 human（人工 changes_requested）"
+        required: true
+        type: string
+      workflow_source_repo:
+        description: "reusable workflow 源仓库（owner/repo）"
+        required: false
+        default: ""
+        type: string
+      workflow_source_ref:
+        description: "reusable workflow 源 ref（分支、tag 或 SHA）"
+        required: false
+        default: ""
+        type: string
+      repo_dir:
+        description: "仓库目录（相对 GITHUB_WORKSPACE 或绝对路径）"
+        required: false
+        default: "."
+        type: string
+      gate_max_retries:
+        description: "Gate 最大重试次数"
+        required: false
+        default: "2"
+        type: string
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  iterate:
+    runs-on: self-hosted
+    concurrency:
+      group: niuma-iterate-${{ inputs.issue_number || inputs.pr_number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NIUMA_PAT }}
+          fetch-depth: 0
+
+      - name: Setup niuma binary
+        run: |
+          niuma_path="$(command -v niuma || true)"
+          if [ -z "$niuma_path" ] && [ -x "/usr/local/bin/niuma" ]; then
+            niuma_path="/usr/local/bin/niuma"
+          fi
+          if [ -z "$niuma_path" ]; then
+            echo "::error::找不到 niuma 二进制，请确保 runner 上已安装 niuma（PATH=$PATH）"
+            exit 1
+          fi
+          echo "NIUMA_BIN=$niuma_path" >> "$GITHUB_ENV"
+
+      - name: Resolve repo directory
+        id: resolve_dir
+        env:
+          REPO_DIR: ${{ inputs.repo_dir }}
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          resolved_repo_dir="$REPO_DIR"
+          if [ -z "$resolved_repo_dir" ]; then
+            resolved_repo_dir="."
+          fi
+          if [[ "$resolved_repo_dir" != /* ]]; then
+            resolved_repo_dir="$WORKSPACE/$resolved_repo_dir"
+          fi
+          echo "repo_dir=$resolved_repo_dir" >> "$GITHUB_OUTPUT"
+
+      # === Review 路径：AI 自审不通过，从 issue 解析 PR ===
+      - name: Find PR Number
+        id: find_pr
+        if: inputs.trigger_source == 'review'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          # 分页解析 BOT:PR_CREATED marker，取最新 open PR 号
+          if PR_NUMBER=$("$NIUMA_BIN" resolve-pr --repo "$REPO" --issue "$ISSUE_NUMBER"); then
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::未在 issue #${ISSUE_NUMBER} 的评论中找到可用 PR 号"
+            echo "pr_number=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check PR State
+        id: pr_state
+        if: inputs.trigger_source == 'review' && steps.find_pr.outputs.pr_number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+        run: |
+          PR_STATE=$(gh pr view "$PR_NUMBER" --json state -q '.state')
+          echo "pr_state=$PR_STATE" >> $GITHUB_OUTPUT
+
+      - name: Escalate Human When PR Not Open
+        if: inputs.trigger_source == 'review' && steps.find_pr.outputs.pr_number != '' && steps.pr_state.outputs.pr_state != 'OPEN'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+        run: |
+          "$NIUMA_BIN" state-label clear --repo "$REPO" --issue "$ISSUE_NUMBER" || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label needs-human || true
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "## ⚠️ 自动迭代已停止\n\n检测到 PR #$PR_NUMBER 当前状态不是 OPEN，已转人工处理（\`needs-human\`）。"
+          exit 1
+
+      - name: Iterate on Review (from bot review)
+        if: inputs.trigger_source == 'review' && steps.find_pr.outputs.pr_number != '' && steps.pr_state.outputs.pr_state == 'OPEN'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+          WORKSPACE: ${{ steps.resolve_dir.outputs.repo_dir }}
+        run: |
+          "$NIUMA_BIN" iterate \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --pr "$PR_NUMBER" \
+            --repo-dir "$WORKSPACE"
+
+      - name: Run PR Gate (from bot review)
+        if: inputs.trigger_source == 'review' && steps.find_pr.outputs.pr_number != '' && steps.pr_state.outputs.pr_state == 'OPEN'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+          WORKSPACE: ${{ steps.resolve_dir.outputs.repo_dir }}
+        run: |
+          GATE_MAX_RETRIES=2
+          if [[ "${{ inputs.gate_max_retries }}" =~ ^[0-9]+$ ]]; then
+            GATE_MAX_RETRIES="${{ inputs.gate_max_retries }}"
+          else
+            echo "::warning::gate_max_retries 非法: '${{ inputs.gate_max_retries }}'，回退为 2"
+          fi
+
+          "$NIUMA_BIN" gate run \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --pr "$PR_NUMBER" \
+            --repo-dir "$WORKSPACE" \
+            --max-retries "$GATE_MAX_RETRIES"
+
+      # === Human 路径：人工 changes_requested，PR 号由 caller 传入 ===
+      - name: Iterate on Review (from human)
+        if: inputs.trigger_source == 'human' && inputs.pr_number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          WORKSPACE: ${{ steps.resolve_dir.outputs.repo_dir }}
+        run: |
+          "$NIUMA_BIN" iterate \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --pr "$PR_NUMBER" \
+            --repo-dir "$WORKSPACE"
+
+      - name: Run PR Gate (from human)
+        if: inputs.trigger_source == 'human' && inputs.pr_number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          WORKSPACE: ${{ steps.resolve_dir.outputs.repo_dir }}
+        run: |
+          GATE_MAX_RETRIES=2
+          if [[ "${{ inputs.gate_max_retries }}" =~ ^[0-9]+$ ]]; then
+            GATE_MAX_RETRIES="${{ inputs.gate_max_retries }}"
+          else
+            echo "::warning::gate_max_retries 非法: '${{ inputs.gate_max_retries }}'，回退为 2"
+          fi
+
+          "$NIUMA_BIN" gate run \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --pr "$PR_NUMBER" \
+            --repo-dir "$WORKSPACE" \
+            --max-retries "$GATE_MAX_RETRIES"
