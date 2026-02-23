@@ -422,13 +422,21 @@ defmodule Gong.AgentLoop do
 
     try do
       case action_module.run(atom_args, tool_context) do
-        {:ok, data} -> {:ok, data}
-        {:error, reason} -> {:error, to_string(reason)}
+        {:ok, data} ->
+          {:ok, data}
+
+        # 避免错误结构体未实现 String.Chars 时导致二次崩溃
+        {:error, reason} ->
+          {:error, format_reason(reason)}
       end
     rescue
       e -> {:error, Exception.message(e)}
     end
   end
+
+  defp format_reason(reason) when is_binary(reason), do: reason
+  defp format_reason(reason) when is_atom(reason), do: Atom.to_string(reason)
+  defp format_reason(reason), do: inspect(reason)
 
   # ── AutoCompaction 集成 ──
 
@@ -571,11 +579,13 @@ defmodule Gong.AgentLoop do
               {:ok, parsed}
 
             {:error, reason} ->
-              {:ok, {:error, to_string(reason)}}
+              # reason 可能是结构体（如 ReqLLM.Error.API.Request），不能直接 to_string
+              {:ok, {:error, inspect(reason)}}
           end
 
         {:error, reason} ->
-          {:ok, {:error, to_string(reason)}}
+          # reason 可能是结构体（如 ReqLLM.Error.API.Request），不能直接 to_string
+          {:ok, {:error, inspect(reason)}}
       end
     end
   end
