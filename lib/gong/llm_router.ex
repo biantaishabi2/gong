@@ -63,11 +63,16 @@ defmodule Gong.LLMRouter do
     # runtime 级覆盖
     runtime_base_url = Keyword.get(runtime_opts, :base_url)
     runtime_timeout = Keyword.get(runtime_opts, :receive_timeout)
+    runtime_headers = Keyword.get(runtime_opts, :headers)
 
     # 合并：runtime > model > provider > default
     final_base_url = runtime_base_url || model_base_url || provider_base_url
     final_timeout = runtime_timeout || provider_timeout || @default_timeout
-    final_headers = Map.merge(provider_headers || %{}, model_headers || %{})
+
+    final_headers =
+      (provider_headers || %{})
+      |> Map.merge(model_headers || %{})
+      |> Map.merge(runtime_headers || %{})
 
     model_str = "#{provider_name}:#{Map.get(model_config, :model_id, "deepseek-chat")}"
 
@@ -129,13 +134,18 @@ defmodule Gong.LLMRouter do
     # 从 runtime_opts 中保留非配置项（如 tools）
     base_opts =
       runtime_opts
-      |> Keyword.drop([:base_url, :receive_timeout])
+      |> Keyword.drop([:base_url, :receive_timeout, :headers])
 
     base_opts
     |> Keyword.put(:receive_timeout, resolved.receive_timeout)
     |> maybe_put_base_url(resolved.base_url)
+    |> maybe_put_headers(resolved.headers)
   end
 
   defp maybe_put_base_url(opts, nil), do: opts
   defp maybe_put_base_url(opts, base_url), do: Keyword.put(opts, :base_url, base_url)
+
+  defp maybe_put_headers(opts, nil), do: opts
+  defp maybe_put_headers(opts, headers) when headers == %{}, do: opts
+  defp maybe_put_headers(opts, headers), do: Keyword.put(opts, :headers, headers)
 end

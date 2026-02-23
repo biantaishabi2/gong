@@ -127,6 +127,60 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
   end
 
+  # ── 三层 headers 合并集成测试 ──
+
+  describe "三层 headers 合并" do
+    test "provider + model + runtime 同时配置时 runtime 优先" do
+      ProviderRegistry.register(
+        "header_test",
+        Gong.Test.MockProvider,
+        %{headers: %{"Auth" => "pk", "X-Provider" => "pv"}},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      model_config = %{
+        provider: "header_test",
+        model_id: "test-model",
+        headers: %{"Auth" => "mk", "X-Custom" => "cv"}
+      }
+
+      resolved = LLMRouter.resolve_config(model_config, headers: %{"X-Custom" => "rv", "X-New" => "nv"})
+
+      assert resolved.headers == %{
+               "Auth" => "mk",
+               "X-Provider" => "pv",
+               "X-Custom" => "rv",
+               "X-New" => "nv"
+             }
+    end
+
+    test "base_url runtime 覆盖 model" do
+      ProviderRegistry.register("base_test", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
+
+      model_config = %{
+        provider: "base_test",
+        model_id: "test-model",
+        base_url: "https://model.api.com"
+      }
+
+      resolved = LLMRouter.resolve_config(model_config, base_url: "http://localhost:8080")
+      assert resolved.base_url == "http://localhost:8080"
+    end
+
+    test "deepseek 路由回归：默认路由在 headers 透传后行为不变" do
+      ProviderRegistry.register("deepseek", Gong.Test.MockProvider, %{}, priority: 10, timeout: 60_000)
+
+      model_config = %{provider: "deepseek", model_id: "deepseek-chat"}
+      resolved = LLMRouter.resolve_config(model_config)
+
+      assert resolved.model_str == "deepseek:deepseek-chat"
+      assert resolved.headers == %{}
+      assert resolved.provider_name == "deepseek"
+      assert resolved.receive_timeout == 60_000
+    end
+  end
+
   # ── AgentLoop 与 Compaction 使用同一 Router 断言 ──
 
   describe "AgentLoop 与 Summarizer 统一路由" do
