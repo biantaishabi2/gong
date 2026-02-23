@@ -204,38 +204,10 @@ defmodule Gong.Integration.ProviderRoutingTest do
         :openai_compat,
         "deepseek",
         %{base_url: "https://api.deepseek.com", api_key_env: "DEEPSEEK_API_KEY"},
-=======
-      model_config = %{
-        provider: "hp_test",
-        model_id: "test-model",
-        header_profile: :opencode,
-        headers: %{"X-Model" => "mv"}
-      }
-
-      resolved = LLMRouter.resolve_config(model_config)
-
-      # profile 基底
-      assert resolved.headers["User-Agent"] == "OpenCode/1.0"
-      assert resolved.headers["X-Client-Name"] == "opencode"
-      # provider 覆盖 profile 的 Accept
-      assert resolved.headers["Accept"] == "text/plain"
-      # provider 独有头保留
-      assert resolved.headers["X-Provider"] == "pv"
-      # model 独有头保留
-      assert resolved.headers["X-Model"] == "mv"
-    end
-
-    test "profile + provider + model + runtime 四层合并" do
-      ProviderRegistry.register(
-        "hp_full",
-        Gong.Test.MockProvider,
-        %{headers: %{"X-Provider" => "pv"}},
->>>>>>> origin/integration/main
         priority: 10,
         timeout: 60_000
       )
 
-<<<<<<< HEAD
       # 通过 alias "deepseek" 解析到 "openai_compat:deepseek"
       assert ProviderRegistry.resolve_alias("deepseek") == "openai_compat:deepseek"
 
