@@ -1,0 +1,440 @@
+name: niuma - Orchestrate Reusable
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "目标仓库（owner/repo）"
+        required: true
+        type: string
+      workflow_source_repo:
+        description: "reusable workflow 源仓库（owner/repo）"
+        required: false
+        default: ""
+        type: string
+      workflow_source_ref:
+        description: "reusable workflow 源 ref（分支、tag 或 SHA）"
+        required: false
+        default: ""
+        type: string
+      repo_dir:
+        description: "仓库目录（相对 GITHUB_WORKSPACE 或绝对路径）"
+        required: false
+        default: "."
+        type: string
+      label_whitelist:
+        description: "issues:labeled 允许触发的标签白名单（逗号分隔）"
+        required: false
+        default: "bot:orchestrate,bot:queued,bot:pr-reviewable"
+        type: string
+      enable_dispatch_wakeup:
+        description: "是否允许 repository_dispatch 唤醒"
+        required: false
+        default: true
+        type: boolean
+      event_id:
+        description: "外部事件唯一标识；为空时退化到 run 级唯一键"
+        required: false
+        default: ""
+        type: string
+      dedup_window_hours:
+        description: "event_id 去重窗口（小时，正整数）"
+        required: false
+        default: 24
+        type: number
+      concurrency_key:
+        description: "并发串行键；默认支持 ${repo} 占位"
+        required: false
+        default: "niuma-orchestrate-${repo}"
+        type: string
+      enable_local_cleanup:
+        description: "是否启用 PR 合并后的本地 worktree/branch 清理"
+        required: false
+        default: false
+        type: boolean
+      store_dir:
+        description: "tasks.json 存储目录（多 runner 共享场景，绝对路径）"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  orchestrate:
+    runs-on: self-hosted
+    if: >
+      (github.event_name == 'issues' || github.event_name == 'repository_dispatch' || github.event_name == 'schedule' || github.event_name == 'pull_request') &&
+      (github.event_name != 'repository_dispatch' || inputs.enable_dispatch_wakeup)
+    concurrency:
+      group: ${{ inputs.concurrency_key == 'niuma-orchestrate-${repo}' && format('niuma-orchestrate-{0}', inputs.repo) || inputs.concurrency_key }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.NIUMA_PAT || github.token }}
+
+      - name: Resolve Trigger Context
+        id: trigger_context
+        run: |
+          trigger_source="${GITHUB_EVENT_NAME}"
+          issue=""
+          label_name="${{ github.event.label.name }}"
+          payload_source="${{ github.event.client_payload.event_source }}"
+          raw_event_id="${{ inputs.event_id }}"
+          event_id_from_external="false"
+
+          if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
+            trigger_source="issues:${label_name}"
+            issue="${{ github.event.issue.number }}"
+          elif [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then
+            if [ -n "$payload_source" ]; then
+              trigger_source="repository_dispatch:${payload_source}"
+            else
+              trigger_source="repository_dispatch:${{ github.event.action }}"
+            fi
+            issue="${{ github.event.client_payload.source_issue }}"
+            if [ -z "$issue" ]; then
+              issue="${{ github.event.client_payload.trigger_pr }}"
+            fi
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            if [ "${{ github.event.pull_request.merged }}" = "true" ]; then
+              trigger_source="pull_request:merged"
+            else
+              trigger_source="pull_request:closed"
+            fi
+            issue="pr-${{ github.event.pull_request.number }}"
+          elif [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            trigger_source="schedule"
+          fi
+
+          if [ -z "$issue" ]; then
+            issue="schedule"
+          fi
+
+          if [ -z "$raw_event_id" ]; then
+            raw_event_id="${{ github.event.client_payload.event_id }}"
+          fi
+          if [ -z "$raw_event_id" ] && [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            raw_event_id="pr-${{ github.event.pull_request.number }}-merge-${{ github.event.pull_request.merge_commit_sha }}"
+          fi
+          if [ -n "$raw_event_id" ]; then
+            event_id="$raw_event_id"
+            event_id_from_external="true"
+          else
+            event_id="run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
+          fi
+
+          triggered_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "trigger_source=$trigger_source" >> "$GITHUB_OUTPUT"
+          echo "issue=$issue" >> "$GITHUB_OUTPUT"
+          echo "event_id=$event_id" >> "$GITHUB_OUTPUT"
+          echo "event_id_from_external=$event_id_from_external" >> "$GITHUB_OUTPUT"
+          echo "triggered_at=$triggered_at" >> "$GITHUB_OUTPUT"
+          printf '[orchestrate.trigger] {"trigger_source":"%s","issue":"%s","event_id":"%s","triggered_at":"%s"}\n' \
+            "$trigger_source" "$issue" "$event_id" "$triggered_at"
+
+      - name: Enforce Trigger Gate
+        id: trigger_gate
+        run: |
+          should_run="true"
+          reason="accepted"
+
+          if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
+            whitelist="${{ inputs.label_whitelist }}"
+            label_name="${{ github.event.label.name }}"
+            matched="false"
+            IFS=',' read -r -a labels <<<"$whitelist"
+            for item in "${labels[@]}"; do
+              trimmed="$(echo "$item" | xargs)"
+              if [ "$trimmed" = "$label_name" ]; then
+                matched="true"
+                break
+              fi
+            done
+            if [ "$matched" != "true" ]; then
+              should_run="false"
+              reason="label_not_whitelisted"
+            fi
+          elif [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then
+            if [ "${{ inputs.enable_dispatch_wakeup }}" != "true" ]; then
+              should_run="false"
+              reason="dispatch_disabled"
+            elif [ "${{ github.event.action }}" != "niuma.task.completed" ]; then
+              should_run="false"
+              reason="dispatch_type_mismatch"
+            elif [ "${{ github.event.client_payload.event_source }}" != "close-after-integration-merge" ]; then
+              should_run="false"
+              reason="dispatch_source_mismatch"
+            fi
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            if [ "${{ github.event.action }}" != "closed" ]; then
+              should_run="false"
+              reason="pr_action_mismatch"
+            elif [ "${{ github.event.pull_request.merged }}" != "true" ]; then
+              should_run="false"
+              reason="pr_not_merged"
+            fi
+          fi
+
+          echo "should_run=$should_run" >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          printf '[orchestrate.gate] {"should_run":"%s","reason":"%s"}\n' "$should_run" "$reason"
+
+      - name: Loop Guard
+        id: loop_guard
+        run: |
+          blocked="false"
+          reason="none"
+
+          if [ "$GITHUB_EVENT_NAME" = "issues" ] && [ "${GITHUB_ACTOR}" = "github-actions[bot]" ]; then
+            blocked="true"
+            reason="issues_actor_bot"
+          fi
+
+          echo "blocked=$blocked" >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          printf '[orchestrate.loop_guard] {"blocked":"%s","reason":"%s"}\n' "$blocked" "$reason"
+
+      - name: Idempotency Guard
+        id: idempotency_guard
+        run: |
+          duplicate_event="false"
+          dedup_reason="not_applicable"
+
+          if [ "${{ steps.trigger_context.outputs.event_id_from_external }}" != "true" ]; then
+            dedup_reason="run_level_unique"
+            echo "duplicate_event=$duplicate_event" >> "$GITHUB_OUTPUT"
+            echo "reason=$dedup_reason" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          safe_repo="$(echo "${{ inputs.repo }}" | tr '/:' '__')"
+          dedup_dir="/tmp/niuma-orchestrate-dedup/${safe_repo}"
+          event_hash="$(printf '%s' "${{ steps.trigger_context.outputs.event_id }}" | sha256sum | awk '{print $1}')"
+          marker_file="${dedup_dir}/${event_hash}.ts"
+          now_epoch="$(date +%s)"
+          window_hours_raw="${{ inputs.dedup_window_hours }}"
+          if ! echo "$window_hours_raw" | grep -Eq '^[1-9][0-9]*$'; then
+            echo "::error::dedup_window_hours 必须为正整数，当前值: $window_hours_raw"
+            exit 1
+          fi
+          window_hours="$window_hours_raw"
+          window_seconds=$((window_hours * 3600))
+
+          mkdir -p "$dedup_dir"
+          # 清理窗口外历史标记，避免本地 runner 长期累积。
+          find "$dedup_dir" -type f -mmin "+$((window_hours * 60))" -delete 2>/dev/null || true
+
+          if [ -f "$marker_file" ]; then
+            seen_epoch="$(cat "$marker_file" 2>/dev/null || echo 0)"
+            if [ "$seen_epoch" -gt 0 ] && [ $((now_epoch - seen_epoch)) -le "$window_seconds" ]; then
+              duplicate_event="true"
+              dedup_reason="duplicate_event_id"
+            fi
+          fi
+
+          if [ "$duplicate_event" != "true" ]; then
+            echo "$now_epoch" > "$marker_file"
+            dedup_reason="first_seen"
+          fi
+
+          echo "duplicate_event=$duplicate_event" >> "$GITHUB_OUTPUT"
+          echo "reason=$dedup_reason" >> "$GITHUB_OUTPUT"
+          printf '[orchestrate.idempotency] {"event_id":"%s","duplicate_event":"%s","reason":"%s"}\n' \
+            "${{ steps.trigger_context.outputs.event_id }}" "$duplicate_event" "$dedup_reason"
+
+      - name: Setup niuma binary
+        if: steps.trigger_gate.outputs.should_run == 'true' && steps.loop_guard.outputs.blocked != 'true' && steps.idempotency_guard.outputs.duplicate_event != 'true'
+        run: |
+          niuma_path="$(command -v niuma || true)"
+          # 某些 self-hosted runner 服务环境 PATH 不含 /usr/local/bin，补绝对路径兜底。
+          if [ -z "$niuma_path" ] && [ -x "/usr/local/bin/niuma" ]; then
+            niuma_path="/usr/local/bin/niuma"
+          fi
+          if [ -z "$niuma_path" ]; then
+            echo "::error::找不到 niuma 二进制，请确保 runner 上已安装 niuma（PATH=$PATH）"
+            exit 1
+          fi
+          echo "NIUMA_BIN=$niuma_path" >> "$GITHUB_ENV"
+
+      - name: Run Orchestration
+        id: control_run
+        if: steps.trigger_gate.outputs.should_run == 'true' && steps.loop_guard.outputs.blocked != 'true' && steps.idempotency_guard.outputs.duplicate_event != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT || github.token }}
+          REPO: ${{ inputs.repo }}
+          REPO_DIR: ${{ inputs.repo_dir }}
+          WORKSPACE: ${{ github.workspace }}
+          NIUMA_INTEGRATION_GATE_MAX_RETRIES: ${{ vars.NIUMA_INTEGRATION_GATE_MAX_RETRIES || '2' }}
+          NIUMA_PR_CONFLICT_RETRY_THRESHOLD: ${{ vars.NIUMA_PR_CONFLICT_RETRY_THRESHOLD || '3' }}
+          NIUMA_PR_CONFLICT_UNKNOWN_BACKOFFS: ${{ vars.NIUMA_PR_CONFLICT_UNKNOWN_BACKOFFS || '5s,15s,30s' }}
+          NIUMA_STORE_DIR: ${{ inputs.store_dir }}
+        run: |
+          resolved_repo_dir="$REPO_DIR"
+          if [ -z "$resolved_repo_dir" ]; then
+            resolved_repo_dir="."
+          fi
+          if [[ "$resolved_repo_dir" != /* ]]; then
+            resolved_repo_dir="$WORKSPACE/$resolved_repo_dir"
+          fi
+
+          "$NIUMA_BIN" control run \
+            --repo "$REPO" \
+            --repo-dir "$resolved_repo_dir" \
+            --integration-gate-max-retries "$NIUMA_INTEGRATION_GATE_MAX_RETRIES" \
+            --pr-conflict-retry-threshold "$NIUMA_PR_CONFLICT_RETRY_THRESHOLD" \
+            --pr-conflict-unknown-backoffs "$NIUMA_PR_CONFLICT_UNKNOWN_BACKOFFS"
+
+      - name: Collect Integration Gate Status
+        id: gate_status
+        if: steps.control_run.outcome == 'success'
+        env:
+          REPO_DIR: ${{ inputs.repo_dir }}
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          resolved_repo_dir="$REPO_DIR"
+          if [ -z "$resolved_repo_dir" ]; then
+            resolved_repo_dir="."
+          fi
+          if [[ "$resolved_repo_dir" != /* ]]; then
+            resolved_repo_dir="$WORKSPACE/$resolved_repo_dir"
+          fi
+
+          STORE_DIR="${{ inputs.store_dir }}"
+          if [ -n "$STORE_DIR" ]; then
+            STORE_PATH="$STORE_DIR/tasks.json"
+          else
+            STORE_PATH="$resolved_repo_dir/.niuma/tasks.json"
+          fi
+          if [ ! -f "$STORE_PATH" ]; then
+            echo "integration_gate_status=passed" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          STATUS=$(jq -r '
+            [ (.tasks // {}) | to_entries[] | .value.metadata.integration_gate_status // empty ] as $s |
+            if ($s | index("escalated")) then "escalated"
+            elif ($s | index("retrying")) then "retrying"
+            elif ($s | index("pending")) then "pending"
+            elif ($s | index("passed")) then "passed"
+            else "passed" end
+          ' "$STORE_PATH")
+          echo "integration_gate_status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "integration_gate_status=$STATUS"
+
+      - name: Log Orchestrate Result
+        if: always()
+        run: |
+          result="success"
+          if [ "${{ steps.trigger_gate.outputs.should_run }}" != "true" ]; then
+            result="skipped_${{ steps.trigger_gate.outputs.reason }}"
+          elif [ "${{ steps.loop_guard.outputs.blocked }}" = "true" ]; then
+            result="skipped_${{ steps.loop_guard.outputs.reason }}"
+          elif [ "${{ steps.idempotency_guard.outputs.duplicate_event }}" = "true" ]; then
+            result="deduplicated_noop"
+          elif [ "${{ steps.control_run.outcome }}" != "success" ]; then
+            result="control_failed"
+          elif [ -n "${{ steps.gate_status.outputs.integration_gate_status }}" ]; then
+            result="gate_${{ steps.gate_status.outputs.integration_gate_status }}"
+          fi
+
+          printf '[orchestrate.result] {"trigger_source":"%s","issue":"%s","event_id":"%s","triggered_at":"%s","result":"%s"}\n' \
+            "${{ steps.trigger_context.outputs.trigger_source }}" \
+            "${{ steps.trigger_context.outputs.issue }}" \
+            "${{ steps.trigger_context.outputs.event_id }}" \
+            "${{ steps.trigger_context.outputs.triggered_at }}" \
+            "$result"
+
+  cleanup_local_worktrees:
+    runs-on: self-hosted
+    if: >
+      inputs.enable_local_cleanup &&
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'master'
+    concurrency:
+      group: ${{ format('cleanup-{0}-{1}', github.repository, github.event.pull_request.number) }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NIUMA_PAT || github.token }}
+          fetch-depth: 0
+
+      - name: Resolve Reusable Workflow Source
+        id: workflow_source
+        env:
+          INPUT_SOURCE_REPO: ${{ inputs.workflow_source_repo }}
+          INPUT_SOURCE_REF: ${{ inputs.workflow_source_ref }}
+          DEFAULT_SOURCE_REPO: ${{ github.repository }}
+          DEFAULT_SOURCE_REF: ${{ github.event.repository.default_branch }}
+        run: |
+          source_repo="$INPUT_SOURCE_REPO"
+          source_ref="$INPUT_SOURCE_REF"
+
+          if [ -z "$source_repo" ]; then
+            source_repo="$DEFAULT_SOURCE_REPO"
+          fi
+          if [ -z "$source_ref" ]; then
+            source_ref="$DEFAULT_SOURCE_REF"
+          fi
+
+          if [ -z "$source_repo" ] || [ -z "$source_ref" ]; then
+            echo "::error::无法解析 reusable workflow 源仓库/ref，请显式传入 workflow_source_repo 与 workflow_source_ref"
+            exit 1
+          fi
+
+          echo "source_repo=$source_repo" >> "$GITHUB_OUTPUT"
+          echo "source_ref=$source_ref" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout Reusable Workflow Source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.workflow_source.outputs.source_repo }}
+          ref: ${{ steps.workflow_source.outputs.source_ref }}
+          path: .niuma-workflow-source
+          token: ${{ secrets.NIUMA_PAT || github.token }}
+          fetch-depth: 1
+
+      - name: Run Local Worktree Cleanup
+        id: cleanup
+        env:
+          REPO_DIR: ${{ inputs.repo_dir }}
+          WORKSPACE: ${{ github.workspace }}
+          WORKFLOW_SOURCE_DIR: ${{ github.workspace }}/.niuma-workflow-source
+        run: |
+          resolved_repo_dir="$REPO_DIR"
+          if [ -z "$resolved_repo_dir" ]; then
+            resolved_repo_dir="."
+          fi
+          if [[ "$resolved_repo_dir" != /* ]]; then
+            resolved_repo_dir="$WORKSPACE/$resolved_repo_dir"
+          fi
+
+          script_path="$WORKFLOW_SOURCE_DIR/automation/niuma/scripts/cleanup_worktrees.sh"
+          if [ ! -x "$script_path" ]; then
+            echo "::error::cleanup 脚本不存在或不可执行: $script_path"
+            exit 1
+          fi
+
+          "$script_path" --repo-dir "$resolved_repo_dir"
+
+      - name: Write Cleanup Summary
+        if: always()
+        run: |
+          echo "## Local Cleanup Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- deleted_count: ${{ steps.cleanup.outputs.deleted_count || '0' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- skipped_count: ${{ steps.cleanup.outputs.skipped_count || '0' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- warned_count: ${{ steps.cleanup.outputs.warned_count || '0' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- error_count: ${{ steps.cleanup.outputs.error_count || '0' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- deleted: \`${{ steps.cleanup.outputs.deleted || '[]' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- skipped: \`${{ steps.cleanup.outputs.skipped || '[]' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- warned: \`${{ steps.cleanup.outputs.warned || '[]' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- errors: \`${{ steps.cleanup.outputs.errors || '[]' }}\`" >> "$GITHUB_STEP_SUMMARY"
