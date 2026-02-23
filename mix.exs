@@ -32,7 +32,7 @@ defmodule Gong.MixProject do
     [
       # Agent 框架
       {:jido, "~> 2.0.0-rc.4"},
-      {:jido_ai, github: "agentjido/jido_ai", branch: "main"},
+      {:jido_ai, github: "agentjido/jido_ai", branch: "main", depth: 1},
 
       # LLM 客户端
       {:req_llm, "~> 1.5"},

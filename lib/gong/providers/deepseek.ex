@@ -2,9 +2,15 @@ defmodule Gong.Providers.DeepSeek do
   @moduledoc """
   DeepSeek provider — OpenAI 兼容接口，指向 DeepSeek endpoint。
 
-  通过 `use ReqLLM.Provider` 自动获得默认的 prepare_request/parse_response 实现，
-  使用 OpenAI 兼容的 chat/completions 接口。
+  **已弃用**：请使用 `Gong.Providers.OpenaiCompatProvider` 配合
+  `ProviderRegistry.register_compat(:openai_compat, "deepseek", config)` 代替。
+
+  本模块保留以维持编译兼容性，新代码不应直接引用此模块。
+  迁移路径：通过 Application.start 中的 register_compat 注册 DeepSeek 为
+  openai_compat 实例，旧名称 "deepseek" 通过 alias 自动映射。
   """
+
+  @deprecated "使用 Gong.Providers.OpenaiCompatProvider + ProviderRegistry.register_compat/4 代替"
 
   use ReqLLM.Provider,
     id: :deepseek,

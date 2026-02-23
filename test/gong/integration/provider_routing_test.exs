@@ -181,6 +181,109 @@ defmodule Gong.Integration.ProviderRoutingTest do
     end
   end
 
+  # ── 协议型 provider 与 alias 解析测试 ──
+
+  describe "协议型 provider 注册与 alias 解析" do
+    test "register_compat 注册后 resolve_provider_config 返回正确 base_url" do
+      ProviderRegistry.register_compat(
+        :openai_compat,
+        "deepseek",
+        %{base_url: "https://api.deepseek.com", api_key_env: "DEEPSEEK_API_KEY"},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      assert {:ok, config} = ProviderRegistry.resolve_provider_config("openai_compat:deepseek")
+      assert config.base_url == "https://api.deepseek.com"
+      assert config.module == Gong.Providers.OpenaiCompatProvider
+      assert config.timeout == 60_000
+    end
+
+    test "通过旧名称 alias 查找返回 canonical provider 配置" do
+      ProviderRegistry.register_compat(
+        :openai_compat,
+        "deepseek",
+        %{base_url: "https://api.deepseek.com", api_key_env: "DEEPSEEK_API_KEY"},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      # 通过 alias "deepseek" 解析到 "openai_compat:deepseek"
+      assert ProviderRegistry.resolve_alias("deepseek") == "openai_compat:deepseek"
+
+      # resolve_provider_config 通过 alias 透明解析
+      assert {:ok, config} = ProviderRegistry.resolve_provider_config("deepseek")
+      assert config.base_url == "https://api.deepseek.com"
+      assert config.module == Gong.Providers.OpenaiCompatProvider
+    end
+
+    test "get_provider_for_model 通过 alias 解析旧 provider 名称" do
+      ProviderRegistry.register_compat(
+        :openai_compat,
+        "deepseek",
+        %{base_url: "https://api.deepseek.com", api_key_env: "DEEPSEEK_API_KEY"},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      model_config = %{provider: "deepseek", model_id: "deepseek-chat"}
+
+      assert {:ok, {"openai_compat:deepseek", entry}} =
+               ProviderRegistry.get_provider_for_model(model_config)
+
+      assert entry.module == Gong.Providers.OpenaiCompatProvider
+      assert entry.config.base_url == "https://api.deepseek.com"
+    end
+
+    test "fallback chain 中协议 provider 优先级排序正确" do
+      ProviderRegistry.register_compat(
+        :openai_compat,
+        "deepseek",
+        %{base_url: "https://api.deepseek.com", api_key_env: "DEEPSEEK_API_KEY"},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      ProviderRegistry.register_compat(
+        :anthropic_compat,
+        "anthropic",
+        %{base_url: "https://api.anthropic.com", api_key_env: "ANTHROPIC_API_KEY"},
+        priority: 5,
+        timeout: 30_000
+      )
+
+      chain = ProviderRegistry.fallback_chain()
+      assert chain == ["openai_compat:deepseek", "anthropic_compat:anthropic"]
+    end
+
+    test "switch 通过 alias 名称切换 provider" do
+      ProviderRegistry.register_compat(
+        :openai_compat,
+        "deepseek",
+        %{base_url: "https://api.deepseek.com", api_key_env: "DEEPSEEK_API_KEY"},
+        priority: 10,
+        timeout: 60_000
+      )
+
+      ProviderRegistry.register_compat(
+        :anthropic_compat,
+        "anthropic",
+        %{base_url: "https://api.anthropic.com", api_key_env: "ANTHROPIC_API_KEY"},
+        priority: 5,
+        timeout: 30_000
+      )
+
+      # 通过 alias 切换
+      :ok = ProviderRegistry.switch("anthropic")
+      {current_name, _} = ProviderRegistry.current()
+      assert current_name == "anthropic_compat:anthropic"
+    end
+
+    test "无匹配 alias 时透传原名" do
+      assert ProviderRegistry.resolve_alias("unknown") == "unknown"
+    end
+  end
+
   # ── header_profile 端到端合并测试 ──
 
   describe "header_profile 三层合并" do

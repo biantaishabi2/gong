@@ -137,16 +137,27 @@ defmodule Gong.ModelRegistry do
 
     case String.split(model_str, ":", parts: 2) do
       [provider, model_id] when provider != "" and model_id != "" ->
-        # 先在注册表里找匹配的
+        # 通过 alias 解析 provider 名称（如 "deepseek" → "openai_compat:deepseek"）
+        resolved_provider = Gong.ProviderRegistry.resolve_alias(provider)
+
+        # 先在注册表里找匹配的（用原始和解析后的 provider 名称都尝试）
         case find_by_provider_model(provider, model_id) do
-          {:ok, config} -> {:ok, config}
+          {:ok, config} ->
+            {:ok, config}
+
           :not_found ->
-            # 构造默认配置（假设 API key 环境变量为 PROVIDER_API_KEY）
-            {:ok, %{
-              provider: provider,
-              model_id: model_id,
-              api_key_env: "#{String.upcase(provider)}_API_KEY"
-            }}
+            case find_by_provider_model(resolved_provider, model_id) do
+              {:ok, config} ->
+                {:ok, config}
+
+              :not_found ->
+                # 构造默认配置，使用解析后的 provider 名称
+                {:ok, %{
+                  provider: resolved_provider,
+                  model_id: model_id,
+                  api_key_env: "#{String.upcase(provider)}_API_KEY"
+                }}
+            end
         end
 
       _ ->
