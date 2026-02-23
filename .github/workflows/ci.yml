@@ -20,9 +20,9 @@ on:
 env:
   MIX_ENV: test
   ERL_FLAGS: "+S 4:4"
-  # 防止 git fetch 挂起：10 秒内速度低于 1000 bytes/s 则中断
+  # 防止 git fetch 挂起：30 秒内速度低于 1000 bytes/s 则中断
   GIT_HTTP_LOW_SPEED_LIMIT: "1000"
-  GIT_HTTP_LOW_SPEED_TIME: "10"
+  GIT_HTTP_LOW_SPEED_TIME: "30"
   # 使用 git protocol v2 加速大仓库克隆协商
   GIT_PROTOCOL_VERSION: "2"
 
