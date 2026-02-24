@@ -104,7 +104,7 @@ defmodule Gong.BDD.Generated.SettingsTest do
   # Source: SETTINGS-006
   @tag :settings
   @tag :unit
-  test "[SETTINGS-006]" do
+  test "[SETTINGS-006] cleanup 后回退到编译期默认值" do
     run_id = Gong.BDD.Instructions.V1.new_run_id()
     ctx = %{run_id: run_id, scenario_id: "SETTINGS-006"}
     # line 46: GIVEN create_temp_dir
