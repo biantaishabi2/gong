@@ -118,6 +118,7 @@ defmodule Gong.CLI.Chat do
 
   defp handle_input("/model", session_pid) do
     IO.puts("用法: /model <name>")
+    print_models(session_pid)
     repl_loop(session_pid)
   end
 
@@ -127,6 +128,7 @@ defmodule Gong.CLI.Chat do
 
     if target == "" do
       IO.puts("用法: /model <name>")
+      print_models(session_pid)
       repl_loop(session_pid)
     else
       case Gong.Settings.set_model(cwd, target) do
