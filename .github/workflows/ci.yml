@@ -96,15 +96,27 @@ jobs:
           restore-keys: mix-${{ runner.os }}-
 
       - name: 安装依赖
-        timeout-minutes: 5
+        timeout-minutes: 30
         run: |
           git config --global protocol.version 2
-          for i in 1 2 3; do
-            timeout 120 mix deps.get && break
-            echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
-            rm -rf deps/jido_ai
-            sleep 5
+          ok=0
+          for i in 1 2 3 4 5; do
+            echo "::group::mix deps.get attempt ${i}/5"
+            timeout 300 mix deps.get
+            code=$?
+            echo "::endgroup::"
+            if [ "$code" -eq 0 ]; then
+              ok=1
+              break
+            fi
+            echo "::warning::mix deps.get 第 ${i} 次失败(code=${code})，清理 partial clone 后重试..."
+            rm -rf deps/jido_ai _build/test/lib/jido_ai
+            sleep $((i * 10))
           done
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::mix deps.get 连续 5 次失败"
+            exit 1
+          fi
 
       - name: 安装 bddc（若缺失）
         run: |
@@ -161,15 +173,27 @@ jobs:
           restore-keys: mix-${{ runner.os }}-
 
       - name: 安装依赖
-        timeout-minutes: 5
+        timeout-minutes: 30
         run: |
           git config --global protocol.version 2
-          for i in 1 2 3; do
-            timeout 120 mix deps.get && break
-            echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
-            rm -rf deps/jido_ai
-            sleep 5
+          ok=0
+          for i in 1 2 3 4 5; do
+            echo "::group::mix deps.get attempt ${i}/5"
+            timeout 300 mix deps.get
+            code=$?
+            echo "::endgroup::"
+            if [ "$code" -eq 0 ]; then
+              ok=1
+              break
+            fi
+            echo "::warning::mix deps.get 第 ${i} 次失败(code=${code})，清理 partial clone 后重试..."
+            rm -rf deps/jido_ai _build/test/lib/jido_ai
+            sleep $((i * 10))
           done
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::mix deps.get 连续 5 次失败"
+            exit 1
+          fi
 
       - name: 安装 bddc（若缺失）
         run: |
@@ -253,15 +277,27 @@ jobs:
           restore-keys: mix-${{ runner.os }}-
 
       - name: 安装依赖
-        timeout-minutes: 5
+        timeout-minutes: 30
         run: |
           git config --global protocol.version 2
-          for i in 1 2 3; do
-            timeout 120 mix deps.get && break
-            echo "::warning::mix deps.get 第 ${i} 次失败，清理 partial clone 后重试..."
-            rm -rf deps/jido_ai
-            sleep 5
+          ok=0
+          for i in 1 2 3 4 5; do
+            echo "::group::mix deps.get attempt ${i}/5"
+            timeout 300 mix deps.get
+            code=$?
+            echo "::endgroup::"
+            if [ "$code" -eq 0 ]; then
+              ok=1
+              break
+            fi
+            echo "::warning::mix deps.get 第 ${i} 次失败(code=${code})，清理 partial clone 后重试..."
+            rm -rf deps/jido_ai _build/test/lib/jido_ai
+            sleep $((i * 10))
           done
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::mix deps.get 连续 5 次失败"
+            exit 1
+          fi
 
       - name: E2E 测试
         env:
