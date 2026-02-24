@@ -28,7 +28,15 @@ defmodule Gong.Application do
     Gong.PromptTemplate.init()
     Gong.ModelRegistry.init()
 
-    # 注册 Kimi/MiniMax/GLM 模型配置
+    # 注册 DeepSeek/Kimi/MiniMax/GLM 模型配置
+    Gong.ModelRegistry.register(:deepseek, %{
+      provider: "deepseek",
+      model_id: "deepseek-chat",
+      base_url: "https://api.deepseek.com",
+      api_key_env: "DEEPSEEK_API_KEY",
+      auth_mode: :bearer
+    })
+
     Gong.ModelRegistry.register(:kimi, %{
       provider: "kimi",
       model_id: "k2p5",
