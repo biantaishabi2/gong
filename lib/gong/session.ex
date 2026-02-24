@@ -832,6 +832,8 @@ defmodule Gong.Session do
   def normalize_error(:timeout), do: error(:timeout, "timeout", %{})
   def normalize_error(:cancelled), do: error(:cancelled, "cancelled", %{})
   def normalize_error(:unauthorized), do: error(:unauthorized, "unauthorized", %{})
+  def normalize_error(other) when is_binary(other),
+    do: error(:internal_error, normalize_runtime_message(other), %{})
 
   def normalize_error({:iteration_limit_reached, details}) when is_map(details) do
     max = Map.get(details, :max_iterations, "?")
@@ -846,6 +848,18 @@ defmodule Gong.Session do
 
   def normalize_error(other) do
     error(:internal_error, "internal error", %{raw: inspect(other)})
+  end
+
+  defp normalize_runtime_message(message) when is_binary(message) do
+    cond do
+      String.starts_with?(message, "Error: \"") and String.ends_with?(message, "\"") ->
+        message
+        |> String.trim_leading("Error: \"")
+        |> String.trim_trailing("\"")
+
+      true ->
+        message
+    end
   end
 
   # 刷新活动时间戳并同步 ETS 索引

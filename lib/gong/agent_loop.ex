@@ -236,7 +236,6 @@ defmodule Gong.AgentLoop do
 
       :error ->
         error_msg = state[:result] || "unknown error"
-        emit_stream_event(StreamEvent.new(:error, content: error_msg))
         :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
         {:error, error_msg, agent}
 
@@ -579,13 +578,11 @@ defmodule Gong.AgentLoop do
               {:ok, parsed}
 
             {:error, reason} ->
-              # reason 可能是结构体（如 ReqLLM.Error.API.Request），不能直接 to_string
-              {:ok, {:error, inspect(reason)}}
+              {:ok, {:error, Gong.LLMRouter.humanize_error(reason)}}
           end
 
         {:error, reason} ->
-          # reason 可能是结构体（如 ReqLLM.Error.API.Request），不能直接 to_string
-          {:ok, {:error, inspect(reason)}}
+          {:ok, {:error, Gong.LLMRouter.humanize_error(reason)}}
       end
     end
   end

@@ -146,12 +146,13 @@ defmodule Gong.CLI.Renderer do
   end
 
   def render(%Events{type: type, payload: payload, error: error}) when type in ["error.stream", "error.runtime"] do
-    message =
+    raw_message =
       Map.get(payload, :message) || Map.get(payload, "message") ||
         get_in_error(payload) ||
         extract_error_message(error) ||
         "未知错误"
 
+    message = normalize_error_message(raw_message)
     IO.puts(:stderr, "#{@red}✗ #{message}#{@reset}")
   end
 
@@ -289,6 +290,31 @@ defmodule Gong.CLI.Renderer do
     Map.get(error, :message) || Map.get(error, "message")
   end
   defp extract_error_message(_), do: nil
+
+  defp normalize_error_message(message) when not is_binary(message), do: to_string(message)
+  defp normalize_error_message(message) do
+    cond do
+      String.contains?(message, "ReqLLM.Error.API.Request") ->
+        extract_reqllm_request_message(message) || message
+
+      true ->
+        message
+    end
+  end
+
+  defp extract_reqllm_request_message(message) do
+    # 优先取 response_body.message，其次取 reason 字段
+    response_body_message =
+      Regex.run(~r/response_body:\s*%\{[^}]*"message"\s*=>\s*"([^"]+)"/, message, capture: :all_but_first)
+
+    reason_message =
+      Regex.run(~r/reason:\s*"([^"]+)"/, message, capture: :all_but_first)
+
+    case response_body_message || reason_message do
+      [detail] when is_binary(detail) -> detail
+      _ -> nil
+    end
+  end
 
   @doc "截断字符串到指定最大长度"
   @spec truncate(String.t(), non_neg_integer()) :: String.t()

@@ -34,6 +34,25 @@ defmodule Gong.LLMRouter do
     call_with_fallback(model_config, messages, opts, :generate_text)
   end
 
+  @doc "将底层错误格式化为用户可读文案"
+  @spec humanize_error(term()) :: String.t()
+  def humanize_error(%{message: message}) when is_binary(message) and message != "", do: message
+
+  def humanize_error(%{response_body: body, status: status, reason: reason})
+      when is_map(body) and is_integer(status) do
+    detail = Map.get(body, :message) || Map.get(body, "message") || reason || "请求失败"
+    "#{detail} (HTTP #{status})"
+  end
+
+  def humanize_error(%{reason: reason, status: status})
+      when is_binary(reason) and is_integer(status) do
+    "#{reason} (HTTP #{status})"
+  end
+
+  def humanize_error(error) when is_binary(error), do: error
+  def humanize_error(error) when is_atom(error), do: to_string(error)
+  def humanize_error(error), do: inspect(error)
+
   @doc """
   按 runtime > model > provider > default 优先级合并配置。
 
@@ -95,8 +114,10 @@ defmodule Gong.LLMRouter do
         nil
       end
 
+    api_key_env = Map.get(model_config, :api_key_env) || Map.get(provider_config, :api_key_env)
+
     api_key =
-      case Map.get(model_config, :api_key_env) || Map.get(provider_config, :api_key_env) do
+      case api_key_env do
         env when is_binary(env) and env != "" -> System.get_env(env)
         _ -> nil
       end
@@ -108,6 +129,7 @@ defmodule Gong.LLMRouter do
       base_url: final_base_url,
       headers: final_headers,
       api_key: api_key,
+      api_key_env: api_key_env,
       receive_timeout: final_timeout,
       provider_name: provider_name
     }
@@ -124,13 +146,16 @@ defmodule Gong.LLMRouter do
 
     model_input = resolved.req_model_spec || resolved.model_str
 
-    case do_call(method, model_input, messages, final_opts) do
-      {:ok, _} = success ->
-        success
+    with :ok <- validate_api_key(resolved),
+         result <- do_call(method, model_input, messages, final_opts) do
+      case result do
+        {:ok, _} = success ->
+          success
 
-      {:error, reason} = _error ->
-        # 尝试 fallback chain
-        try_fallback(model_config, messages, opts, method, provider_name, reason)
+        {:error, reason} ->
+          # 尝试 fallback chain
+          try_fallback(model_config, messages, opts, method, provider_name, reason)
+      end
     end
   end
 
@@ -253,4 +278,16 @@ defmodule Gong.LLMRouter do
   end
 
   defp inject_auth_header(headers, _model_config), do: headers
+
+  defp validate_api_key(%{api_key_env: env_var, api_key: api_key})
+       when is_binary(env_var) and env_var != "" and (is_nil(api_key) or api_key == "") do
+    {:error,
+     %{
+       code: :unauthorized,
+       message: "缺少 #{env_var}，请先配置后重试",
+       details: %{api_key_env: env_var}
+     }}
+  end
+
+  defp validate_api_key(_resolved), do: :ok
 end
