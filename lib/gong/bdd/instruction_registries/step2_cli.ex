@@ -140,7 +140,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
         name: :start_chat_session, kind: :given,
         args: %{},
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       chat_input: %{
         name: :chat_input, kind: :when,
@@ -148,13 +148,13 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
           text: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       chat_wait_completion: %{
         name: :chat_wait_completion, kind: :when,
         args: %{},
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       assert_session_closed: %{
         name: :assert_session_closed, kind: :then,
@@ -241,7 +241,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
         name: :assert_session_saved, kind: :then,
         args: %{},
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: :C
       },
 
       # ── Session 容错 ──
