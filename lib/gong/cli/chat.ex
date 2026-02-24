@@ -223,32 +223,66 @@ defmodule Gong.CLI.Chat do
   end
 
   defp handle_input(text, session_pid) do
-    # 普通输入，发送 prompt 并等待完成
-    case Session.prompt(session_pid, text, []) do
-      :ok ->
-        wait_completion(session_pid)
-        repl_loop(session_pid)
-
+    # 普通输入，发送标准 command payload，并按 command_id 等待完成
+    with {:ok, session_id} <- resolve_session_id(session_pid),
+         {:ok, payload} <- Gong.CLI.build_command_payload(session_id, "prompt", %{message: text}),
+         :ok <- Gong.CLI.submit_command(session_pid, payload, []),
+         command_id when is_binary(command_id) <- Map.get(payload, :command_id) do
+      wait_completion(session_pid, command_id)
+      repl_loop(session_pid)
+    else
       {:error, _reason} ->
         IO.puts(:stderr, "[错误] 发送消息失败")
         repl_loop(session_pid)
     end
   end
 
-  defp wait_completion(session_pid) do
+  defp wait_completion(session_pid, command_id) do
     receive do
-      {:session_event, %{type: "lifecycle.completed"}} ->
-        :ok
-
-      {:session_event, %{type: "lifecycle.error"}} ->
-        :ok
-
       {:session_event, event} ->
-        Renderer.render(event)
-        wait_completion(session_pid)
+        if event_for_command?(event, command_id) do
+          Renderer.render(event)
+
+          case event_type(event) do
+            "lifecycle.completed" -> :ok
+            "lifecycle.error" -> :ok
+            _ -> wait_completion(session_pid, command_id)
+          end
+        else
+          # 忽略旧命令/并发命令事件，避免超时后串台。
+          wait_completion(session_pid, command_id)
+        end
     after
       60_000 ->
         IO.puts(:stderr, "[错误] 等待回复超时")
+    end
+  end
+
+  @doc false
+  def event_for_command?(event, command_id) when is_binary(command_id) do
+    event_command_id(event) == command_id
+  end
+
+  def event_for_command?(_event, _command_id), do: false
+
+  @doc false
+  def event_type(event) when is_map(event) do
+    Map.get(event, :type) || Map.get(event, "type")
+  end
+
+  def event_type(_event), do: nil
+
+  defp event_command_id(event) when is_map(event) do
+    Map.get(event, :command_id) || Map.get(event, "command_id")
+  end
+
+  defp event_command_id(_event), do: nil
+
+  defp resolve_session_id(session_pid) do
+    case Session.session_id(session_pid) do
+      {:ok, {:ok, sid}} when is_binary(sid) and sid != "" -> {:ok, sid}
+      {:ok, sid} when is_binary(sid) and sid != "" -> {:ok, sid}
+      _ -> {:error, :session_id_unavailable}
     end
   end
 
