@@ -7,6 +7,9 @@ defmodule Gong.SettingsTest do
   setup do
     workspace = Path.join(System.tmp_dir!(), "gong-settings-#{System.unique_integer([:positive])}")
     File.mkdir_p!(workspace)
+    settings_file = Path.join([workspace, ".gong", "settings.json"])
+    old_settings_file = System.get_env("GONG_SETTINGS_FILE")
+    System.put_env("GONG_SETTINGS_FILE", settings_file)
 
     ModelRegistry.init()
 
@@ -26,19 +29,24 @@ defmodule Gong.SettingsTest do
     Settings.init(workspace)
 
     on_exit(fn ->
+      if old_settings_file do
+        System.put_env("GONG_SETTINGS_FILE", old_settings_file)
+      else
+        System.delete_env("GONG_SETTINGS_FILE")
+      end
+
       Settings.cleanup()
       ModelRegistry.cleanup()
       File.rm_rf!(workspace)
     end)
 
-    {:ok, workspace: workspace}
+    {:ok, workspace: workspace, settings_file: settings_file}
   end
 
-  test "set_model 原子写 settings.json 并更新 ETS", %{workspace: workspace} do
+  test "set_model 原子写 settings.json 并更新 ETS", %{workspace: workspace, settings_file: settings_file} do
     assert {:ok, %{short: "kimi", model: "kimi:k2p5"}} = Settings.set_model(workspace, "k2p5")
     assert Settings.get_model() == "kimi"
 
-    settings_file = Path.join([workspace, ".gong", "settings.json"])
     assert File.exists?(settings_file)
     refute File.exists?(settings_file <> ".tmp")
 

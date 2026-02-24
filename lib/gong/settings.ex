@@ -3,7 +3,8 @@ defmodule Gong.Settings do
   设置管理。
 
   ETS 存储 + JSON 文件持久化。
-  支持全局和项目级别配置，项目级覆盖全局。
+  默认使用全局配置文件 `~/.gong/settings.json`。
+  测试可通过 `GONG_SETTINGS_FILE` 覆盖路径。
   """
 
   @table :gong_settings
@@ -17,7 +18,7 @@ defmodule Gong.Settings do
 
   @doc "初始化设置管理器"
   @spec init(String.t()) :: :ok
-  def init(workspace) do
+  def init(_workspace) do
     if :ets.info(@table) == :undefined do
       :ets.new(@table, [:named_table, :set, :public])
     end
@@ -27,13 +28,7 @@ defmodule Gong.Settings do
       :ets.insert_new(@table, {k, v})
     end
 
-    # 加载全局配置（如有）
-    global_file = Path.join([workspace, ".gong", "settings.json"])
-    load_file(global_file)
-
-    # 加载项目配置（如有），覆盖全局
-    project_file = Path.join([workspace, ".gong", "settings.json"])
-    load_file(project_file)
+    load_file(settings_file())
 
     :ok
   end
@@ -102,7 +97,7 @@ defmodule Gong.Settings do
       {:ok, resolved} ->
         :ets.insert(@table, {"model", resolved.short})
 
-        case persist(workspace) do
+        case persist() do
           :ok ->
             {:ok, %{short: resolved.short, model: resolved.model}}
 
@@ -125,7 +120,7 @@ defmodule Gong.Settings do
 
   @doc "重新读取配置文件刷新 ETS"
   @spec reload(String.t()) :: :ok
-  def reload(workspace) do
+  def reload(_workspace) do
     # 清空当前值并重新加载
     if :ets.info(@table) != :undefined do
       :ets.delete_all_objects(@table)
@@ -136,8 +131,7 @@ defmodule Gong.Settings do
       :ets.insert(@table, {k, v})
     end
 
-    config_file = Path.join([workspace, ".gong", "settings.json"])
-    load_file(config_file)
+    load_file(settings_file())
     :ok
   end
 
@@ -203,9 +197,9 @@ defmodule Gong.Settings do
     end
   end
 
-  defp persist(workspace) do
-    dir = Path.join([workspace, ".gong"])
-    file = Path.join(dir, "settings.json")
+  defp persist do
+    file = settings_file()
+    dir = Path.dirname(file)
     tmp = file <> ".tmp"
 
     with :ok <- File.mkdir_p(dir),
@@ -224,6 +218,13 @@ defmodule Gong.Settings do
       reason ->
         _ = File.rm(tmp)
         {:error, reason}
+    end
+  end
+
+  defp settings_file do
+    case System.get_env("GONG_SETTINGS_FILE") do
+      path when is_binary(path) and path != "" -> path
+      _ -> Path.join([System.user_home!(), ".gong", "settings.json"])
     end
   end
 end
