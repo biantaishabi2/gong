@@ -330,7 +330,9 @@ defmodule Gong.Session do
         # 正常 model 路径（生产）— 已在 start_link 中校验过
         is_binary(model) ->
           case ModelRegistry.lookup_by_string(model) do
-            {:ok, config} -> {Gong.Agent.new(), AgentLoop.build_llm_backend(config)}
+            {:ok, config} ->
+              config = ModelRegistry.apply_defaults(config)
+              {Gong.Agent.new(), AgentLoop.build_llm_backend(config)}
             {:error, _} -> {Gong.Agent.new(), nil}
           end
 
@@ -1041,12 +1043,29 @@ defmodule Gong.Session do
 
   defp normalize_stream_delta_content(content) when is_binary(content), do: content
   defp normalize_stream_delta_content(nil), do: ""
+  defp normalize_stream_delta_content(content) when is_atom(content), do: Atom.to_string(content)
+  defp normalize_stream_delta_content(content) when is_number(content), do: to_string(content)
+  defp normalize_stream_delta_content(content) when is_list(content), do: decode_list_content(content)
 
   defp normalize_stream_delta_content(content) do
     try do
       to_string(content)
     rescue
-      _ -> inspect(content)
+      _ -> inspect(content, charlists: :as_lists)
+    end
+  end
+
+  # 优先把 list 按文本解码，避免回退 inspect 后出现 \x{XXXX} 转义展示。
+  defp decode_list_content(content) do
+    try do
+      List.to_string(content)
+    rescue
+      _ ->
+        try do
+          IO.iodata_to_binary(content)
+        rescue
+          _ -> inspect(content, charlists: :as_lists)
+        end
     end
   end
 

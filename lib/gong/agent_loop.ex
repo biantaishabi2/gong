@@ -422,13 +422,21 @@ defmodule Gong.AgentLoop do
 
     try do
       case action_module.run(atom_args, tool_context) do
-        {:ok, data} -> {:ok, data}
-        {:error, reason} -> {:error, to_string(reason)}
+        {:ok, data} ->
+          {:ok, data}
+
+        # 避免错误结构体未实现 String.Chars 时导致二次崩溃
+        {:error, reason} ->
+          {:error, format_reason(reason)}
       end
     rescue
       e -> {:error, Exception.message(e)}
     end
   end
+
+  defp format_reason(reason) when is_binary(reason), do: reason
+  defp format_reason(reason) when is_atom(reason), do: Atom.to_string(reason)
+  defp format_reason(reason), do: inspect(reason)
 
   # ── AutoCompaction 集成 ──
 
@@ -541,8 +549,6 @@ defmodule Gong.AgentLoop do
   """
   @spec build_llm_backend(map()) :: (struct(), String.t() -> {:ok, term()} | {:error, term()})
   def build_llm_backend(model_config) do
-    model_str = "#{model_config[:provider]}:#{model_config[:model_id]}"
-
     fn agent_state, _call_id ->
       state = StratState.get(agent_state, %{})
       config = state[:config] || %{}
@@ -552,29 +558,34 @@ defmodule Gong.AgentLoop do
 
       opts = [tools: reqllm_tools, receive_timeout: 60_000]
 
-      case ReqLLM.stream_text(model_str, messages, opts) do
+      case Gong.LLMRouter.stream_text(model_config, messages, opts) do
         {:ok, stream_response} ->
           # 流式输出：每 chunk 通过进程字典回调实时发出
           # 标记已流式输出，避免 process_response 重复发送
           Process.put(:gong_streamed, true)
           emit_stream_event(StreamEvent.new(:text_start))
 
-          {:ok, response} =
-            ReqLLM.StreamResponse.process_stream(stream_response,
-              on_result: fn chunk ->
-                emit_stream_event(StreamEvent.new(:text_delta, content: chunk))
-              end
-            )
+          case ReqLLM.StreamResponse.process_stream(stream_response,
+                 on_result: fn chunk ->
+                   emit_stream_event(StreamEvent.new(:text_delta, content: chunk))
+                 end
+               ) do
+            {:ok, response} ->
+              emit_stream_event(StreamEvent.new(:text_end))
 
-          emit_stream_event(StreamEvent.new(:text_end))
+              # 从 Response 解析结果 + 提取 usage
+              {parsed, usage} = parse_reqllm_response(response)
+              accumulate_turn_usage(usage)
+              {:ok, parsed}
 
-          # 从 Response 解析结果 + 提取 usage
-          {parsed, usage} = parse_reqllm_response(response)
-          accumulate_turn_usage(usage)
-          {:ok, parsed}
+            {:error, reason} ->
+              # reason 可能是结构体（如 ReqLLM.Error.API.Request），不能直接 to_string
+              {:ok, {:error, inspect(reason)}}
+          end
 
         {:error, reason} ->
-          {:ok, {:error, to_string(reason)}}
+          # reason 可能是结构体（如 ReqLLM.Error.API.Request），不能直接 to_string
+          {:ok, {:error, inspect(reason)}}
       end
     end
   end

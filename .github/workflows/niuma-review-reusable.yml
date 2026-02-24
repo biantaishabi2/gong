@@ -1,0 +1,134 @@
+name: niuma - Review Reusable
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "目标仓库（owner/repo）"
+        required: true
+        type: string
+      issue_number:
+        description: "Issue 编号"
+        required: true
+        type: string
+      workflow_source_repo:
+        description: "reusable workflow 源仓库（owner/repo）"
+        required: false
+        default: ""
+        type: string
+      workflow_source_ref:
+        description: "reusable workflow 源 ref（分支、tag 或 SHA）"
+        required: false
+        default: ""
+        type: string
+      repo_dir:
+        description: "仓库目录（相对 GITHUB_WORKSPACE 或绝对路径）"
+        required: false
+        default: "."
+        type: string
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: self-hosted
+    concurrency:
+      group: niuma-review-${{ inputs.issue_number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup niuma binary
+        run: |
+          niuma_path="$(command -v niuma || true)"
+          if [ -z "$niuma_path" ] && [ -x "/usr/local/bin/niuma" ]; then
+            niuma_path="/usr/local/bin/niuma"
+          fi
+          if [ -z "$niuma_path" ]; then
+            echo "::error::找不到 niuma 二进制，请确保 runner 上已安装 niuma（PATH=$PATH）"
+            exit 1
+          fi
+          echo "NIUMA_BIN=$niuma_path" >> "$GITHUB_ENV"
+
+      - name: Find PR Number
+        id: find_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          # 分页解析 BOT:PR_CREATED marker，取最新 open PR 号
+          if PR_NUMBER=$("$NIUMA_BIN" resolve-pr --repo "$REPO" --issue "$ISSUE_NUMBER"); then
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::未在 issue #${ISSUE_NUMBER} 的评论中找到可用 PR 号"
+            echo "pr_number=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run PR Gate
+        id: pr_gate
+        if: steps.find_pr.outputs.pr_number != ''
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+        run: |
+          if [ -x "./.github/scripts/niuma-test-gate.sh" ]; then
+            echo "检测到自定义门禁脚本，执行..."
+            ./.github/scripts/niuma-test-gate.sh "$PR_NUMBER"
+          else
+            echo "无自定义门禁脚本，检查 GitHub PR status checks..."
+            # 等待 checks 完成（最多等 5 分钟）
+            for i in $(seq 1 30); do
+              PENDING=$(gh pr checks "$PR_NUMBER" --json state --jq '[.[] | select(.state == "PENDING")] | length' 2>/dev/null || echo "0")
+              if [ "$PENDING" = "0" ]; then
+                break
+              fi
+              echo "等待 $PENDING 个 check 完成... ($i/30)"
+              sleep 10
+            done
+            # 检查是否全部通过（排除本 workflow 自身的 review job）
+            FAILED=$(gh pr checks "$PR_NUMBER" --json name,conclusion --jq '[.[] | select(.conclusion == "FAILURE" or .conclusion == "failure")] | length' 2>/dev/null || echo "0")
+            if [ "$FAILED" != "0" ]; then
+              echo "::error::PR #$PR_NUMBER 有 $FAILED 个 check 失败"
+              gh pr checks "$PR_NUMBER" --json name,conclusion --jq '.[] | select(.conclusion == "FAILURE" or .conclusion == "failure") | "  ✗ \(.name)"'
+              exit 1
+            fi
+            echo "所有 PR checks 通过"
+          fi
+
+      - name: Restore Workspace After Gate
+        if: steps.find_pr.outputs.pr_number != '' && steps.pr_gate.outcome == 'success'
+        run: |
+          git checkout --force "$GITHUB_SHA"
+
+      - name: Gate Failed -> Transition to PR Needs Fix
+        if: steps.find_pr.outputs.pr_number != '' && steps.pr_gate.outcome == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: |
+          "$NIUMA_BIN" state-label set \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --from bot:pr-created \
+            --to bot:pr-needs-fix
+
+      - name: AI Self-Review
+        if: steps.find_pr.outputs.pr_number != '' && steps.pr_gate.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          NIUMA_IMPLEMENTATION_PROVIDER: codex
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          PR_NUMBER: ${{ steps.find_pr.outputs.pr_number }}
+        run: |
+          "$NIUMA_BIN" review \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER" \
+            --pr "$PR_NUMBER"

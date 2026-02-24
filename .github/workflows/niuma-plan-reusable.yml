@@ -1,0 +1,81 @@
+name: niuma - Plan Draft Reusable
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: "目标仓库（owner/repo）"
+        required: true
+        type: string
+      issue_number:
+        description: "Issue 编号"
+        required: true
+        type: string
+      workflow_source_repo:
+        description: "reusable workflow 源仓库（owner/repo）"
+        required: false
+        default: ""
+        type: string
+      workflow_source_ref:
+        description: "reusable workflow 源 ref（分支、tag 或 SHA）"
+        required: false
+        default: ""
+        type: string
+      repo_dir:
+        description: "仓库目录（相对 GITHUB_WORKSPACE 或绝对路径）"
+        required: false
+        default: "."
+        type: string
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  plan-draft:
+    runs-on: self-hosted
+    concurrency:
+      group: niuma-plan-${{ inputs.issue_number }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup niuma binary
+        run: |
+          niuma_path="$(command -v niuma || true)"
+          if [ -z "$niuma_path" ] && [ -x "/usr/local/bin/niuma" ]; then
+            niuma_path="/usr/local/bin/niuma"
+          fi
+          if [ -z "$niuma_path" ]; then
+            echo "::error::找不到 niuma 二进制，请确保 runner 上已安装 niuma（PATH=$PATH）"
+            exit 1
+          fi
+          echo "NIUMA_BIN=$niuma_path" >> "$GITHUB_ENV"
+
+      - name: Check if issue is in orchestration queue
+        id: check_orchestration
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          # 检查 issue 是否在 taskctl 中（被编排队列管理）
+          if "$NIUMA_BIN" control check --repo "$REPO" --issue "$ISSUE_NUMBER" 2>/dev/null; then
+            echo "Issue is in orchestration queue, skipping single-issue flow"
+            echo "should_skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+
+      - name: Generate Plan Draft
+        if: steps.check_orchestration.outputs.should_skip != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIUMA_PAT }}
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: |
+          "$NIUMA_BIN" plan-draft \
+            --repo "$REPO" \
+            --issue "$ISSUE_NUMBER"

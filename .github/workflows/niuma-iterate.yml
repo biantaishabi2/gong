@@ -18,7 +18,7 @@ jobs:
       github.event_name == 'issues' &&
       github.event.label.name == 'bot:pr-needs-fix' &&
       github.event.issue.state == 'open'
-    uses: biantaishabi2/Cli/.github/workflows/niuma-iterate-reusable.yml@master
+    uses: ./.github/workflows/niuma-iterate-reusable.yml
     with:
       repo: ${{ github.repository }}
       issue_number: ${{ format('{0}', github.event.issue.number) }}
@@ -52,7 +52,7 @@ jobs:
   call-iterate-from-human:
     needs: extract-issue-from-pr
     if: needs.extract-issue-from-pr.outputs.issue_number != ''
-    uses: biantaishabi2/Cli/.github/workflows/niuma-iterate-reusable.yml@master
+    uses: ./.github/workflows/niuma-iterate-reusable.yml
     with:
       repo: ${{ github.repository }}
       issue_number: ${{ needs.extract-issue-from-pr.outputs.issue_number }}
