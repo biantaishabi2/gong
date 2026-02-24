@@ -133,8 +133,17 @@ defmodule Gong.CLI.Chat do
     else
       case Gong.Settings.set_model(cwd, target) do
         {:ok, %{short: short, model: full_model}} ->
-          _ = Session.sync_model(session_pid)
-          IO.puts("已切换模型: #{short} (#{full_model})")
+          case Session.sync_model(session_pid) do
+            {:ok, %{changed: true}} ->
+              IO.puts("已切换模型: #{short} (#{full_model})")
+
+            {:ok, %{changed: false, reason: reason}} ->
+              current = current_model(session_pid)
+              IO.puts("设置已更新，但会话未切换（#{reason}），当前模型: #{current}")
+
+            {:error, error} ->
+              IO.puts("设置已更新，但会话同步失败: #{inspect(error)}")
+          end
 
         {:error, :unknown_provider} ->
           IO.puts("模型不存在: #{target}")
@@ -275,11 +284,7 @@ defmodule Gong.CLI.Chat do
   end
 
   defp print_models(session_pid) do
-    current_model =
-      case Session.metadata(session_pid) do
-        {:ok, metadata} -> get_in(metadata, ["session", "model"]) || "unknown"
-        _ -> "unknown"
-      end
+    current_model = current_model(session_pid)
 
     IO.puts("当前模型: #{current_model}")
     IO.puts("可用模型:")
@@ -297,5 +302,12 @@ defmodule Gong.CLI.Chat do
       |> Enum.join(", ")
 
     IO.puts("可用模型: #{options}")
+  end
+
+  defp current_model(session_pid) do
+    case Session.metadata(session_pid) do
+      {:ok, metadata} -> get_in(metadata, ["session", "model"]) || "unknown"
+      _ -> "unknown"
+    end
   end
 end
