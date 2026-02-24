@@ -156,6 +156,17 @@ defmodule Gong.CLI.RendererTest do
       output = capture_io(:stderr, fn -> Renderer.render(event) end)
       assert output =~ "未知错误"
     end
+
+    test "error.runtime 为 ReqLLM 结构体字符串时提取简洁 message" do
+      raw =
+        "%ReqLLM.Error.API.Request{reason: \"auth failed\", status: 401, response_body: %{\"message\" => \"token invalid\"}}"
+
+      event = make_event("error.runtime", %{message: raw})
+      output = capture_io(:stderr, fn -> Renderer.render(event) end)
+
+      assert output =~ "token invalid"
+      refute output =~ "ReqLLM.Error.API.Request"
+    end
   end
 
   describe "truncate/2" do

@@ -315,4 +315,30 @@ defmodule Gong.LLMRouterTest do
       assert openai_resolved.receive_timeout == 30_000
     end
   end
+
+  describe "错误处理与预校验" do
+    test "缺少 API key 时请求前返回 unauthorized 友好错误" do
+      System.delete_env("NONEXISTENT_ROUTER_KEY")
+
+      model_config = %{
+        provider: "deepseek",
+        model_id: "deepseek-chat",
+        api_key_env: "NONEXISTENT_ROUTER_KEY"
+      }
+
+      assert {:error, error} = LLMRouter.stream_text(model_config, [%{role: :user, content: "hi"}], [])
+      assert error.code == :unauthorized
+      assert error.message =~ "缺少 NONEXISTENT_ROUTER_KEY"
+    end
+
+    test "humanize_error 提取 response_body.message 与状态码" do
+      error = %{
+        reason: "auth failed",
+        status: 401,
+        response_body: %{"message" => "token invalid"}
+      }
+
+      assert LLMRouter.humanize_error(error) == "token invalid (HTTP 401)"
+    end
+  end
 end

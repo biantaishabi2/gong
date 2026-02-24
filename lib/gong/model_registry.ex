@@ -123,6 +123,56 @@ defmodule Gong.ModelRegistry do
     |> Enum.sort_by(fn {name, _} -> name end)
   end
 
+  @doc """
+  解析为“已注册模型”，不会回退到动态构造配置。
+
+  用于 `/model` 等需要严格校验的场景：
+  - 输入短名（如 `kimi` / `k2p5`）
+  - 输入完整名（`provider:model_id`）
+  """
+  @spec resolve_registered_model(String.t()) ::
+          {:ok, %{name: atom(), short: String.t(), model: String.t(), config: model_config()}}
+          | {:error, :unknown_provider}
+  def resolve_registered_model(model_str) when is_binary(model_str) do
+    ensure_table!()
+    trimmed = String.trim(model_str)
+
+    cond do
+      trimmed == "" ->
+        {:error, :unknown_provider}
+
+      String.contains?(trimmed, ":") ->
+        resolve_by_provider_model(trimmed)
+
+      true ->
+        resolve_by_short_name(trimmed)
+    end
+  end
+
+  @doc "返回可切换模型列表（短名 + 完整名）"
+  @spec available_models() :: [%{name: atom(), short: String.t(), model: String.t(), config: model_config()}]
+  def available_models do
+    models =
+      list()
+      |> Enum.reject(fn {name, _} -> name == @default_model_name end)
+
+    selected =
+      if models == [] do
+        list()
+      else
+        models
+      end
+
+    Enum.map(selected, fn {name, config} ->
+      %{
+        name: name,
+        short: Atom.to_string(name),
+        model: model_to_string(config),
+        config: config
+      }
+    end)
+  end
+
   @doc "校验模型是否可用（API key 环境变量存在）"
   @spec validate(atom()) :: :ok | {:error, String.t()}
   def validate(name) when is_atom(name) do
@@ -222,6 +272,51 @@ defmodule Gong.ModelRegistry do
     end
   end
 
+  defp resolve_by_provider_model(model_str) do
+    case String.split(model_str, ":", parts: 2) do
+      [provider, model_id] when provider != "" and model_id != "" ->
+        resolved_provider = Gong.ProviderRegistry.resolve_alias(provider)
+
+        available_models()
+        |> Enum.find(fn item ->
+          config = item.config
+          (config.provider == provider or config.provider == resolved_provider) and
+            config.model_id == model_id
+        end)
+        |> case do
+          nil -> {:error, :unknown_provider}
+          found -> {:ok, found}
+        end
+
+      _ ->
+        {:error, :unknown_provider}
+    end
+  end
+
+  defp resolve_by_short_name(model_str) do
+    normalized = String.downcase(model_str)
+
+    case Map.get(@short_name_aliases, normalized) do
+      nil ->
+        {:error, :unknown_provider}
+
+      name ->
+        case :ets.lookup(@table, name) do
+          [{^name, config}] ->
+            {:ok,
+             %{
+               name: name,
+               short: Atom.to_string(name),
+               model: model_to_string(config),
+               config: config
+             }}
+
+          [] ->
+            {:error, :unknown_provider}
+        end
+    end
+  end
+
   defp find_by_provider_model(provider, model_id) do
     result =
       :ets.tab2list(@table)
@@ -313,4 +408,6 @@ defmodule Gong.ModelRegistry do
       init()
     end
   end
+
+  defp model_to_string(%{provider: provider, model_id: model_id}), do: "#{provider}:#{model_id}"
 end

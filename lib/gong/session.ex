@@ -20,6 +20,7 @@ defmodule Gong.Session do
   alias Gong.AgentLoop
   alias Gong.AutoCompaction
   alias Gong.ModelRegistry
+  alias Gong.Settings
   alias Gong.Session.Events
   alias Gong.Stream.Event, as: StreamEvent
   alias Gong.Thinking
@@ -220,6 +221,15 @@ defmodule Gong.Session do
     end
   end
 
+  @doc "同步当前会话模型（从 settings 读取）"
+  @spec sync_model(pid()) :: {:ok, map()} | {:error, error_t()}
+  def sync_model(pid) do
+    case safe_genserver_call(pid, :sync_model) do
+      {:ok, {:ok, _} = ok} -> ok
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
+  end
+
   @spec session_id(pid()) :: {:ok, String.t()} | {:error, error_t()}
   def session_id(pid) do
     safe_genserver_call(pid, :session_id)
@@ -313,6 +323,7 @@ defmodule Gong.Session do
     # Agent 路径：model（生产）/ agent+llm_backend_fn（测试直传）/ model+llm_backend_fn（测试覆盖）
     direct_agent = Keyword.get(opts, :agent)
     llm_backend_fn_override = Keyword.get(opts, :llm_backend_fn)
+    model_sync_opt = Keyword.get(opts, :model_sync, false)
 
     {agent, llm_backend_fn} =
       cond do
@@ -358,6 +369,8 @@ defmodule Gong.Session do
 
     now = System.monotonic_time(:millisecond)
     external_session_key = Keyword.get(opts, :external_session_key)
+    model_sync_enabled =
+      model_sync_opt and is_binary(model) and direct_agent == nil and llm_backend_fn_override == nil
 
     state = %{
       session_id: session_id,
@@ -367,6 +380,7 @@ defmodule Gong.Session do
       tape_path: tape_path,
       auto_compaction: auto_compaction,
       workspace: workspace,
+      model_sync_enabled: model_sync_enabled,
       turn_id: 0,
       metadata: init_metadata,
       subscribers: MapSet.new(),
@@ -450,6 +464,12 @@ defmodule Gong.Session do
     {:reply, state.metadata, state}
   end
 
+  def handle_call(:sync_model, _from, state) do
+    state = refresh_activity(state)
+    {new_state, sync_result} = maybe_sync_model_from_settings(state)
+    {:reply, {:ok, sync_result}, new_state}
+  end
+
   def handle_call(:session_id, _from, state) do
     {:reply, {:ok, state.session_id}, state}
   end
@@ -519,6 +539,7 @@ defmodule Gong.Session do
 
   def handle_call({:prompt, message, opts}, _from, state) do
     state = refresh_activity(state)
+    {state, _sync_result} = maybe_sync_model_from_settings(state)
 
     with :ok <- validate_prompt(message),
          :ok <- validate_prompt_opts(opts),
@@ -542,6 +563,8 @@ defmodule Gong.Session do
   end
 
   def handle_call({:submit_command, command_payload, opts}, _from, state) do
+    {state, _sync_result} = maybe_sync_model_from_settings(state)
+
     with :ok <- validate_prompt_opts(opts),
          {:ok, normalized_payload} <- validate_command_payload(command_payload, state),
          :ok <- validate_backend_available(state) do
@@ -809,6 +832,8 @@ defmodule Gong.Session do
   def normalize_error(:timeout), do: error(:timeout, "timeout", %{})
   def normalize_error(:cancelled), do: error(:cancelled, "cancelled", %{})
   def normalize_error(:unauthorized), do: error(:unauthorized, "unauthorized", %{})
+  def normalize_error(other) when is_binary(other),
+    do: error(:internal_error, normalize_runtime_message(other), %{})
 
   def normalize_error({:iteration_limit_reached, details}) when is_map(details) do
     max = Map.get(details, :max_iterations, "?")
@@ -823,6 +848,18 @@ defmodule Gong.Session do
 
   def normalize_error(other) do
     error(:internal_error, "internal error", %{raw: inspect(other)})
+  end
+
+  defp normalize_runtime_message(message) when is_binary(message) do
+    cond do
+      String.starts_with?(message, "Error: \"") and String.ends_with?(message, "\"") ->
+        message
+        |> String.trim_leading("Error: \"")
+        |> String.trim_trailing("\"")
+
+      true ->
+        message
+    end
   end
 
   # 刷新活动时间戳并同步 ETS 索引
@@ -1238,7 +1275,17 @@ defmodule Gong.Session do
         send(session_pid, {:session_stream_event, command_id, turn_id, event})
       end)
 
-      run_agent_turn(session_pid, agent, message, llm_backend_fn, command_id, turn_id, workspace: workspace)
+      run_agent_turn(
+        session_pid,
+        agent,
+        message,
+        llm_backend_fn,
+        command_id,
+        turn_id,
+        workspace: workspace,
+        current_model: current_model_for_prompt(state),
+        available_models: available_models_for_prompt()
+      )
     end)
 
     %{state | agent_busy: true}
@@ -1254,6 +1301,51 @@ defmodule Gong.Session do
       {:empty, _} ->
         %{state | agent_busy: false}
     end
+  end
+
+  defp maybe_sync_model_from_settings(%{model_sync_enabled: false} = state),
+    do: {state, %{changed: false, reason: :disabled}}
+
+  defp maybe_sync_model_from_settings(state) do
+    _ = Settings.reload(state.workspace)
+    desired_model = Settings.get_model() |> to_string() |> String.trim()
+    current_model = current_model_for_prompt(state)
+
+    cond do
+      desired_model == "" ->
+        {state, %{changed: false, reason: :missing}}
+
+      desired_model == current_model ->
+        {state, %{changed: false, reason: :unchanged, model: current_model}}
+
+      true ->
+        case ModelRegistry.resolve_registered_model(desired_model) do
+          {:ok, resolved} ->
+            llm_backend_fn = AgentLoop.build_llm_backend(ModelRegistry.apply_defaults(resolved.config))
+            thinking_level = Map.get(resolved.config, :thinking_level, "off") |> to_string()
+
+            new_metadata =
+              state.metadata
+              |> put_in(["session", "model"], resolved.short)
+              |> put_in(["session", "thinking", "level"], thinking_level)
+
+            new_state = %{state | llm_backend_fn: llm_backend_fn, metadata: new_metadata}
+            {new_state, %{changed: true, model: resolved.short, full_model: resolved.model}}
+
+          {:error, :unknown_provider} ->
+            Logger.warning("Session settings 模型无效，忽略热重载: #{inspect(desired_model)}")
+            {state, %{changed: false, reason: :invalid, requested: desired_model}}
+        end
+    end
+  end
+
+  defp current_model_for_prompt(state) do
+    get_in(state.metadata, ["session", "model"]) || @default_model
+  end
+
+  defp available_models_for_prompt do
+    ModelRegistry.available_models()
+    |> Enum.map(fn item -> "#{item.short}(#{item.model})" end)
   end
 
   defp payload_get(map, key), do: Events.payload_get(map, key)

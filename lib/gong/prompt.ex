@@ -66,6 +66,8 @@ defmodule Gong.Prompt do
     workspace = Keyword.get(opts, :workspace, ".")
     context = Keyword.get(opts, :context, "")
     skills = Keyword.get(opts, :skills, "")
+    current_model = Keyword.get(opts, :current_model)
+    available_models = Keyword.get(opts, :available_models, [])
 
     now = DateTime.utc_now() |> DateTime.to_string()
 
@@ -73,6 +75,14 @@ defmodule Gong.Prompt do
       @default_prompt,
       if(context != "", do: "\n## Context\n#{context}\n", else: ""),
       if(skills != "", do: "\n## Skills\n#{skills}\n", else: ""),
+      if(is_binary(current_model),
+        do: "\n## Model\n当前模型：#{current_model}\n",
+        else: ""
+      ),
+      if(is_list(available_models) and available_models != [],
+        do: "可用模型：#{Enum.join(available_models, ", ")}\n",
+        else: ""
+      ),
       "\n当前时间：#{now}",
       "\n当前工作目录：#{workspace}\n"
     ]
