@@ -11,7 +11,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
           argv: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       cli_run: %{
         name: :cli_run, kind: :when,
@@ -19,7 +19,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
           argv: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       assert_cli_command: %{
         name: :assert_cli_command, kind: :then,
@@ -69,7 +69,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
         name: :capture_io, kind: :given,
         args: %{},
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: nil
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: nil
       },
       render_event: %{
         name: :render_event, kind: :when,
@@ -90,7 +90,7 @@ defmodule Gong.BDD.InstructionRegistries.Step2CLI do
           contains: %{type: :string, required?: true, allowed: nil}
         },
         outputs: %{}, rules: [], boundary: :service,
-        scopes: [:unit, :integration], async?: false, eventually?: false, assert_class: :C
+        scopes: [:unit, :integration, :e2e], async?: false, eventually?: false, assert_class: :C
       },
       assert_io_output_empty: %{
         name: :assert_io_output_empty, kind: :then,
