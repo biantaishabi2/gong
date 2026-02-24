@@ -7,6 +7,7 @@ defmodule Gong.CLI.Chat do
 
   alias Gong.Session
   alias Gong.CLI.Renderer
+  alias Gong.ModelRegistry
 
   @exit_ok 0
   @exit_error 1
@@ -26,7 +27,11 @@ defmodule Gong.CLI.Chat do
     Gong.Settings.init(cwd)
 
     tape_path = Path.join(cwd, ".gong/tape")
-    session_opts = build_session_opts(opts) |> Keyword.put(:tape_path, tape_path) |> Keyword.put(:workspace, cwd)
+    session_opts =
+      build_session_opts(opts)
+      |> Keyword.put(:tape_path, tape_path)
+      |> Keyword.put(:workspace, cwd)
+      |> Keyword.put(:model_sync, true)
 
     case Session.start_link(session_opts) do
       {:ok, pid} ->
@@ -104,6 +109,41 @@ defmodule Gong.CLI.Chat do
   defp handle_input("/help", session_pid) do
     IO.puts(help_text())
     repl_loop(session_pid)
+  end
+
+  defp handle_input("/models", session_pid) do
+    print_models(session_pid)
+    repl_loop(session_pid)
+  end
+
+  defp handle_input("/model", session_pid) do
+    IO.puts("用法: /model <name>")
+    repl_loop(session_pid)
+  end
+
+  defp handle_input("/model " <> model_name, session_pid) do
+    cwd = File.cwd!()
+    target = String.trim(model_name)
+
+    if target == "" do
+      IO.puts("用法: /model <name>")
+      repl_loop(session_pid)
+    else
+      case Gong.Settings.set_model(cwd, target) do
+        {:ok, %{short: short, model: full_model}} ->
+          _ = Session.sync_model(session_pid)
+          IO.puts("已切换模型: #{short} (#{full_model})")
+
+        {:error, :unknown_provider} ->
+          IO.puts("模型不存在: #{target}")
+          print_available_models_hint()
+
+        {:error, :persist_failed} ->
+          IO.puts("模型切换失败: 设置写入失败")
+      end
+
+      repl_loop(session_pid)
+    end
   end
 
   defp handle_input("/history", session_pid) do
@@ -227,6 +267,33 @@ defmodule Gong.CLI.Chat do
       /history  查看对话历史
       /clear    清空对话
       /save     保存当前会话
+      /models   查看可用模型
+      /model    切换模型（如 /model kimi）
     """
+  end
+
+  defp print_models(session_pid) do
+    current_model =
+      case Session.metadata(session_pid) do
+        {:ok, metadata} -> get_in(metadata, ["session", "model"]) || "unknown"
+        _ -> "unknown"
+      end
+
+    IO.puts("当前模型: #{current_model}")
+    IO.puts("可用模型:")
+
+    ModelRegistry.available_models()
+    |> Enum.each(fn item ->
+      IO.puts("  - #{item.short} -> #{item.model}")
+    end)
+  end
+
+  defp print_available_models_hint do
+    options =
+      ModelRegistry.available_models()
+      |> Enum.map(& &1.short)
+      |> Enum.join(", ")
+
+    IO.puts("可用模型: #{options}")
   end
 end

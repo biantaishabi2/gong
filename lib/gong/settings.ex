@@ -79,6 +79,42 @@ defmodule Gong.Settings do
     :ok
   end
 
+  @doc "获取当前模型设置"
+  @spec get_model() :: String.t()
+  def get_model do
+    get("model")
+  end
+
+  @doc """
+  持久化设置模型（原子写）。
+
+  返回归一化后的模型信息（短名 + 完整名）。
+  """
+  @spec set_model(String.t(), String.t()) ::
+          {:ok, %{short: String.t(), model: String.t()}}
+          | {:error, :unknown_provider | :persist_failed}
+  def set_model(workspace, model_name) when is_binary(workspace) and is_binary(model_name) do
+    if :ets.info(@table) == :undefined do
+      init(workspace)
+    end
+
+    case Gong.ModelRegistry.resolve_registered_model(model_name) do
+      {:ok, resolved} ->
+        :ets.insert(@table, {"model", resolved.short})
+
+        case persist(workspace) do
+          :ok ->
+            {:ok, %{short: resolved.short, model: resolved.model}}
+
+          {:error, _reason} ->
+            {:error, :persist_failed}
+        end
+
+      {:error, :unknown_provider} ->
+        {:error, :unknown_provider}
+    end
+  end
+
   @doc "列出所有设置"
   @spec list() :: map()
   def list do
@@ -164,6 +200,30 @@ defmodule Gong.Settings do
         _ ->
           :ok
       end
+    end
+  end
+
+  defp persist(workspace) do
+    dir = Path.join([workspace, ".gong"])
+    file = Path.join(dir, "settings.json")
+    tmp = file <> ".tmp"
+
+    with :ok <- File.mkdir_p(dir),
+         content <- list() |> Jason.encode!(pretty: true),
+         :ok <- File.write(tmp, content),
+         {:ok, fd} <- :file.open(String.to_charlist(tmp), [:read, :raw]),
+         :ok <- :file.sync(fd),
+         :ok <- :file.close(fd),
+         :ok <- File.rename(tmp, file) do
+      :ok
+    else
+      {:error, reason} ->
+        _ = File.rm(tmp)
+        {:error, reason}
+
+      reason ->
+        _ = File.rm(tmp)
+        {:error, reason}
     end
   end
 end

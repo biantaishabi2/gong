@@ -61,4 +61,27 @@ defmodule Gong.ModelRegistryShortNameTest do
   test "未知短名返回错误" do
     assert {:error, :unknown_provider} = ModelRegistry.lookup_by_string("not-exists")
   end
+
+  test "resolve_registered_model 仅命中已注册模型，不做兜底构造" do
+    assert {:ok, resolved} = ModelRegistry.resolve_registered_model("k2p5")
+    assert resolved.short == "kimi"
+    assert resolved.model == "kimi:k2p5"
+
+    assert {:ok, resolved2} = ModelRegistry.resolve_registered_model("minimax:MiniMax-M2.5")
+    assert resolved2.short == "minimax"
+    assert resolved2.model == "minimax:MiniMax-M2.5"
+
+    assert {:error, :unknown_provider} = ModelRegistry.resolve_registered_model("unknown:model")
+  end
+
+  test "available_models 返回短名与完整名映射" do
+    available = ModelRegistry.available_models()
+    shorts = Enum.map(available, & &1.short)
+    models = Enum.map(available, & &1.model)
+
+    assert "kimi" in shorts
+    assert "minimax" in shorts
+    assert "glm" in shorts
+    assert "kimi:k2p5" in models
+  end
 end
