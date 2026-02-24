@@ -77,7 +77,7 @@ defmodule Gong.SessionReaper do
       end)
 
     # 关闭 TTL 过期的 session
-    Enum.each(expired, fn {session_id, _key, created_at, last_active_at, _pid} ->
+    Enum.each(expired, fn {session_id, _key, created_at, _last_active_at, _pid} ->
       reason =
         if absolute_expired?(now, created_at, state.absolute_ttl),
           do: :ttl_absolute_expired,
