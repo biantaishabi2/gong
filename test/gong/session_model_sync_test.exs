@@ -69,4 +69,16 @@ defmodule Gong.SessionModelSyncTest do
     assert {:ok, metadata} = Session.metadata(session)
     assert get_in(metadata, ["session", "model"]) == "minimax"
   end
+
+  test "switch_model 直接切换当前会话模型", %{session: session} do
+    assert {:ok, %{changed: true, model: "kimi"}} = Session.switch_model(session, "kimi")
+
+    assert {:ok, metadata} = Session.metadata(session)
+    assert get_in(metadata, ["session", "model"]) == "kimi"
+  end
+
+  test "switch_model 重复切换同模型返回 unchanged", %{session: session} do
+    assert {:ok, %{changed: false, reason: :unchanged, model: "minimax"}} =
+             Session.switch_model(session, "minimax")
+  end
 end

@@ -133,7 +133,7 @@ defmodule Gong.CLI.Chat do
     else
       case Gong.Settings.set_model(cwd, target) do
         {:ok, %{short: short, model: full_model}} ->
-          case Session.sync_model(session_pid) do
+          case Session.switch_model(session_pid, short) do
             {:ok, %{changed: true}} ->
               IO.puts("已切换模型: #{short} (#{full_model})")
 

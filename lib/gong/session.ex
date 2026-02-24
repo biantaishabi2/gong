@@ -230,6 +230,15 @@ defmodule Gong.Session do
     end
   end
 
+  @doc "直接切换当前会话模型（不依赖 settings reload）"
+  @spec switch_model(pid(), String.t()) :: {:ok, map()} | {:error, error_t()}
+  def switch_model(pid, model_name) when is_binary(model_name) do
+    case safe_genserver_call(pid, {:switch_model, model_name}) do
+      {:ok, {:ok, _} = ok} -> ok
+      {:error, reason} -> {:error, normalize_error(reason)}
+    end
+  end
+
   @spec session_id(pid()) :: {:ok, String.t()} | {:error, error_t()}
   def session_id(pid) do
     safe_genserver_call(pid, :session_id)
@@ -467,6 +476,12 @@ defmodule Gong.Session do
   def handle_call(:sync_model, _from, state) do
     state = refresh_activity(state)
     {new_state, sync_result} = maybe_sync_model_from_settings(state)
+    {:reply, {:ok, sync_result}, new_state}
+  end
+
+  def handle_call({:switch_model, model_name}, _from, state) do
+    state = refresh_activity(state)
+    {new_state, sync_result} = maybe_switch_model(state, model_name)
     {:reply, {:ok, sync_result}, new_state}
   end
 
@@ -1309,6 +1324,10 @@ defmodule Gong.Session do
   defp maybe_sync_model_from_settings(state) do
     _ = Settings.reload(state.workspace)
     desired_model = Settings.get_model() |> to_string() |> String.trim()
+    maybe_switch_model(state, desired_model)
+  end
+
+  defp maybe_switch_model(state, desired_model) do
     current_model = current_model_for_prompt(state)
 
     cond do
