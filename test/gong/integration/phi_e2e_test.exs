@@ -171,8 +171,21 @@ defmodule Gong.PhiE2ETest do
     IO.puts("  [guidance] telemetry events: #{length(events)}")
     IO.puts("  [guidance] phi injection events: #{length(phi_injected)}")
 
+    # ── 硬断言 1: PhiGuidance 模块真的加载了（非降级） ──
+    assert Code.ensure_loaded?(UniboVariationCenter.PhiGuidance),
+      "UniboVariationCenter.PhiGuidance 应该已加载，否则 guidance 处于降级模式"
+
+    # ── 硬断言 2: 直接调用 generate 验证返回非 nil text ──
+    # 先喂一些状态让 tracker 有内容，再 generate
+    direct_guidance = PhiGuidance.generate()
+
+    IO.puts("  [guidance] direct generate text: #{inspect(direct_guidance.text)}")
+
+    # generate 返回的 map 必须有 :text 键
+    assert Map.has_key?(direct_guidance, :text),
+      "PhiGuidance.generate() 返回值必须包含 :text 键"
+
     # 验证：PhiGuidanceHook.on_context 确实被调用
-    # 即使 guidance 内容为空（初始状态），hook 至少会被 HookRunner.pipe 调用
     # 检查 conversation 中是否有 Phi Guidance 系统消息
     strategy_state = StratState.get(updated_agent, %{})
     conversation = Map.get(strategy_state, :conversation, [])
@@ -185,9 +198,11 @@ defmodule Gong.PhiE2ETest do
 
     IO.puts("  [guidance] guidance messages in conversation: #{length(guidance_msgs)}")
 
-    # 验证 phi_injected telemetry（on_context:applied 或 phi:guidance:injected）
-    # 注：初始空状态可能不注入，所以只验证不崩溃
+    # ── 硬断言 3: phi_injected telemetry 至少被触发 1 次 ──
     IO.puts("  [guidance] phi:guidance:injected count: #{length(phi_injected)}")
+
+    assert length(phi_injected) >= 1,
+      "PhiGuidanceHook 应至少注入 1 次 guidance（phi:guidance:injected telemetry 事件），实际: #{length(phi_injected)}"
 
     Process.put(:guidance_reply, reply)
     Process.put(:guidance_events, events)
@@ -350,6 +365,13 @@ defmodule Gong.PhiE2ETest do
     IO.puts("  reply: #{String.length(guidance_reply)} chars")
     IO.puts("  conversation: #{length(guidance_conversation)} messages")
     IO.puts("  phi injections: #{length(phi_inj)}")
+
+    # 硬断言：guidance 非降级
+    assert Code.ensure_loaded?(UniboVariationCenter.PhiGuidance),
+      "UniboVariationCenter.PhiGuidance 应该已加载（综合对比组）"
+
+    assert length(phi_inj) >= 1,
+      "综合对比组：PhiGuidanceHook 应至少注入 1 次 guidance，实际: #{length(phi_inj)}"
 
     # ── 3. Hybrid ──
     IO.puts("\n  --- Hybrid (PhiHybridOrchestrator) ---")
