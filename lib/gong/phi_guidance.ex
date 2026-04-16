@@ -128,7 +128,8 @@ defmodule Gong.PhiGuidance do
       end
 
     content = Enum.join(parts, "\n")
-    %{role: :system, content: content}
+    # 用 :user 角色注入，避免 DeepSeek 等模型拒绝多 system 消息
+    %{role: :user, content: content}
   end
 
   def format_message(_), do: nil

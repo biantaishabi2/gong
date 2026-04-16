@@ -156,8 +156,7 @@ defmodule Gong.PhiE2ETest do
 
     guidance_msgs =
       Enum.filter(conversation, fn msg ->
-        msg[:role] == :system and
-          is_binary(msg[:content]) and
+        is_binary(msg[:content]) and
           String.contains?(msg[:content], "Guidance")
       end)
 

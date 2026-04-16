@@ -48,7 +48,12 @@ defmodule Gong.MixProject do
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:mox, "~> 1.1", only: :test}
+      {:mox, "~> 1.1", only: :test},
+
+      # UniBO Φ 语义管线（测试环境接入真实变化中心）
+      {:unibo_variation_center_runtime,
+       path: "../unibo/targets/elixir/unibo_variation_center_runtime",
+       only: :test}
     ]
   end
 
