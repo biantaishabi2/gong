@@ -42,6 +42,7 @@ defmodule Gong.PhiHybridOrchestrator do
           phi_id: String.t() | nil,
           k: pos_integer(),
           score_threshold: float(),
+          upgrade_policy: map() | nil,
           selector: PhiCandidateSelector.t(),
           total_steps: non_neg_integer(),
           upgraded_steps: non_neg_integer(),
@@ -51,6 +52,7 @@ defmodule Gong.PhiHybridOrchestrator do
   defstruct phi_id: nil,
             k: 5,
             score_threshold: 1.0,
+            upgrade_policy: nil,
             selector: nil,
             total_steps: 0,
             upgraded_steps: 0,
@@ -68,6 +70,9 @@ defmodule Gong.PhiHybridOrchestrator do
           fallback_used: boolean()
         }
 
+  # PhiUpgradePolicy 模块引用（可选依赖，不可用时降级为硬编码阈值）
+  @upgrade_policy_mod UniboVariationCenter.PhiUpgradePolicy
+
   @doc "创建新的混合编排器。"
   @spec new(keyword()) :: t()
   def new(opts \\ []) do
@@ -75,12 +80,27 @@ defmodule Gong.PhiHybridOrchestrator do
     k = Keyword.get(opts, :k, 5)
     threshold = Keyword.get(opts, :score_threshold, 1.0)
 
-    selector = PhiCandidateSelector.new(phi_id: phi_id, k: k)
+    # 尝试从 PhiUpgradePolicy 获取策略；不可用时 upgrade_policy 为 nil
+    upgrade_policy = resolve_upgrade_policy(phi_id, opts)
+
+    # 如果 policy 存在，用 policy 的 k 和 threshold（除非调用方显式传了）
+    {effective_k, effective_threshold} =
+      if upgrade_policy do
+        {
+          Keyword.get(opts, :k, upgrade_policy.k),
+          Keyword.get(opts, :score_threshold, upgrade_policy.score_threshold)
+        }
+      else
+        {k, threshold}
+      end
+
+    selector = PhiCandidateSelector.new(phi_id: phi_id, k: effective_k)
 
     %__MODULE__{
       phi_id: phi_id,
-      k: k,
-      score_threshold: threshold,
+      k: effective_k,
+      score_threshold: effective_threshold,
+      upgrade_policy: upgrade_policy,
       selector: selector
     }
   end
@@ -107,16 +127,16 @@ defmodule Gong.PhiHybridOrchestrator do
         # 解析 + 打分
         case score_response(first_response, orch.selector) do
           {:ok, first_score, first_action, first_candidate} ->
-            if first_score >= orch.score_threshold do
-              # 达标 → 不升级
-              handle_accepted(orch, first_response, first_candidate, first_score, first_action, step_num)
-            else
-              # 不达标 → 升级 Best-of-K
-              handle_upgrade(orch, agent, call_id, llm_backend, first_response, first_candidate, first_score, step_num)
+            case decide_upgrade(orch, first_score) do
+              :accept ->
+                handle_accepted(orch, first_response, first_candidate, first_score, first_action, step_num)
+
+              :upgrade ->
+                handle_upgrade(orch, agent, call_id, llm_backend, first_response, first_candidate, first_score, step_num)
             end
 
           :parse_failed ->
-            # 解析失败 → 直接升级
+            # 解析失败 → 直接升级（score = nil 在 policy 中视为 -∞）
             handle_upgrade(orch, agent, call_id, llm_backend, first_response, nil, nil, step_num)
         end
 
@@ -391,6 +411,36 @@ defmodule Gong.PhiHybridOrchestrator do
   defp extract_text({:error, _}), do: nil
   defp extract_text(text) when is_binary(text), do: text
   defp extract_text(_), do: nil
+
+  # ── 升级判定 ──
+
+  # 委托 PhiUpgradePolicy.should_upgrade?/3；policy 不可用时降级为硬编码阈值比较
+  defp decide_upgrade(%__MODULE__{upgrade_policy: policy} = orch, score) when is_map(policy) do
+    if Code.ensure_loaded?(@upgrade_policy_mod) do
+      @upgrade_policy_mod.should_upgrade?(score, policy, orch.upgraded_steps)
+    else
+      # PhiUpgradePolicy 被卸载（理论上不会，但防御性降级）
+      if score >= orch.score_threshold, do: :accept, else: :upgrade
+    end
+  end
+
+  defp decide_upgrade(%__MODULE__{} = orch, score) do
+    # 没有 policy（模块不可用）→ 原始硬编码逻辑
+    if score >= orch.score_threshold, do: :accept, else: :upgrade
+  end
+
+  # 尝试加载 PhiUpgradePolicy 并获取 policy；不可用时返回 nil
+  defp resolve_upgrade_policy(phi_id, opts) do
+    if Code.ensure_loaded?(@upgrade_policy_mod) do
+      policy_opts =
+        opts
+        |> Keyword.take([:score_threshold, :k, :max_upgrades_per_session, :fallback_on_all_fail])
+
+      @upgrade_policy_mod.get_policy(phi_id, policy_opts)
+    else
+      nil
+    end
+  end
 
   # ── Telemetry ──
 

@@ -292,4 +292,85 @@ defmodule Gong.PhiHybridOrchestratorTest do
       assert updated.selector.scorer_state.step_num == 1
     end
   end
+
+  # ── 测试：PhiUpgradePolicy 集成 ──
+
+  describe "PhiUpgradePolicy 集成" do
+    @policy_available Code.ensure_loaded?(UniboVariationCenter.PhiUpgradePolicy)
+
+    test "new/1 设置 upgrade_policy 字段" do
+      orch = PhiHybridOrchestrator.new(k: 3, score_threshold: 1.0)
+
+      if @policy_available do
+        assert is_map(orch.upgrade_policy)
+        assert Map.has_key?(orch.upgrade_policy, :score_threshold)
+        assert Map.has_key?(orch.upgrade_policy, :max_upgrades_per_session)
+      else
+        assert orch.upgrade_policy == nil
+      end
+    end
+
+    if Code.ensure_loaded?(UniboVariationCenter.PhiUpgradePolicy) do
+      test "phi_id 场景化策略：phi_methodical 使用更高阈值" do
+        orch = PhiHybridOrchestrator.new(phi_id: "phi_methodical")
+
+        assert orch.upgrade_policy.score_threshold == 1.5
+        assert orch.score_threshold == 1.5
+      end
+
+      test "phi_id 场景化策略：phi_exploratory 使用更低阈值" do
+        orch = PhiHybridOrchestrator.new(phi_id: "phi_exploratory")
+
+        assert orch.upgrade_policy.score_threshold == 0.5
+        assert orch.upgrade_policy.k == 3
+      end
+
+      test "显式 opts 覆盖 policy 默认值" do
+        orch = PhiHybridOrchestrator.new(phi_id: "phi_methodical", score_threshold: 2.0, k: 7)
+
+        assert orch.score_threshold == 2.0
+        assert orch.k == 7
+        assert orch.upgrade_policy.score_threshold == 2.0
+        assert orch.upgrade_policy.k == 7
+      end
+
+      test "max_upgrades_per_session 限制：超预算后不再升级" do
+        # phi_conservative：max_upgrades_per_session = 3
+        orch = PhiHybridOrchestrator.new(phi_id: "phi_conservative", score_threshold: 10.0, k: 2)
+        backend = make_backend("PATCH")
+
+        # 连续运行 4 步（threshold 很高，前 3 步应升级，第 4 步被 max_upgrades 限制）
+        {:ok, _, orch, t1} = PhiHybridOrchestrator.run_step(orch, dummy_agent(), "c1", backend)
+        assert t1.upgraded == true
+
+        {:ok, _, orch, t2} = PhiHybridOrchestrator.run_step(orch, dummy_agent(), "c2", backend)
+        assert t2.upgraded == true
+
+        {:ok, _, orch, t3} = PhiHybridOrchestrator.run_step(orch, dummy_agent(), "c3", backend)
+        assert t3.upgraded == true
+
+        # 第 4 步：已升级 3 次，达到 max_upgrades_per_session → 不升级
+        {:ok, _, _orch, t4} = PhiHybridOrchestrator.run_step(orch, dummy_agent(), "c4", backend)
+        assert t4.upgraded == false
+      end
+
+      test "should_upgrade? 在 score=nil 时始终升级" do
+        policy = UniboVariationCenter.PhiUpgradePolicy.get_policy(nil)
+        assert UniboVariationCenter.PhiUpgradePolicy.should_upgrade?(nil, policy, 0) == :upgrade
+      end
+    end
+
+    test "无论 policy 是否可用，基本行为不变" do
+      # 无 phi_id → 默认策略或 nil，行为一致
+      orch = PhiHybridOrchestrator.new(k: 3, score_threshold: 1.0)
+      backend = make_backend("READ_CODE")
+
+      assert {:ok, _response, updated_orch, telemetry} =
+               PhiHybridOrchestrator.run_step(orch, dummy_agent(), "call_1", backend)
+
+      assert telemetry.upgraded == false
+      assert telemetry.llm_calls == 1
+      assert updated_orch.total_steps == 1
+    end
+  end
 end
