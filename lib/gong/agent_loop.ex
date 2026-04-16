@@ -158,8 +158,8 @@ defmodule Gong.AgentLoop do
     # AutoCompaction：在 on_context 之后、LLM 调用之前
     agent = maybe_agent_compact(agent, opts)
 
-    # 调用 LLM backend 获取响应
-    case llm_backend.(agent, call_id) do
+    # 调用 LLM backend 获取响应（支持 Best-of-K 选择）
+    case maybe_best_of_k(agent, call_id, llm_backend, opts) do
       {:ok, response} ->
         # Auto-retry：transient 错误自动重试
         case maybe_retry(response, agent, call_id, llm_backend, hooks, opts, turn, max_turns) do
@@ -173,6 +173,28 @@ defmodule Gong.AgentLoop do
       {:error, reason} ->
         :telemetry.execute([:gong, :turn, :end], %{count: 1}, %{tool_calls: []})
         {:error, "LLM 调用失败: #{inspect(reason)}", agent}
+    end
+  end
+
+  # ── Best-of-K 选择（Φ 打分）──
+
+  # 当 opts 中包含 :phi_selector 时，使用 PhiCandidateSelector 并发生成 K 候选并选择最优。
+  # 否则退化为普通单次 LLM 调用。
+  defp maybe_best_of_k(agent, call_id, llm_backend, opts) do
+    case Keyword.get(opts, :phi_selector) do
+      nil ->
+        llm_backend.(agent, call_id)
+
+      %Gong.PhiCandidateSelector{} = selector ->
+        case Gong.PhiCandidateSelector.select_best(selector, agent, call_id, llm_backend) do
+          {:ok, response, updated_selector, _telemetry} ->
+            # 通过进程字典传回更新后的 selector（避免改变 drive_loop 签名）
+            Process.put(:gong_phi_selector, updated_selector)
+            {:ok, response}
+
+          {:error, reason} ->
+            {:error, reason}
+        end
     end
   end
 
